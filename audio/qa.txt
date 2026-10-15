@@ -1,0 +1,59 @@
+sv_99  WER 0.17
+  script:  With ordinary architectural improvements, and no change to model size or training data, ninety-nine to a hundred percent of the neurons in that last layer become easily interpretable.
+  heard:   with ordinary architectural improvements and no change to model size or training data, 99 to 100 % of the neurons in that last layer become easily interpretable.
+
+sv_lm_then  WER 0.14
+  script:  Language models also look far more interpretable than generally believed. In 2023, an Anthropic study gave its median neuron zero out of fourteen on its rubric. The automated interpretability project I started at OpenAI found only about one point seven percent of neurons interpretable by our most generous measure.
+  heard:   Language models also look far more interpretable than generally believe. In 2023, an anthropic study gave its median neuron 0 out of 14 on its rubric. The automated interpretability project I started at OpenAI found only about 1 .7 % of neurons interpretable by our most generous measure.
+
+sv_lm_now  WER 0.26
+  script:  With better tools and modern models, the picture looks quite different. In preliminary audits of Kwen three, thirty-two B, roughly ninety percent of neuron poles have one main job, often with small related offshoots. About seven percent have two related jobs. Only two to four percent aren't understood yet.
+  heard:   With better tools in modern models, the picture looks quite different. In preliminary audits of QEN -3, 32B, roughly 90 % of neuron poles have one main job, often with small related offshoots. About 7 % have two related jobs. Only 2 % to 4 % aren't understood yet.
+
+ca_famous  WER 0.21
+  script:  Let's start with the most famous polysemantic neuron of all: neuron four E fifty-five of Inception V one. It looked like an arbitrary mixture of cats and cars.
+  heard:   Let's start with the most famous polysemantic neuron of all, neuron 4E55 of Inception V1. It looked like an arbitrary mixture of cats and cars.
+
+mi_numbers  WER 0.15
+  script:  With the tools of that era, I'd have put that last layer around five percent interpretable. With better tools, it's more like fifty percent, on the very same 2014 network. Retrain the same architecture with modern regularization, and it's about seventy percent. In the Conv Next of the same size, it's about ninety-nine.
+  heard:   With the tools of that era, I'd have put that last layer around 5 % interpretable. With better tools, it's more like 50%, on the very same 2014 network, retrain the same architecture with modern regularization, and it's about 70%. In the conv next of the same size, it's about 99.
+
+gp_pr  WER 0.15
+  script:  In a frontier language model, I found a neuron that mostly fired on the letters "P R", but also on a bunch of base sixty-four URL strings, and on some Bengali. Surely this was finally an arbitrary mixture. Then I decoded the URLs: "P R" words. I translated the Bengali: "P R".
+  heard:   In a frontier language model, I found a neuron that mostly fired on the letters PR, but also on a bunch of base 64 URL strings, and on some Bengali. Surely this was finally an arbitrary mixture. Then I decoded the URLs, PR words. I translated the Bengali, PR.
+
+im_three  WER 0.29
+  script:  So I trained three Conv Nexts, spanning about three hundred times in size: a small one with ninety-two thousand parameters, a medium one with seven million, the same size as Inception V one, and a large one with twenty-eight million.
+  heard:   So I trained three convNEXTs spanning about 300 times in size, a small one with 92 ,000 parameters, a medium one with 7 million, the same size as Inception V1, and a large one with 28 million.
+
+im_3b  WER 0.16
+  script:  So we can test it. Layer three B of Inception V one holds the curve detectors and high-low frequency detectors, some of the most fundamental neurons I know. The model has no residual stream, so nothing can flow around them. I cut that layer from four hundred and eighty neurons down to ten, and retrained from scratch.
+  heard:   So we can test it. Layer 3B of Inception V1 holds the curve detectors and high -low frequency detectors, some of the most fundamental neurons I know. The model has no residual stream, so nothing can flow around them. I cut that layer from 480 neurons down to 10 and retrained from scratch.
+
+im_lastcrush  WER 0.20
+  script:  People mostly suspected superposition in the last layers, so we crushed the medium Conv Next's final layer from a thousand and twenty-four neurons to thirteen, blocked it from routing around through the residual stream, and retrained. Same pattern. It broadens.
+  heard:   people mostly suspected superposition in the last layers. So we crushed the medium -conve neck's final layer from 1 ,024 neurons to 13, blocked it from routing around through the residual stream and retrained. Same pattern. It broadens.
+
+wk_crowd  WER 0.37
+  script:  Here are a hundred million tokens through one Kwen three, thirty-two B neuron. Almost all of them sit near zero. About a hundred and sixty reach the strong half.
+  heard:   Here are 100 million tokens through 1 -Quen -3, 32 -B neuron. Almost all of them sit near zero. About 160 reach the strong half.
+
+wk_percentile  WER 0.16
+  script:  I also used to think in percentiles. But a ninety-ninth percentile sounds high, and one token in a hundred is about a quarter of a page. A neuron for a niche feeling shouldn't come up four times a page. Thinking in pages helps: the ninety-nine point nine-ninth percentile is about once every twenty-five pages.
+  heard:   I also used to think in percentiles, but a 99th percentile sounds high, and one token in a hundred is about a quarter of a page. A neuron for a niche feeling shouldn't come up four times a page. Thinking in pages helps. The 99 .99th percentile is about once every 25 pages.
+
+lm_santa2  WER 0.14
+  script:  Remove the eight neurons with a Santa negative side, and Santa falls from near-certain to six percent, with the model blaming the pet instead. Remove the twenty neurons actually labeled Christmas or Santa, and it only falls to seventy-six percent.
+  heard:   Remove the eight neurons with a Santa negative side, and Santa falls from near certain to 6%, with the model blaming the pet instead. Remove the 20 neurons actually labeled Christmas or Santa, and it only falls to 76%.
+
+lm_gpt2  WER 0.16
+  script:  Just as we looked back at early vision models, we can look back at early language models. In the original OpenAI project on G P T two X L, fewer than two percent of neurons came out clean. Going back with modern agents and almost no iteration, about seventy percent now look like roughly one thing. Smaller models just have broader neurons.
+  heard:   Just as we looked back at early vision models, we can look back at early language models. In the original OpenAI project on GPT -2XL, fewer than 2 % of neurons came out clean. Going back with modern agents and almost no iteration, about 70 % now look like roughly one thing. Smaller models just have broader neurons.
+
+ap_couldlose2  WER 0.24
+  script:  The new examples fired their neurons strongly seventy-six percent of the time. The near misses, eleven percent. Then we had the agent invent the most distant concept it could, exactly the kind of thing a network could pack in without interference. Those fired strongly about one percent of the time, and a hundred and seventy-nine of a hundred and eighty-three neurons never fired on them at all.
+  heard:   The new examples fired their neurons strongly 76 % of the time. The near misses 11%. Then we had the agent invent the most distant concept it could, exactly the kind of thing a network could pack in without interference. Those fired strongly about 1 % of the time and 179 of 183 neurons never fired on them at all.
+
+ti_kind  WER 0.13
+  script:  It's a bit like moving from intelligent design to natural selection. The update isn't that more and more animals turn out to have evolved. It's realizing you misunderstood what was producing all of them. We're maybe eighty-five percent sure. But that means eighty-five percent sure that nearly everything comes from the second kind of process, which is very different from thinking eighty-five percent of mechanisms do.
+  heard:   It's a bit like moving from intelligent design to natural selection. The update isn't that more and more animals turn out to have evolved. It's realizing you misunderstood what was producing all of them. We're maybe 85 % sure, but that means 85 % sure that nearly everything comes from the second kind of process, which is very different from thinking 85 % of mechanisms do.

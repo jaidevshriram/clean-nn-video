@@ -1,0 +1,23 @@
+{
+  "name": "clean-nn-video",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaidevshriram/clean-nn-video.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jaidevshriram/clean-nn-video/issues"
+  },
+  "homepage": "https://github.com/jaidevshriram/clean-nn-video#readme",
+  "dependencies": {
+    "@napi-rs/canvas": "^0.1.65"
+  }
+}
