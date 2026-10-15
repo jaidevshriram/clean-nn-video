@@ -15,7 +15,7 @@
     push(); translate(x, y); scale(s);
     paint(rrPts(-170, -60, 340, 60, 12), { wash: '#7A5B3E', ink: PAL.ink, sw: 1.2 });
     for (const wx of [-120, 120]) { paint(ellPts(wx, 0, 34, 34, 18), { wash: '#4A5268', ink: PAL.ink, sw: 1.1 }); const a = (o.roll || 0) * 3; inkLine([[wx, 0], [wx + Math.cos(a) * 30, Math.sin(a) * 30]], 1.4, PAL.ink, 'inkfine', 0); }
-    inkLine([[0, -60], [0, -220]], 14, '#B08A4A', 'ink', 0);
+    paint(rectPts(-9, -230, 18, 172, 1), { grad: [[0, '#D9B46A'], [1, '#9A7A3A']], gdir: [-9, 0, 9, 0], ink: PAL.ink, sw: 1 });
     // brass ring
     paint(ellPts(0, -400, 210, 210, 40), { grad: [[0, '#E8C27A'], [1, '#A87A3A']], ink: PAL.ink, sw: 1.6 });
     pop();
