@@ -125,7 +125,7 @@ function head(s, o, C, sw, q) {
   paint(ellPts(hx - 44, -64, 18, 10, 10), { fill: '#E58A7A', fillOp: 90, bleed: .2, ink: null }); paint(ellPts(hx + 44, -64, 18, 10, 10), { fill: '#E58A7A', fillOp: 90, bleed: .2, ink: null });
   // beard: a short trimmed beard along the jaw
   const bd = [[-72, -96], [-62, -42], [-32, -12], [0, -6], [32, -12], [62, -42], [72, -96], [62, -82], [48, -40], [20, -26], [0, -28], [-20, -26], [-48, -40], [-62, -82]].map(([a, b]) => [a + hx * .4, b]);
-  paint(bd, { wash: C.hair, ink: PAL.ink, sw: sw * .6, curv: .5 });
+  if (o.beard !== false) paint(bd, { wash: C.hair, ink: PAL.ink, sw: sw * .6, curv: .5 });
   // hair: a swept top
   const hr = [[-80, -130], [-82, -176], [-56, -214], [-10, -226], [44, -222], [80, -196], [86, -150], [70, -150], [56, -184], [10, -190], [-30, -186], [-60, -164], [-66, -128]].map(([a, b]) => [a + hx * .3, b]);
   paint(hr, { wash: C.hair, ink: PAL.ink, sw: sw * .7, curv: .45 });
