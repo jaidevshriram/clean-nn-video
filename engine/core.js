@@ -246,16 +246,17 @@ function paint(pts, o = {}) {
   if (!pts || pts.length < 2) return;
   for (const p of pts) if (!isFinite(p[0]) || !isFinite(p[1])) return;
   const P = o.curv ? throughClosed(pts, o.curv) : pts;
-  if (o.wash || o.fill || o.hatch) {
+  if (o.wash || o.fill || o.hatch || o.grad) {
     const path = polyPath(P);
-    if (o.wash) washPath(path, P, o.wash, (o.washOp ?? 255) / 255, o.tex ?? .5);
+    if (o.grad) { const [x0, y0, x1, y1] = o.gdir || [0, bbox(P).y0, 0, bbox(P).y1], g = ctx.createLinearGradient(x0, y0, x1, y1); o.grad.forEach(([st, c]) => g.addColorStop(st, c)); ctx.globalAlpha = (o.washOp ?? 255) / 255; ctx.fillStyle = g; ctx.fill(path); ctx.globalAlpha = 1; if ((o.tex ?? .5) > .05) washPath(path, P, o.grad[Math.floor(o.grad.length / 2)][1], (o.washOp ?? 255) / 255, o.tex ?? .5, true); }
+    else if (o.wash) washPath(path, P, o.wash, (o.washOp ?? 255) / 255, o.tex ?? .5);
     if (o.fill) wcFill(P, o.fill, (o.fillOp ?? 170) / 255, o.bleed ?? .1, o.tex ?? .4, o.border ?? .35);
     if (o.hatch) hatchPath(path, P, o.hatch);
   }
   if (o.ink !== null) inkStroke(P, true, o.sw ?? 1, o.ink || PAL.ink, o.br || 'ink', 0);
 }
-function washPath(path, P, col, a, tex) {
-  ctx.globalAlpha = a; ctx.fillStyle = col; ctx.fill(path);
+function washPath(path, P, col, a, tex, noFill) {
+  if (!noFill) { ctx.globalAlpha = a; ctx.fillStyle = col; ctx.fill(path); }
   if (a > .3) {
     // pigment granulation, offset per shape so textures don't line up
     const bb = bbox(P), s = curScale();
