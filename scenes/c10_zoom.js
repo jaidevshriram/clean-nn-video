@@ -176,12 +176,12 @@
     const kA = on(t, fa - .1);
     if (kA > 0) {
       // two roads: assume clean → a messy neuron is a lead; assume packed → it's a dead end
-      boilSeed('roads2'); paint(ribbon([[960, 1100], [960, 800], [600, 500], [420, 300]], 120, 70), { wash: '#C9B48E', ink: PAL.ink, sw: .9 }); paint(ribbon([[960, 800], [1300, 560], [1440, 480]], 110, 80), { wash: '#A99E90', ink: PAL.ink, sw: .9 });
+      boilSeed('roads2'); paint(ribbon([[960, 1100], [960, 860], [760, 640], [520, 420]], 80, 46), { wash: '#C9B48E', ink: PAL.ink, sw: .9 }); paint(ribbon([[960, 860], [1180, 640], [1380, 500]], 76, 50), { wash: '#A99E90', ink: PAL.ink, sw: .9 });
       const k1 = seg(t, wt('zo_asym', 'clean') - .3, wt('zo_asym', 'lead') + .3), k2 = seg(t, wt('zo_asym', 'packed') - .3, wt('zo_asym', 'end') + .3);
-      if (k1 > 0) { card(500, 230, 380, 150, { k: k1, text: 'assume clean:\na messy neuron is a lead', size: 30, col: '#E7F0DC', key: 'r1' }); }
-      if (k2 > 0) { boilSeed('wall'); paint(rectPts(1380, 380, 160, 140, 2), { wash: PAL.brick, ink: PAL.ink, sw: 1 }); card(1460, 230, 380, 150, { k: k2, text: 'assume packed:\nit’s the end', size: 30, col: '#F2E0E4', key: 'r2' }); }
-      hand('it took a little faith', 960, 1010, 42, PAL.cream, seg(t, wt('zo_faith', 'little') - .4, wt('zo_faith', 'little', 1) + .3), { stroke: PAL.ink, strokeW: .1 });
-      hand('a decade figuring out how to look, rather than looking', 960, 1010, 38, PAL.ochre, seg(t, wt('zo_decade', 'decade') - .3, wt('zo_decade', 'it', 1) + .3), { stroke: PAL.ink, strokeW: .1 });
+      if (k1 > 0) { card(520, 300, 400, 150, { k: k1, text: 'assume clean:\na messy neuron is a lead', size: 30, col: '#E7F0DC', key: 'r1' }); }
+      if (k2 > 0) { boilSeed('wall'); paint(rectPts(1340, 400, 150, 130, 2), { wash: PAL.brick, ink: PAL.ink, sw: 1 }); card(1440, 300, 400, 150, { k: k2, text: 'assume packed:\nit’s the end', size: 30, col: '#F2E0E4', key: 'r2' }); }
+      hand('it took a little faith', 960, 1010, 42, PAL.cream, seg(t, wt('zo_faith', 'little') - .4, wt('zo_faith', 'little') + .3), { stroke: PAL.ink, strokeW: .1 });
+      hand('a decade figuring out how to look, rather than looking', 960, 1010, 38, PAL.ochre, on(t, wt('zo_decade', 'decade') - .3), { stroke: PAL.ink, strokeW: .1 });
     }
     const cx = t < as ? 960 : t < dc ? lerp(960, 560, ease(seg(t, wt('zo_asym', 'lead') - 1, wt('zo_asym', 'lead')))) : 560;
     clawd(cx, 920, 18, emotions(t, [[f - 1, 'neutral'], [f + .3, 'hopeful'], [fa + .3, 'thinking'], [wt('zo_faith', 'five'), 'happy'], [as + .3, 'determined'], [dc + .3, 'sad'], [e - 1, 'relieved']]));
@@ -191,10 +191,10 @@
     const a = cs('zo_eight'), f = cs('zo_frontier'), g = cs('zo_agents'), x = cs('zo_textbook'), e = ce('zo_textbook');
     setCountry(t, { mood: 'dawn' });
     const kA = on(t, a, f);
-    if (kA > 0) { fig('blog/figs/fig006', 960, 420, 1100, kA, { key: 'f6z' }); hand('the medium ConvNeXt: the map is mostly filled in', 960, 700, 40, PAL.ink, kA, { stroke: PAL.cream, strokeW: .2 }); hand('no interpretability-specific fixing of the network at all', 960, 770, 36, PAL.clayDk, seg(t, wt('zo_eight', 'specific') - .3, wt('zo_eight', 'all') + .3), { stroke: PAL.cream, strokeW: .2 }); }
+    if (kA > 0) { fig('blog/figs/fig006', 960, 420, 1100, kA, { key: 'f6z' }); hand('the medium ConvNeXt: the map is mostly filled in', 960, 700, 40, PAL.ink, kA, { stroke: PAL.cream, strokeW: .2 }); hand('no interpretability-specific fixing of the network at all', 960, 770, 36, PAL.clayDk, seg(t, wt('zo_eight', 'interpretability-specific') - .3, wt('zo_eight', 'all') + .3), { stroke: PAL.cream, strokeW: .2 }); }
     const kF = on(t, f - .1, x);
     if (kF > 0) {
-      title('the best laboratory in natural science', 960, 160, 54, PAL.ink, seg(t, wt('zo_frontier', 'laboratory') - .6, wt('zo_frontier', 'science') + .3));
+      title('frontier networks: where vision was eight years ago', 960, 160, 50, PAL.ink, on(t, f + .1, wt('zo_frontier', 'laboratory') - .6)); title('the best laboratory in natural science', 960, 160, 54, PAL.ink, seg(t, wt('zo_frontier', 'laboratory') - .6, wt('zo_frontier', 'science') + .3));
       notes(t, 600, 300, [[wt('zo_frontier', 'read') - .4, 'every neuron can be read'], [wt('zo_frontier', 'intervention') - .4, 'every intervention made'], [wt('zo_frontier', 'rerun') - .4, 'every experiment rerun on an identical copy']], { size: 40, gap: 72 });
       // many little automated scientists
       const kg = on(t, g);
@@ -205,7 +205,7 @@
     if (kX > 0) {
       card(960, 380, 760, 260, { k: kX, text: 'neurons generalize, work together,\nand build abstractions over layers', size: 44, col: '#FBF6EC', key: 'tb' });
       hand('— the introductory textbook story', 960, 560, 34, PAL.slate, kX);
-      title('if the network isn’t a knot, untangling it can make it look like one', 960, 780, 46, PAL.ink, seg(t, wt('zo_textbook', 'knot') - 1.2, wt('zo_textbook', 'one', 1) + .4), { maxW: 1500 });
+      title('if the network isn’t a knot, untangling it can make it look like one', 960, 780, 46, PAL.ink, seg(t, wt('zo_textbook', 'knot') - 1.2, wt('zo_textbook', 'one') + .4), { maxW: 1500 });
       clawd(960, 1000, 18, { ...feel('proud', t), boilKey: 'tbc' });
     }
     edges(lt, dur, { in: 'wipe', out: 'wipe', cols: ['#C99AB8', '#F4B39A'] });

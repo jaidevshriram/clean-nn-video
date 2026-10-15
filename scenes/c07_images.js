@@ -26,7 +26,7 @@
     if (kT > 0) {
       title('three ConvNeXts, ~300× apart in size', BX, 200, 54, PAL.ink, seg(t, th + .2, th + 1.6));
       const M = [['small', '92k', 3, wt('im_three', 'small')], ['medium', '7.06M · = InceptionV1', 5, wt('im_three', 'medium')], ['large', '28.6M', 7, wt('im_three', 'large')]];
-      M.forEach(([n, p, cols, ta], i) => { const k = seg(t, ta - .3, ta + .8); if (k <= 0) return; const cx = BX - 400 + i * 400; for (let l = 0; l < cols; l++) for (let r = 0; r < 2 + i; r++) neuron(cx - (cols - 1) * 22 + l * 44, 420 + r * 46 - i * 23, 15 * backOut(clamp(k * 2 - (l + r) * .1)), { on: .5, key: 'm' + i + l + r, glow: false }); hand(n, cx, 610, 40, PAL.ink, k); hand(p, cx, 660, 30, PAL.slate, k); });
+      M.forEach(([n, p, cols, ta], i) => { const k = seg(t, ta - .3, ta + .8); if (k <= 0) return; const cx = BX - 400 + i * 400; for (let l = 0; l < cols; l++) for (let r = 0; r < 2 + i; r++) neuron(cx - (cols - 1) * 26 + l * 52, 470 + r * 52 - i * 26, 19 * backOut(clamp(k * 2 - (l + r) * .1)), { on: .5, key: 'm' + i + l + r, glow: false }); hand(n, cx, 680, 44, PAL.ink, k); hand(p, cx, 740, 32, PAL.slate, k); });
     }
     presenter(t, 300, 960, 22, [[a - 1, 'neutral'], [a + .3, 'happy'], [b + .3, 'thinking'], [wt('im_blur', 'flaw'), 'nervous'], [th + .3, 'proud']], { point: [[a + .3, e]] });
   }
@@ -59,7 +59,7 @@
       const t0 = g + .5 + i * 1.1, f = frac((t - t0) / 6.6); if (t < t0) return;
       let p; if (f < .5) p = [lerp(-40, 700, f / .5), 610 + 8 * Math.sin(f * 30)]; else { const q = (f - .5) / .5; p = s > 0 ? [lerp(700, 1300, q), lerp(610, 380, q)] : [lerp(700, 1300, q), lerp(610, 820, q)]; }
       if (f >= .5 && t < g2 + .5 && s < 0) p = [700 + 10 * Math.sin(t * 9), 650];   // before the gate exists, dogs queue
-      neuron(p[0], p[1] - 40, 32, { img: im, key: 'tv' + i, glow: false });
+      neuron(p[0], p[1] - 50, 46, { img: im, key: 'tv' + i, glow: false });
     });
     hand('finer distinctions in a bigger model', 1320, 140, 34, PAL.ink, on(t, wt('im_gate3', 'bigger') - .5));
     hand('one view of a taxi vs another', 1320, 190, 28, PAL.slate, on(t, wt('im_gate3', 'finer') - .3));
@@ -123,7 +123,7 @@
     const a = cs('im_pressure'), b = cs('im_3b'), p = cs('im_3b_predict'), r = cs('im_3b_result'), s = cs('im_3b_sae'), l = cs('im_lastcrush'), e = ce('im_lastcrush');
     setLab(t, { scope: false });
     const kA = on(t, a, b - .1);
-    if (kA > 0) { title('why are early layers clean?', 960, 200, 60, PAL.cream, seg(t, a + .2, a + 1.4), { stroke: PAL.ink, strokeW: .1 }); hand('“not many early features”…', 960, 290, 40, PAL.cream, seg(t, wt('im_pressure', 'standard') - .3, wt('im_pressure', 'represent') + .3), { stroke: PAL.ink, strokeW: .1 }); hand('…yet AlexNet to CLIP all have the right ratio?', 960, 360, 38, PAL.ochre, seg(t, wt('im_pressure', 'AlexNet') - .4, wt('im_pressure', 'different') + .3), { stroke: PAL.ink, strokeW: .1 }); }
+    if (kA > 0) { title('why are early layers clean?', 960, 200, 60, PAL.cream, seg(t, a + .2, a + 1.4), { stroke: PAL.ink, strokeW: .1 }); hand('“not many early features”…', 960, 290, 40, PAL.cream, seg(t, wt('im_pressure', 'standard') - .3, wt('im_pressure', 'represent') + .3), { stroke: PAL.ink, strokeW: .1 }); hand('…yet AlexNet to CLIP all have the right ratio?', 960, 360, 38, PAL.ochre, seg(t, wt('im_pressure', 'Alex') - .4, wt('im_pressure', 'different') + .3), { stroke: PAL.ink, strokeW: .1 }); }
     const kB = on(t, b - .1, r - .2);
     if (kB > 0) {
       // the press: 480 little lanterns → 10

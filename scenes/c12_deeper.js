@@ -13,7 +13,7 @@
     if (kG > 0) {
       title('why do networks generalize at all?', 960, 200, 56, PAL.ink, seg(t, g + .2, g + 1.6));
       for (let i = 0; i < 6; i++) print(OE + ['train-labrador', 'train-sports-car', 'train-goldfinch', 'train-daisy', 'train-zebra', 'train-church'][i], 520 + i * 180, 470, 150, seg(t, wt('ap_why_gen', 'one') - .3 + i * .1, wt('ap_why_gen', 'one') + .2 + i * .1), { key: 'ot' + i });
-      hand('one example at a time — it could memorize every one', 960, 640, 38, PAL.ink, seg(t, wt('ap_why_gen', 'memorize') - .5, wt('ap_why_gen', 'one', 2) + .3));
+      hand('one example at a time — it could memorize every one', 960, 640, 38, PAL.ink, seg(t, wt('ap_why_gen', 'memorize') - .5, wt('ap_why_gen', 'every') + .3));
       hand('common guess: memorize first, generalize later', 960, 720, 36, PAL.violet, seg(t, wt('ap_why_gen', 'guess') - .3, wt('ap_why_gen', 'pass') + .3));
     }
     const kR = on(t, r - .1, l);
@@ -26,7 +26,7 @@
       boilSeed('track'); for (const y of [430, 640]) { inkLine([[680, y + 50], [1600, y + 50]], 1.4, PAL.ink, 'inkfine', 0); }
       inkLine([[1560, 400], [1560, 720]], 4, PAL.berry, 'dry', 0);
       neuron(xB, 430, 40 * (1 - .5 * lead), { on: .5 * (1 - lead), key: 'pix' }); hand('“if pixel 322 is this colour…”', 900, 360, 30, PAL.slate, seg(t, wt('ap_race', 'pixel') - .3, wt('ap_race', 'Labrador', 1) + .3));
-      neuron(xA, 640, 40 * (1 + .4 * lead), { on: .6 + .4 * lead, key: 'broad' }); hand('green grass · tan fur', 900, 570, 32, PAL.sap, seg(t, wt('ap_race', 'broad', 1) - .3, wt('ap_race', 'fur') + .3));
+      neuron(xA, 640, 40 * (1 + .4 * lead), { on: .6 + .4 * lead, key: 'broad' }); hand('green grass · tan fur', 900, 570, 32, PAL.sap, seg(t, wt('ap_race', 'broad') - .3, wt('ap_race', 'fur') + .3));
       if (lead > .6) hand('starves', xB, 500, 32, PAL.berry, seg(t, wt('ap_race2', 'starves') - .3, wt('ap_race2', 'starves') + .3));
       hand('rich get richer', 1200, 790, 40, PAL.clayDk, seg(t, wt('ap_race2', 'rich-get-richer') - .4, wt('ap_race2', 'rich-get-richer') + .4));
     }
@@ -68,6 +68,7 @@
     setStudy(t);
     const kA = on(t, a, b);
     if (kA > 0) {
+      title('rainforests, gardens and petri dishes', BX, 200, 52, PAL.ink, seg(t, a + .2, a + 1.6));
       const items = [['rainforest', 'frontier networks', wt('ap_toy', 'rainforest'), '#7FAE73'], ['garden', 'our small models', wt('ap_toy', 'gardens'), '#B8D39A'], ['petri dish', 'toy models', wt('ap_toy', 'petri'), '#E5E9F2']];
       items.forEach(([h, s, ta, col], i) => { const k = popk(t, ta - .3); card(BX - 400 + i * 400, 450, 330, 260, { k, col, key: 'tm' + i, text: h + '\n\n' + s, size: 38 }); });
       hand('Toy Models of Superposition: careful work, no problems with its experiments', BX, 740, 34, PAL.ink, seg(t, wt('ap_toy', 'Toy') - .3, wt('ap_toy', 'experiments') + .3));
@@ -81,7 +82,7 @@
     const kC = on(t, c - .1, p);
     if (kC > 0) {
       title('which world are real networks in?', BX, 200, 56, PAL.ink, seg(t, wt('ap_toy3', 'world', 1) - .5, wt('ap_toy3', 'in') + .3));
-      notes(t, BX - 400, 330, [[wt('ap_toy3', 'toy') - .3, 'in the toy’s world, things do pack'], [wt('ap_toy3', 'nothing') - .5, 'in real data, almost nothing is related to nothing'], [wt('ap_toy3', 'rare') - .3, 'a rare person still has a country, a job, a name'], [wt('ap_toy3', 'umbrella') - .3, 'even the umbrella-bee had parts it knew']], { size: 38, gap: 84 });
+      notes(t, BX - 400, 330, [[wt('ap_toy3', 'toys') - .3, 'in the toy’s world, things do pack'], [wt('ap_toy3', 'nothing') - .5, 'in real data, almost nothing is related to nothing'], [wt('ap_toy3', 'rare') - .3, 'a rare person still has a country, a job, a name'], [wt('ap_toy3', 'umbrella') - .3, 'even the umbrella-bee had parts it knew']], { size: 38, gap: 84 });
     }
     const kP = on(t, p - .1);
     if (kP > 0) { fig('blog/figs/fig083', BX + 40, 450, 780, kP, { key: 'f83', tape: true }); hand('one geometry, reused for a circle and for four corners', BX, 830, 38, PAL.sap, seg(t, wt('ap_playground', 'geometry') - .5, wt('ap_playground', 'both') + .3)); }
@@ -103,9 +104,9 @@
     const kG = on(t, g);
     if (kG > 0) {
       title('semantic gravity', 960, 860, 60, PAL.ochre, seg(t, wt('ap_gravity', 'gravity') - .4, wt('ap_gravity', 'gravity') + .3), { stroke: PAL.ink, strokeW: .1 });
-      const tc = seg(t, wt('ap_gravity', 'second') - .5, wt('ap_gravity', 'cars', 1) + .5);
+      const tc = seg(t, wt('ap_gravity', 'second') - .5, wt('ap_gravity', 'cars') + .5);
       if (tc > 0) { const p = arcPt([1300, 400], [790, 520], 200, ease(tc)); neuron(p[0], p[1], 28, { img: 'blog/raw/tiny-vehicles/positive-03', key: 'nc', glow: false }); }
-      hand('build next to whatever is already next to cars', 960, 950, 36, PAL.cream, seg(t, wt('ap_gravity', 'build') - .3, wt('ap_gravity', 'cars', 1) + .3), { stroke: PAL.ink, strokeW: .1 });
+      hand('build next to whatever is already next to cars', 960, 950, 36, PAL.cream, seg(t, wt('ap_gravity', 'build') - .3, wt('ap_gravity', 'cars') + .3), { stroke: PAL.ink, strokeW: .1 });
     }
     edges(lt, dur, { in: 'wipe', out: 'wipe', cols: ['#2F3C7A', '#3B3B6D'] });
   }
@@ -116,7 +117,7 @@
     if (kA > 0) {
       title('explanations that could lose', BX, 190, 58, PAL.ink, seg(t, a + .2, a + 1.4));
       hand('200 random neurons · predictions written before measuring anything', BX, 260, 34, PAL.slate, seg(t, wt('ap_couldlose', 'two') - .3, wt('ap_couldlose', 'anything') + .3));
-      const bars = [[.76, 'new examples', PAL.sap, wt('ap_couldlose2', 'seventy-six')], [.11, 'near misses', PAL.ochre, wt('ap_couldlose2', 'eleven')], [.01, 'most distant concept', PAL.violet, wt('ap_couldlose2', 'one', 1)]];
+      const bars = [[.76, 'new examples', PAL.sap, wt('ap_couldlose2', 'seventy-six')], [.11, 'near misses', PAL.ochre, wt('ap_couldlose2', 'eleven')], [.01, 'most distant concept', PAL.violet, wt('ap_couldlose2', 'one')]];
       bars.forEach(([v, lab, col, ta], i) => { const x = BX - 420 + i * 320, k = seg(t, ta - .4, ta + .5); boilSeed('lb' + i); paint(rectPts(x, 330, 140, 400, 1), { wash: '#FBF6EC', ink: PAL.ink, sw: .9 }); if (k <= 0) return; bar(x, 730, 140, 400, v, col, k, 'lbb' + i); title(Math.round(v * 100) + '%', x + 70, 730 - 400 * v * ease(k) - 40, 54, mixCol(col, PAL.ink, .2), 1); hand(lab, x + 70, 780, 32, PAL.ink, k); });
       hand('fired strongly', BX - 600, 530, 30, PAL.slate, kA);
       hand('179 of 183 never fired on the distant concept at all', BX, 850, 34, PAL.violet, seg(t, wt('ap_couldlose2', 'hundred', 1) - .3, wt('ap_couldlose2', 'all') + .3));

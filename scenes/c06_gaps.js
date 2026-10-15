@@ -17,7 +17,7 @@
   function causes(t, lt, dur) {
     const a = cs('gp_observer'), l = cs('gp_list'), l5 = cs('gp_list5'), e = ce('gp_list5');
     setStudy(t);
-    title('“polysemantic” = no good explanation yet', BX, 190, 52, PAL.ink, seg(t, wt('gp_observer', 'explanation') - 1.2, wt('gp_observer', 'yet') + .3));
+    title('“polysemantic” = no good explanation yet', BX, 190, 52, PAL.ink, seg(t, a + .2, wt('gp_observer', 'yet') + .3));
     hand('…a claim about the observer', BX, 260, 36, PAL.berry, seg(t, wt('gp_observer', 'observer') - .4, wt('gp_observer', 'observer') + .5));
     const at = [wt('gp_list', 'One'), wt('gp_list', 'Two'), wt('gp_list', 'Three'), wt('gp_list', 'Four'), wt('gp_list5', 'five')];
     CAUSES.forEach(([h, s], i) => {
@@ -62,10 +62,10 @@
     // Colorado + the summary motif
     const kC = on(t, c - .1, x - .2);
     if (kC > 0) {
-      figure('blog/figs/fig012', BX - 120, 440, 900, { k: kC, tape: true, key: 'f12' });
+      figure('blog/figs/fig012', BX - 170, 440, 820, { k: kC, tape: true, key: 'f12' });
       title('the “comma” neuron is a Colorado neuron', BX, 190, 50, PAL.ink, seg(t, c + .2, wt('gp_colorado', 'Colorado') + .4));
       const kh = seg(t, wt('gp_colorado', 'hiking') - .5, wt('gp_colorado', 'hiking') + .3);
-      if (kh > 0) { boilSeed('mtn'); push(); translate(BX + 470, 470); scale(backOut(kh)); paint([[-130, 90], [-40, -70], [10, -10], [60, -100], [150, 90]], { wash: '#8EA0B5', ink: PAL.ink, sw: 1 }); paint([[60, -100], [90, -55], [30, -50]], { wash: '#FFFFFF', ink: null }); paint(rrPts(-50, 40, 80, 50, 12), { wash: '#7A5B3E', ink: PAL.ink, sw: .8 }); pop(); hand('turn it up → plans a hike', BX + 470, 610, 32, PAL.sap, kh); }
+      if (kh > 0) { boilSeed('mtn'); push(); translate(BX + 480, 520); scale(backOut(kh) * .85); paint([[-130, 90], [-40, -70], [10, -10], [60, -100], [150, 90]], { wash: '#8EA0B5', ink: PAL.ink, sw: 1 }); paint([[60, -100], [90, -55], [30, -50]], { wash: '#FFFFFF', ink: null }); paint(rrPts(-50, 40, 80, 50, 12), { wash: '#7A5B3E', ink: PAL.ink, sw: .8 }); pop(); hand('turn it up → plans a hike', BX + 480, 640, 30, PAL.sap, kh); }
       const ks = on(t, s);
       if (ks > 0) { swash(BX - 420, 740, 840, 80, '#F3D9A6', ks, 'sm'); hand('the summary motif: attention collects on punctuation', BX, 740, 38, PAL.ink, seg(t, wt('gp_summary', 'motif') - .6, wt('gp_summary', 'motif') + .6)); }
     }

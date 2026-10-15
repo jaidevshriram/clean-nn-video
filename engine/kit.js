@@ -33,7 +33,7 @@ function camKeys(t, keys, drift = 1) {
 // ---------- lettering helpers ----------
 // title(txt, x, y, size, col, k): marker lettering that writes on as k goes 0 → 1
 function title(txt, x, y, size, col = PAL.ink, k = 1, o = {}) { if (k <= 0) return; letter(txt, x, y, size, col, { reveal: k, shadow: o.shadow ?? false, ...o }); }
-function hand(txt, x, y, size, col = PAL.ink, k = 1, o = {}) { if (k <= 0) return; letter(txt, x, y, size, col, { face: 'hand', reveal: k, ...o }); }
+function hand(txt, x, y, size, col = PAL.ink, k = 1, o = {}) { if (k <= 0) return; letter(txt, x, y, size * (o.raw ? 1 : 1.2), col, { face: 'hand', reveal: k, ...o }); }
 // a painted brush-stroke underline / highlight band behind text
 function swash(x, y, w, h, col, k = 1, key = 'swash') {
   if (k <= .01) return; boilSeed(key + x + y);
@@ -136,7 +136,7 @@ function corkboard(x, y, w, h, key = 'cork') {
 // The study: warm wall, wainscot, a window with evening light, a desk lamp, a corkboard. Returns the board rectangle.
 const STUDY_BOARD = { x: 520, y: 120, w: 1240, h: 700 };
 function setStudy(t, o = {}) {
-  layer('study' + (o.variant || ''), () => {
+  layer('study' + (o.variant || '') + (o.board === false ? '-noboard' : ''), () => {
     paint(rectPts(-60, -60, W + 120, H + 120), { wash: o.wall || '#EBD9BC', ink: null, tex: .9 });
     // wallpaper stripes
     for (let i = 0; i < 26; i++) { const x = i * 80 - 20; inkLine([[x, -20], [x + jit(3), H * .45], [x, H * .74]], 3.5, mixCol(o.wall || '#EBD9BC', '#C9A984', .45), 'dry', 0); }
@@ -153,10 +153,11 @@ function setStudy(t, o = {}) {
   }, { variants: 3 });
   if (o.lamp !== false) {
     boilSeed('lamp');
-    glow(250, 700, 320, '#FFC27A', .55 + .05 * Math.sin(t * 3.1));
-    paint([[200, 795], [300, 795], [290, 775], [210, 775]], { wash: '#5B4A63', ink: PAL.ink, sw: .9 });
-    inkLine([[250, 777], [230, 700], [270, 650]], 3, PAL.ink, 'ink', .5);
-    paint([[215, 650], [325, 650], [300, 600], [240, 600]], { wash: PAL.teal, ink: PAL.ink, sw: .9 });
+    const lx = 1840;
+    glow(lx, 690, 300, '#FFC27A', .5 + .05 * Math.sin(t * 3.1));
+    paint([[lx - 50, 800], [lx + 50, 800], [lx + 40, 780], [lx - 40, 780]], { wash: '#5B4A63', ink: PAL.ink, sw: .9 });
+    inkLine([[lx, 782], [lx + 20, 700], [lx - 20, 650]], 3, PAL.ink, 'ink', .5);
+    paint([[lx - 75, 650], [lx + 35, 650], [lx + 10, 600], [lx - 50, 600]], { wash: PAL.teal, ink: PAL.ink, sw: .9 });
   }
 }
 // The lab: deep teal room, a bench, a big painted microscope; MICRO gives the eyepiece lens centre

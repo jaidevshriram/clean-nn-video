@@ -11,15 +11,15 @@
   function famous(t, lt, dur) {
     const a = cs('ca_famous'), c = cs('ca_cited'), o = cs('ca_opened'), v = cs('ca_v'), e = ce('ca_v');
     setStudy(t);
-    camKeys(t, [[a - .3, 960, 540, 1], [o + .5, 960, 540, 1], [o + 4, 1180, 480, 1.35], [v + .2, 1180, 480, 1.4], [e + .5, 1160, 480, 1.3]], .5);
+    camKeys(t, [[a - .3, 960, 540, 1], [o + .5, 960, 540, 1], [o + 4, 1180, 450, 1.3], [v + .2, 1180, 450, 1.35], [e + .5, 1160, 450, 1.25]], .5);
     title('neuron 4e:55', BX + 40, 175, 64, PAL.ink, seg(t, a + .2, a + 1.2));
     hand('“cats and cars”', BX + 40, 245, 40, PAL.violet, seg(t, wt('ca_famous', 'cats') - .3, wt('ca_famous', 'cars') + .5));
     GRIDI.forEach((n, i) => { const [x, y] = gridPos(i); print(n, x, y, 210, popk(t, a + .6 + i * .18), { rot: (hash(i) - .5) * .08, key: 'g' + i }); });
     // the citations: paper cards that slide in over the grid's right side
     const kc = on(t, c, o + .5);
     if (kc > 0) {
-      card(BX + 470, 330, 280, 170, { k: kc, text: 'Feature\nVisualization · 2017', size: 28, rot: .05, key: 'p1' });
-      card(BX + 500, 520, 280, 170, { k: on(t, c + .5, o + .5), text: 'Zoom In · 2020', size: 30, rot: -.04, key: 'p2' });
+      card(BX - 470, 330, 280, 170, { k: kc, text: 'Feature\nVisualization · 2017', size: 28, rot: .05, key: 'p1' });
+      card(BX - 450, 540, 280, 170, { k: on(t, c + .5, o + .5), text: 'Zoom In · 2020', size: 30, rot: -.04, key: 'p2' });
       hand('“isn’t responding to some commonality\nof cars and cat faces”', BX + 40, 770, 34, PAL.slate, seg(t, wt('ca_cited', 'outright'), wt('ca_cited', 'faces') + .5) * (1 - seg(t, o + .3, o + .8)));
     }
     // the V appears on every photo
@@ -39,24 +39,24 @@
   function connections(t, lt, dur) {
     const a = cs('ca_connections'), n = cs('ca_negative'), e = ce('ca_negative');
     setCountry(t, { mood: 'dusk' });
-    camKeys(t, [[a - .3, 860, 520, 1.1], [n - .2, 900, 520, 1.1], [n + 1.5, 1060, 520, 1.1]], .5);
-    const NX = 960, NY = 460;
+    camKeys(t, [[a - .3, 900, 540, 1], [n - .2, 920, 540, 1], [n + 1.5, 980, 540, 1]], .5);
+    const NX = 960, NY = 540;
     const ins = [[V + 'c5a94a', 'flames', wt('ca_connections', 'flames')], [V + 'c5a94c', 'fireboat jets', wt('ca_connections', 'water')], [V + 'c4d493a', 'fox faces', wt('ca_connections', 'fox')]];
     ins.forEach(([im, lab, ta], i) => {
-      const k = seg(t, ta - .3, ta + .4), x = 330, y = 230 + i * 230;
-      wire(bow([x + 80, y], [NX - 70, NY], .1 * (i - 1)), seg(t, ta, ta + .8), { sw: 3.2 - i * .6, col: '#E0A36A', flow: 1, flowCol: '#FFD27A', key: 'in' + i });
-      neuron(x, y, 80 * backOut(k), { img: im, on: .2, key: 'ins' + i, glow: false });
-      if (k > .5) hand(lab, x, y + 110, 32, PAL.cream, k, { stroke: PAL.ink, strokeW: .1 });
+      const k = seg(t, ta - .3, ta + .4), x = 300, y = 260 + i * 270;
+      wire(bow([x + 100, y], [NX - 110, NY], .1 * (i - 1)), seg(t, ta, ta + .8), { sw: 6 - i * 1.2, col: '#C9803F', flow: 1, flowCol: '#FFD27A', key: 'in' + i });
+      neuron(x, y, 100 * backOut(k), { img: im, on: .2, key: 'ins' + i, glow: false });
+      if (k > .5) hand(lab, x, y + 128, 32, PAL.cream, k, { stroke: PAL.ink, strokeW: .1 });
     });
-    neuron(NX, NY, 72, { img: V + 'fv-pointed', on: .7 + .2 * Math.sin(t * 4), key: 'vn' });
-    hand('the V neuron', NX, NY + 110, 36, PAL.cream, on(t, a + .4), { stroke: PAL.ink, strokeW: .1 });
+    neuron(NX, NY, 110, { img: V + 'fv-pointed', on: .7 + .2 * Math.sin(t * 4), key: 'vn' });
+    hand('the V neuron', NX, NY + 160, 38, PAL.cream, on(t, a + .4), { stroke: PAL.ink, strokeW: .1 });
     const kq = seg(t, wt('ca_connections', 'flame', 1) - .4, wt('ca_connections', 'flame', 1) + .4);
     if (kq > 0) emote('?', 760, 280, 20, kq, t);
     // negative side: round things
     const kn = on(t, n + .2);
-    const outs = [[V + 'n1070575', 1450, 260], [V + 'n1158528', 1640, 420], [V + 'n132986', 1450, 600], [V + 'n282687', 1640, 760]];
-    outs.forEach(([im, x, y], i) => { const k = seg(t, wt('ca_negative', 'O') - .4 + i * .15, wt('ca_negative', 'O') + .2 + i * .15); if (k <= 0) return; wire(bow([NX + 70, NY], [x - 70, y], .05), k, { sw: 2.2, col: '#6E9BD0', key: 'out' + i, flow: kn * .8, flowCol: '#9CC4F0' }); neuron(x, y, 66 * backOut(k), { img: im, neg: .6, key: 'ng' + i, glow: false }); });
-    if (kn > 0) { title('O', 1260, 520, 150, '#4E7FB8', seg(t, wt('ca_negative', 'O') - .2, wt('ca_negative', 'O') + .4)); hand('round, where the V is pointed', 1300, 900, 34, PAL.cream, seg(t, wt('ca_negative', 'Round') - .2, wt('ca_negative', 'pointed') + .4), { stroke: PAL.ink, strokeW: .1 }); }
+    const outs = [[V + 'n1070575', 1450, 280], [V + 'n1158528', 1680, 450], [V + 'n132986', 1450, 640], [V + 'n282687', 1680, 820]];
+    outs.forEach(([im, x, y], i) => { const k = seg(t, wt('ca_negative', 'O') - .4 + i * .15, wt('ca_negative', 'O') + .2 + i * .15); if (k <= 0) return; wire(bow([NX + 110, NY], [x - 80, y], .05), k, { sw: 4, col: '#4E7FB8', key: 'out' + i, flow: kn * .8, flowCol: '#9CC4F0' }); neuron(x, y, 80 * backOut(k), { img: im, neg: .6, key: 'ng' + i, glow: false }); });
+    if (kn > 0) { title('O', 1250, 560, 150, '#4E7FB8', seg(t, wt('ca_negative', 'O') - .2, wt('ca_negative', 'O') + .4)); hand('round, where the V is pointed', 1400, 990, 34, PAL.cream, seg(t, wt('ca_negative', 'Round') - .2, wt('ca_negative', 'pointed') + .4), { stroke: PAL.ink, strokeW: .1 }); }
     camEnd();
     edges(lt, dur, { in: 'wipe', out: 'wipe', cols: ['#5E7F6E', '#8C6B9C'] });
   }
@@ -65,7 +65,7 @@
   function vfigure(t, lt, dur) {
     const a = cs('ca_whiskers'), e = ce('ca_whiskers');
     setStudy(t);
-    const fw = 760, fh = fw * 1184 / 1320, fx = BX + 120, fy = 470;
+    const fw = 700, fh = fw * 1184 / 1320, fx = BX + 60, fy = 460;
     const z = camKeys(t, [[a - .3, 960, 540, 1], [wt('ca_whiskers', 'visualization') - .3, 960, 540, 1], [wt('ca_whiskers', 'visualization') + 1.2, fx - fw / 2 + .435 * fw, fy - fh / 2 + .17 * fh + 30, 2.1], [wt('ca_whiskers', 'optimizer') - .3, fx - fw / 2 + .435 * fw, fy - fh / 2 + .17 * fh + 30, 2.2], [wt('ca_whiskers', 'optimizer') + 1.2, fx - fw / 2 + .2 * fw, fy - fh / 2 + .2 * fh, 1.5], [e, fx, fy, 1.02]], .3);
     figure('blog/figs/fig001', fx, fy, fw, { k: on(t, a - .2), tape: true, key: 'f1' });
     ringBox(fx - fw / 2 + .38 * fw, fy - fh / 2 + .1 * fh, .12 * fw, .14 * fh, seg(t, wt('ca_whiskers', 'whiskers') - .3, wt('ca_whiskers', 'whiskers') + .4), PAL.berry, 2.4, 'wh');
@@ -83,11 +83,11 @@
     const kA = on(t, a - .2, p - .2);
     if (kA > 0) {
       // rebuild "what we thought": car → four dogs → car, as painted lanterns with the blog's visualizations
-      const car = [BX - 420, 470], car2 = [BX + 420, 470], dogs = [[BX - 90, 330], [BX + 90, 330], [BX - 90, 560], [BX + 90, 560]];
+      const car = [BX - 450, 470], car2 = [BX + 450, 470], dogs = [[BX - 115, 330], [BX + 115, 330], [BX - 115, 590], [BX + 115, 590]];
       const dims = ['4d417', '4d167', '4d295', '4d241'];
-      neuron(car[0], car[1], 80 * backOut(seg(t, a, a + .5)), { img: SC + 'dream02/4c447', key: 'car1', glow: false, label: 'car', labelSize: 30, labelGap: 30 });
-      dogs.forEach((d, i) => { const k = seg(t, wt('ca_circuit', 'dog') - .4 + i * .15, wt('ca_circuit', 'dog') + .2 + i * .15); wire(bow(car, d, .05), k, { sw: 2.4, col: '#B5895A', key: 'cd' + i, flow: on(t, wt('ca_circuit', 'dog') + 1, p) }); wire(bow(d, car2, .05), seg(t, wt('ca_circuit', 'recovered') - .4, wt('ca_circuit', 'recovered') + .4), { sw: 2.4, col: '#B5895A', key: 'dc' + i }); neuron(d[0], d[1], 70 * backOut(k), { img: SC + 'dream02/' + dims[i], key: 'dog' + i, glow: false }); });
-      neuron(car2[0], car2[1], 80 * backOut(seg(t, wt('ca_circuit', 'recovered') - .3, wt('ca_circuit', 'recovered') + .3)), { img: SC + 'dream02/4c447', key: 'car2', glow: false, label: 'car again?', labelSize: 30, labelGap: 30 });
+      neuron(car[0], car[1], 105 * backOut(seg(t, a, a + .5)), { img: SC + 'dream02/4c447', key: 'car1', glow: false, label: 'car', labelSize: 30, labelGap: 30 });
+      dogs.forEach((d, i) => { const k = seg(t, wt('ca_circuit', 'dog') - .4 + i * .15, wt('ca_circuit', 'dog') + .2 + i * .15); wire(bow(car, d, .05), k, { sw: 2.4, col: '#B5895A', key: 'cd' + i, flow: on(t, wt('ca_circuit', 'dog') + 1, p) }); wire(bow(d, car2, .05), seg(t, wt('ca_circuit', 'recovered') - .4, wt('ca_circuit', 'recovered') + .4), { sw: 2.4, col: '#B5895A', key: 'dc' + i }); neuron(d[0], d[1], 95 * backOut(k), { img: SC + 'dream02/' + dims[i], key: 'dog' + i, glow: false }); });
+      neuron(car2[0], car2[1], 105 * backOut(seg(t, wt('ca_circuit', 'recovered') - .3, wt('ca_circuit', 'recovered') + .3)), { img: SC + 'dream02/4c447', key: 'car2', glow: false, label: 'car again?', labelSize: 30, labelGap: 30 });
       title('the 2019 “superposition” circuit', BX, 175, 54, PAL.violet, seg(t, a + .2, a + 1.5));
       hand('a hidden storage place?', BX, 760, 36, PAL.violet, seg(t, wt('ca_circuit', 'storage') - .4, wt('ca_circuit', 'storage') + .6));
       // flashback tint during ca_found
@@ -153,23 +153,23 @@
     const kA = on(t, a - .2, n);
     if (kA > 0) {
       figure('blog/figs/fig003', 960, 470, 1200, { crop: [0, 0, 1608, 170], k: kA, key: 'dino' });
-      hand('DINOv2 · more than ten times the size · still generalized', 960, 640, 40, PAL.ink, seg(t, wt('ca_bigger', 'DINOv2'), wt('ca_bigger', 'generalized') + .6));
+      hand('DINOv2 · more than ten times the size · still generalized', 960, 640, 40, PAL.ink, seg(t, wt('ca_bigger', 'Dino'), wt('ca_bigger', 'generalized') + .6));
       hand('every vision model, of any size', 960, 710, 36, PAL.sap, seg(t, wt('ca_bigger', 'every') - .3, wt('ca_bigger', 'size') + .4));
     }
     const kN = on(t, n);
     if (kN > 0) {
       // a fork in the road; the neuron is the switch; V things go one way, O things the other
       boilSeed('road'); const ink = PAL.ink;
-      paint([[860, 1100], [1060, 1100], [1010, 620], [910, 620]], { wash: '#D9C29A', ink, sw: 1.1 });
-      paint([[910, 640], [1010, 640], [700, 330], [600, 380]], { wash: '#D9C29A', ink, sw: 1.1 });
-      paint([[910, 640], [1010, 640], [1360, 380], [1260, 330]], { wash: '#D9C29A', ink, sw: 1.1 });
-      neuron(960, 610, 56, { img: V + 'fv-pointed', on: .6, key: 'sw' });
-      const travel = (im, side, i) => { const ta = v + .8 + i * 1.3, f = seg(t, ta, ta + 2.2); if (f <= 0 || f >= 1) return; const p = f < .5 ? [960, lerp(1060, 640, f * 2)] : [lerp(960, side < 0 ? 650 : 1310, (f - .5) * 2), lerp(640, 360, (f - .5) * 2)]; neuron(p[0], p[1], 44, { img: im, key: 'tr' + i, glow: false }); };
+      paint(ribbon([[960, 1120], [960, 860], [960, 760]], 120, 110), { wash: '#D9C29A', ink, sw: 1.1 });
+      paint(ribbon([[960, 760], [800, 640], [560, 560], [300, 520]], 110, 80), { wash: '#D9C29A', ink, sw: 1.1 });
+      paint(ribbon([[960, 760], [1120, 640], [1360, 560], [1620, 520]], 110, 80), { wash: '#D9C29A', ink, sw: 1.1 });
+      neuron(960, 740, 70, { img: V + 'fv-pointed', on: .6, key: 'sw' });
+      const travel = (im, side, i) => { const ta = v + .8 + i * 1.3, f = seg(t, ta, ta + 2.6); if (f <= 0 || f >= 1) return; const p = f < .4 ? [960, lerp(1120, 760, f / .4)] : [lerp(960, side < 0 ? 330 : 1590, (f - .4) / .6), lerp(740, 520, (f - .4) / .6)]; neuron(p[0], p[1] - 60, 56, { img: im, key: 'tr' + i, glow: false }); };
       [[V + 'pPool13', 1], [V + 'n1070575', -1], [V + 'pTrain34', 1], [V + 'n1158528', -1], [V + 'p10704', 1], [V + 'n282687', -1]].forEach(([im, s], i) => travel(im, s, i));
-      title('V →', 1330, 300, 60, PAL.clayDk, seg(t, v + 1, v + 1.6)); title('← O', 600, 300, 60, '#4E7FB8', seg(t, v + 1.5, v + 2.1));
+      title('V →', 1560, 420, 64, PAL.clayDk, seg(t, v + 1, v + 1.6)); title('← O', 360, 420, 64, '#4E7FB8', seg(t, v + 1.5, v + 2.1));
       const kno = seg(t, n + .2, n + 1.2);
-      card(420, 820, 380, 150, { k: kno * (1 - seg(t, v, v + .5)), text: 'noun: cats + cars', size: 38, key: 'noun' }); cross(420, 820, 200, seg(t, wt('ca_nouns', 'shared') - .3, wt('ca_nouns', 'shared') + .2) * (1 - seg(t, v, v + .5)));
-      card(1500, 820, 420, 150, { k: seg(t, v + .2, v + .8), text: 'verb: separate V from O', size: 38, col: '#E7F0DC', key: 'verb' });
+      card(420, 900, 380, 150, { k: kno * (1 - seg(t, v, v + .5)), text: 'noun: cats + cars', size: 38, key: 'noun' }); cross(420, 900, 200, seg(t, wt('ca_nouns', 'shared') - .3, wt('ca_nouns', 'shared') + .2) * (1 - seg(t, v, v + .5)));
+      card(1500, 900, 440, 150, { k: seg(t, v + .2, v + .8), text: 'verb: separate V from O', size: 38, col: '#E7F0DC', key: 'verb' });
     }
     clawd(250, 960, 22, emotions(t, [[a - 1, 'neutral'], [a + .4, 'proud'], [n + .3, 'thinking'], [v + .3, 'idea'], [v + 2, 'happy']]));
     edges(lt, dur, { in: 'wipe', out: 'wipe', cols: [PAL.sap, PAL.moss] });

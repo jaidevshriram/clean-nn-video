@@ -132,9 +132,9 @@
   function tree(x, y, depth, spread, k, key, leaves) {
     // a painted tree of car neurons: depth 0 = one coarse neuron
     const nodes = [[x, y, 0, null]];
-    for (let d = 1; d <= depth; d++) { const prev = nodes.filter(n => n[2] === d - 1); prev.forEach((p, pi) => { const nch = d === 1 ? 3 : 2; for (let c = 0; c < nch; c++) nodes.push([p[0] + (c - (nch - 1) / 2) * spread / Math.pow(2.2, d - 1), p[1] - 110, d, p]); }); }
+    for (let d = 1; d <= depth; d++) { const prev = nodes.filter(n => n[2] === d - 1); prev.forEach((p, pi) => { const nch = d === 1 ? 3 : 2; for (let c = 0; c < nch; c++) nodes.push([p[0] + (c - (nch - 1) / 2) * spread / Math.pow(2.2, d - 1), p[1] - 150, d, p]); }); }
     nodes.forEach((n, i) => { const kn = clamp(k * (depth + 1) - n[2]); if (kn <= 0) return; if (n[3]) wire(bow([n[3][0], n[3][1]], [n[0], n[1]], .05), kn, { sw: 1.2, key: key + 'w' + i }); });
-    nodes.forEach((n, i) => { const kn = clamp(k * (depth + 1) - n[2]); if (kn <= 0) return; const leaf = n[2] === depth && leaves ? leaves[i % leaves.length] : null; neuron(n[0], n[1], (n[2] === 0 ? 34 : 26) * backOut(kn), { on: .6, img: leaf, key: key + i, glow: false }); });
+    nodes.forEach((n, i) => { const kn = clamp(k * (depth + 1) - n[2]); if (kn <= 0) return; const leaf = n[2] === depth && leaves ? leaves[i % leaves.length] : null; neuron(n[0], n[1], (n[2] === 0 ? 44 : 36) * backOut(kn), { on: .6, img: leaf, key: key + i, glow: false }); });
   }
   function results(t, lt, dur) {
     const a = cs('sv_result1'), b = cs('sv_99'), c = cs('sv_300x'), e = ce('sv_300x');
@@ -161,7 +161,7 @@
       hand('small', BX - 420, 790, 32, PAL.slate, kC); hand('medium', BX - 40, 790, 32, PAL.slate, kC); hand('large', BX + 380, 790, 32, PAL.slate, kC);
       hand('one car neuron', BX - 420, 610, 30, PAL.ink, seg(t, wt('sv_300x', 'car'), wt('sv_300x', 'car') + .8));
       title('legible at every scale', BX, 200, 58, PAL.clayDk, seg(t, c + .2, c + 1.6));
-      hand('300× range in size', BX, 270, 32, PAL.slate, seg(t, wt('sv_300x', 'hundred') - .3, wt('sv_300x', 'hundred') + .9));
+      hand('300× range in size', BX, 270, 32, PAL.slate, seg(t, wt('sv_300x', 'three-hundred-fold') - .3, wt('sv_300x', 'three-hundred-fold') + .9));
     }
     presenter(t, 300, 960, 22, [[a - 1, 'neutral'], [a + .4, 'determined'], [b + .3, 'proud'], [c + .5, 'happy'], [wt('sv_300x', 'differentiates'), 'excited']], { point: [[a + .5, e - .3]] });
   }
@@ -187,16 +187,16 @@
     // 2023
     hand('2023', BX - 380, 270, 44, PAL.slate, seg(t, a + .5, a + 1));
     const kr = seg(t, wt('sv_lm_then', 'zero') - .4, wt('sv_lm_then', 'zero') + .4);
-    if (kr > 0) { dial(BX - 470, 470, 100, 0, {}); hand('median rubric score: 0 / 14', BX - 470, 600, 30, PAL.ink, kr); }
+    if (kr > 0) { dial(BX - 440, 470, 100, 0, {}); hand('median rubric score: 0 / 14', BX - 420, 600, 28, PAL.ink, kr); }
     const kp = seg(t, wt('sv_lm_then', 'one') - .3, wt('sv_lm_then', 'seven') + .4);
     if (kp > 0) { boilSeed('b17'); paint(rectPts(BX - 300, 380, 40, 300, 1), { wash: '#FBF6EC', ink: PAL.ink, sw: .8 }); bar(BX - 300, 680, 40, 300, .017, PAL.berry, kp, 'b1'); title('1.7%', BX - 280, 720, 54, PAL.berry, kp); hand('interpretable (OpenAI, 2023)', BX - 280, 770, 26, PAL.ink, kp); }
     // today
     const kn = seg(t, b + .2, b + 1.2);
     if (kn > 0) {
-      hand('today · Qwen3-32B', BX + 280, 270, 44, PAL.slate, kn);
+      hand('today · Qwen3-32B', BX + 280, 260, 40, PAL.ink, kn);
       const parts = [[.9, PAL.sap, '~90%  one main job', wt('sv_lm_now', 'ninety')], [.07, PAL.ochre, '~7%  two related jobs', wt('sv_lm_now', 'seven')], [.03, PAL.slate, '2–4%  not yet understood', wt('sv_lm_now', 'four')]];
       let y0 = 700;
-      parts.forEach(([f, col, txt, ta], i) => { const k = seg(t, ta - .3, ta + .6); if (k <= 0) return; bar(BX + 60, y0, 90, 380, f, col, k, 'p' + i); hand(txt, BX + 190, y0 - 380 * f / 2 - (i === 2 ? 20 : 0), 34, col === PAL.slate ? PAL.ink : mixCol(col, PAL.ink, .3), k, { align: 'left' }); y0 -= 380 * f; });
+      parts.forEach(([f, col, txt, ta], i) => { const k = seg(t, ta - .3, ta + .6); if (k <= 0) return; bar(BX + 60, y0, 110, 380, f, col, k, 'p' + i); const ly = [560, 400, 330][i]; hand(txt, BX + 200, ly, 32, mixCol(col, PAL.ink, .45), k, { align: 'left' }); inkLine([[BX + 175, y0 - 380 * f / 2], [BX + 195, ly]], 1, PAL.ink, 'inkfine', 0); y0 -= 380 * f; });
     }
     hand('…up to trillions of parameters', BX + 280, 770, 34, PAL.ink, seg(t, wt('sv_lm_scale', 'trillions') - .4, wt('sv_lm_scale', 'trillions') + .8));
     const kw = seg(t, wt('sv_lm_scale', 'why') - .3, wt('sv_lm_scale', 'why') + 1.2);
@@ -305,34 +305,37 @@
   function crossword(t, lt, dur) {
     const a = cs('sv_crossword'), b = cs('sv_crossword2'), c = cs('sv_bargain'), d = cs('sv_commas'), f = cs('sv_commas2'), e = ce('sv_commas2');
     setStudy(t);
-    const slide = ease(seg(t, c - .2, c + .8)), gx = lerp(BX - 330, BX - 520, slide), gy = 280, cs_ = 58;
+    const slide = ease(seg(t, c - .2, c + .8)), cs_ = lerp(58, 34, slide), gx = lerp(BX - 330, B.x + 40, slide), gy = lerp(280, 250, slide);
     // grid 9 × 6
     const fillT = (i, j) => b + 1 + (i * 9 + j) * .09;
     for (let i = 0; i < 6; i++) for (let j = 0; j < 9; j++) {
       const ch = (GRID[i][j] || '.'), x = gx + j * cs_, y = gy + i * cs_;
       boilSeed('cw' + i + j);
       paint(rectPts(x, y, cs_, cs_, .8), { wash: ch === '.' ? '#3A3550' : '#FBF6EC', ink: PAL.ink, sw: .6, tex: .2 });
-      if (ch !== '.' && t > fillT(i, j) && t > a + .5) letter(ch, x + cs_ / 2, y + cs_ / 2 + 2, 36, PAL.ink, { face: 'hand', pop: seg(t, fillT(i, j), fillT(i, j) + .3), shadow: false });
+      if (ch !== '.' && t > fillT(i, j) && t > a + .5) letter(ch, x + cs_ / 2, y + cs_ / 2 + 2, cs_ * .62, PAL.ink, { face: 'hand', pop: seg(t, fillT(i, j), fillT(i, j) + .3), shadow: false });
     }
     if (t < c) { title('every answer constrains the rest', BX, 190, 52, PAL.ink, seg(t, wt('sv_crossword', 'constrains') - 1, wt('sv_crossword', 'constrains') + .5)); notes(t, BX + 260, 330, [[wt('sv_crossword2', 'connects'), 'what it connects to'], [wt('sv_crossword2', 'ecosystem'), 'the ecosystem around it'], [wt('sv_crossword2', 'expert'), 'which expert it lives in']], { size: 34 }); }
     // the bargain neuron: a sentence card, its commas lighting up
     const kc = on(t, c + .3);
     if (kc > 0) {
-      card(BX + 200, 330, 780, 150, { k: kc, key: 'bc', pin: true, col: '#FBF6EC', text: 'a sense of righteousness when a bargain purchase\nbeats the expensive alternative', size: 32 });
-      const sent = ['bought the store brand', ' and honestly', ' it works better than the $300 one', ' which my brother swore by', ' so'];
-      const kx = seg(t, d - .2, d + .8), x0 = BX - 180;
-      card(BX + 200, 560, 780, 170, { k: kx, key: 'sent', pin: false, col: '#FFFDF6' });
-      let x = x0;
-      if (kx > .5) sent.forEach((s, i) => {
-        const glowK = i < sent.length - 1 ? clamp((t - d - .6 - i * .25) * 3) : 0;
-        letter(s, x, 560, 27, PAL.ink, { face: 'hand', align: 'left', shadow: false });
-        x += s.length * 12.6;
-        if (i < sent.length - 1) { glow(x + 5, 568, 30, '#FFC766', glowK); letter(',', x + 3, 562, 34, glowK > .5 ? PAL.berry : PAL.ink, { face: 'hand', shadow: false }); x += 12; }
+      card(BX + 230, 300, 760, 150, { k: kc, key: 'bc', pin: true, col: '#FBF6EC', text: 'a sense of righteousness when a bargain purchase\nbeats the expensive alternative', size: 32 });
+      const lines = [['bought the store brand', ' and honestly', ' it beats the $300 one'], [' which my brother swore by', ' so…']];
+      const kx = seg(t, d - .2, d + .8);
+      card(BX + 230, 520, 760, 190, { k: kx, key: 'sent', pin: false, col: '#FFFDF6' });
+      let ci = 0;
+      if (kx > .5) lines.forEach((L, li) => {
+        let x = BX - 120, y = 485 + li * 60;
+        L.forEach((s_, i) => {
+          letter(s_, x, y, 31, PAL.ink, { face: 'hand', align: 'left', shadow: false });
+          ctx.font = '31px "Patrick Hand"'; x += ctx.measureText(s_).width;
+          const last = li === lines.length - 1 && i === L.length - 1;
+          if (!last) { const glowK = clamp((t - d - .6 - ci * .25) * 3); ci++; glow(x + 4, y + 8, 30, '#FFC766', glowK); letter(',', x + 3, y + 2, 34, glowK > .5 ? PAL.berry : PAL.ink, { face: 'hand', shadow: false }); x += 8; }
+        });
       });
-      hand('where it fires: …commas', BX + 200, 680, 30, PAL.berry, seg(t, wt('sv_commas', 'commas') - .4, wt('sv_commas', 'commas') + .6));
+      hand('where it fires: …commas', BX + 230, 640, 30, PAL.berry, seg(t, wt('sv_commas', 'commas') - .4, wt('sv_commas', 'commas') + .6));
       const checks = [['summary on punctuation', wt('sv_commas2', 'punctuation')], ['steering lines up', wt('sv_commas2', 'turn')], ['upstream + downstream', wt('sv_commas2', 'upstream')], ['negative side', wt('sv_commas2', 'negative')], ['store brands', wt('sv_commas2', 'store')]];
-      checks.forEach(([txt, ta], i) => { const k = seg(t, ta - .2, ta + .6); if (k <= 0) return; tick(BX - 470, 610 + i * 46, 34, k); hand(txt, BX - 440, 610 + i * 46, 30, PAL.ink, k, { align: 'left' }); });
-      hand('…all point to the same place', BX + 200, 790, 34, PAL.sap, seg(t, wt('sv_commas2', 'same') - .4, wt('sv_commas2', 'same') + .6));
+      checks.forEach(([txt, ta], i) => { const k = seg(t, ta - .2, ta + .6); if (k <= 0) return; tick(B.x + 60, 540 + i * 52, 34, k); hand(txt, B.x + 90, 540 + i * 52, 28, PAL.ink, k, { align: 'left' }); });
+      hand('…all point to the same place', BX + 230, 740, 34, PAL.sap, seg(t, wt('sv_commas2', 'same') - .4, wt('sv_commas2', 'same') + .6));
     }
     presenter(t, 300, 960, 22, [[a - 1, 'neutral'], [a + .3, 'happy'], [c + .3, 'thinking'], [d + .4, 'confused'], [f + .5, 'idea'], [wt('sv_commas2', 'same'), 'proud']], { point: [[a + .5, e]] });
   }

@@ -13,25 +13,25 @@
     const a = cs('rg_before'), f = cs('rg_flowers'), g = cs('rg_grew'), e = ce('rg_grew');
     setCountry(t, { mood: 'day' });
     camKeys(t, [[a - .3, 960, 520, 1], [f, 960, 560, 1.15], [g, 960, 540, 1.05], [e, 960, 520, 1]], .5);
-    const R = [960, 600];
+    const R = [960, 640];
     // training clock: epoch advances over the two cues
     const ep = kf(t, [[f, 0], [g, 1], [wt('rg_grew', 'dogs'), 3], [wt('rg_grew', 'broccoli'), 4], [e, 4]], easeInOut);
     const si = Math.min(4, Math.floor(ep + .001));
     hand('epoch ' + EPOCH[si], 1650, 150, 46, PAL.ink, on(t, f));
     title('neuron 338 · InceptionV1', 960, 140, 54, PAL.ink, seg(t, a + .3, a + 1.4));
-    hand('still not arbitrary', 960, 210, 38, PAL.sap, seg(t, wt('rg_before', 'arbitrarily') - .4, wt('rg_before', 'arbitrarily') + .5));
+    hand('still not arbitrary', 960, 210, 38, PAL.sap, on(t, wt('rg_before', 'arbitrarily') - .4, f + 1.5));
     // each branch appears when its row first has photos; its leaves are the photos at the current epoch
     const onset = [0, 1, 1, 0, 2];
     ROWS.forEach(([lab, ang], row) => {
       const st = onset[row] === 0 && row === 3 ? .4 : onset[row];   // dogs appear in the very first photos
       const kb = clamp((ep - st) * 1.5 + (row === 0 ? 1 : 0)); if (kb <= 0 || t < f) return;
-      const len = 330, tip = [R[0] + Math.cos(ang) * len * ease(kb), R[1] + Math.sin(ang) * len * .75 * ease(kb)];
+      const len = 400, tip = [R[0] + Math.cos(ang) * len * ease(kb), R[1] + Math.sin(ang) * len * .8 * ease(kb)];
       // ConvNeXt-style thinning: fields stay thick; others thicken with epoch in InceptionV1
       const w = row === 0 ? lerp(34, 18, ep / 4) : lerp(6, 18, clamp((ep - st) / 3));
       boilSeed('gb' + row); paint(ribbon([R, [lerp(R[0], tip[0], .5), lerp(R[1], tip[1], .5) - 20], tip], w, w * .5), { wash: '#7A5B3E', ink: PAL.ink, sw: .7 });
       const ph = photosFor(STEPS[si], row);
-      ph.slice(0, 2).forEach((p, i) => print(p, tip[0] + (i - .5) * 120 + Math.cos(ang) * 40, tip[1] + Math.sin(ang) * 50 - 10 + i * 18, 110, kb, { key: 'gp' + row + i + si, rot: (i - .5) * .12 }));
-      hand(lab, tip[0] + Math.cos(ang) * 40, tip[1] + Math.sin(ang) * 50 + 95, 30, PAL.ink, kb, { stroke: PAL.cream, strokeW: .2 });
+      ph.slice(0, 2).forEach((p, i) => print(p, tip[0] + (i - .5) * 165 + Math.cos(ang) * 50, tip[1] + Math.sin(ang) * 60 - 10 + i * 18, 150, kb, { key: 'gp' + row + i + si, rot: (i - .5) * .12 }));
+      hand(lab, tip[0] + Math.cos(ang) * 50, tip[1] + Math.sin(ang) * 60 + 120, 30, PAL.ink, kb, { stroke: PAL.cream, strokeW: .2 });
     });
     neuron(R[0], R[1], 56, { on: .8, key: 'root338' });
     camEnd();
@@ -42,7 +42,7 @@
     const a = cs('rg_convnext'), e = ce('rg_convnext');
     setStudy(t);
     const fw = 760, fh = fw * 1608 / 2080, fx = BX + 80, fy = 480;
-    const tc = wt('rg_convnext', 'ConvNeXt') || a + .5;
+    const tc = wt('rg_convnext', 'Conv') || a + .5;
     camKeys(t, [[a - .3, 960, 540, 1], [a + 1.5, fx, fy + fh * .17, 1.25], [wt('rg_convnext', 'Every') - .3, fx, fy + fh * .17, 1.25], [e, 960, 540, 1]], .4);
     figure('blog/figs/fig007', fx, fy, fw, { k: on(t, a - .2), key: 'f7', tape: true });
     ringBox(fx - fw / 2, fy - fh / 2 + .52 * fh, fw * .45, fh * .12, seg(t, wt('rg_convnext', 'balls') - .3, wt('rg_convnext', 'balls') + .5), PAL.ochre, 2.2, 'r1');
@@ -74,6 +74,7 @@
     setStudy(t);
     const kA = on(t, a, g + .3);
     if (kA > 0) {
+      title('examples all over the place', BX, 200, 56, PAL.sap, seg(t, a, a + 1.4));
       card(BX - 300, 380, 470, 200, { k: popk(t, wt('rg_examples', 'geology') - .3), text: 'geology neuron\n→ Cesium, a JavaScript library', size: 34, key: 'ex1' });
       card(BX + 300, 400, 470, 200, { k: popk(t, wt('rg_examples', 'enemy') - .3), text: 'enemy neuron\n→ a Russian poem about enemies', size: 34, key: 'ex2', col: '#F2E0E4' });
     }

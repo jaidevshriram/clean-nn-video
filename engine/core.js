@@ -15,7 +15,7 @@ const PAL = {
   night: '#1F2550', indigo: '#2F3C7A', rose: '#E27A92', ochre: '#E8AA38', sap: '#6E9F58',
   teal: '#3A9C98', violet: '#7B5CA8', cream: '#FFF5E2', sky: '#8EC3E6',
   // added for this video
-  slate: '#54617A', mist: '#C9D6DF', sand: '#E9D8B8', moss: '#8BA86A', plum: '#5B3F6B', brick: '#B5533C',
+  slate: '#3E4860', mist: '#C9D6DF', sand: '#E9D8B8', moss: '#8BA86A', plum: '#5B3F6B', brick: '#B5533C',
   dusk: '#3B3B6D', gold: '#F0BE46', sea: '#5FA8B5', berry: '#C2456A', fog: '#E4E0D6'
 };
 

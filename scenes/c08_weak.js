@@ -47,6 +47,7 @@
     }
     const kD = on(t, d - .1, c);
     if (kD > 0) {
+      title('where cutting them costs the most', BX, 200, 52, PAL.ink, seg(t, d, d + 1.4));
       card(BX - 300, 420, 480, 220, { k: popk(t, wt('wk_dials', 'say') - .4), text: 'language: the last layer\n“say, or just think”', size: 36, key: 'say', col: '#E5E9F2' });
       card(BX + 300, 420, 480, 220, { k: popk(t, wt('wk_dials', 'dials') - .4), text: 'vision: early layers\nwork like dials', size: 36, key: 'dial', col: '#E7F0DC' });
       const kk = seg(t, wt('wk_dials', 'slightly') - .3, wt('wk_dials', 'evidence') + .3);
@@ -112,7 +113,7 @@
     const kK = t >= k - .3 ? 1 : 0;
     if (kK > 0) {
       setStudy(t, { board: false });
-      title('almost all turned out to be related', 1060, 170, 54, PAL.ink, seg(t, wt('wk_koan', 'related') - 1, wt('wk_koan', 'related') + .3));
+      title('almost all turned out to be related', 1060, 170, 54, PAL.ink, seg(t, k, wt('wk_koan', 'related') + .3));
       // ensō: a single brush circle, drawn on
       boilSeed('enso'); const P = []; for (let i = 0; i <= 60; i++) { const q = -1.4 + i / 60 * TAU * .93; P.push([1060 + Math.cos(q) * 200, 520 + Math.sin(q) * 190]); }
       const ke = seg(t, wt('wk_koan', 'koan') - .3, wt('wk_koan', 'koan') + 1.2);

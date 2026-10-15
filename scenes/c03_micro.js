@@ -23,7 +23,7 @@
     const a = cs('mi_story'), f = cs('mi_fv'), r = cs('mi_robust'), l = cs('mi_late'), e = ce('mi_late');
     setLab(t, { mx: 560, my: 800, ms: .9, focus: kf(t, [[r, 0], [r + 1.5, 1], [l + 3, 1], [wt('mi_late', 'tweaks'), 2.2]]) });
     // Clawd peering into the eyepiece, then turning to us
-    clawd(400, 860, 22, { ...emotions(t, [[a - 1, 'thinking', { lookX: .6, lookY: -.8 }], [wt('mi_fv', 'good') + .2, 'sad'], [r + .4, 'surprised'], [r + 1.4, 'happy'], [l + .5, 'confused'], [wt('mi_late', 'Same') - .2, 'proud']]), flip: false, view: 'q' });
+    clawd(260, 860, 22, { ...emotions(t, [[a - 1, 'thinking', { lookX: .6, lookY: -.8 }], [wt('mi_fv', 'good') + .2, 'sad'], [r + .4, 'surprised'], [r + 1.4, 'happy'], [l + .5, 'confused'], [wt('mi_late', 'Same') - .2, 'proud']]), flip: false, view: 'q' });
     // what's under the lens
     const kL = on(t, a + .5);
     const kCrisp = seg(t, wt('mi_robust', 'crisp') - .8, wt('mi_robust', 'crisp') + .3);
@@ -39,13 +39,13 @@
     // the strongest photos next to it, for the late neuron
     if (!midNeuron) ['top-mixed5a-400-1', 'top-mixed5a-400-2', 'top-mixed5a-400-3', 'top-mixed5a-400-4'].forEach((n, i) => print(MT + n, 1720, 200 + i * 175, 150, popk(t, wt('mi_late', 'Better') - .6 + i * .1), { key: 'tp' + i }));
     else ['top-mixed4d-161-1', 'top-mixed4d-161-2', 'top-mixed4d-161-3', 'top-mixed4d-161-4'].forEach((n, i) => print(MT + n, 1720, 200 + i * 175, 150, popk(t, r + 1.6 + i * .1) * (1 - seg(t, l, l + .4)), { key: 'tq' + i }));
-    title('same neurons, better microscope', 760, 120, 56, PAL.cream, seg(t, wt('mi_late', 'Same') - .2, wt('mi_late', 'microscope', 1) + .3), { stroke: PAL.ink, strokeW: .1 });
+    title('same neurons, better microscope', 760, 120, 56, PAL.cream, seg(t, wt('mi_late', 'Same') - .2, wt('mi_late', 'microscope') + .3), { stroke: PAL.ink, strokeW: .1 });
     title('the microscope just wasn’t tuned right', 760, 120, 48, PAL.cream, on(t, wt('mi_story', 'tuned') - 1, f + 1), { stroke: PAL.ink, strokeW: .1 });
     edges(lt, dur, { in: 'none', out: 'none' });
   }
   function model(t, lt, dur) {
     const a = cs('mi_model_too'), p = cs('mi_packing_story'), c = cs('mi_convnext'), d = cs('mi_two_things'), e = ce('mi_two_things');
-    setLab(t, { mx: 560, my: 800, ms: .9 });
+    setLab(t, { scope: false });
     const kA = on(t, a, c);
     figure('blog/figs/fig005', 1220, 470, 1100, { k: on(t, wt('mi_model_too', 'looked') - .5, c + .2), key: 'iv1', rot: -.01 });
     if (kA > 0) {
@@ -62,7 +62,7 @@
       const kd = on(t, d);
       if (kd > 0) { card(1050, 860, 420, 120, { k: popk(t, wt('mi_two_things', 'learn') - .4), text: 'a network that learns well', size: 34, key: 'tw1', col: '#E7F0DC' }); card(1530, 860, 420, 120, { k: popk(t, wt('mi_two_things', 'tools') - .4), text: 'tools strong enough to see', size: 34, key: 'tw2', col: '#E5E9F2' }); }
     }
-    clawd(400, 860, 22, emotions(t, [[a - 1, 'neutral'], [a + .5, 'sad'], [p + .3, 'nervous'], [c + .3, 'surprised'], [wt('mi_convnext', 'beautiful'), 'starstruck'], [d + .4, 'thinking'], [e - 1, 'proud']]));
+    clawd(250, 860, 22, emotions(t, [[a - 1, 'neutral'], [a + .5, 'sad'], [p + .3, 'nervous'], [c + .3, 'surprised'], [wt('mi_convnext', 'beautiful'), 'starstruck'], [d + .4, 'thinking'], [e - 1, 'proud']]));
     edges(lt, dur, { in: 'wipe', out: 'wipe', cols: ['#2E4A57', '#3E6170'] });
   }
   function numbers(t, lt, dur) {

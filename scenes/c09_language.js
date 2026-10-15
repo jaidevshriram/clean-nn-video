@@ -9,7 +9,7 @@
     const a = cs('lm_intro'), p = cs('lm_preeclampsia'), h = cs('lm_hub'), e = ce('lm_hub');
     setStudy(t);
     const kI = on(t, a, p);
-    if (kI > 0) { title('does the simple story hold in language models?', BX, 250, 50, PAL.ink, seg(t, wt('lm_intro', 'check') - .8, wt('lm_intro', 'too') + .3)); hand('with Curt Tigges', BX, 330, 36, PAL.slate, seg(t, wt('lm_intro', 'Curt') - .3, wt('lm_intro', 'Tigges') + .3)); }
+    if (kI > 0) { title('does the simple story hold in language models?', BX, 250, 50, PAL.ink, seg(t, a + .3, a + 2.5)); for (let i = 0; i < 12; i++) neuron(BX - 440 + (i % 6) * 176, 470 + Math.floor(i / 6) * 150, 34, { on: .3 + .6 * (hash(i) > .4 ? seg(t, a + 1 + i * .3, a + 1.4 + i * .3) : 0), key: 'li' + i }); hand('with Curt Tigges', BX, 330, 36, PAL.slate, seg(t, wt('lm_intro', 'Curt') - .3, wt('lm_intro', 'Tigges') + .3)); }
     const kP = on(t, p - .1);
     const F = fig('blog/figs/fig029', BX + 30, 450, 1180, 0);
     if (kP > 0) {
@@ -107,6 +107,8 @@
     const a = cs('lm_lose'), b = cs('lm_blind'), b2 = cs('lm_blind2'), tg = cs('lm_target'), m = cs('lm_mercury'), e = ce('lm_mercury');
     setStudy(t);
     title('explanations that can lose', BX, 190, 60, PAL.ink, on(t, a, tg));
+    const kTB = on(t, a + .5, b - .1);
+    if (kTB > 0) { card(BX, 430, 640, 160, { k: kTB, text: '“a multifunctional language neuron”', size: 40, key: 'mf', col: '#F2E0E4' }); cross(BX, 430, 240, seg(t, wt('lm_lose', 'broadly') - .2, wt('lm_lose', 'broadly') + .4)); hand('too broad to ever be wrong', BX, 580, 38, PAL.berry, seg(t, wt('lm_lose', 'broadly'), wt('lm_lose', 'broadly') + 1)); }
     const kB = on(t, b - .1, tg);
     if (kB > 0) {
       // two agents: one investigates and writes an explanation; the other only sees the note
@@ -131,12 +133,12 @@
     const kM = on(t, m - .1);
     if (kM > 0) {
       // Mercury's orbit, with a little precessing wobble
-      boilSeed('sun'); glow(BX + 150, 500, 120, '#FFC766', .9); paint(ellPts(BX + 150, 500, 50, 50, 20), { wash: PAL.gold, ink: PAL.ink, sw: .9 });
-      for (let i = 0; i < 4; i++) { const rot = i * .25 + t * .02; inkStroke(ellPts(BX + 150, 500, 300, 190, 60, 0, rot), true, .7, mixCol(PAL.slate, PAL.paper, .3 + i * .1), 'inkfine'); }
-      const q = t * 1.3, rot = .75 + t * .02, px = BX + 150 + Math.cos(q) * 300 * Math.cos(rot) - Math.sin(q) * 190 * Math.sin(rot), py = 500 + Math.cos(q) * 300 * Math.sin(rot) + Math.sin(q) * 190 * Math.cos(rot);
-      paint(ellPts(px, py, 16, 16, 12), { wash: '#A99D93', ink: PAL.ink, sw: .7 });
-      hand('“cats and cars” could pass many tests', BX - 380, 330, 34, PAL.violet, seg(t, m + .3, wt('lm_mercury', 'is') + .3), { maxW: 420 });
-      hand('the best criticism is specific to the conjecture', BX - 380, 760, 34, PAL.sap, seg(t, wt('lm_mercury', 'criticism') - .5, wt('lm_mercury', 'conjecture') + .3), { maxW: 420 });
+      boilSeed('sun'); glow(BX + 220, 480, 200, '#FFC766', .9); paint(ellPts(BX + 220, 480, 80, 80, 24), { wash: PAL.gold, ink: PAL.ink, sw: 1.1 });
+      for (let i = 0; i < 4; i++) { const rot = i * .25 + t * .02; inkStroke(ellPts(BX + 220, 480, 400, 240, 60, 0, rot), true, 1, mixCol(PAL.slate, PAL.paper, .2 + i * .1), 'inkfine'); }
+      const q = t * 1.3, rot = .75 + t * .02, px = BX + 220 + Math.cos(q) * 400 * Math.cos(rot) - Math.sin(q) * 240 * Math.sin(rot), py = 480 + Math.cos(q) * 400 * Math.sin(rot) + Math.sin(q) * 240 * Math.cos(rot);
+      paint(ellPts(px, py, 24, 24, 14), { wash: '#A99D93', ink: PAL.ink, sw: .9 });
+      hand('“cats and cars” could pass many tests', BX - 420, 300, 34, PAL.violet, seg(t, m + .3, wt('lm_mercury', 'is') + .3), { maxW: 420 });
+      hand('the best criticism is specific to the conjecture', BX - 420, 780, 34, PAL.sap, seg(t, wt('lm_mercury', 'criticism') - .5, wt('lm_mercury', 'conjecture') + .3), { maxW: 420 });
       hand('Mercury', px + 20, py - 40, 28, PAL.ink, seg(t, wt('lm_mercury', 'Mercury') - .3, wt('lm_mercury', 'orbit') + .3));
     }
     presenter(t, 300, 960, 22, [[a - 1, 'neutral'], [a + .3, 'determined'], [b + .3, 'thinking'], [b2 + .3, 'surprised'], [tg + .3, 'happy'], [m + .3, 'thinking'], [wt('lm_mercury', 'criticism'), 'proud']]);
@@ -164,7 +166,7 @@
       notes(t, BX - 380, 340, [[wt('lm_slouching', 'small') - .3, '2023: “start with small, simplified models”'], [wt('lm_slouching', 'bells') - .3, 'the bells and whistles help networks learn'], [wt('lm_slouching', 'narrower') - .3, 'bigger models → narrower neurons → easier patterns']], { size: 38, gap: 76 });
       // a slouching Clawd walking toward a signpost
       const wx = lerp(BX - 300, BX + 300, ease(seg(t, wt('lm_slouching', 'adopting') - .5, e)));
-      clawd(wx, 860, 16, { ...feel('relieved', t), view: 'side', walk: t * 1.5, rot: .12, boilKey: 'sl' });
+      clawd(wx, 860, 24, { ...feel('relieved', t), view: 'side', walk: t * 1.5, rot: .12, boilKey: 'sl' });
       boilSeed('sign'); inkLine([[BX + 420, 870], [BX + 420, 700]], 5, '#7A5B3E', 'ink', 0); paint(rectPts(BX + 330, 660, 300, 70, 2), { wash: PAL.cream, ink: PAL.ink, sw: .9 }); hand('monosemanticity →', BX + 480, 695, 28, PAL.ink, kS);
     }
     if (kS <= 0) presenter(t, 300, 960, 22, [[a - 1, 'neutral'], [a + .3, 'happy'], [d + .3, 'thinking'], [d2 + .3, 'idea'], [wt('lm_dot2', 'period'), 'laugh']]);
@@ -201,7 +203,7 @@
     const a = cs('lm_attention'), w = cs('lm_attn_where'), h = cs('lm_attn_heads'), f = cs('lm_attn_5'), e = ce('lm_attn_5');
     setStudy(t);
     const kA = on(t, a, w + .2);
-    if (kA > 0) { title('attention', BX, 200, 66, PAL.ink, seg(t, a + .2, a + 1.2)); hand('least progress — but much of its value is in the easier parts', BX, 290, 36, PAL.slate, seg(t, wt('attention'.length ? 'lm_attention' : 'lm_attention', 'value') - .5, wt('lm_attention', 'parts') + .3)); }
+    if (kA > 0) { const toks = ['she', 'has', 'a', 'headache', ',', 'swollen', 'ankles', '…']; let tx = BX - 470; toks.forEach((w_, i) => { const ww = 40 + w_.length * 17; card(tx + ww / 2, 470, ww, 70, { k: popk(t, a + .5 + i * .1), text: w_, size: 32, key: 'tk' + i, pin: false, shadow: false }); tx += ww + 16; }); arrow([BX + 60, 420], [BX - 410, 420], seg(t, a + 2, a + 3), PAL.berry, 3, -.4, 'at1'); title('attention', BX, 200, 66, PAL.ink, seg(t, a + .2, a + 1.2)); hand('least progress — but much of its value is in the easier parts', BX, 290, 36, PAL.slate, seg(t, wt('attention'.length ? 'lm_attention' : 'lm_attention', 'value') - .5, wt('lm_attention', 'parts') + .3)); }
     const kW = on(t, w - .1, h);
     if (kW > 0) {
       const qs = [['where is it looking?', wt('lm_attn_where', 'where')], ['what is it looking for?', wt('lm_attn_where', 'for')], ['what does it do when it finds it?', wt('lm_attn_where', 'finds')], ['why?', wt('lm_attn_where', 'why')]];

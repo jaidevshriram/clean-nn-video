@@ -12,7 +12,7 @@
       card(BX + 300, 300, 500, 150, { k: popk(t, wt('lp_bold', 'Superposition') - .2), text: 'superposition:\na whole new learning principle', size: 34, col: '#ECE2F2', key: 'b2' });
       const kc = on(t, c);
       if (kc > 0) {
-        hand('a shared, useful pattern,\nkept in one place to build on', BX - 300, 520, 36, PAL.sap, seg(t, wt('lp_contrast', 'shared') - .3, wt('lp_contrast', 'built') + .4));
+        hand('a shared, useful pattern,\nkept in one place to build on', BX - 300, 520, 36, PAL.sap, seg(t, wt('lp_contrast', 'useful') - .3, wt('lp_contrast', 'built') + .4));
         hand('unrelated things,\nbecause they don’t interfere', BX + 300, 520, 36, PAL.violet, seg(t, wt('lp_contrast', 'unrelated') - .3, wt('lp_contrast', 'interfere') + .4));
       }
     }
@@ -38,7 +38,7 @@
     const kg = seg(t, wt('lp_ears', 'floppy-eared-dog') - .5, wt('lp_ears', 'floppy-eared-dog') + .4) || seg(t, a + .5, a + 1);
     card(BX - 300, 470, 520, 520, { k: kg, col: '#E7F0DC', key: 'fe', draw: (w, h) => {} });
     if (kg > .5) { [R + 'ear-large-hanging', R + 'ear-medium-head-side', R + 'ear-small-general-dog', PE + 'large/6'].forEach((n, i) => print(n, BX - 420 + (i % 2) * 240, 380 + Math.floor(i / 2) * 210, 190, seg(t, a + 1 + i * .3, a + 1.4 + i * .3), { key: 'e' + i })); hand('generalization', BX - 300, 680, 40, PAL.sap, kg); }
-    const ks = seg(t, wt('lp_ears', 'Latin') - .6, wt('lp_ears', 'Latin') + .4);
+    const ks = seg(t, wt('lp_ears', 'floppy-eared-dog-plus') - .6, wt('lp_ears', 'floppy-eared-dog-plus') + .4);
     card(BX + 300, 470, 520, 520, { k: ks, col: '#ECE2F2', key: 'lat' });
     if (ks > .5) {
       print(PE + 'large/6', BX + 200, 420, 190, ks, { key: 'ld' });
@@ -51,7 +51,7 @@
       title('+', BX + 300, 430, 70, PAL.violet, ks);
       hand('superposition', BX + 300, 680, 40, PAL.violet, ks);
     }
-    presenter(t, 300, 960, 22, [[a - 1, 'happy'], [wt('lp_ears', 'Latin') - .2, 'laugh']], { point: [[a + .4, e]] });
+    presenter(t, 300, 960, 22, [[a - 1, 'happy'], [wt('lp_ears', 'floppy-eared-dog-plus') - .2, 'laugh']], { point: [[a + .4, e]] });
   }
 
   // the 32 things, sorted by generalizing neurons (coarse → fine) vs arbitrary packing
@@ -71,11 +71,12 @@
         const box = side ? Math.floor((s.fam * 8 + s.i) / perBox) : ((j * 13 + 7) % 32) % nN, slot = side ? (s.fam * 8 + s.i) % perBox : Math.floor(((j * 13 + 7) % 32) / nN);
         const bx = x0 + (box % cols) * bw, by = 280 + Math.floor(box / cols) * bh, pc = Math.ceil(Math.sqrt(perBox * bw / bh));
         const px = bx + 30 + (slot % pc + .5) * (bw - 60) / pc, py = by + 30 + (Math.floor(slot / pc) + .5) * (bh - 60) / Math.ceil(perBox / pc);
-        const kk = seg(t, (side ? tg : tp) - .4 + hash(j) * .5, (side ? tg : tp) + .3 + hash(j) * .5); if (kk <= 0) return;
-        boilSeed('ps' + side + j); shape(s.kind, px, py + (1 - backOut(kk)) * -40, Math.min(22, bw / 9), s.col);
+        const kk = ease(seg(t, (side ? tg : tp) - .4 + hash(j) * .5, (side ? tg : tp) + .5 + hash(j) * .5)); if (t < a + .6 + j * .03) return;
+        const pile = [x0 + 120 + hash(j * 7 + side) * (w - 240), 920 + 50 * hash(j * 3 + side)], q = arcPt(pile, [px, py], 140, kk);
+        boilSeed('ps' + side + j); shape(s.kind, q[0], q[1], Math.min(22, bw / 9), s.col);
       });
     }
-    hand(nN + ' neurons', 960, 900, 40, PAL.ink, on(t, tfew - .2));
+    hand(nN + ' neurons', 960, 880, 44, PAL.ink, on(t, tfew - .2));
     hand('fewer neurons → coarser, never fractured', 960, 970, 40, PAL.sap, seg(t, wt('lp_panels', 'coarser') - .3, wt('lp_panels', 'fracture') + .4));
     edges(lt, dur, { in: 'wipe', out: 'wipe', cols: [PAL.violet, '#5B3F6B'] });
   }

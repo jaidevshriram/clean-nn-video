@@ -6,7 +6,8 @@
   function forest(t) {
     layer('forest', () => {
       paint(rectPts(-80, -80, W + 160, H + 160), { wash: '#2F5A43', ink: null, tex: .8 });
-      for (let i = 0; i < 70; i++) { const x = hash(i * 3.1) * W, y = hash(i * 7.3) * H, r = 60 + 120 * hash(i), a = hash(i * 5) * TAU; paint(ellPts(x, y, r, r * .35, 16, 0, a), { wash: mixCol('#3F7A52', '#7FAE73', hash(i * 2)), ink: '#1E3A2A', sw: .7, curv: .4 }); }
+      for (let i = 0; i < 14; i++) { const x = 60 + i * 140 + 40 * hash(i); inkLine([[x, -20], [x + 30 * Math.sin(i), 300 + 300 * hash(i * 9)]], 2.5, '#244A33', 'ink', .6); }
+      for (let i = 0; i < 150; i++) { const x = hash(i * 3.1) * W, y = hash(i * 7.3) * H * 1.05, r = 40 + 90 * hash(i), a = hash(i * 5) * TAU; const P = []; for (let k = 0; k <= 16; k++) { const u = k / 16, w = Math.sin(u * Math.PI) * r * .32; P.push([u * 2 * r - r, -w]); } for (let k = 16; k >= 0; k--) { const u = k / 16, w = Math.sin(u * Math.PI) * r * .32; P.push([u * 2 * r - r, w]); } push(); translate(x, y); rotate(a); paint(P, { wash: mixCol('#2F6B45', '#8FBF73', hash(i * 2)), ink: '#1E3A2A', sw: .6 }); inkLine([[-r * .9, 0], [r * .9, 0]], .6, '#1E3A2A', 'inkfine', 0); pop(); }
     });
   }
   function tiger(x, y, s, t) {
@@ -89,19 +90,19 @@
     const a = cs('ti_end'), e = ce('ti_end');
     setSky(t, { tint: '#F7E4D6' });
     glow(960, 900, 700, '#FFC98A', .6);
-    camKeys(t, [[a - .5, 960, 540, .95], [e + 2, 960, 540, 1.05], [e + 6, 960, 560, 1.12]], .6);
+    camKeys(t, [[a - .5, 960, 560, .95], [e + 2, 960, 580, 1.0], [e + 6, 960, 600, 1.04]], .6);
     const un = ease(seg(t, wt('ti_end', 'learn') - .5, e + 2.5));
-    hero(960, 540, 1800, { half: 'city' });
-    ctx.save(); ctx.globalAlpha = 1 - un; hero(960, 540, 1800, { half: 'knot', alpha: 1 - un }); ctx.restore();
+    hero(960, 620, 1650, { half: 'city' });
+    ctx.save(); ctx.globalAlpha = 1 - un; hero(960, 620, 1650, { half: 'knot', alpha: 1 - un }); ctx.restore();
     if (un > 0) { // the city again where the knot was: read in its own organisation
-      const I = img('blog/hero/city-and-knot'), w = 1800 * 975 / I.width, h = 1800 * I.height / I.width;
-      ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = un; ctx.translate(960 + 1800 * 975 / I.width / 2 + 30, 540); ctx.scale(-1, 1); ctx.drawImage(I, 0, 0, 975, I.height, -w / 2, -h / 2, w, h); ctx.restore();
+      const I = img('blog/hero/city-and-knot'), w = 1650 * 975 / I.width, h = 1650 * I.height / I.width;
+      ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.globalAlpha = un; ctx.translate(960 + 1650 * 975 / I.width / 2 + 30, 620); ctx.scale(-1, 1); ctx.drawImage(I, 0, 0, 975, I.height, -w / 2, -h / 2, w, h); ctx.restore();
     }
     camEnd();
-    title('Neural networks are already clean.', 960, 140, 70, PAL.ink, seg(t, wt('ti_end', 'Neural') - .2, wt('ti_end', 'clean') + .4));
-    hand('We just have to learn how to read them.', 960, 225, 46, PAL.clayDk, seg(t, wt('ti_end', 'We') - .2, wt('ti_end', 'them') + .4));
-    // credits
     const kc = seg(t, e + 3, e + 4.5);
+    if (kc < 1) title('Neural networks are already clean.', 960, 140, 70, PAL.ink, seg(t, wt('ti_end', 'Neural') - .2, wt('ti_end', 'clean') + .4));
+    if (kc < 1) hand('We just have to learn how to read them.', 960, 225, 46, PAL.clayDk, seg(t, wt('ti_end', 'We') - .2, wt('ti_end', 'them') + .4) * (1 - kc));
+    // credits
     if (kc > 0) {
       ctx.save(); ctx.globalAlpha = kc * .85; ctx.fillStyle = PAL.paper; ctx.fillRect(0, 0, W, H); ctx.restore();
       title('Neural Networks Are Already Clean', 960, 380, 62, PAL.ink, kc);
