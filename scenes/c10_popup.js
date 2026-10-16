@@ -450,7 +450,7 @@
   function riverShot(t, lt, dur) {
     const { a, tRiver, tRes, tRead, tWrite, tWorr, tTang, tPrac, tRead2, tSq, tMess, tNev, tKn } = R0;
     library(t);
-    camSpread(t, t - lt, t - lt + dur, [[tRiver + .5, 960, 600, 1.02], [tRead, 940, 630, 1.03], [tWrite + .6, 970, 630, 1.03], [tTang, 980, 600, 1.0], [tPrac + .3, 920, 640, 1.0], [tSq + .2, 960, 630, 1.0], [tKn + .4, 1100, 620, 1.04]]);
+    camSpread(t, t - lt, t - lt + dur, [[tRiver + .5, 960, 600, 1.02], [tRead, 940, 630, 1.03], [tWrite + .6, 970, 630, 1.03], [tTang, 980, 600, 1.0], [tPrac + .3, 920, 640, 1.0], [tSq + .2, 960, 630, 1.0], [tKn + .4, 1040, 620, 1.03]]);
     book();
     const ko = kout(lt, dur), kr = Math.min(seg(lt, .7, 1.3), ko), dam = ease(seg(t, tSq - .3, tSq + .7)), twist = Math.sin(Math.PI * seg(t, tWorr, tPrac)) * (t < tPrac ? 1 : 0);
     const narrow = x => 1 - .5 * dam * clamp(1 - Math.abs(x - 1200) / 260);
@@ -496,7 +496,7 @@
 
   // ================= attention: the courier service =================
   const Q0 = { a: cs('cw_couriers'), tAtt: wt('cw_couriers', 'attention'), tCour: wt('cw_couriers', 'courier'), tNotes: wt('cw_couriers', 'notes'), tKnow: wt('cw_couriers', 'know'), tAnoth: wt('cw_couriers', 'another'), tMed: wt('cw_couriers', 'medical'), tHead: wt('cw_couriers', 'headache'), tGath: wt('cw_couriers', 'gather'), tFacts: wt('cw_couriers', 'facts'), tOnePl: wt('cw_couriers', 'place', 1), tDiag: wt('cw_couriers', 'diagnosis') };
-  const STREET = [[200, 'she', 120], [335, 'is', 120], [490, 'pregnant', 156], [645, 'with', 120], [775, 'a', 120], [925, 'headache', 156], [1075, 'and', 120], [1320, 'high blood pressure', 280]];
+  const STREET = [[250, 'she', 120], [380, 'is', 120], [530, 'pregnant', 156], [680, 'with', 120], [805, 'a', 120], [950, 'headache', 156], [1095, 'and', 120], [1340, 'high blood pressure', 280]];
   function couriersShot(t, lt, dur) {
     const { a, tAtt, tCour, tNotes, tKnow, tAnoth, tMed, tHead, tGath, tFacts, tOnePl, tDiag } = Q0;
     library(t);
@@ -512,10 +512,10 @@
     if (lit > .3) bubble(1650, 390, '?', 72, Math.min(popk(t, tDiag, .5), ko), { col: C.gold, tail: -10 });   // the answer itself comes next, when it is spoken
     // couriers: first a demo between two words, then the three medical notes ride to the diagnosis house
     const ride = (t0, t1, x0, x1, y, note, col, ph, lift = 0) => { if (t < t0 || t > t1 + .4) return; const u = easeInOut(seg(t, t0, t1)); ctx.save(); ctx.translate(lerp(x0, x1, u), y - Math.abs(Math.sin(t * 7 + ph)) * 4); courier(1.3, t + ph, t < t1 ? note : null, col, lift); ctx.restore(); };
-    ride(tNotes - 1, tAnoth, 200, 925, 960, 'she', C.teal, 0);
-    ride(tHead - .4, tOnePl - .1, 925, 1500, 975, 'headache', C.red, 1, 140);
-    ride(tGath - .4, tOnePl + .25, 1320, 1560, 965, 'high blood pressure', C.navy, 2, 60);
-    ride(tFacts - .6, tOnePl + .6, 490, 1440, 990, 'pregnant', C.teal, 3);
+    ride(tNotes - 1, tAnoth, 250, 950, 960, 'she', C.teal, 0);
+    ride(tHead - .4, tOnePl - .1, 950, 1500, 975, 'headache', C.red, 1, 140);
+    ride(tGath - .4, tOnePl + .25, 1340, 1560, 965, 'high blood pressure', C.navy, 2, 60);
+    ride(tFacts - .6, tOnePl + .6, 530, 1440, 990, 'pregnant', C.teal, 3);
     // a second courier lane: ambient traffic of notes so the street is alive
     for (let q = 0; q < 2; q++) { const ph = frac((t - a) * .12 + q * .5); if (t < tMed) { ctx.save(); ctx.translate(lerp(1700, 200, ph), 1000); ctx.scale(-1, 1); courier(.7, t + q, null, C.orange); ctx.restore(); } }
     caps(t, [[tAtt - .3, tKnow - .4, 'attention: the courier service'], [tKnow - .3, tMed - .4, 'knows what was said elsewhere'], [tMed - .3, t - lt + dur - .3, 'symptoms carried to one place']]);
