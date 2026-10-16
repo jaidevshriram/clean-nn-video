@@ -46,15 +46,15 @@
     const k = ease(seg(t, a, a + .6)) * (1 - ease(seg(t, b - .5, b))); if (k <= 0) return;
     POST.push(() => {
       ctx.save(); ctx.globalAlpha = k;
-      ctx.font = 'italic 46px "DejaVu Serif"'; const w1 = ctx.measureText(latin).width; ctx.font = '34px "DejaVu Serif"'; const w2 = ctx.measureText(common).width, w = Math.max(w1, w2) + 90;
+      ctx.font = 'italic 58px "DejaVu Serif"'; const w1 = ctx.measureText(latin).width; ctx.font = '40px "DejaVu Serif"'; const w2 = ctx.measureText(common).width, w = Math.max(w1, w2) + 90;
       const x0 = side ? W - 110 - w : 110;
-      ctx.fillStyle = 'rgba(20,12,4,.6)'; ctx.fillRect(x0, 820, w, 128); ctx.fillStyle = '#F0BE46'; ctx.fillRect(x0, 820, 8, 128);
-      ctx.fillStyle = '#FFF2C8'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = 'italic 46px "DejaVu Serif"'; ctx.fillText(latin, x0 + 40, 860); ctx.font = '34px "DejaVu Serif"'; ctx.fillStyle = '#F3DDB0'; ctx.fillText(common, x0 + 40, 914);
+      ctx.fillStyle = 'rgba(20,12,4,.6)'; ctx.fillRect(x0, 800, w, 160); ctx.fillStyle = '#F0BE46'; ctx.fillRect(x0, 800, 8, 160);
+      ctx.fillStyle = '#FFF2C8'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = 'italic 58px "DejaVu Serif"'; ctx.fillText(latin, x0 + 40, 850); ctx.font = '40px "DejaVu Serif"'; ctx.fillStyle = '#F3DDB0'; ctx.fillText(common, x0 + 40, 915);
       ctx.restore();
     });
   }
   // a documentary caption at the top of the picture (inside the letterbox)
-  function caption(t, a, b, s, y = 170) { const k = ease(seg(t, a, a + .5)) * (1 - ease(seg(t, b - .4, b))); if (k > 0) letter(s, 960, y, 56, '#FFF6E0', { face: 'hand', shadow: false, alpha: k, stroke: '#3A2410', strokeW: .16, screen: true }); }
+  function caption(t, a, b, s, y = 170) { const k = ease(seg(t, a, a + .5)) * (1 - ease(seg(t, b - .4, b))); if (k > 0) letter(s, 960, y, 68, '#FFF6E0', { face: 'hand', shadow: false, alpha: k, stroke: '#3A2410', strokeW: .16, screen: true }); }
 
   // ---------- props and animals ----------
   // a field post holding a print (a photo in the world): bottom of the posts at (x, y)
@@ -208,31 +208,32 @@
   }
 
   // ---------- 4 · ecology: a time-lapse of herds; newcomers join their own kind ----------
-  const FAMS = [[NP + 'wolves-positive-1', NP + 'wolves-positive-2', 280], [NP + 'toucans-positive-1', NP + 'toucans-positive-2', 760], [NP + 'taxis-positive-1', NP + 'taxis-positive-2', 1240], [NP + 'broccoli-positive-1', NP + 'broccoli-positive-2', 1700]];
+  const FAMS = [[NP + 'wolves-positive-1', NP + 'wolves-positive-2', 330], [NP + 'toucans-positive-1', NP + 'toucans-positive-2', 960], [NP + 'taxis-positive-1', NP + 'taxis-positive-2', 1590]];
+  const SLOT = [[-120, 0], [130, 20], [10, 110], [-190, 120]];
   function ecology(t, lt, dur) {
     const a = cs('hl_ecology'), e = ce('hl_ecology'), tEc = wt('hl_ecology', 'ecosystem'), tCa = wt('hl_ecology', 'captures'), tCl = wt('hl_ecology', 'cluster'), tEd = wt('hl_ecology', 'edges');
     const day = seg(t, a - .3, e + .5);
-    camKeys(t, [[t - lt, 1010, 640, .92], [e + .5, 1010, 650, .95]], .3);
+    camKeys(t, [[t - lt, 960, 690, 1.0], [e + .5, 960, 700, 1.04]], .3);
     // time-lapse sky: the sun sweeps, the light warms and cools
     skyL(); const sa = lerp(-.2, 1.2, frac(day * 2)); sun(lerp(-200, 2200, sa), 520 - Math.sin(clamp(sa) * Math.PI) * 360, 90);
     groundL(); acacia(230, HZ + 50, 1, INK);
     // cloud shadows race over the plain
     for (let i = 0; i < 3; i++) { const x = -600 + frac(day * 3 + i / 3) * 3200; ctx.fillStyle = 'rgba(60,30,0,.14)'; ctx.beginPath(); ctx.ellipse(x, 820 + i * 60, 360, 50, 0, 0, TAU); ctx.fill(); }
     // the herds: each grows as newcomers arrive and join their own kind
-    const grownN = Math.floor(lerp(2, 5, seg(t, a + .5, tEd)));
+    const grownN = Math.floor(lerp(2, 4.99, seg(t, a + .5, tEd)));
     FAMS.forEach(([im1, im2, cx], f) => {
-      const n = grownN + (f === 1 ? 1 : 0);
+      const n = grownN;
       for (let i = n - 1; i >= 0; i--) {
-        const ta = a + .3 + (i - 2) * ((tEd - a) / 3) + f * .4, k = i < 2 ? 1 : seg(t, ta, ta + 1.6), side = (f % 2 ? 1 : -1), hx = cx + ((i % 3) - 1) * 130 + (i > 2 ? 65 : 0), hy = 860 + Math.floor(i / 3) * 110 + (i % 2) * 20;
+        const ta = a + .3 + (i - 2) * ((tEd - a) / 3) + f * .4, k = i < 2 ? 1 : seg(t, ta, ta + 1.6), side = (f % 2 ? 1 : -1), hx = cx + SLOT[i][0], hy = 820 + SLOT[i][1];
         const x = lerp(cx + side * 1400, hx, easeOut(k)), y = lerp(hy + 40, hy, k);
-        beast(x, y, .42, t + i, { im: i % 2 ? im2 : im1, walk: k < 1 ? t * 2 + i : 0, flip: side > 0 && k < 1, lit: (i === n - 1 && k < 1) ? 1 : .3 * Math.sin(t * 2 + i + f) + .3 });
+        beast(x, y, .56, t + i, { im: i % 2 ? im2 : im1, walk: k < 1 ? t * 2 + i : 0, flip: side > 0 && k < 1, lit: (i === n - 1 && k < 1) ? 1 : .3 * Math.sin(t * 2 + i + f) + .3 });
       }
       // the herd's edge glows: generalization at its edges
-      const ek = seg(t, tEd - 1, tEd); if (ek > 0) { ctx.save(); ctx.globalAlpha = ek * (.5 + .3 * Math.sin(t * 4)); ctx.strokeStyle = '#FFE08A'; ctx.lineWidth = 5; ctx.setLineDash([14, 12]); ctx.beginPath(); ctx.ellipse(cx, 860, 260, 150, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
+      const ek = seg(t, tEd - 1, tEd); if (ek > 0) { ctx.save(); ctx.globalAlpha = ek * (.5 + .3 * Math.sin(t * 4)); ctx.strokeStyle = '#FFE08A'; ctx.lineWidth = 5; ctx.setLineDash([14, 12]); ctx.beginPath(); ctx.ellipse(cx, 880, 300, 170, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
     });
     // a newcomer wanders toward the wrong herd, is nudged away, and trots home (a gag at "before anyone new can move in")
     const g = seg(t, tCa - 1, tCl + .3);
-    if (g > 0 && g < 1) { const x = g < .5 ? lerp(-200, 690, easeOut(g / .5)) : lerp(690, 900 + 0 * g, ease((g - .5) / .5)), y = 900 - (g > .45 && g < .55 ? Math.abs(Math.sin(t * 20)) * 20 : 0); beast(x, y, .4, t, { im: NP + 'toucans-positive-2', walk: t * 3, flip: false, lit: 1 }); if (g > .45 && g < .7) sfx('?!', x + 40, y - 150, 60, '#FFF6E0', (g - .45) * 4, { stroke: INK, strokeW: .12 }); }
+    if (g > 0 && g < 1) { const x = g < .5 ? lerp(-200, 560, easeOut(g / .5)) : lerp(560, 820, ease((g - .5) / .5)), y = 960 - (g > .45 && g < .55 ? Math.abs(Math.sin(t * 20)) * 20 : 0); beast(x, y, .5, t, { im: NP + 'toucans-positive-2', walk: t * 3, flip: false, lit: 1 }); if (g > .45 && g < .7) sfx('?!', x + 40, y - 200, 60, '#FFF6E0', (g - .45) * 4, { stroke: INK, strokeW: .12 }); }
     frontGrass(t, 1010, 30);
     camEnd();
     // time-lapse speed marker

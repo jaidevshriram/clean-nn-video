@@ -20,7 +20,7 @@
     const [x, y, w, h] = R;
     ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
     ctx.fillStyle = PAPERC_; ctx.fillRect(x, y, w, h);
-    if (k < 1) { ctx.strokeStyle = 'rgba(120,100,70,.18)'; ctx.lineWidth = 2; for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(x + i * w / 6, y); ctx.lineTo(x + i * w / 6, y + h); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y + i * h / 6); ctx.lineTo(x + w, y + h * i / 6); ctx.stroke(); } }
+    if (k < 1) { ctx.save(); ctx.filter = 'grayscale(1) sepia(.35)'; ctx.globalAlpha = .3; draw(x, y, w, h); ctx.restore(); ctx.strokeStyle = 'rgba(120,100,70,.18)'; ctx.lineWidth = 2; for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(x + i * w / 6, y); ctx.lineTo(x + i * w / 6, y + h); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y + i * h / 6); ctx.lineTo(x + w, y + h * i / 6); ctx.stroke(); } }
     if (k > 0) { ctx.save(); ctx.beginPath(); const r = Math.hypot(w, h) * easeInOut(k); ctx.arc(x + w / 2, y + h / 2, r, 0, TAU); ctx.clip(); draw(x, y, w, h); ctx.restore(); }
     ctx.restore();
     ctx.strokeStyle = TEAL_D; ctx.lineWidth = 10; ctx.strokeRect(x + 5, y + 5, w - 10, h - 10);
@@ -83,7 +83,7 @@
       dot(x + w / 2, y + h * .5, 260, ORA_D);
       if (o.flash > 0) glow(x + w / 2, y + h * .5, 900, '#FFF6D8', o.flash);
       flat(rectPts(x, y + h * .82, w, h * .18), TEAL);
-      T('THE LABORATORY', x + w / 2, y + 90, 100, TEAL_D); T('OF TOMORROW', x + w / 2, y + 180, 70, RED);
+      { const [lx, ty] = CAM ? toScreen(x + w / 2 - 520, y + 30) : [0, 999], [rx] = CAM ? toScreen(x + w / 2 + 520, y + 30) : [W]; const ta = clamp(Math.min(ty - 80, lx - 80, W - 80 - rx) / 40); if (ta > 0) { T('THE LABORATORY', x + w / 2, y + 90, 100, TEAL_D, { alpha: ta }); T('OF TOMORROW', x + w / 2, y + 180, 70, RED, { alpha: ta }); } }
       if (o.inner) o.inner(x, y, w, h);
     }, t);
   }
@@ -187,7 +187,7 @@
       visitor(t, x + w * .82, y + h * .84, 12, [[CH, 'happy'], [tLa, 'excited'], [tLb, 'starstruck'], [tTe, 'proud']], { flip: true });
     } });
     camEnd();
-    if (t > tFi - .3) letter('label · find patterns · test · again', 960, 1010, 56, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tLb - .3, tAg + .4) });
+    if (t > tFi - .3) letter('label · find patterns · test · again', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tLb - .3, tAg + .4) });
     GRAIN = 1; PAPER = false;
   }
 
@@ -214,8 +214,8 @@
     visitor(t, 2620, 1070, 16, [[t - lt, 'happy'], [tPi, 'thinking'], [tSo, 'determined'], [tPl + .1, 'excited']], { flip: true });
     camEnd();
     if (t > tPl - .1 && t < tPl + 1.2) sfx('CLICK!', 960, 400, 90, RED, t - tPl, { stroke: '#FFF6E0', strokeW: .12 });
-    if (t < tAg - 1.4) letter('the pieces already exist', 960, 1000, 64, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tPi - .5, tPi + .5) });
-    if (t > tBo - .3 && t < tSo) letter('both make interpretability easier', 960, 1000, 60, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tBo - .3, tIn + .6) });
+    if (t < tAg - 1.4) letter('the pieces already exist', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tPi - .5, tPi + .5) });
+    if (t > tBo - .3 && t < tSo) letter('both make interpretability easier', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tBo - .3, tIn + .6) });
     GRAIN = 1; PAPER = false;
   }
 
@@ -226,7 +226,7 @@
     camKeys(t, [[t - lt, 1920, 775, .7], [tRe, 1920, 540, 1.0], [tId + .4, 1920, 540, 1.0], [tBe + 1.2, 1920, 605, .9], [tNe - .5, 1120, 1590, .95], [tNo, 1120, 1560, .9], [e + .6, 1120, 1545, .88]], .4);
     poster(t, { b: 1, bAct: 1, c: 1, cAct: 1, d: seg(t, tNe - 1.4, tNe - .3), alive: true, aInner: (x, y, w, h) => {
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = TEAL_D; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * .42 + i * 110, 240 - i * 40, 46, Math.sin(t + i) * .05, 0, TAU); ctx.stroke(); }
-      if (twin > 0) { tower(x + w / 2 + 380 * twin, y + h * .82, .9, t, { floors: 5, lit: 1, labels: 1, ghost: .85 * twin }); if (twin > .8) T('= identical copy', x + w / 2 + 380, y + h * .82 + 50, 40, TEAL_D, { font: KAL, weight: '700' }); }
+      if (twin > 0) { tower(x + w / 2 + 380 * twin, y + h * .82, .9, t, { floors: 5, lit: 1, labels: 1, ghost: .85 * twin }); if (twin > .8) T('= identical copy', x + w / 2 + 380, y + h * .82 + 60, 52, TEAL_D, { font: KAL, weight: '700' }); }
       tower(x + w / 2 - 20 * twin, y + h * .82, 1, t, { floors: 5, lit: seg(t, a - .3, tRe + .4), labels: 1 });
       march(t, x + 60, y + h * .86, w - 120, 3, 1, { lit: true });
       // the ribbon banner
@@ -240,8 +240,8 @@
       for (let i = 0; i < 260; i++) { const k = clamp(flood * 1.4 - hash(i * 3.3) * .8); if (k <= 0) continue; const rx = x + 120 + hash(i * 1.7) * (w - 240), ry = y + h * .6 + hash(i * 5.1) * h * .34, sx = x - 200 + (rx - x) * .2; bot(lerp(sx, rx, easeOut(k)), ry, 1 + ry / (y + h) * .6, t * 2 + i, { clip: i % 3 === 0, lit: i % 2 === 0 }); }
     } });
     camEnd();
-    if (t > tRe - .4 && t < tEx - .2) letter('every neuron can be read', 960, 1000, 60, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tRe - .4, tRe + .4) });
-    if (t > tEx - .2 && t < tBe - .5) letter('every experiment can be rerun', 960, 1000, 60, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tEx - .2, tId + .3) });
+    if (t > tRe - .4 && t < tEx - .2) letter('every neuron can be read', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tRe - .4, tRe + .4) });
+    if (t > tEx - .2 && t < tBe - .5) letter('every experiment can be rerun', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tEx - .2, tId + .3) });
     if (t > tNe - .3 && t < tNo - .2) letter('never enough scientists', 960, 200, 64, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tNe - .3, tSc + .3) });
     if (t > tNo - .2) letter('now we do', 960, 200, 90, RED, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, pop: seg(t, tNo - .2, tNo + .2) < 1 ? seg(t, tNo - .2, tNo + .2) : null });
     GRAIN = 1; PAPER = false;
@@ -267,7 +267,7 @@
     } });
     camEnd();
     if (t < tRi - .3) letter('the simple thing, at enormous scale, beats the clever thing', 960, 210, 54, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tSi - .3, tCl + .4) });
-    if (t > tSc - .3) letter('scaling ordinary investigation', 960, 1000, 60, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tSc - .3, tSc + .9) });
+    if (t > tSc - .3) letter('scaling ordinary investigation', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tSc - .3, tSc + .9) });
     GRAIN = 1; PAPER = false;
   }
 

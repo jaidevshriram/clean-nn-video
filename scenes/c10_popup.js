@@ -246,7 +246,7 @@
   function y2023Shot(t, lt, dur) {
     const { a, tNone, tUnd, tOAI, tTwo } = N0;
     library(t);
-    camSpread(t, t - lt, t - lt + dur, [[a + .6, 960, 560, 1], [tNone, 960, 600, 1.06], [tOAI, 900, 620, 1.1], [tTwo + .5, 900, 640, 1.14]]);
+    camSpread(t, t - lt, t - lt + dur, [[a + .6, 960, 560, 1], [tNone, 960, 590, 1.02], [tOAI, 960, 600, 1.03], [tTwo + .5, 960, 610, 1.03]]);
     book();
     // the Knot looms over the crowd: in 2023 it all looked like superposition
     const kk = Math.min(kin(lt, 1500), kout(lt, dur));
@@ -267,7 +267,7 @@
   function todayShot(t, lt, dur) {
     const { tMod, tQ, t90, tJob, t7, tRel, tOnly, tYet } = N0;
     library(t);
-    camSpread(t, t - lt, t - lt + dur, [[tQ + .5, 960, 560, 1], [t90 + .4, 960, 600, 1.04], [t7, 960, 620, 1.06], [tOnly, 960, 640, 1.08], [tYet + .5, 960, 620, 1.04]]);
+    camSpread(t, t - lt, t - lt + dur, [[tQ + .5, 960, 560, 1], [t90 + .4, 960, 590, 1.02], [t7, 960, 600, 1.03], [tOnly, 960, 610, 1.03], [tYet + .5, 960, 600, 1.02]]);
     book();
     // the Knot, proved wrong, shrinks and slinks off the page
     const ks = seg(t, t90 + .2, t90 + 2.6), kk = Math.min(kin(lt, 1500), 1 - ks);
