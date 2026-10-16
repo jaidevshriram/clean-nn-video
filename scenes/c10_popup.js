@@ -134,14 +134,14 @@
   }
   function santaHat(x, y, s) { cutout([[x - 30 * s, y], [x + 30 * s, y], [x + 14 * s, y - 52 * s]], C.red, { jag: 1.5, shadow: [3, 4, 'rgba(0,0,0,.3)'] }); cutout(rectPts(x - 34 * s, y - 6 * s, 68 * s, 14 * s), '#FFFFFF', { jag: 1, shadow: false }); cutout(ellPts(x + 14 * s, y - 54 * s, 9 * s, 9 * s, 10), '#FFFFFF', { jag: 1, shadow: false }); }
   // a paper bicycle courier (origin at the ground), heading right; note text on the parcel
-  function courier(s, t, note, col) {
+  function courier(s, t, note, col, lift = 0) {
     ctx.save(); ctx.scale(s, s);
     for (const wx of [-34, 34]) { ctx.save(); ctx.translate(wx, -24); ctx.strokeStyle = C.ink; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, 22, 0, TAU); ctx.stroke(); ctx.rotate(t * 9); ctx.lineWidth = 1.5; for (let q = 0; q < 4; q++) { ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(q * TAU / 4) * 20, Math.sin(q * TAU / 4) * 20); ctx.stroke(); } ctx.restore(); }
     ctx.strokeStyle = col; ctx.lineWidth = 6; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-34, -24); ctx.lineTo(-6, -24); ctx.lineTo(18, -56); ctx.lineTo(-14, -56); ctx.lineTo(-34, -24); ctx.moveTo(-6, -24); ctx.lineTo(-14, -56); ctx.moveTo(18, -56); ctx.lineTo(34, -24); ctx.stroke();
     const ped = t * 9; cutout([[-20, -60], [-8, -96], [8, -96], [4, -60]], col, { jag: 1, shadow: false }); cutout(ellPts(-2, -110, 12, 12, 12), '#E9C9A6', { jag: 1, shadow: false }); cutout([[-14, -116], [10, -122], [14, -112], [-12, -108]], C.navy, { jag: 1, shadow: false });
     flat([[-8, -64], [-6 + 8 * Math.cos(ped), -36 + 8 * Math.sin(ped)], [-2 + 8 * Math.cos(ped), -34 + 8 * Math.sin(ped)], [0, -64]], C.ink);
     ctx.restore();
-    if (note) { ctx.save(); ctx.translate(-10 * s, -150 * s - 8 * Math.abs(Math.sin(t * 5))); glow(0, 0, 70 * s, '#FFE08A', .5); ctx.font = `700 ${28 * s}px ${SERIF}`; const w = ctx.measureText(note).width + 30 * s; cutout(rectPts(-w / 2, -24 * s, w, 46 * s), C.cream, { jag: 1, shadow: [4, 5, 'rgba(40,24,16,.3)'] }); ps(note, 0, 0, 28 * s); ctx.restore(); }
+    if (note) { ctx.save(); ctx.translate(-10 * s, -150 * s - lift - 8 * Math.abs(Math.sin(t * 5))); glow(0, 0, 70 * s, '#FFE08A', .5); ctx.font = `700 ${28 * s}px ${SERIF}`; const w = ctx.measureText(note).width + 30 * s; cutout(rectPts(-w / 2, -24 * s, w, 46 * s), C.cream, { jag: 1, shadow: [4, 5, 'rgba(40,24,16,.3)'] }); ps(note, 0, 0, 28 * s); ctx.restore(); }
   }
   // Clawd the tourist in a beret, on the page
   const cl = (x, y, t, keys, o = {}) => tourist(x, y, o.u || 8, 'beret', { ...emotions(t, keys), view: 'q', flip: o.flip, boilKey: o.key || 'c10clawd', ...o.extra });
@@ -198,12 +198,12 @@
   const Qd = fn => (t, lt, dur) => { fn(t, lt, dur); qTag(t); };
 
   // ================= arrival: the taxi parks on a page; the city of words pops up =================
-  const A = { s: chapStart('ch10'), a: cs('cw_arrive'), tImg: wt('cw_arrive', 'Image'), tBut: wt('cw_arrive', 'but'), tLang: wt('cw_arrive', 'language', 1), tTalk: wt('cw_arrive', 'kind') };
+  const A = { s: chapStart('ch10'), a: cs('cw_arrive'), tImg: wt('cw_arrive', 'Image'), tBut: wt('cw_arrive', 'but'), tLang: wt('cw_arrive', 'language', 1), tTalk: wt('cw_arrive', 'kind'), tPR: wt('cw_arrive', 'P'), tCol: wt('cw_arrive', 'Colorado') };
   const CITY = [[1080, 820, 130, 230, C.orange, 'once', 'peak'], [1250, 790, 120, 170, C.yellow, 'said', 'flat'], [1420, 830, 140, 270, C.blue, 'river', 'step'], [1590, 800, 120, 200, C.green, 'because', 'peak'], [1700, 860, 110, 150, C.pink, 'why', 'flat'], [1180, 930, 120, 140, C.lilac, 'if', 'peak']];
   function arriveShot(t, lt, dur) {
-    const { s, a, tImg, tBut, tLang, tTalk } = A;
+    const { s, a, tImg, tBut, tLang, tTalk, tPR, tCol } = A;
     library(t);
-    camB(t, [[s, 900, 600, 1.06], [a, 900, 580, 1.02], [tBut, 1000, 560, 1.0], [tLang + .5, 1180, 540, 1.08], [cs('cw_numbers') - .9, 960, 560, 1]], .5);
+    camB(t, [[s, 900, 600, 1.06], [a, 900, 580, 1.02], [tBut, 1000, 560, 1.0], [tLang + .5, 1100, 540, 1.04], [cs('cw_numbers') - .9, 960, 560, 1]], .5);
     book();
     // the paper taxi drives in from the right and parks; Clawd hops out
     const tx = kf(t, [[s - .1, 2050], [s + 2.1, 760]], easeOut), tb = Math.max(0, t - (s + 2.1)), bounce = Math.exp(-6 * tb) * Math.sin(16 * tb) * 6;
@@ -219,8 +219,12 @@
     const ki = popk(t, tImg - .2, .5) * (1 - ease(seg(t, tThree - .5, tThree + .1)));   // folds away for the three questions
     stand(420, 850, ki, 260, () => { flat(rectPts(-6, -60, 12, 60), C.brown); cutout(rectPts(-120, -300, 240, 240), C.cream, { jag: 2, shadow: SH }); const I = img('blog/raw/v-figure-10x/p47742'), sz = Math.min(I.width, I.height); ctx.drawImage(I, (I.width - sz) / 2, (I.height - sz) / 2, sz, sz, -104, -284, 208, 208); });
     if (ki > .5) heading('images', 420, 905, 40, ki);
+    // the two language neurons met earlier (P R; Colorado) pop up as a reminder, and fold away at "But"
+    const fk = 1 - ease(seg(t, tBut - .2, tBut + .3));
+    stand(1230, 900, popk(t, tPR - .15, .5) * fk, 220, () => pb(200, 330, C.orange, { roof: 'peak', sign: 'P R', signSize: 40, wins: [{ s: 'pr' }, { s: 'cHJpbnQ=', font: 'monospace', size: 24 }, { s: 'প্রথম', font: '"FreeSans"', weight: '400', size: 38 }], cols: 1, winH: 54, lit: .8 }));
+    stand(1560, 900, popk(t, tCol - .25, .5) * fk, 240, () => pb(220, 270, C.blue, { roof: 'flat', sign: 'Colorado', signSize: 36, wins: [{ s: 'west ,', size: 26 }, { s: 'Colorado ,', size: 26 }], cols: 1, winH: 54, lit: .8, glowCol: '#FFB13B' }));
     // the city of words rises on the right page, one building per beat
-    CITY.forEach(([x, y, w, h, col, word, roof], n) => { const k = popk(t, tBut + .1 + n * .32, .55); stand(x, y, k, w, () => pb(w, h, col, { roof, sign: word, signSize: word.length > 5 ? 22 : 28, wins: [{}, {}], cols: 2, lit: .4 + .3 * Math.sin(t * 2 + n) ** 2 })); });
+    CITY.forEach(([x, y, w, h, col, word, roof], n) => { const k = popk(t, tLang - .3 + n * .32, .55); stand(x, y, k, w, () => pb(w, h, col, { roof, sign: word, signSize: word.length > 5 ? 22 : 28, wins: [{}, {}], cols: 2, lit: .4 + .3 * Math.sin(t * 2 + n) ** 2 })); });
     // the kind of AI you talk to: a speech bubble from the city
     bubble(1450, 470, 'hello! how can I help?', 40, popk(t, tTalk - .2, .5), { tail: -60 });
     // Clawd hops out of the taxi and looks around
@@ -474,26 +478,27 @@
   }
 
   // ================= attention: the courier service =================
-  const Q0 = { a: cs('cw_couriers'), tAtt: wt('cw_couriers', 'attention'), tCour: wt('cw_couriers', 'courier'), tNotes: wt('cw_couriers', 'notes'), tKnow: wt('cw_couriers', 'know'), tAnoth: wt('cw_couriers', 'another'), tMed: wt('cw_couriers', 'medical'), tHead: wt('cw_couriers', 'headache'), tSwell: wt('cw_couriers', 'gather'), tBP: wt('cw_couriers', 'facts'), tOnePl: wt('cw_couriers', 'place', 1), tDiag: wt('cw_couriers', 'diagnosis') };
-  const STREET = [[230, 'she'], [400, 'is'], [575, 'pregnant'], [760, 'with'], [920, 'a'], [1080, 'headache'], [1260, 'and'], [1430, 'swelling']];
+  const Q0 = { a: cs('cw_couriers'), tAtt: wt('cw_couriers', 'attention'), tCour: wt('cw_couriers', 'courier'), tNotes: wt('cw_couriers', 'notes'), tKnow: wt('cw_couriers', 'know'), tAnoth: wt('cw_couriers', 'another'), tMed: wt('cw_couriers', 'medical'), tHead: wt('cw_couriers', 'headache'), tGath: wt('cw_couriers', 'gather'), tFacts: wt('cw_couriers', 'facts'), tOnePl: wt('cw_couriers', 'place', 1), tDiag: wt('cw_couriers', 'diagnosis') };
+  const STREET = [[200, 'she', 120], [335, 'is', 120], [490, 'pregnant', 156], [645, 'with', 120], [775, 'a', 120], [925, 'headache', 156], [1075, 'and', 120], [1320, 'high blood pressure', 280]];
   function couriersShot(t, lt, dur) {
-    const { a, tAtt, tCour, tNotes, tKnow, tAnoth, tMed, tHead, tSwell, tBP, tOnePl, tDiag } = Q0;
+    const { a, tAtt, tCour, tNotes, tKnow, tAnoth, tMed, tHead, tGath, tFacts, tOnePl, tDiag } = Q0;
     library(t);
-    camSpread(t, t - lt, t - lt + dur, [[tCour, 960, 560, 1], [tKnow, 960, 590, 1.02], [tMed, 960, 570, 1], [tBP, 990, 590, 1.02], [tDiag + .4, 1000, 590, 1.02]]);
+    camSpread(t, t - lt, t - lt + dur, [[tCour, 960, 560, 1], [tKnow, 960, 590, 1.02], [tMed, 960, 570, 1], [tFacts, 990, 590, 1.02], [tDiag + .4, 1000, 590, 1.02]]);
     book();
     const ko = kout(lt, dur);
     // the sentence as a street of word buildings
-    STREET.forEach(([x, w], n) => stand(x, 800 + (n % 2) * 20, Math.min(kin(lt, x), ko), 160, () => pb(156, 190 + 50 * ((n * 3) % 3), [C.orange, C.yellow, C.blue, C.green, C.pink, C.lilac][n % 6], { roof: n % 2 ? 'flat' : 'peak', sign: w, signSize: w.length > 6 ? 30 : 40, wins: [{}, {}], cols: 2, lit: (w === 'headache' && t > tHead - .2) || (w === 'swelling' && t > tSwell - .2) || (w === 'pregnant' && t > tBP - .2) ? .9 : .3 })));
+    STREET.forEach(([x, w, bw], n) => stand(x, 800 + (n % 2) * 20, Math.min(kin(lt, x), ko), bw + 4, () => pb(bw, 190 + 50 * ((n * 3) % 3), [C.orange, C.yellow, C.blue, C.green, C.pink, C.lilac][n % 6], { roof: n % 2 ? 'flat' : 'peak', sign: w, signSize: w.length > 10 ? 27 : w.length > 6 ? 30 : 40, wins: [{}, {}], cols: 2, lit: (w === 'headache' && t > tHead - .2) || (w[0] === 'h' && w.length > 10 && t > tGath - .2) || (w === 'pregnant' && t > tFacts - .2) ? .9 : .3 })));
     // the diagnosis house at the end of the street
     const lit = on(t, tDiag - .4);
-    stand(1650, 830, Math.min(kin(lt, 1650), ko), 220, () => pb(220, 330, C.lilac, { roof: 'step', sign: 'diagnosis', signSize: 34, wins: [{}, {}, {}, {}], cols: 2, lit, winH: 46 }));
-    if (lit > .3) bubble(1660, 380, 'preeclampsia', 48, Math.min(popk(t, tDiag, .5), ko), { col: C.gold, tail: -20 });
+    const ARR = [tOnePl - .1, tOnePl + .25, tOnePl + .6];   // when each note is delivered: it lands in one of the house's windows
+    stand(1650, 830, Math.min(kin(lt, 1650), ko), 264, () => pb(260, 330, C.lilac, { roof: 'step', sign: 'diagnosis', signSize: 34, wins: ['headache', 'high blood pressure', 'pregnant'].map((s, n) => ({ s: t > ARR[n] ? s : '', size: n === 1 ? 19 : 23, lit: Math.max(lit, on(t, ARR[n], Infinity, .25) * .7) })), cols: 1, lit, winH: 40 }));
+    if (lit > .3) bubble(1650, 390, '?', 72, Math.min(popk(t, tDiag, .5), ko), { col: C.gold, tail: -10 });   // the answer itself comes next, when it is spoken
     // couriers: first a demo between two words, then the three medical notes ride to the diagnosis house
-    const ride = (t0, t1, x0, x1, y, note, col, ph) => { if (t < t0 || t > t1 + .4) return; const u = easeInOut(seg(t, t0, t1)); ctx.save(); ctx.translate(lerp(x0, x1, u), y - Math.abs(Math.sin(t * 7 + ph)) * 4); courier(1.3, t + ph, note, col); ctx.restore(); };
-    ride(tNotes - 1, tAnoth, 260, 1060, 960, 'she', C.teal, 0);
-    ride(tHead - .4, tDiag - .2, 1060, 1560, 975, 'headache', C.red, 1);
-    ride(tSwell - .4, tDiag, 1420, 1600, 950, 'swelling', C.navy, 2);
-    ride(tBP - .6, tDiag + .1, 560, 1520, 990, 'pregnant', C.teal, 3);
+    const ride = (t0, t1, x0, x1, y, note, col, ph, lift = 0) => { if (t < t0 || t > t1 + .4) return; const u = easeInOut(seg(t, t0, t1)); ctx.save(); ctx.translate(lerp(x0, x1, u), y - Math.abs(Math.sin(t * 7 + ph)) * 4); courier(1.3, t + ph, t < t1 ? note : null, col, lift); ctx.restore(); };
+    ride(tNotes - 1, tAnoth, 200, 925, 960, 'she', C.teal, 0);
+    ride(tHead - .4, tOnePl - .1, 925, 1500, 975, 'headache', C.red, 1, 140);
+    ride(tGath - .4, tOnePl + .25, 1320, 1560, 965, 'high blood pressure', C.navy, 2, 60);
+    ride(tFacts - .6, tOnePl + .6, 490, 1440, 990, 'pregnant', C.teal, 3);
     // a second courier lane: ambient traffic of notes so the street is alive
     for (let q = 0; q < 2; q++) { const ph = frac((t - a) * .12 + q * .5); if (t < tMed) { ctx.save(); ctx.translate(lerp(1700, 200, ph), 1000); ctx.scale(-1, 1); courier(.7, t + q, null, C.orange); ctx.restore(); } }
     caps(t, [[tAtt - .3, tKnow - .4, 'attention: the courier service'], [tKnow - .3, tMed - .4, 'knows what was said elsewhere'], [tMed - .3, t - lt + dur - .3, 'symptoms carried to one place']]);
