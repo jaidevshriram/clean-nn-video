@@ -340,7 +340,7 @@
     });
     if (t > tLe - .3) capL('assume clean: a mess is a lead', 960, 1016, 54, '#FFE08A', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tLe - .3, tLe + .6), alpha: 1 - seg(t, tKn - .6, tKn - .3) });
     if (t > tKn - .3) capL('assume a knot: a mess is a dead end', 960, 1016, 54, '#E7D4FF', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tKn - .3, tDe + .4), alpha: 1 - seg(t, tMa - .5, tMa - .2) });
-    if (t > tMa - .2) capL('I made that second mistake for years', 960, 1016, 58, '#FFF6E0', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tMa - .2, tYe + .2) });
+    if (t > tMa - .2) capL('Nick made that mistake for years', 960, 1016, 58, '#FFF6E0', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tMa - .2, tYe + .2) });
   }
 
   // ---------- 8 · a postcard to my younger self, posted through time ----------
@@ -357,11 +357,11 @@
       ctx.fillStyle = '#F7F1E4'; ctx.fillRect(0, 0, w, h);
       ctx.strokeStyle = '#C9B48E'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(w * .62, 40); ctx.lineTo(w * .62, h - 40); ctx.stroke();
       for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(w * .66, h * .5 + i * 80); ctx.lineTo(w - 50, h * .5 + i * 80); ctx.stroke(); }
-      T('to: me, eight years ago', w * .81, h * .5 - 30, 40, '#3A64B8', { font: HANDF });
+      T('to: Nick, eight years ago', w * .81, h * .5 - 30, 40, '#3A64B8', { font: HANDF });
       // the stamp and the postmark
       ctx.save(); ctx.translate(w - 150, 140); flat(rectPts(-80, -100, 160, 200), '#FFFFFF', { line: '#C9B48E', lw: 3 }); ctx.fillStyle = lgrad(0, -80, 0, 80, [[0, '#F0A24E'], [1, '#C9963A']]); ctx.fillRect(-64, -84, 128, 168); dot(20, -30, 26, '#FFE9B0'); acaciaMini(-20, 60, .5); ctx.restore();
       if (stampK > 0) { ctx.save(); ctx.translate(w - 270, 170); ctx.rotate(-.25); ctx.scale(lerp(1.6, 1, easeOut(stampK)), lerp(1.6, 1, easeOut(stampK))); ctx.globalAlpha = .85; ctx.strokeStyle = '#3A3A6A'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, 90, 0, TAU); ctx.stroke(); T('2026', 0, 0, 44, '#3A3A6A', { font: SERIF, weight: '900' }); for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(100, -30 + i * 20); ctx.quadraticCurveTo(160, -40 + i * 20, 220, -30 + i * 20); ctx.stroke(); } ctx.restore(); }
-      T('Dear me,', 70, 90, 60, INK, { font: HANDF, align: 'left', alpha: seg(t, tNo - .3, tNo + .3) });
+      T('Dear Nick,', 70, 90, 60, INK, { font: HANDF, align: 'left', alpha: seg(t, tNo - .3, tNo + .3) });
       TIPS.forEach(([s1, w1], i) => { const tw = wt('zo_advice', w1), k = seg(t, tw - .8, tw + .4); if (k <= 0) return; ctx.save(); ctx.beginPath(); ctx.rect(40, 150 + i * 150, 60 + 860 * k, 140); ctx.clip(); dot(80, 230 + i * 150, 10, '#C2456A'); T(s1, 110, 230 + i * 150, 58, '#C2456A', { font: HANDF, align: 'left' }); ctx.restore(); });
     });
     if (t > tEi - .3 && t < tNo + 3.5) capL('a note back in time', 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, a, a + .8) });

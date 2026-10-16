@@ -301,7 +301,7 @@
     oldFilm(t);
   }
 
-  // ---------- shot 7 · "I believed it": the young believer, 2019 ----------
+  // ---------- shot 7 · "Nick believed it": the young believer, 2019 ----------
   function believer(t, lt, dur) {
     const b0 = cs('kn_both'), tcase = wt('kn_both', 'case'), tprop = wt('kn_both', 'proposed'), tbel = wt('kn_both', 'believed'), tyrs = wt('kn_both', 'years'), e = ce('kn_both'), end = chapStart('ch03');
     camKeys(t, [[b0, 960, 580, 1], [tprop, 920, 580, 1.05], [tbel, 880, 560, 1.12], [end + 2, 880, 560, 1.15]], .4);
@@ -322,7 +322,7 @@
     tourist(590, 990, 11, 'top', { ...emotions(t, [[b0, 'happy'], [tcase, 'excited'], [tbel, 'love']]), view: 'q' });
     camEnd();
     irisOpen(seg(lt, 0, .7), 1100, 640);
-    decoCard([['I BELIEVED IT', 92, 0]], seg(t, tbel - .2, tbel + .3), { y: 150, h: 170, w: 900 });
+    decoCard([['NICK BELIEVED IT', 92, 0]], seg(t, tbel - .2, tbel + .3), { y: 150, h: 170, w: 900 });
     oldFilm(t);
     // the reel jams and burns: a hole melts out from the frame's middle (drawn after the grey pass, so it glows orange)
     const burn = seg(t, e + .1, end + .5);

@@ -193,7 +193,7 @@
     const kb = popk(t, te - .4, .4);
     if (kb > 0) { boilSeed('c5bill'); push(); translate(1040, 420); rotate(.06); scale(backOut(kb)); paint(rectPts(-150, -110, 300, 220, 1), { wash: '#F2E8D2', ink: INK, sw: 1.2 }); pop(); }
     gasLamp(1580, 920, 1, .7 + .3 * hash(Math.floor(t * 9)));
-    hoarding(1760, 360, '5%', popk(t, t5 - .4, .5), { sub: 'my guess, back then' });
+    hoarding(1760, 360, '5%', popk(t, t5 - .4, .5), { sub: "Nick's guess, back then" });
     // the fog curls into the Knot over the district
     const kk = seg(t, tk - 1.2, tk + .4);
     fogBands(t, 1 - .4 * kk);
