@@ -22,6 +22,12 @@
       const g = ctx.createLinearGradient(0, 300, 0, 900); g.addColorStop(0, 'rgba(120,120,120,0)'); g.addColorStop(1, 'rgba(120,120,120,.35)'); ctx.fillStyle = g; ctx.fillRect(-400, 300, W + 800, 600);
     }, { variants: 1, x: -400, y: -300, w: W + 800, h: H + 600 });
   }
+  // foreground trunks and ferns in screen space, sliding with the camera (parallax, nearer than the action)
+  function fg(v, xs, o = {}) {
+    const cx = v ? v[0] : 960;
+    for (const [bx, w] of xs) { const x = bx - (cx - 960) * 1.7; if (x < -w || x > W + w) continue; ctx.save(); ctx.fillStyle = '#121212'; ctx.fillRect(x - w / 2, -20, w, H + 40); ctx.fillStyle = 'rgba(255,255,255,.07)'; ctx.fillRect(x + w * .22, -20, w * .08, H + 40); ctx.restore(); }
+    if (o.fern !== false) for (let i = 0; i < 7; i++) { const x = ((i * 330 + 120 - (cx - 960) * 2.1) % (W + 400) + W + 400) % (W + 400) - 200; ctx.save(); ctx.fillStyle = '#181818'; for (let j = 0; j < 7; j++) { const a = -Math.PI / 2 + (j - 3) * .35; ctx.beginPath(); ctx.ellipse(x + Math.cos(a) * 70, H + 30 + Math.sin(a) * 90, 22, 95, a + Math.PI / 2, 0, TAU); ctx.fill(); } ctx.restore(); }
+  }
   // a foreground trunk
   function trunk(x, w, col = '#3E3E3E') { flat(rectPts(x - w / 2, -300, w, H + 600), col); ctx.save(); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fillRect(x + w * .2, -300, w * .1, H + 600); ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.fillRect(x - w / 2, -300, w * .15, H + 600); ctx.restore(); }
   // the knot as a cryptid: fur, glowing eyes, still wearing its game-show party hat
@@ -30,7 +36,7 @@
     ctx.save(); if (o.alpha != null) ctx.globalAlpha = o.alpha;
     knotBeast(x, y, s, { fur: true, col: '#C8C8C8', dark: '#6A6A6A', look: o.look || [0, 0], hat: o.hat === false ? null : 'party', loose: o.loose || 0, grin: o.grin });
     ctx.restore();
-    if ((o.loose || 0) < .5) for (const ex of [-.17, .17]) glow(x + ex * s, y - .04 * s, s * .22, '#FFFFFF', .8 * (o.alpha ?? 1) * (o.eyes ?? 1));
+    if ((o.loose || 0) < .5) for (const ex of [-.17, .17]) { glow(x + ex * s, y - .04 * s, s * .38, '#FFFFFF', (o.alpha ?? 1) * (o.eyes ?? 1)); dot(x + ex * s, y - .04 * s, s * .07, '#FFFFFF', (o.alpha ?? 1) * (o.eyes ?? 1)); }
   }
   // the knot's true form: a loose ball of string with a trailing end
   function stringBall(x, y, r, k = 1) { if (k <= 0) return; ctx.save(); ctx.globalAlpha = k; ctx.strokeStyle = '#E0E0E0'; ctx.lineWidth = Math.max(2, r * .09); ctx.lineCap = 'round'; for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.ellipse(x + (hash(i) - .5) * r * .2, y + (hash(i * 2) - .5) * r * .2, r * (.75 + .25 * hash(i * 3)), r * (.45 + .3 * hash(i * 5)), hash(i * 7) * 3, 0, TAU); ctx.stroke(); } ctx.beginPath(); ctx.moveTo(x + r * .8, y + r * .2); ctx.bezierCurveTo(x + r * 1.6, y + r * .9, x + r * 2.2, y - r * .1, x + r * 2.8, y + r * .6); ctx.stroke(); ctx.restore(); }
@@ -135,23 +141,24 @@
     const c0 = chapStart('ch08'), a = cs('sg_believer'), tTrue = wt('sg_believer', 'believer'), tSup = wt('sg_believer', 'superposition'), tStud = wt('sg_believer', 'studying'), tExp = wt('sg_believer', 'expecting'), tHit = wt('sg_believer', 'hit'), tDay = wt('sg_believer', 'day'), e = ce('sg_believer');
     const [hx, hy] = shakeXY(t, 4);
     // a whip pan follows the knot's dash, then settles on the clearing
-    camKeys(t, [[c0, 500, 540, 1.1], [c0 + 1.8, 1300, 540, 1.1], [a, 1100, 560, 1.05], [tTrue, 900, 600, 1.12], [tExp, 1000, 610, 1.2], [tHit, 1080, 620, 1.28], [e + 1, 1000, 600, 1.15]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
+    const v = camKeys(t, [[c0, 500, 600, 1.25], [c0 + 1.8, 1300, 600, 1.25], [a, 1000, 700, 1.3], [tTrue, 820, 720, 1.45], [tStud, 950, 760, 1.5], [tExp, 1080, 780, 1.6], [tHit, 1120, 780, 1.65], [e + 1, 1060, 760, 1.5]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
     woods('a', { seed: 1 });
     // the knot dashes through, party hat and all, and vanishes behind a tree
     const dk = seg(t, c0 - .6, c0 + 2.2);
-    if (dk < 1) cryptid(t, lerp(-200, 1560, dk), 640 - 40 * Math.abs(Math.sin(t * 12)), 84, { look: [1, 0] });
+    if (dk < 1) cryptid(t, lerp(-200, 1560, dk), 700 - 40 * Math.abs(Math.sin(t * 12)), 130, { look: [1, 0] });
     trunk(1600, 170, '#444444'); trunk(420, 120, '#3A3A3A');
     // Clawd marches in: net in one arm, the pennant in the other
     const st = stroll(t, a - .2, tTrue + 1.4, -150, 820, 14), swing = env(t, tHit - .5, tHit + .6, .25, .3);
     // something in the bush: two eyes... it's only a moth
     const bush = [1250, GROUND - 20];
     flat(ellPts(bush[0], bush[1], 170, 90, 20), '#5A5A5A');
-    if (t > tStud && t < tHit) for (const ex of [-18, 18]) glow(bush[0] + ex, bush[1] - 30, 22, '#FFFFFF', .9 * (Math.floor(t * 3) % 5 ? 1 : .1));
+    if (t > tStud && t < tHit) for (const ex of [-22, 22]) { const bl = Math.floor(t * 3) % 5 ? 1 : .1; glow(bush[0] + ex, bush[1] - 30, 40, '#FFFFFF', bl); dot(bush[0] + ex, bush[1] - 30, 7, '#FFFFFF', bl); }
     if (t > tHit) { const mk = seg(t, tHit, tHit + 2.4), mx = bush[0] + 60 * mk + 30 * Math.sin(t * 9), my = bush[1] - 90 - 260 * mk; ctx.save(); ctx.fillStyle = '#E8E8E8'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(mx + sd * 9, my, 10, 6 + 3 * Math.sin(t * 40), sd * .6, 0, TAU); ctx.fill(); } ctx.restore(); glow(mx, my, 20, '#FFFFFF', .6); }
     const pose = st.walk > 0 && t < tTrue + 1.4 ? { walk: st.walk, view: 'q' } : { view: 'q' };
     const sneaking = t > tStud && t < tHit;
     hunter(t, sneaking ? lerp(820, 1000, ease(seg(t, tStud, tHit - .4))) : t >= tHit ? 1000 : st.x, GROUND - 40, 14, { ...emotions(t, [[c0, 'excited'], [tSup, 'proud'], [tStud, 'determined'], [tExp, 'suspicious'], [tHit, 'surprised'], [tDay, 'sad']]), ...pose, dy: st.dy, aR: sneaking ? .4 : .6 + 1.2 * swing, armR: net(swing), aL: .9, armL: pennant, lampA: sneaking ? -.15 : .05, boilKey: 'c8hunter' });
     camEnd();
+    fg(v, [[80, 190], [1880, 160], [2700, 220]]);
     nv(t, t < a ? 'CAM 1 · MOTION DETECTED' : 'CAM 1 · NIGHT 1 · THE BELIEVER');
     if (t > tTrue - .3) letter('a true believer', 1350, 340, 64, OSD, { face: 'marker', shadow: false, reveal: seg(t, tTrue - .3, tTrue + .6), alpha: 1 - seg(t, tStud, tStud + .4) });
     if (t > tHit && t < tHit + 1.4) sfx('swish!', 1180, 520, 64, OSD, t - tHit, { face: 'marker' });
@@ -176,11 +183,11 @@
     const cut = tThen - .2;
     if (t < cut) {
       const [hx, hy] = shakeXY(t, t > tFin - .2 && t < tMix + .6 ? 14 : 4);
-      camKeys(t, [[a - .3, 960, 560, 1], [tLet, 900, 520, 1.15], [tCode, 960, 520, 1.15], [tBen, 1040, 520, 1.15], [tFin - .1, 960, 520, 1.1], [tFin + .3, 960, 480, 1.55], [cut, 960, 480, 1.6]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
+      camKeys(t, [[a - .3, 960, 560, 1], [tLet, 900, 520, 1.15], [tCode, 960, 520, 1.15], [tBen, 1040, 520, 1.15], [tFin - .1, 960, 560, 1.1], [tFin + .3, 1130, 640, 1.4], [cut, 1140, 640, 1.45]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('b', { seed: 5 });
       cabin(t, 960, GROUND, 900, 560, [winPR, winB64, winBN], { lit: [seg(t, tLet - .2, tLet + .3), seg(t, tStr - .2, tStr + .3), seg(t, tBen - .2, tBen + .3)] });
       trunk(180, 160, '#444444'); trunk(1780, 130, '#3E3E3E');
-      hunter(t, 1460, GROUND + 40, 14, { ...emotions(t, [[a, 'suspicious'], [tLet, 'surprised'], [tBen, 'thinking'], [tFin, 'excited']]), view: 'q', flip: true, aR: .9, armR: net(0), aL: t > tFin ? 1.5 + .3 * Math.sin(t * 10) : .9, armL: pennantF, lampA: .25, boilKey: 'c8hunter' });
+      hunter(t, 1460, GROUND, 14, { ...emotions(t, [[a, 'suspicious'], [tLet, 'surprised'], [tBen, 'thinking'], [tFin, 'excited']]), view: 'q', flip: true, aR: .9, armR: net(0), aL: t > tFin ? 1.5 + .3 * Math.sin(t * 10) : .9, armL: pennantF, lampA: .25, boilKey: 'c8hunter' });
       camEnd();
       nv(t, 'CAM 2 · CABIN 7 · SIGHTING #1', [], { osd: () => { if (t > tFin - .1) { const blink = Math.floor(t * 4) % 2; osdText('ARBITRARY MIXTURE?!', 960, 300, 76, blink ? '#FFFFFF' : OSD, { align: 'center', bold: true }); } } });
     } else {
@@ -283,47 +290,51 @@
     const [hx, hy] = shakeXY(t, 5);
     if (t < c2) {
       // CAM 3: it peeks from behind a tree... then it's behind the next one
-      camKeys(t, [[c1, 900, 560, 1.1], [c2, 1000, 560, 1.15]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
+      var v3 = camKeys(t, [[c1, 1000, 700, 1.35], [c2, 1120, 690, 1.4]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('c', { seed: 9 });
       const hop = seg(t, tMoved - .1, tMoved + .25), kx = hop < 1 ? 1180 : 1700, peek = hop > 0 && hop < 1 ? 0 : 1;
-      cryptid(t, kx - 30 * Math.sin(Math.min(1, (t - c1) * 2) * Math.PI / 2), 520, 150, { look: [1, 0], alpha: peek });
-      trunk(1180, 220, '#4A4A4A'); trunk(1730, 200, '#444444');
-      if (hop > 0 && hop < 1) { ctx.save(); ctx.globalAlpha = .5; ctx.fillStyle = '#BBBBBB'; ctx.fillRect(1180, 470, 520 * hop, 60); ctx.restore(); }
+      cryptid(t, kx - 50 * Math.sin(Math.min(1, (t - c1) * 2) * Math.PI / 2), 560, 230, { look: [1, 0], alpha: peek });
+      trunk(1180, 260, '#4A4A4A'); trunk(1730, 240, '#444444');
+      if (hop > 0 && hop < 1) { ctx.save(); ctx.globalAlpha = .5; ctx.fillStyle = '#BBBBBB'; ctx.fillRect(1180, 500, 520 * hop, 90); ctx.restore(); }
       const sw = env(t, tMoved + .1, tMoved + .9, .2, .3);
       hunter(t, 900, GROUND + 20, 15, { ...emotions(t, [[c1, 'determined'], [tMoved + .2, 'surprised']]), view: 'q', aR: .6 + 1.4 * sw, armR: net(sw), aL: .9, armL: pennant, boilKey: 'c8hunter' });
       camEnd();
+      fg(v3, [[200, 170], [2300, 200]]);
       nv(t, 'CAM 3 · TREE LINE', [c1]);
       if (t > tMoved - .3) letter('superposition just moved', 960, 230, 64, OSD, { face: 'marker', shadow: false, reveal: seg(t, tMoved - .3, tMoved + .5) });
     } else if (t < c3) {
       // CAM 4: hiding in the weak signals: faint, through fog and noise
-      camKeys(t, [[c2, 960, 540, 1.05], [c3, 1000, 540, 1.12]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
+      var v4 = camKeys(t, [[c2, 900, 700, 1.3], [c3, 960, 700, 1.35]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('d', { seed: 13 });
       ctx.save(); ctx.globalAlpha = .55; ctx.fillStyle = '#6A6A6A'; ctx.fillRect(-400, -300, W + 800, H + 600); ctx.restore();
-      cryptid(t, 1320 + 20 * Math.sin(t), 560, 70, { alpha: .14 + .06 * Math.sin(t * 6), look: [-1, 0], eyes: .35 });
+      cryptid(t, 1300 + 20 * Math.sin(t), 600, 150, { alpha: .22 + .08 * Math.sin(t * 6), look: [-1, 0], eyes: .6 });
       const beamA = lerp(-.4, .25, ease(seg(t, tWeak - .9, tWeak + .2)));
       hunter(t, 520, GROUND + 20, 15, { ...emotions(t, [[c2, 'suspicious'], [tWeak + .3, 'confused']]), view: 'q', aR: .6, armR: net(0), aL: .9, armL: pennant, lampA: beamA, boilKey: 'c8hunter' });
       camEnd();
+      fg(v4, [[1850, 180]]);
       nv(t, 'CAM 4 · WEAK SIGNALS', [c2]);
     } else if (t < c4) {
       // CAM 5: between two neurons
-      camKeys(t, [[c3, 960, 560, 1.05], [c4, 960, 560, 1.12]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
+      var v5 = camKeys(t, [[c3, 930, 700, 1.25], [c4, 980, 700, 1.3]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('e', { seed: 17 });
       const NPV = 'blog/raw/negative-poles-v2/';
       neuronHouse(640, GROUND, 360, 380, { roof: 'peak', on: .9, imgs: [NPV + 'cats-positive-1', NPV + 'cats-positive-2'], cols: 2, key: 'c8h1', col: '#5A5A5A', roofCol: '#3A3A3A', awning: false });
       neuronHouse(1280, GROUND, 360, 380, { roof: 'peak', on: .9, imgs: [NPV + 'wolves-positive-1', NPV + 'wolves-positive-2'], cols: 2, key: 'c8h2', col: '#5A5A5A', roofCol: '#3A3A3A', awning: false });
       const lunge = seg(t, tBet + .1, tBet + .5), esc = seg(t, tBet + .3, tBet + .8);
-      cryptid(t, 960, 640 - 600 * easeIn(esc), 90, { look: [0, -1], alpha: 1 - esc });
+      cryptid(t, 960, 700 - 600 * easeIn(esc), 140, { look: [0, -1], alpha: 1 - esc });
       hunter(t, lerp(380, 820, ease(lunge)), GROUND + 30, 15, { ...emotions(t, [[c3, 'determined'], [tBet + .5, 'angry']]), view: 'q', aR: .6 + 1.2 * lunge, armR: net(lunge), aL: .9, armL: pennant, boilKey: 'c8hunter' });
       camEnd();
+      fg(v5, [[60, 160], [1900, 150]]);
       nv(t, 'CAM 5 · BETWEEN NEURONS', [c3]);
     } else {
       // CAM 6: in the neurons nobody has checked yet
-      camKeys(t, [[c4, 960, 560, 1.05], [e + 1, 1060, 560, 1.15]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
+      var v6 = camKeys(t, [[c4, 960, 640, 1.15], [e + 1, 1180, 660, 1.3]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('f', { seed: 21 });
       for (let i = 0; i < 5; i++) { const x = 360 + i * 300, s = 1 - i * .08; cabin(t, x, GROUND - 40 - i * 10, 220 * s, 260 * s, [() => {}], { lit: [0] }); txt('?', x, GROUND - 120 - i * 10, 70 * s, '#BDBDBD', { font: SERIF, weight: '900' }); }
       const eyeK = Math.floor(t * 2.3) % 7 ? 1 : 0, ex = 360 + 3 * 300, ey = GROUND - 40 - 30 - 260 * .76 + 40; for (const dx of [-12, 12]) { glow(ex + dx, ey, 26, '#FFFFFF', .95 * eyeK); dot(ex + dx, ey, 5, '#FFFFFF', eyeK); }
       hunter(t, 330, GROUND + 30, 15, { ...emotions(t, [[c4, 'nervous'], [tChk + .2, 'sad']]), view: 'q', aR: .2, armR: net(0), aL: .5, armL: pennant, lampA: .1, boilKey: 'c8hunter' });
       camEnd();
+      fg(v6, [[40, 150], [2200, 180]]);
       nv(t, 'CAM 6 · UNCHECKED NEURONS', [c4]);
     }
   }
@@ -334,7 +345,7 @@
     const a = cs('sg_last'), tSup = wt('sg_last', 'superposition'), tDef = wt('sg_last', 'default'), tLast = wt('sg_last', 'last'), tRes = wt('sg_last', 'resort'), tRad = wt('sg_last', 'radical'), tHard = wt('sg_last', 'hardest'), tSym = wt('sg_last', 'symptom'), tSense = wt('sg_last', 'sense');
     const tTool = wt('sg_last', 'tool'), tDes = wt('sg_last', 'design'), tBr = wt('sg_last', 'branch'), tLooks = wt('sg_last', 'looks'), e = ce('sg_last');
     const [hx, hy] = shakeXY(t, 3);
-    camKeys(t, [[a - .3, 860, 600, 1.15], [e, 900, 600, 1.2]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.2);
+    const v8 = camKeys(t, [[a - .3, 820, 700, 1.3], [e, 880, 700, 1.35]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.2);
     woods('g', { seed: 25 });
     // a little campfire; Clawd on a log, thinking it over
     for (const [dx, a2] of [[-50, .5], [50, -.5]]) { push(); translate(560 + dx * .4, GROUND + 10); rotate(a2); flat(rrPts(-70, -12, 140, 24, 10), '#5A5A5A'); pop(); }
@@ -347,23 +358,24 @@
     hunter(t, 900, GROUND - 4, 14, { ...emotions(t, [[a, 'thinking'], [tRes, 'surprised'], [tSym, 'confused'], [tTool + .4, 'determined'], [tLooks, 'relieved']]), view: 'front', aR: -.4, aL: -.3, lamp: false, boilKey: 'c8hunter' });
     flat(rrPts(1010, GROUND - 120, 26, 140, 10), '#8A7A6A');
     camEnd();
+    fg(v8, [[1500, 140]], { fern: true });
     nv(t, 'CAM 1 · BASE CAMP', [], { osd: () => {
       if (fog > 0) { ctx.save(); ctx.globalAlpha = .75 * fog; ctx.filter = 'blur(2px)'; ctx.fillStyle = '#CFE9CF'; ctx.fillRect(0, 0, W, H); ctx.restore(); if (wipe > 0 && wipe < 1) { ctx.save(); ctx.globalAlpha = .9; ctx.fillStyle = '#4A2A1A'; const wx = lerp(-300, W + 300, wipe); ctx.beginPath(); ctx.ellipse(wx, 560, 260, 420, .3, 0, TAU); ctx.fill(); ctx.restore(); } }
       // the menu
       const mk = seg(t, a - .2, a + .3); if (mk <= 0) return;
-      const X = 1100, Y = 230, w = 700, rh = 92;
-      ctx.save(); ctx.globalAlpha = .82 * mk; ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X - 30, Y - 80, w, 680); ctx.globalAlpha = mk; ctx.strokeStyle = OSD; ctx.lineWidth = 3; ctx.strokeRect(X - 30, Y - 80, w, 680); ctx.restore();
-      osdText('MOST LIKELY CAUSE', X, Y - 34, 40, OSD, { bold: true, alpha: mk });
+      const X = 1010, Y = 210, w = 840, rh = 104;
+      ctx.save(); ctx.globalAlpha = .82 * mk; ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X - 30, Y - 80, w, 780); ctx.globalAlpha = mk; ctx.strokeStyle = OSD; ctx.lineWidth = 3; ctx.strokeRect(X - 30, Y - 80, w, 780); ctx.restore();
+      osdText('MOST LIKELY CAUSE', X, Y - 30, 54, OSD, { bold: true, alpha: mk });
       const drop = ease(seg(t, tLast - .2, tRes + .6));
-      ROWS.forEach((s, i) => { const k = seg(t, [tTool, tDes, tBr, tLooks][i] - .4, [tTool, tDes, tBr, tLooks][i]); const y = Y + 50 + i * rh; osdText(`${i + 1}.`, X, y, 44, OSD, { alpha: mk }); if (k > 0) { osdText(s.slice(0, Math.ceil(s.length * k)), X + 70, y, 44, '#FFFFFF', { bold: true }); } else osdText('- - -', X + 70, y, 44, 'rgba(184,255,176,.45)'); });
+      ROWS.forEach((s, i) => { const k = seg(t, [tTool, tDes, tBr, tLooks][i] - .4, [tTool, tDes, tBr, tLooks][i]); const y = Y + 50 + i * rh; osdText(`${i + 1}.`, X, y, 56, OSD, { alpha: mk }); if (k > 0) { osdText(s.slice(0, Math.ceil(s.length * k)), X + 80, y, 56, '#FFFFFF', { bold: true }); } else osdText('- - -', X + 80, y, 56, 'rgba(184,255,176,.45)'); });
       // SUPERPOSITION starts at the top and drops to the bottom
       const sy = lerp(Y + 50, Y + 50 + 4 * rh, drop), blink = Math.floor(t * 3) % 2;
-      if (drop < .02) { ctx.save(); ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X + 60, sy - 36, 560, 72); ctx.restore(); }
-      osdText(drop > .5 ? '5.' : '', X, sy, 44, OSD);
-      osdText('> SUPERPOSITION', X + 40, sy, 44, drop < 1 && blink ? '#FFFFFF' : '#FF9AE0', { bold: true, alpha: mk });
-      if (t > tRes) osdText('the last resort', X + 70, sy + 50, 32, '#FF9AE0', { alpha: seg(t, tRes, tRes + .4) });
-      if (t > tRad - .2) osdText('most radical · hardest to test', X + 70, sy + 50 + 38, 28, OSD, { alpha: seg(t, tRad - .2, tRad + .3) * (1 - seg(t, tHard + 1.8, tHard + 2.2)) });
-      if (t > tSym - .2) osdText('only symptom: ???', X + 70, sy + 50 + 38, 28, OSD, { alpha: seg(t, tHard + 2.2, tHard + 2.5) });
+      if (drop < .02) { ctx.save(); ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X + 60, sy - 40, 700, 80); ctx.restore(); }
+      osdText(drop > .5 ? '5.' : '', X, sy, 56, OSD);
+      osdText('> SUPERPOSITION', X + 45, sy, 58, drop < 1 && blink ? '#FFFFFF' : '#FF9AE0', { bold: true, alpha: mk });
+      if (t > tRes) osdText('the last resort', X + 80, sy + 60, 42, '#FF9AE0', { alpha: seg(t, tRes, tRes + .4) });
+      if (t > tRad - .2) osdText('most radical · hardest to test', X + 80, sy + 60 + 48, 36, OSD, { alpha: seg(t, tRad - .2, tRad + .3) * (1 - seg(t, tHard + 1.8, tHard + 2.2)) });
+      if (t > tSym - .2) osdText('only symptom: ???', X + 80, sy + 60 + 48, 36, OSD, { alpha: seg(t, tHard + 2.2, tHard + 2.5) });
     } });
     if (t > tSense - .4 && t < tSense + 1.4) sfx('?', 900, 700, 120, OSD, t - tSense + .4, { face: 'marker', life: 1.8 });
   }
@@ -410,11 +422,12 @@
     }
     // the final night: the knot, cornered against the rocks
     const [hx, hy] = shakeXY(t, t > tAnd - .2 && t < tMis + .3 ? 10 : 4);
-    camKeys(t, [[cut, 900, 600, 1.05], [t19, 1100, 680, 1.3], [tAnd, 1250, 800, 1.65], [tMis + .4, 1240, 800, 1.7], [gl1 + 3, 1230, 790, 1.72]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.4);
+    const v7 = camKeys(t, [[cut, 1000, 760, 1.45], [t19, 1150, 760, 1.5], [tAnd, 1250, 800, 1.65], [tMis + .4, 1240, 800, 1.7], [gl1 + 3, 1230, 790, 1.72]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.4);
     woods('h', { seed: 29 });
     flat([[1100, GROUND + 40], [1200, 520], [1420, 430], [1700, 480], [1820, GROUND + 40]], '#6A6A6A'); flat([[1300, 600], [1420, 470], [1560, 520], [1520, 640]], '#7A7A7A');
-    const loose = ease(seg(t, tAnd + .3, tMis + .1)), take = seg(t, tMis + .3, tMis + 1);
-    const ks = lerp(100, 60, loose), kx = 1360, ky = lerp(800, 900, loose) + (1 - loose) * 4 * Math.sin(t * 30);
+    const loose = ease(seg(t, tAnd + .3, tMis + .1));
+    const ks0 = 1, take = seg(t, tMis + .3, tMis + 1);
+    const ks = lerp(150, 70, loose), kx = 1360, ky = lerp(800, 900, loose) + (1 - loose) * 4 * Math.sin(t * 30);
     if (loose < .9) cryptid(t, kx, ky, ks, { look: [-1, .2], loose, hat: loose < .5, grin: false, alpha: 1 - seg(loose, .6, .9) });
     if (loose > .6 && take <= 0) stringBall(kx, ky + 30, 40, seg(loose, .6, .9));
     // Clawd creeps up, nets it, and pockets the string
@@ -425,6 +438,7 @@
     // the dropped party hat lies in the leaves
     if (loose > .6) hatOn('party', kx + 120, GROUND + 20, 60);
     camEnd();
+    fg(v7, [[150, 200], [2050, 220]]);
     const gk = seg(t, gl0, gl1), sw2 = seg(t, gl1 - .45, gl1 - .1);
     nv(t, 'CAM 7 · FINAL NIGHT', [cut], { osd: () => {
       if (t > tNo - .2 && t < tMis - .3) osdText('LAST REAL SUPERPOSITION CIRCUIT: 2019', 960, 240, 46, '#FFFFFF', { align: 'center', bold: true, alpha: seg(t, tNo - .2, tNo + .3) });
