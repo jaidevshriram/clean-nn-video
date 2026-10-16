@@ -4,7 +4,7 @@
 // light fills the screen (ch01 opens on a tiny lit house).
 (() => {
   // the machine with a blank name plate (machine() letters its plate with jargon; drop that letter)
-  function machineL(t, x, y, s, o) { const n = LETTERS.length, C0 = CAM; CAM = null; machine(t, x, y, s, o); CAM = C0; for (let i = LETTERS.length - 1; i >= n; i--) if (LETTERS[i].txt === 'SAE') LETTERS.splice(i, 1); }
+  function machineL(t, x, y, s, o) { const n = LETTERS.length, C0 = CAM; CAM = null; machine(t, x, y, s, o); CAM = C0; LETTERS.length = n; }   // (its only lettering is the plate)
   const V = 'blog/raw/v-figure-10x/', PE = 'blog/raw/pose-everywhere/';
   const CLASH = [V + 'p47742', V + 'c5a94a', V + 'pPool13', V + 'n282687', V + 'n1158528', V + 'c4d201c', V + 'c5a94c'];
   const PIECES = [V + 'p47742', V + 'c4d201c', V + 'c5a94a', V + 'pPool13', V + 'n282687', V + 'n1158528', V + 'c5a352d', V + 'pCarX5', V + 'c5a94c', V + 'n1070575'];

@@ -6,7 +6,7 @@
 (() => {
   // the machine with its jargon name plate dropped (machine() letters it on top of everything, even the iris);
   // this world paints its own plate, under the grey grade
-  function machineL(t, x, y, s, o) { const n = LETTERS.length, C0 = CAM; CAM = null; machine(t, x, y, s, o); CAM = C0; for (let i = LETTERS.length - 1; i >= n; i--) if (LETTERS[i].txt === 'SAE') LETTERS.splice(i, 1); }
+  function machineL(t, x, y, s, o) { const n = LETTERS.length, C0 = CAM; CAM = null; machine(t, x, y, s, o); CAM = C0; LETTERS.length = n; }   // (its only lettering is the plate)
   // a hand-painted sign on a stick pointing at (x, y) from (x + dx, y + dy); k 0..1 pops it in
   function hoseTag(s, x, y, dx, dy, k, size = 44) {
     if (k <= 0) return; const tx = x + dx, ty = y + dy, w = s.length * size * .62 + 50, h = size * 1.5;
