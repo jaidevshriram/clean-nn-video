@@ -225,7 +225,7 @@
     camKeys(t, [[a - .2, 960, 540, 1.0], [tf, 960, 520, 1.04], [ce('hc_pose') + .4, 960, 540, 1.0]], .3);
     // two big windows (the two remaining "dog" lockers), each flipping between its dog and its car
     POSE.forEach(([ims, lab], k) => {
-      const x = 560 + k * 800, y = 480, kk = popk(t, a - .35 + k * .2, .5); if (kk <= 0) return;
+      const x = 560 + k * 800, y = 530, kk = popk(t, a - .35 + k * .2, .5); if (kk <= 0) return;
       const sw = t < tc ? 0 : t < td ? 1 : Math.floor((t - td) * 1.4 + k) % 4, d = ims[sw === 1 ? 0 : sw], c = ims[sw];
       push(); translate(x, y); scale(backOut(kk));
       cutout([[-260, -200], [0, -330], [260, -200], [260, 250], [-260, 250]], k ? BL : RD);
@@ -233,14 +233,14 @@
       const I = img(c), sz = Math.min(I.width, I.height); ctx.save(); ctx.beginPath(); ctx.rect(-190, -180, 380, 340); ctx.clip(); ctx.drawImage(I, (I.width - sz) / 2, (I.height - sz) / 2, sz, sz * 340 / 380, -190, -180, 380, 340); ctx.restore();
       pop();
       const ka = seg(t, tf - .6 + k * .2, tf + .1 + k * .2);
-      if (ka > 0) { push(); translate(x, 860); rotate(-.04); scale(backOut(ka)); cutout(rectPts(-150, -46, 300, 92), sw % 2 ? BL : CR); serif(sw % 2 ? 'a car' : 'a dog', 0, 4, 54, sw % 2 ? CR : BK); pop(); }
+      if (ka > 0) { push(); translate(x, 880); rotate(-.04); scale(backOut(ka)); cutout(rectPts(-150, -46, 300, 92), sw % 2 ? BL : CR); serif(sw % 2 ? 'a car' : 'a dog', 0, 4, 54, sw % 2 ? CR : BK); pop(); }
     });
     // Clawd turns his head to match each window's direction
     const look = t > tf ? Math.floor((t - tf) * 1.2) % 2 : -1;
     tourist(960, 1010, 11, 'fedora', { ...emotions(t, [[a - .2, 'thinking'], [tf, 'neutral'], [tp, 'happy']]), view: look === 0 ? 'side' : 'front', flip: true, boilKey: 'c4c' });
     camEnd();
     const kp = seg(t, tp - .3, tp + .3);
-    if (kp > 0) { push(); translate(960, 84); rotate(-.03); scale(backOut(kp)); cutout(rectPts(-360, -64, 720, 128), BK); serif('POSE NEURONS', 0, 6, 80, OR); pop(); }
+    if (kp > 0) { push(); translate(960, 142); rotate(-.03); scale(backOut(kp)); cutout(rectPts(-350, -55, 700, 110), BK); serif('POSE NEURONS', 0, 5, 74, OR); pop(); }
     const ko = seg(t, a - .3, a + .2) * (1 - seg(t, tc - .6, tc - .3));
     if (ko > 0) { ctx.globalAlpha = ko; serif('and the other two?', 960, 150, 70, BK, { weight: '400' }); ctx.globalAlpha = 1; }
     const kd = seg(t, tc - .3, tc + .2) * (1 - seg(t, tp - .5, tp - .3));
@@ -353,9 +353,9 @@
     }
     camEnd();
     const kq = seg(t, ts - .8, ts + .2) * (1 - seg(t, td - .6, td - .2));
-    if (kq > 0) { ctx.globalAlpha = kq; serif('only because it was small?', 960, 120, 70, BK, { weight: '400' }); ctx.globalAlpha = 1; }
+    if (kq > 0) { ctx.globalAlpha = kq; serif('only because it was small?', 960, 150, 70, BK, { weight: '400' }); ctx.globalAlpha = 1; }
     const kv = seg(t, tev - .2, tev + .4) * (1 - seg(t, tS - .3, tS));
-    if (kv > 0) { ctx.globalAlpha = kv; serif('every vision model', 960, 120, 76, BK); ctx.globalAlpha = 1; }
+    if (kv > 0) { ctx.globalAlpha = kv; serif('every vision model', 960, 150, 76, BK); ctx.globalAlpha = 1; }
   }
 
   shots([[chapStart('ch04'), opening], [cs('hc_story') - .2, heist], [cs('hc_artist') - .2, lazy], [cs('hc_pose') - .2, pose], [cs('hc_hundred') - .2, hundred], [cs('hc_bigger') - .2, bigger]]);
