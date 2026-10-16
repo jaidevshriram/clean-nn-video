@@ -116,7 +116,7 @@
 
   // ---------- broadcast graphics (screen space) ----------
   function bug(t, label = 'LIVE', sub = 'PUB DARTS · LEG 11') {
-    const x = 1460, y = 46;
+    const x = 1400, y = 80;
     flat(rectPts(x, y, 120, 54), RED); txt(label, x + 60, y + 28, 30, '#FFFFFF', { font: F, weight: '900' });
     flat(rectPts(x + 120, y, 300, 54), NAVY); txt(sub, x + 270, y + 28, 24, '#FFFFFF', { font: F, weight: '700' });
     if (label === 'LIVE') dot(x + 18, y + 27, 6, Math.floor(t * 2) % 2 ? '#FFFFFF' : 'rgba(255,255,255,.3)');
@@ -124,7 +124,7 @@
   // a lower third that slides in at a and out at b
   function lower(t, a, b, head, sub, o = {}) {
     const k = easeOut(seg(t, a, a + .45)), out = ease(seg(t, b - .35, b)); if (k <= 0 || out >= 1) return;
-    const y = o.y ?? 870, x = lerp(-1700, 0, k) - out * 1900, w = o.w ?? 1500;
+    const y = o.y ?? 840, x = lerp(-1700, 0, k) - out * 1900, w = o.w ?? 1500;
     ctx.save(); ctx.translate(x, 0);
     flat(rectPts(120, y, w, sub ? 150 : 104), 'rgba(10,18,56,.94)', { shadow: [0, 10, 'rgba(0,0,0,.35)'] });
     flat(rectPts(120, y, 22, sub ? 150 : 104), o.tag || RED);
@@ -278,8 +278,8 @@
     if (tube > 0 && tube < 1) { const p = TC[Math.floor(easeInOut(tube) * (TC.length - 1))]; ctx.save(); ctx.translate(p[0], p[1]); flat(rrPts(-34, -15, 68, 30, 14), '#FBF6EC', { line: '#3A2A1A', lw: 3 }); ctx.restore(); sfx('FWOOMP!', p[0], y0 - 100, 46, '#FFFFFF', t - (tSe - .5), { life: 1, stroke: '#1A1A1A', strokeW: .12 }); }
     if (t > tNe - .2 && t < tNe + 1.4) sfx('TWEET!', x2 + 300, y0 + 150, 60, '#FFFFFF', t - (tNe + .45), { stroke: '#1A1A1A', strokeW: .12 });
     // the sentence it writes, as a broadcast caption
-    if (t > tWr2 - .2) { const k = easeOut(seg(t, tWr2 - .2, tWr2 + .3)); flat(rectPts(lerp(W, 990, k), 920, 860, 110), 'rgba(10,18,56,.94)'); flat(rectPts(lerp(W, 990, k), 920, 16, 110), '#3A64B8'); letter('"Squeaky the tiny mouse squeaked!"', lerp(W, 990, k) + 440, 975, 46, YEL, { face: 'hand', shadow: false, screen: true, reveal: seg(t, tWr2, tWr2 + 1.4) }); }
-    if (t < tWr2 - .2) { const k = easeOut(seg(t, a + .2, a + .7)) * (1 - seg(t, tWr2 - .6, tWr2 - .2)); if (k > 0) { flat(rectPts(70, 920, 1780 * k, 110), 'rgba(10,18,56,.94)'); flat(rectPts(70, 920, 16, 110), YEL); if (k > .9) txt('THE BLIND TEST', 120, 976, 56, YEL, { font: F, weight: '900', align: 'left' }); if (k > .9) txt('one agent explains · another, who never saw the neuron, aims', 680, 978, 34, '#FFFFFF', { font: F, weight: '600', align: 'left' }); } }
+    if (t > tWr2 - .2) { const k = easeOut(seg(t, tWr2 - .2, tWr2 + .3)); flat(rectPts(lerp(W, 990, k), 900, 860, 100), 'rgba(10,18,56,.94)'); flat(rectPts(lerp(W, 990, k), 900, 16, 100), '#3A64B8'); letter('"Squeaky the tiny mouse squeaked!"', lerp(W, 990, k) + 440, 950, 46, YEL, { face: 'hand', shadow: false, screen: true, reveal: seg(t, tWr2, tWr2 + 1.4) }); }
+    if (t < tWr2 - .2) { const k = easeOut(seg(t, a + .2, a + .7)) * (1 - seg(t, tWr2 - .6, tWr2 - .2)); if (k > 0) { flat(rectPts(80, 900, 1760 * k, 100), 'rgba(10,18,56,.94)'); flat(rectPts(80, 900, 16, 100), YEL); if (k > .9) txt('THE BLIND TEST', 130, 950, 56, YEL, { font: F, weight: '900', align: 'left' }); if (k > .9) txt('one agent explains · another, who never saw the neuron, aims', 690, 952, 34, '#FFFFFF', { font: F, weight: '600', align: 'left' }); } }
     bug(t);
   }
 
@@ -475,8 +475,8 @@
       ctx.save(); ctx.translate(30, ay); ctx.rotate(fa * 2); dot(0, 0, 30, '#C8402A'); dot(-9, -9, 9, 'rgba(255,255,255,.4)'); flat(rectPts(-2, -40, 4, 14), '#4A3A1A'); flat(ellPts(12, -36, 12, 6, 10), '#5E9A3C'); ctx.restore();
       flat(rectPts(-128, 130, 256, 40), '#7E9A4A'); ctx.restore();
       txt('NEWTON', 270, 742, 46, '#F3E2BE', { font: '"DejaVu Serif"', weight: '700' });
-      flat(rectPts(0, 0, W, 120), 'rgba(10,18,56,.92)'); flat(rectPts(0, 0, 18, 120), YEL);
-      txt('HISTORY CORNER', 1040, 62, 60, YEL, { font: F, weight: '900' });
+      flat(rectPts(0, 0, W, 160), 'rgba(10,18,56,.92)'); flat(rectPts(0, 0, 18, 160), YEL);
+      txt('HISTORY CORNER', 1040, 112, 60, YEL, { font: F, weight: '900' });
       ctx.restore();
       if (kin >= 1 && kout <= 0) { fxFilm(t, .5); POST.push(() => { ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = 'rgba(240,200,140,.35)'; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; }); }
       if (kout <= 0) { lower(t, tNe - .2, tBe - .3, "NEWTON'S GRAVITY", 'explained almost everything…', { size: 58, w: 1000 }); lower(t, tBe - .2, hOut, 'THE BEST TESTS ARE SPECIFIC', null, { size: 62, w: 1250 }); }

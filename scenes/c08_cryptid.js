@@ -307,7 +307,8 @@
       var v4 = camKeys(t, [[c2, 900, 700, 1.3], [c3, 960, 700, 1.35]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('d', { seed: 13 });
       ctx.save(); ctx.globalAlpha = .55; ctx.fillStyle = '#6A6A6A'; ctx.fillRect(-400, -300, W + 800, H + 600); ctx.restore();
-      cryptid(t, 1300 + 20 * Math.sin(t), 600, 150, { alpha: .22 + .08 * Math.sin(t * 6), look: [-1, 0], eyes: .6 });
+      cryptid(t, 1300 + 20 * Math.sin(t), 600, 150, { alpha: .15 + .06 * Math.sin(t * 6), look: [-1, 0], eyes: .7 });
+      ctx.save(); ctx.fillStyle = 'rgba(110,110,110,.42)'; ctx.fillRect(-400, -300, W + 800, H + 600); ctx.restore(); for (const ex of [-.17, .17]) glow(1300 + 20 * Math.sin(t) + ex * 150, 594, 34, '#FFFFFF', .7 * (Math.floor(t * 2.6) % 4 ? 1 : .1));
       const beamA = lerp(-.4, .25, ease(seg(t, tWeak - .9, tWeak + .2)));
       hunter(t, 520, GROUND + 20, 15, { ...emotions(t, [[c2, 'suspicious'], [tWeak + .3, 'confused']]), view: 'q', aR: .6, armR: net(0), aL: .9, armL: pennant, lampA: beamA, boilKey: 'c8hunter' });
       camEnd();
@@ -332,7 +333,7 @@
       woods('f', { seed: 21 });
       for (let i = 0; i < 5; i++) { const x = 360 + i * 300, s = 1 - i * .08; cabin(t, x, GROUND - 40 - i * 10, 220 * s, 260 * s, [() => {}], { lit: [0] }); txt('?', x, GROUND - 120 - i * 10, 70 * s, '#BDBDBD', { font: SERIF, weight: '900' }); }
       const eyeK = Math.floor(t * 2.3) % 7 ? 1 : 0, ex = 360 + 3 * 300, ey = GROUND - 40 - 30 - 260 * .76 + 40; for (const dx of [-12, 12]) { glow(ex + dx, ey, 26, '#FFFFFF', .95 * eyeK); dot(ex + dx, ey, 5, '#FFFFFF', eyeK); }
-      hunter(t, 330, GROUND + 30, 15, { ...emotions(t, [[c4, 'nervous'], [tChk + .2, 'sad']]), view: 'q', aR: .2, armR: net(0), aL: .5, armL: pennant, lampA: .1, boilKey: 'c8hunter' });
+      hunter(t, 520, GROUND + 30, 15, { ...emotions(t, [[c4, 'nervous'], [tChk + .2, 'sad']]), view: 'q', aR: .2, armR: net(0), aL: .5, armL: pennant, lampA: .1, boilKey: 'c8hunter' });
       camEnd();
       fg(v6, [[40, 150], [2200, 180]]);
       nv(t, 'CAM 6 · UNCHECKED NEURONS', [c4]);
@@ -345,7 +346,7 @@
     const a = cs('sg_last'), tSup = wt('sg_last', 'superposition'), tDef = wt('sg_last', 'default'), tLast = wt('sg_last', 'last'), tRes = wt('sg_last', 'resort'), tRad = wt('sg_last', 'radical'), tHard = wt('sg_last', 'hardest'), tSym = wt('sg_last', 'symptom'), tSense = wt('sg_last', 'sense');
     const tTool = wt('sg_last', 'tool'), tDes = wt('sg_last', 'design'), tBr = wt('sg_last', 'branch'), tLooks = wt('sg_last', 'looks'), e = ce('sg_last');
     const [hx, hy] = shakeXY(t, 3);
-    const v8 = camKeys(t, [[a - .3, 820, 700, 1.3], [e, 880, 700, 1.35]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.2);
+    const v8 = camKeys(t, [[a - .3, 1060, 700, 1.3], [e, 1100, 700, 1.35]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.2);
     woods('g', { seed: 25 });
     // a little campfire; Clawd on a log, thinking it over
     for (const [dx, a2] of [[-50, .5], [50, -.5]]) { push(); translate(560 + dx * .4, GROUND + 10); rotate(a2); flat(rrPts(-70, -12, 140, 24, 10), '#5A5A5A'); pop(); }
