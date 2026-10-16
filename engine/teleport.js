@@ -122,13 +122,13 @@ function teleport(t) {
     const at = TRANS_AT[chs[i].id] || [W / 2, H / 2];
     const iA = _shotIndexAt(s - .001), iB = _shotIndexAt(Math.max(s, t)), A = _off(0), B = _off(1);
     if (!isAct) {
-      const w0 = s + .1, w1 = s + 1.7;
+      const w0 = s, w1 = s + 1.6;
       if (t >= w0 && t < w1) { renderShotInto(A, iA, t); GRAIN = renderShotInto(B, iB, t); compositePortal(A, B, (t - w0) / (w1 - w0), kind, at[0], at[1]); arrivalLater(t, i, w1); return true; }
       if (t >= w1) { arrivalLater(t, i, w1); return false; }
       return false;
     }
     // act break: old world → passport map (Clawd walks to the next stop) → zoom through the stop into the new world
-    const m0 = s + .1, m1 = s + 1.5, z0 = first - 1.9, z1 = first - .4;
+    const m0 = s, m1 = s + 1.4, z0 = first - 1.9, z1 = first - .4;
     if (t < m0) return false;
     if (t < m1) { renderShotInto(A, iA, t); renderFnInto(B, () => itineraryMap(t, i, { open: (t - m0) / (m1 - m0), walk: 0, title: actTitle(i) })); compositePortal(A, B, (t - m0) / (m1 - m0), kind, at[0], at[1]); return true; }
     if (t < z0) { itineraryMap(t, i, { open: 1, walk: seg(t, m1 + .3, z0 - .4), title: actTitle(i) }); return true; }
