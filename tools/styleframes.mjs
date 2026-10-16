@@ -2,13 +2,13 @@
 //   node tools/styleframes.mjs [--only=3,7] [--out=out/style]
 import vm from 'node:vm';
 import { readFileSync, mkdirSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import { createCanvas } from '@napi-rs/canvas';
 import { makeWorld, ROOT } from '../engine/host.mjs';
 const args = Object.fromEntries(process.argv.slice(2).map(a => { const [k, v] = a.replace(/^--/, '').split('='); return [k, v ?? true]; }));
-const out = join(ROOT, args.out || 'out/style'); mkdirSync(out, { recursive: true });
+const out = resolve(ROOT, args.out || 'out/style'); mkdirSync(out, { recursive: true });
 const world = await makeWorld({ only: ['__none__'] });
-vm.runInContext(readFileSync(join(ROOT, 'style/frames.js'), 'utf8'), world.g, { filename: 'style/frames.js' });
+vm.runInContext(readFileSync(join(ROOT, args.file || 'style/frames.js'), 'utf8'), world.g, { filename: args.file || 'style/frames.js' });
 const FR = world.g.FRAMES, only = args.only ? String(args.only).split(',').map(Number) : null;
 const cols = 4, tw = 640, th = 360, pick = FR.map((f, i) => i).filter(i => !only || only.includes(i));
 const sheet = createCanvas(cols * tw, Math.ceil(pick.length / cols) * (th + 44)), sc = sheet.getContext('2d');

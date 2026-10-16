@@ -146,3 +146,24 @@ function hatOn(kind, x, y, s) {
 }
 // Clawd with a hat: head top is at y - 8u in his own units
 function tourist(x, y, u, hat, o = {}) { clawd(x, y, u, o); if (hat) hatOn(hat, x + (o.flip ? -1 : 1) * (o.view === 'q' ? u * .6 : 0), y - u * 8.05, u * 9); }
+function bg(col) { ctx.save(); resetMatrix(); ctx.fillStyle = col; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+function vgrad(stops, y0 = 0, y1 = H) { ctx.save(); resetMatrix(); const g = ctx.createLinearGradient(0, y0, 0, y1); stops.forEach(([s, c]) => g.addColorStop(s, c)); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore(); }
+function txt(s, x, y, size, col, o = {}) { ctx.save(); ctx.font = `${o.weight || '900'} ${size}px ${o.font || 'sans-serif'}`; ctx.textAlign = o.align || 'center'; ctx.textBaseline = 'middle'; if (o.stroke) { ctx.lineWidth = o.sw || size * .12; ctx.strokeStyle = o.stroke; ctx.lineJoin = 'round'; ctx.strokeText(s, x, y); } ctx.fillStyle = col; if (o.rot) { ctx.translate(x, y); ctx.rotate(o.rot); ctx.fillText(s, 0, 0); } else ctx.fillText(s, x, y); ctx.restore(); }
+function dot(x, y, r, col, a = 1) { ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = col; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.fill(); ctx.restore(); }
+// a glowing "neuron lamp": a lit orb with a photo inside (used in the cosmic and game-show worlds)
+function lampOrb(x, y, r, im, k = 1) { glow(x, y, r * 2.4, '#FFD58A', .6 * k); ctx.save(); ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.clip(); const I = img(im), s = Math.min(I.width, I.height); ctx.drawImage(I, (I.width - s) / 2, (I.height - s) / 2, s, s, x - r, y - r, 2 * r, 2 * r); ctx.restore(); ctx.save(); ctx.strokeStyle = '#FFE9B8'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y, r, 0, TAU); ctx.stroke(); ctx.restore(); }
+
+// ---------- wayfinding: the passport stamp and the itinerary map ----------
+// a rubber-stamp impression in Clawd's passport: ring, stop number, world name. Drawn in screen space.
+function passStamp(num, name, x = 1720, y = 930, k = 1, o = {}) {
+  if (k <= 0) return; const col = o.col || '#C2456A', r = 92, s = lerp(1.5, 1, easeOut(clamp(k)));
+  ctx.save(); resetMatrix(); ctx.translate(x, y); ctx.rotate(o.rot ?? -.16); ctx.scale(s, s); ctx.globalAlpha = .88 * clamp(k * 2);
+  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke(); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, r - 12, 0, TAU); ctx.stroke();
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '900 20px sans-serif'; ctx.fillText('STOP', 0, -44); ctx.font = '900 64px serif'; ctx.fillText(String(num), 0, 2);
+  ctx.font = '800 17px sans-serif'; const words = name.toUpperCase(); ctx.fillText(words.length > 16 ? words.slice(0, 16) : words, 0, 48);
+  // the ink is uneven: knock out a few specks
+  ctx.globalCompositeOperation = 'destination-out'; for (let i = 0; i < 40; i++) { ctx.beginPath(); ctx.arc((hash(i * 3.1 + num) - .5) * 2 * r, (hash(i * 7.3 + num) - .5) * 2 * r, 1 + hash(i) * 3, 0, TAU); ctx.fill(); }
+  ctx.restore();
+}
+// the 16 stops of the tour, as [name, act]
+const STOPS = [['deep space', 1], ['toy town', 1], ['cartoon reel', 1], ['film noir', 2], ['spy titles', 2], ['foggy London', 2], ['botany', 2], ['game show', 2], ['cryptid hunt', 2], ['pixel city', 3], ['pop-up book', 3], ['darts', 3], ['savanna', 3], ['globe', 4], ["world's fair", 4], ['jungle', 4]];
