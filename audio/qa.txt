@@ -1,27 +1,23 @@
-hc_pose  WER 0.19
-  script:  And the other two respond to cars and dogs alike, for one shared reason: which way they're facing. They're pose neurons.
-  heard:   and the other two respond to cars and dogs alike for one shared reason, which way they are facing. They are pose neurons.
-
 fd_numbers  WER 0.26
   script:  Same size, same data. Ninety-nine to a hundred percent of its last-layer neurons are easy to interpret.
-  heard:   same size, same data. 99 to 100 % of its last layer neurons are easy to interpret.
+  heard:   Same size, same data. 99 to 100 % of its last layer neurons are easy to interpret.
 
 gr_iy  WER 0.21
   script:  It happens in language too. One neuron fired on the letters "eye wye", in words like Miyazaki. Then on "D I Y". Then on "do it yourself", which doesn't contain "eye wye" at all.
-  heard:   It happens in language, too. One neuron fired on the letters IY in words like Miyazaki, then on DIY, then on Do It Yourself, which doesn't contain IY at all.
+  heard:   It happens in language too. One neuron fired on the letters IY in words like Miyazaki, then on DIY, then on Do It Yourself, which doesn't contain IY at all.
 
-te_squeeze  WER 0.15
+te_squeeze  WER 0.20
   script:  So I took a layer famous for its curve detectors, and crushed it from four hundred and eighty neurons down to ten, with no way around. If superposition were real, this should be dramatic: curves, spirals and spider webs, crammed together.
-  heard:   So I took a layer famous for its curved detectors, and crushed it from 480 neurons down to 10, with no way around. If superposition were real, this should be dramatic. Curves, spirals, and spider webs crammed together.
+  heard:   So I took a layer famous for its curved detectors and crushed it from 480 neurons down to 10 with no way around. If superposition were real, this should be dramatic. Curves, spirals, and spiderwebs crammed together.
 
 te_last  WER 0.15
   script:  I did the same to the last district of a modern network: a thousand and twenty-four neurons down to thirteen. Same thing. Coarser, never scrambled. Under pressure, a network doesn't switch to packing. It just paints with a broader brush.
-  heard:   I did the same to the last district of a modern network, 1 ,024 neurons down to 13. Same thing, coarser, never scrambled. Under pressure, a network doesn't switch to packing. It just paints with a broader brush.
+  heard:   I did the same to the last district of a modern network. 1 ,024 neurons down to 13. Same thing. Coarser, never scrambled. Under pressure, a network doesn't switch to packing. It just paints with a broader brush.
 
 sg_pr  WER 0.19
   script:  I found one that fired on the letters "P R", and on strange strings of base sixty-four code, and on Bengali text. Finally, an arbitrary mixture! Then I decoded the code: words with "P R". I translated the Bengali: "P R".
   heard:   I found one that fired on the letters PR, and on strange strings of base 64 code, and on Bengali text, finally an arbitrary mixture. Then I decoded the code, words with PR. I translated the Bengali PR.
 
-cw_numbers  WER 0.28
+cw_numbers  WER 0.25
   script:  In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under two percent. In a modern model, Kwen three, thirty-two B, about ninety percent of neurons have one main job. Seven percent have two related jobs. Only two to four percent we don't understand yet.
-  heard:   In 2023, studies of small language models rated almost none of their neurons as understandable. My own project had open AI found under 2%. In a modern model, QEN -3, 32B, about 90 % of neurons have one main job. 7 % have two related jobs. Only two to 4 % we don't understand yet.
+  heard:   In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under 2%. In a modern model, QEN -3 -32B, about 90 % of neurons have one main job. 7 % have two related jobs. Only 2 % to 4 % we don't understand yet.
