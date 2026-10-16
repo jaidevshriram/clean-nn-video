@@ -156,7 +156,7 @@ function lampOrb(x, y, r, im, k = 1) { glow(x, y, r * 2.4, '#FFD58A', .6 * k); c
 // ---------- wayfinding: the passport stamp and the itinerary map ----------
 // a rubber-stamp impression in Clawd's passport: ring, stop number, world name. Drawn in screen space.
 function passStamp(num, name, x = 1720, y = 930, k = 1, o = {}) {
-  if (k <= 0) return; const col = o.col || '#C2456A', r = 92, s = lerp(1.5, 1, easeOut(clamp(k)));
+  if (k <= 0) return; const col = o.col || '#C2456A', r = 92, s = lerp(1.5, 1, easeOut(clamp(k))) * (o.scale || 1);
   ctx.save(); resetMatrix(); ctx.translate(x, y); ctx.rotate(o.rot ?? -.16); ctx.scale(s, s); ctx.globalAlpha = .88 * clamp(k * 2);
   ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke(); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, r - 12, 0, TAU); ctx.stroke();
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '900 20px sans-serif'; ctx.fillText('STOP', 0, -44); ctx.font = '900 64px serif'; ctx.fillText(String(num), 0, 2);

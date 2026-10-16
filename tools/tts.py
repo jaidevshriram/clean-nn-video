@@ -23,6 +23,9 @@ ap.add_argument('--only', default='')
 ap.add_argument('--whisper', default='small.en')
 ap.add_argument('--chapter-hold', type=float, default=2.6)
 ap.add_argument('--lead', type=float, default=1.2)
+ap.add_argument('--acts', default='ch03,ch09,ch13')          # act breaks get extra silence for the itinerary map
+ap.add_argument('--act-hold', type=float, default=4.0)
+ap.add_argument('--tail', type=float, default=10.0)          # silence after the last line, for the end card
 args = ap.parse_args()
 
 SR = 24000
@@ -171,8 +174,9 @@ print(f'QA: {len(qa)} cues flagged (audio/qa.txt)')
 # ---------- timeline ----------
 t = args.lead; out_cues = {}; ch_out = []; segs = []
 for ch in chapters:
-    if ch['id'] != chapters[0]['id']: t += args.chapter_hold
-    ch_start = t - (args.chapter_hold if ch['id'] != chapters[0]['id'] else args.lead)
+    hold = args.chapter_hold + (args.act_hold if ch['id'] in args.acts.split(',') else 0)
+    if ch['id'] != chapters[0]['id']: t += hold
+    ch_start = t - (hold if ch['id'] != chapters[0]['id'] else args.lead)
     for cid in ch['cues']:
         c = next(x for x in cues if x['id'] == cid)
         a, _ = sf.read(c['wav'], dtype='float32'); d = len(a) / SR
@@ -182,7 +186,7 @@ for ch in chapters:
         last = cid == ch['cues'][-1]
         t += d + (c['pause'] if c['pause'] is not None else (1.6 if last else .45))
     ch_out.append({'id': ch['id'], 'title': ch['title'], 's': round(ch_start, 3), 'first': ch['cues'][0], 'last': ch['cues'][-1]})
-total = t + 1.0
+total = t + args.tail
 mix = np.zeros(int(total * SR) + SR, np.float32)
 for s, a in segs: i = int(round(s * SR)); mix[i:i + len(a)] += a
 sf.write(os.path.join(ROOT, 'audio/voice.wav'), resample_poly(mix, 2, 1).astype(np.float32), SR * 2, subtype='PCM_24')

@@ -31,8 +31,16 @@ function span(first, last, lead = .5, tail = .6) { return [cs(first) - lead, ce(
 function drawWorld(t) {
   if (globalThis.LOOP) return globalThis.LOOP(t);
   if (!SHOTS.length) return;
-  let i = 0; while (i + 1 < SHOTS.length && t >= SHOTS[i + 1][0]) i++;
-  const t0 = SHOTS[i][0], end = i + 1 < SHOTS.length ? SHOTS[i + 1][0] : DUR;
-  SHOTS[i][1](t, t - t0, end - t0);
+  globalThis._ARRIVE = null;
+  // the seams between worlds (portal transitions, the act-break map) are handled by teleport.js
+  const handled = typeof teleport === 'function' && teleport(t);
+  if (!handled) {
+    let i = 0; while (i + 1 < SHOTS.length && t >= SHOTS[i + 1][0]) i++;
+    const t0 = SHOTS[i][0], end = i + 1 < SHOTS.length ? SHOTS[i + 1][0] : DUR;
+    SHOTS[i][1](t, t - t0, end - t0);
+  }
   CAM = null;
+  // the arrival stamp goes on top of the world's own style passes
+  const A = globalThis._ARRIVE || (t < 7 && typeof arrival === 'function' ? [0, .8] : null);
+  if (A && typeof arrival === 'function') POST.push(() => arrival(t, A[0], A[1]));
 }
