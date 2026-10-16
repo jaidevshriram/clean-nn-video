@@ -92,6 +92,14 @@ def I_strings(f, d, v, r):
     n = int((d + .8) * SR); t = np.arange(n) / SR; x = np.zeros(n)
     for det in (-.003, .003): x += osc('saw', f * (1 + det) * (1 + .003 * np.sin(2 * np.pi * 5.5 * t)), t, r.uniform(0, 6))
     return lp(x * env_adsr(n, .25, .2, .85, .5, d + .8), 2000) * v * .18
+def I_vibes(f, d, v, r):   # vibraphone: soft sine bar, a touch of 4th partial, motor tremolo
+    n = int(min(d + 2, 3.5) * SR); t = np.arange(n) / SR
+    x = np.sin(2 * np.pi * f * t) + .22 * np.sin(2 * np.pi * f * 4 * t) * np.exp(-t * 6)
+    return x * np.exp(-t * 1.3) * np.clip(t / .006, 0, 1) * (1 - .22 * (.5 + .5 * np.sin(2 * np.pi * 5.2 * t))) * v * .33
+def I_ep(f, d, v, r):      # electric piano (tine): gentle FM bell that settles into a round sine
+    n = int(min(d + 1.6, 3) * SR); t = np.arange(n) / SR
+    mod = np.sin(2 * np.pi * f * t) * 1.1 * np.exp(-t * 5)
+    return np.sin(2 * np.pi * f * t + mod) * np.exp(-t * 1.7) * np.clip(t / .004, 0, 1) * v * .34
 INST = {k[2:]: fn for k, fn in globals().items() if k.startswith('I_')}
 # drums
 def D(kind, v, r):
@@ -118,7 +126,7 @@ S = {
  'ch01': dict(bpm=104, root=60, mode='maj', prog=[0, 5, 3, 4], layers=['musicbox_arp', 'warm', 'tri_bass_soft', 'tick']),
  'ch02': dict(bpm=126, root=55, mode='maj', prog=[0, 0, 4, 4, 0, 3, 4, 0], layers=['ragtime', 'oompah', 'crackle'], lofi=True),
  'ch03': dict(bpm=78, root=50, mode='dor', prog=[0, 3, 0, 4], swing=.62, layers=['walk', 'brush', 'jazz_chords', 'sax']),
- 'ch04': dict(bpm=132, root=52, mode='hmin', prog=[0, 0, 5, 4], layers=['spy_riff', 'bongo', 'kick_snare', 'brass_hits']),
+ 'ch04': dict(bpm=112, root=50, mode='hmin', prog=[0, 0, 5, 4], swing=.6, layers=['spy_bass', 'vibes_comp', 'brush', 'flute']),   # cool 60s spy jazz: the minor-major 7th
  'ch05': dict(bpm=88, root=50, mode='min', prog=[0, 5, 3, 4], layers=['harpsi_arp', 'strings', 'bass_roots'], brighten=True),
  'ch06': dict(bpm=92, root=62, mode='maj', prog=[0, 3, 5, 4], layers=['pizz', 'flute', 'warm']),
  'ch07': dict(bpm=144, root=58, mode='maj', prog=[0, 5, 1, 4], swing=.6, layers=['brass_stabs', 'walk', 'kit_swing', 'piano_comp']),
@@ -128,7 +136,7 @@ S = {
  'ch11': dict(bpm=112, root=60, mode='mix', prog=[0, 3, 4, 3], swing=.58, layers=['pub_piano', 'walk', 'kit_swing']),
  'ch12': dict(bpm=96, root=57, mode='dor', prog=[0, 6, 3, 4], layers=['marimba', 'shaker', 'warm', 'bass_roots']),
  'ch13': dict(bpm=84, root=53, mode='lyd', prog=[0, 4, 5, 3], layers=['pluck_arp', 'pad', 'bass_roots']),
- 'ch14': dict(bpm=116, root=60, mode='maj', prog=[0, 4, 5, 3], layers=['bright_arp', 'brass_pad', 'kick_snare', 'bass_roots']),
+ 'ch14': dict(bpm=100, root=60, mode='maj', prog=[0, 4, 5, 3], layers=['ep_arp', 'warm', 'bass_roots', 'tick']),   # warm retro-future: tine piano over a pad
  'ch15': dict(bpm=88, root=55, mode='maj', prog=[0, 5, 3, 4, 0, 5, 3, 0], layers=['marimba', 'flute', 'strings', 'bass_roots', 'shaker'], finale=True),
 }
 
@@ -214,6 +222,16 @@ def render_cue(cid, t0, t1, seed):
                 riff = [0, 0, 1, 1, 2, 2, 1, 1]   # semitone climb: the classic spy line
                 for k in range(8): place(out, I_guitar(mtof(root - 12 + [0, 0, 1, 1, 2, 2, 1, 1][k] + (7 if b % 4 == 2 else 0)), beat / 2, .5, r), eighth(b, k))
                 if b % 2 == 1: place(out, I_guitar(mtof(root + 12 + 3), beat * 2, .4, r), bt + beat * 2)
+            elif lay == 'spy_bass':      # swung upright ostinato with the spy's flat sixth
+                line = [0, None, 0, 7, 8, 7, 5, 3]
+                for k, iv in enumerate(line):
+                    if iv is not None: place(out, I_upright(mtof(C[0] - 24 + iv), beat * .55, .55 if k % 2 == 0 else .42, r), eighth(b, k))
+            elif lay == 'vibes_comp':    # soft vibes on the offbeats: the full 4-note chord (i = minor-major 7th)
+                for at in ((beat * 1.5, beat * 3.5) if b % 2 == 0 else (beat * 1.5,)):
+                    for m in C: place(out, I_vibes(mtof(m), beat * 1.5, .2, r), bt + at + (sw - .5) * beat)
+            elif lay == 'ep_arp':
+                pat = [0, 1, 2, 1, 3, 2, 1, 2]
+                for k in range(8): place(out, I_ep(mtof(C[pat[k]] + 12), bar / 8, .42 if k % 2 == 0 else .3, r), eighth(b, k))
             elif lay == 'brass_hits':
                 if b % 4 == 3:
                     for m in C[:3]: place(out, I_brass(mtof(m), beat * .8, .5, r), bt + 3 * beat)
