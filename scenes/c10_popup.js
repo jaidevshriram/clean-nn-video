@@ -72,7 +72,7 @@
     if (lit > .02) glow(0, -h * .55, Math.max(w, h) * .95, o.glowCol || '#FFD58A', .6 * lit);
     cutout(P, col, { jag: 2, shadow: SH });
     flat([[-w / 2, 0], [-w / 2, -h], [-w / 2 + 8, -h + 4], [-w / 2 + 8, 0]], 'rgba(0,0,0,.08)');
-    const wins = o.wins || [], cols = o.cols || 1, pad = 14, cw = (w - pad * (cols + 1)) / cols, chh = o.winH || Math.min(cw * .62, 70), top = -h + (o.sign ? 66 : 22);
+    const wins = o.wins || [], cols = o.cols || 1, pad = 14, cw = (w - pad * (cols + 1)) / cols, chh = o.winH || Math.min(cw * .62, 70), top = -h + (o.sign ? (o.signSize || 34) + 40 : 22);
     wins.forEach((wi, n) => {
       const cx = -w / 2 + pad + (n % cols) * (cw + pad), cy = top + Math.floor(n / cols) * (chh + pad), L = clamp(wi.lit ?? lit);
       flat(rectPts(cx - 4, cy - 4, cw + 8, chh + 8), mixCol(col, C.ink, .35));
@@ -82,7 +82,7 @@
       if (wi.draw) { ctx.save(); ctx.translate(cx + cw / 2, cy + chh / 2); wi.draw(cw, chh); ctx.restore(); }
       if (L > .3) glow(cx + cw / 2, cy + chh / 2, cw * .8, '#FFE08A', .35 * L);
     });
-    if (o.sign) { flat(rectPts(-w * .38, -h + 12, w * .76, 44), C.cream); ps(o.sign, 0, -h + 35, o.signSize || 28, C.ink); }
+    if (o.sign) { const ss = o.signSize || 34; ctx.font = `700 ${ss}px ${SERIF}`; const sw = Math.max(w * .7, ctx.measureText(o.sign).width + 18); flat(rectPts(-sw / 2, -h + 10, sw, ss + 18), C.cream); ps(o.sign, 0, -h + 19 + ss / 2, ss, C.ink); }
     if (o.door !== false && h > 120) flat(rrPts(-w * .1, -Math.min(54, h * .22), w * .2, Math.min(54, h * .22) + 2, 8), mixCol(col, C.ink, .45));
   }
   // a paper person (origin at the feet): col body (two cols: two-tone), o.q shows a question mark, o.flip 0..1 card-flip
@@ -153,6 +153,19 @@
     const x = lerp(HOME[0], x1, u), y = lerp(HOME[1], y1, u), moving = (lt > 1.1 && lt < 2.3 && Math.abs(x1 - HOME[0]) > 20) || (back > 0 && back < 1 && !o.stay && Math.abs(x1 - HOME[0]) > 20);
     const hop = jump(t, t0 + .12, t0 + .62, 80), dirLeft = lt < 3 ? x1 < HOME[0] : x1 > HOME[0];
     tourist(x, y + hop.dy, o.u || 7.5, o.hat || 'beret', { ...emotions(t, keys), ...(moving ? { view: 'side', walk: Math.abs(x - HOME[0]) / 30, flip: dirLeft } : { view: 'q', flip: o.flip }), sq: hop.sq, boilKey: o.key || 'c10clawd', ...o.extra });
+  }
+  // a caption: a cut-paper banner hung into the top of the frame on two strings (screen space, so it never sits on the
+  // pop-ups and is never cropped). list: [[tIn, tOut, text, col?]]; o.x moves it sideways
+  function caps(t, list, o = {}) {
+    for (const [a, b, s, col] of list) {
+      const k = on(t, a, b, .45, .35); if (k <= 0) continue;
+      ctx.save(); resetMatrix(); ctx.font = `700 52px ${SERIF}`; const w = ctx.measureText(s).width + 70, h = 84, x = o.x ?? W / 2, y = lerp(-140, o.y ?? 92, backOut(k)) - (1 - k) * 20;
+      ctx.translate(x, y); ctx.rotate(.012 * Math.sin(t * 1.3 + a));
+      ctx.strokeStyle = 'rgba(30,20,14,.8)'; ctx.lineWidth = 3; for (const sx of [-1, 1]) { ctx.beginPath(); ctx.moveTo(sx * w * .38, -h / 2); ctx.lineTo(sx * w * .38, -300); ctx.stroke(); }
+      cutout(rectPts(-w / 2, -h / 2, w, h), col || C.cream, { jag: 2, shadow: [8, 10, 'rgba(0,0,0,.4)'] });
+      for (const sx of [-1, 1]) flat(ellPts(sx * w * .38, -h / 2 + 10, 6, 6, 10), C.ink);
+      ps(s, 0, 4, 52, C.ink); ctx.restore();
+    }
   }
   // a printed heading on the page (world-native type)
   const heading = (s, x, y, size, k, col = C.ink) => { if (k <= 0) return; ctx.save(); ctx.globalAlpha = clamp(k); ps(s, x, y, size, col); ctx.restore(); };
@@ -280,23 +293,24 @@
   function medicalShot(t, lt, dur) {
     const { a, tFol, tPreg, tSym, tFour, tConc, tPre, tSw, tOff, tItch, tDiff, tNext, tGuess } = M0;
     library(t);
-    camSpread(t, t - lt, t - lt + dur, [[tPreg - .4, 960, 560, 1], [tFour, 960, 600, 1.06], [tPre + .3, 1000, 570, 1.04], [tItch + .5, 1200, 580, 1.06], [tGuess + .2, 1160, 590, 1.04]]);
+    camSpread(t, t - lt, t - lt + dur, [[tFol, 820, 600, 1.06], [tPreg, 860, 600, 1.06], [tFour, 900, 590, 1.04], [tPre + .3, 920, 570, 1.03], [tItch + .5, 980, 580, 1.0], [tGuess + .2, 970, 580, 1.0]]);
     book();
     const ko = kout(lt, dur), off = ease(seg(t, tSw + .1, tOff + .3));
-    heading('a pregnant patient', 540, 1000, 50, Math.min(seg(lt, .9, 1.4), ko));
     // the patient, in a paper hospital bed, with a chart that fills in symptom by symptom
-    stand(260, 960, Math.min(popk(t, tFol - .2, .6), ko), 260, () => {
+    stand(300, 960, Math.min(kin(lt, 300), ko), 260, () => {
       cutout(rectPts(-130, -70, 260, 50), C.paper2, { jag: 2, shadow: SH }); cutout(rectPts(-140, -150, 26, 150), C.blue, { jag: 1, shadow: SH }); cutout(rectPts(114, -110, 26, 110), C.blue, { jag: 1, shadow: SH });
       cutout(rrPts(-110, -110, 70, 40, 14), '#FFFFFF', { jag: 1, shadow: false }); cutout(ellPts(-74, -118, 22, 22, 14), '#E9C9A6', { jag: 1, shadow: false });
       cutout([[-50, -70], [-40, -112], [60, -104], [110, -70]], C.pink, { jag: 1.5, shadow: false }); cutout(ellPts(20, -112, 30, 22, 14), C.pink, { jag: 1, shadow: false });
       flat(rectPts(-84, -122, 4, 4), C.ink); flat(rectPts(-70, -122, 4, 4), C.ink);
     });
     // symptoms pop up as folded tent cards
-    SYMS.forEach(([x, y, s, col], n) => { const k = Math.min(popk(t, (n ? tSym - .3 + n * .25 : tPreg - .2), .5), ko); stand(x, y, k, 200, () => { ctx.font = `700 34px ${SERIF}`; const w = ctx.measureText(s).width + 50; cutout([[-w / 2, 0], [-w / 2 + 14, -96], [w / 2 - 14, -96], [w / 2, 0]], col, { jag: 2, shadow: SH }); ps(s, 0, -48, 34); if (n === 0) { ctx.save(); ctx.translate(0, -100); pp(.9, C.pink, { skin: '#E9C9A6' }); ctx.restore(); } }); });
+    SYMS.forEach(([x, y, s, col], n) => { const k = Math.min(popk(t, tFol + .5 + n * .55, .5), ko); stand(x, y, k, 200, () => { ctx.font = `700 34px ${SERIF}`; const w = ctx.measureText(s).width + 50; cutout([[-w / 2, 0], [-w / 2 + 14, -96], [w / 2 - 14, -96], [w / 2, 0]], col, { jag: 2, shadow: SH }); ps(s, 0, -48, 34); if (n === 0) { ctx.save(); ctx.translate(0, -100); pp(.9, C.pink, { skin: '#E9C9A6' }); ctx.restore(); } }); });
     // threads from the symptoms to the hub
     SYMS.forEach(([x, y], n) => thread([[x + 60, y - 70], [lerp(x, 1120, .5), y - 200 - n * 30], [HUB[n % 4][0] - 20, HUB[n % 4][1] - 120]], Math.min(seg(t, tFour - .8 + n * .2, tFour + .4 + n * .2), ko), off > .5 ? C.grey : C.gold));
     // the hub of four neurons; the pull-tab switches them off (they fold flat)
-    HUB.forEach(([x, y], n) => { const k = Math.min(popk(t, tFour - .2 + n * .14, .45), 1 - off * .97, ko); stand(x, y, k, 110, () => pb(110, 140, C.lilac, { roof: 'peak', wins: [{}], lit: on(t, tConc - .5) * (1 - off), glowCol: '#FFD58A' }), { raw: off > 0 }); });
+    HUB.forEach(([x, y], n) => { const k = Math.min(kin(lt, x + 400), 1 - off * .97, ko), hot = on(t, tFour - .2 + n * .14, Infinity, .3); stand(x, y, k, 120, () => pb(120, 150, hot > .5 ? C.lilac : C.grey, { roof: 'peak', wins: [{}], lit: Math.max(hot * .5, on(t, tConc - .5)) * (1 - off), glowCol: '#FFD58A' }), { raw: off > 0 }); });
+    // the other neurons of the hospital district, standing by
+    [[1480, 760, C.blue], [1720, 790, C.green], [1580, 960, C.yellow]].forEach(([x, y, col], n) => stand(x, y, Math.min(kin(lt, x), ko, 1 - seg(t, tItch - .8, tItch - .4) * (n === 0 ? 1 : 0) * 0), 110, () => pb(110, 130, col, { roof: n % 2 ? 'flat' : 'peak', wins: [{}, {}], cols: 2, winH: 30, lit: .15 })));
     // the conclusion: a scroll unrolls above the hub
     const kp = Math.min(popk(t, tPre - .4, .6), ko), drop = ease(seg(t, tOff, tOff + .8));
     if (kp > 0) { ctx.save(); ctx.translate(1200, 560 + 300 * drop * drop); ctx.rotate(.5 * drop); ctx.scale(backOut(kp), backOut(kp)); ctx.globalAlpha = 1 - drop; cutout(rectPts(-200, -50, 400, 100), C.gold, { jag: 2, shadow: SH }); cutout(ellPts(-200, 0, 16, 54, 12), mixCol(C.gold, C.ink, .2), { jag: 1, shadow: false }); cutout(ellPts(200, 0, 16, 54, 12), mixCol(C.gold, C.ink, .2), { jag: 1, shadow: false }); ps('preeclampsia', 0, 3, 48); ctx.restore(); }
@@ -312,7 +326,7 @@
     clS(t, lt, dur, 1720, 1010, [[a, 'happy'], [tPreg, 'thinking'], [tPre, 'proud'], [tSw - .6, 'determined'], [tItch, 'surprised'], [tGuess, 'thinking']], { u: 7, flip: true, extra: { aL: t > tSw - .5 && t < tSw + .6 ? 1.3 : undefined } });
     pageTurn(lt);
     camEnd();
-    if (t > tFol && t < tPreg - .3) title('a line of reasoning, in plain neurons', 960, 140, 60, C.paper, seg(t, tFol, tFol + 1.2), { shadow: false });
+    caps(t, [[tFol - .1, tPreg - .4, 'a line of reasoning, in plain neurons'], [tPreg - .3, t - lt + dur - .3, 'a pregnant patient']]);
     GRAIN = .8;
   }
 

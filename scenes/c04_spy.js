@@ -265,8 +265,8 @@
     if (t < rw0) {
       // the grid: more than a hundred pose neurons, each a little window with a direction
       bg(BK); GRAIN = .8;
-      camKeys(t, [[a - .2, 960, 540, 1.6], [th + .5, 960, 540, 1.0], [rw0, 960, 540, .96]], .3);
-      const kg = seg(t, a + .2, th + .6);
+      camKeys(t, [[a - .2, 760, 420, 1.35], [th + .5, 960, 540, 1.0], [rw0, 960, 540, .96]], .3);
+      const kg = seg(t, a - .25, th + .4);
       // a neat 12 × 9 grid (108 tiles), revealed in a diagonal sweep: each tile is one pose neuron, a dog and a car
       // that share a pose side by side, with a small arrow under them
       const SETS = ['small', 'medium', 'large', 'dino'];
@@ -280,8 +280,8 @@
       }
       camEnd();
       const k1 = seg(t, th - .2, th + .3);
-      if (k1 > 0) { push(); translate(960, 540); scale(backOut(k1)); cutout(rectPts(-400, -90, 800, 180), OR); serif('100+ pose neurons', 0, 6, 92, BK); pop(); }
-      if (t > tc - .2) { push(); translate(960, 680); rotate(-.04); scale(backOut(seg(t, tc - .2, tc + .1))); cutout(rectPts(-200, -46, 400, 92), CR); serif('each one clean', 0, 4, 52, BK, { weight: '400' }); pop(); }
+      if (k1 > 0) { push(); translate(960, 540); scale(backOut(k1)); cutout(rectPts(-470, -85, 940, 170), OR); serif('100+ pose neurons', 0, 6, 84, BK); pop(); }
+      if (t > tc - .2) { push(); translate(960, 680); rotate(-.04); scale(backOut(seg(t, tc - .2, tc + .1))); cutout(rectPts(-250, -46, 500, 92), CR); serif('each one clean', 0, 4, 52, BK, { weight: '400' }); pop(); }
       return;
     }
     // after the rewind: the car drives straight on past the lockers, and the road branches into specific car neurons

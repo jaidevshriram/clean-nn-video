@@ -16,7 +16,7 @@
   // the hatch pattern is static, so its two line-distance fields are computed once (0..255 per pixel)
   let HT = null;
   function hatch() { if (HT) return HT; const sp = 6, T1 = new Uint8Array(W * 6), T2 = new Uint8Array(W * 6); for (let y = 0; y < 6; y++) for (let x = 0; x < W; x++) { const u = ((x + y) % sp) / sp, v = ((x - y + 4096) % sp) / sp; T1[y * W + x] = Math.round(Math.abs(u - .5) * 2 * 255); T2[y * W + x] = Math.round(Math.abs(v - .5) * 2 * 255); } return (HT = [T1, T2]); }
-  function engrave(front = -1e4, soft = 160) {
+  function engrave(front = -1e4, soft = 160, lens = null) {
     POST.push(() => {
       const [T1, T2] = hatch(), d = ctx.getImageData(0, 0, W, H), D = d.data, tk = .16;
       const inkR = 86 * .84, inkG = 50 * .84, inkB = 28 * .84, pR = 246 * .84, pG = 232 * .84, pB = 204 * .84;
@@ -24,10 +24,11 @@
         const fy = front + 60 * Math.sin(y * .013) + (y - 540) * .35, row = (y % 6) * W;
         let x0 = Math.max(0, Math.floor(fy)); if (x0 >= W) continue;
         for (let x = x0, i = (y * W + x0) * 4; x < W; x++, i += 4) {
-          const m = x - fy >= soft ? 1 : (x - fy) / soft; if (m <= 0) continue;
-          const r = D[i], g = D[i + 1], bl = D[i + 2], l = Math.min(255, (r * .3 + g * .59 + bl * .11) * .72 + 82);   // lifted, so more paper shows
+          let m = x - fy >= soft ? 1 : (x - fy) / soft; if (m <= 0) continue;
+          if (lens) { const dx = x - lens[0], dy = y - lens[1]; if (dx * dx + dy * dy < lens[2] * lens[2]) m *= .3; }
+          const r = D[i], g = D[i + 1], bl = D[i + 2], l = Math.min(255, (r * .3 + g * .59 + bl * .11) * .86 + 44);   // lifted, so more paper shows
           const t1 = T1[row + x], t2 = T2[row + x];
-          const ink = l < 70 || t1 < (255 - l) * .78 || (l < 120 && t2 < (120 - l) * 1.4);
+          const ink = l < 52 || t1 < (255 - l) * .95 || (l < 115 && t2 < (115 - l) * 1.7);
           let er, eg, eb;
           if (ink) { er = inkR + r * tk * .4; eg = inkG + g * tk * .4; eb = inkB + bl * tk * .4; } else { er = pR + r * tk; eg = pG + g * tk; eb = pB + bl * tk; }
           if (m >= 1) { D[i] = er; D[i + 1] = eg; D[i + 2] = eb; } else { D[i] = r + (er - r) * m; D[i + 1] = g + (eg - g) * m; D[i + 2] = bl + (eb - bl) * m; }
@@ -153,7 +154,7 @@
     tourist(cx, cy, 11, hop > 0 ? null : 'top', { ...em, view: roll > 0 && roll < 1 ? 'side' : 'q', flip: true, walk: roll > 0 && roll < 1 ? t * 2 : undefined, aR: up >= 1 ? .3 + .5 * turning * Math.sin(t * 14) : undefined, boilKey: 'c5c' });
     if (hop > 0) hatOn('top', cx - 5, cy - 11 * 8 - 160 * Math.sin(hop * Math.PI), 99);
     camEnd();
-    engrave();
+    { const z = LAST_CAM.zoom; engrave(-1e4, 160, [(960 - LAST_CAM.cx) * z + 960, (500 - LAST_CAM.cy) * z + 540, 186 * z]); }
     // engraved year plate under the lens, and the ingredient's name
     if (t > tn - .6) { const yr = ['2009', '2017', '2026'][st]; letter(yr, 420, 560, 96, INK, { face: 'serif', bold: true, shadow: false, stroke: PAPER, strokeW: .12, pop: st ? seg(t, [0, tc - .2, tw + .5][st], [0, tc - .2, tw + .5][st] + .3) : null }); }
     const ks = seg(t, tn - .4, tn + .4) * (1 - seg(t, tT - .8, tT - .4));
