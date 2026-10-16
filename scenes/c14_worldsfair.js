@@ -250,7 +250,7 @@
     camEnd();
     if (t > tRe - .4 && t < tEx - .2) plateL('every neuron can be read', 960, 960, 68, TEAL_D, { reveal: seg(t, tRe - .4, tRe + .4) });
     if (t > tEx - .2 && t < tBe - .5) plateL('every experiment can be rerun', 960, 960, 68, TEAL_D, { reveal: seg(t, tEx - .2, tId + .3) });
-    if (t > tNe - .3 && t < tNo - .2) letter('never enough scientists', 960, 200, 64, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tNe - .3, tSc + .3) });
+    if (t > tNe + .7 && t < tNo - .2) letter('never enough scientists', 960, 200, 64, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tNe + .7, tSc + .9) });   // after the camera has left the banner
     if (t > tNo - .2) letter('now we do', 960, 200, 90, RED, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, pop: seg(t, tNo - .2, tNo + .2) < 1 ? seg(t, tNo - .2, tNo + .2) : null });
     GRAIN = 1; PAPER = false;
   }
