@@ -211,6 +211,7 @@ function deform(P, amt, iters = 2) {
 
 // ---------- textures (built once per process) ----------
 let PIGMENT = null, PIGPAT = null, GRAINC = null, PAPERC = null;
+let GRAIN = 1, POST = [], PAPER = true;   // per-frame style switches: grain strength, full-frame post passes
 function lcg(seed) { let s = seed; return () => (s = (s * 16807) % 2147483647) / 2147483647; }
 function makeTextures() {
   // pigment: soft blotches and fine granulation, as greyscale with alpha; multiplied inside every wash
@@ -482,12 +483,14 @@ function figRing(cx, cy, w, h, r, k, col = PAL.berry, sw = 2.4) {
 // ---------- frame ----------
 let T = 0;
 function renderFrame(t) {
-  T = t; LETTERS = []; CAM = LAST_CAM = null;
+  T = t; LETTERS = []; CAM = LAST_CAM = null; GRAIN = 1; POST = []; PAPER = true;
   resetMatrix(); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
   BOILN = Math.floor(t * BOIL); CLAWD_N = 0; boilSeed('frame');
   ctx.drawImage(PAPERC, 0, 0);
   drawWorld(t);
   resetMatrix(); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
+  for (const f of POST) { resetMatrix(); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over'; f(); }   // full-frame style passes (before text, so titles stay crisp)
+  resetMatrix(); ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
   flushLetters();
-  ctx.globalCompositeOperation = 'multiply'; ctx.drawImage(GRAINC, 0, 0); ctx.globalCompositeOperation = 'source-over';
+  if (GRAIN > 0) { ctx.globalAlpha = GRAIN; ctx.globalCompositeOperation = 'multiply'; ctx.drawImage(GRAINC, 0, 0); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1; }
 }

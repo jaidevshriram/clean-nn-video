@@ -26,7 +26,7 @@ export async function makeWorld({ only = null } = {}) {
   vm.createContext(g);
   const run = f => vm.runInContext(readFileSync(join(ROOT, f), 'utf8'), g, { filename: f });
   vm.runInContext(`const PROJECT = { duration: ${CUES.duration || 10}, bpm: 92, offset: 0 };`, g);
-  for (const f of ['engine/core.js', 'engine/clawd.js', 'engine/timeline.js', 'engine/kit.js', 'engine/prof.js', 'engine/world.js', 'engine/world2.js']) if (existsSync(join(ROOT, f))) run(f);
+  for (const f of ['engine/core.js', 'engine/clawd.js', 'engine/timeline.js', 'engine/kit.js', 'engine/prof.js', 'engine/world.js', 'engine/world2.js', 'engine/styles.js']) if (existsSync(join(ROOT, f))) run(f);
   const scenes = readdirSync(join(ROOT, 'scenes')).filter(f => f.endsWith('.js')).sort();
   for (const f of scenes) if (!only || only.some(o => f.startsWith(o)) || f.startsWith('00')) run('scenes/' + f);
   vm.runInContext('makeTextures(); globalThis.cs = cs; globalThis.ce = ce;', g);
