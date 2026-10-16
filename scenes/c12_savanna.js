@@ -224,16 +224,16 @@
     FAMS.forEach(([im1, im2, cx], f) => {
       const n = grownN;
       for (let i = n - 1; i >= 0; i--) {
-        const ta = a + .3 + (i - 2) * ((tEd - a) / 3) + f * .4, k = i < 2 ? 1 : seg(t, ta, ta + 1.6), side = (f % 2 ? 1 : -1), hx = cx + SLOT[i][0], hy = 820 + SLOT[i][1];
+        const ta = a + .3 + (i - 2) * ((tEd - a) / 3) + f * .4, k = i < 2 ? 1 : seg(t, ta, ta + 1.6), side = (f % 2 ? 1 : -1), hx = cx + SLOT[i][0], hy = 740 + SLOT[i][1];
         const x = lerp(cx + side * 1400, hx, easeOut(k)), y = lerp(hy + 40, hy, k);
         beast(x, y, .56, t + i, { im: i % 2 ? im2 : im1, walk: k < 1 ? t * 2 + i : 0, flip: side > 0 && k < 1, lit: (i === n - 1 && k < 1) ? 1 : .3 * Math.sin(t * 2 + i + f) + .3 });
       }
       // the herd's edge glows: generalization at its edges
-      const ek = seg(t, tEd - 1, tEd); if (ek > 0) { ctx.save(); ctx.globalAlpha = ek * (.5 + .3 * Math.sin(t * 4)); ctx.strokeStyle = '#FFE08A'; ctx.lineWidth = 5; ctx.setLineDash([14, 12]); ctx.beginPath(); ctx.ellipse(cx, 880, 300, 170, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
+      const ek = seg(t, tEd - 1, tEd); if (ek > 0) { ctx.save(); ctx.globalAlpha = ek * (.5 + .3 * Math.sin(t * 4)); ctx.strokeStyle = '#FFE08A'; ctx.lineWidth = 5; ctx.setLineDash([14, 12]); ctx.beginPath(); ctx.ellipse(cx, 800, 300, 170, 0, 0, TAU); ctx.stroke(); ctx.restore(); }
     });
     // a newcomer wanders toward the wrong herd, is nudged away, and trots home (a gag at "before anyone new can move in")
     const g = seg(t, tCa - 1, tCl + .3);
-    if (g > 0 && g < 1) { const x = g < .5 ? lerp(-200, 560, easeOut(g / .5)) : lerp(560, 820, ease((g - .5) / .5)), y = 960 - (g > .45 && g < .55 ? Math.abs(Math.sin(t * 20)) * 20 : 0); beast(x, y, .5, t, { im: NP + 'toucans-positive-2', walk: t * 3, flip: false, lit: 1 }); if (g > .45 && g < .7) sfx('?!', x + 40, y - 200, 60, '#FFF6E0', (g - .45) * 4, { stroke: INK, strokeW: .12 }); }
+    if (g > 0 && g < 1) { const x = g < .5 ? lerp(-200, 560, easeOut(g / .5)) : lerp(560, 820, ease((g - .5) / .5)), y = 880 - (g > .45 && g < .55 ? Math.abs(Math.sin(t * 20)) * 20 : 0); beast(x, y, .5, t, { im: NP + 'toucans-positive-2', walk: t * 3, flip: false, lit: 1 }); if (g > .45 && g < .7) sfx('?!', x + 40, y - 200, 60, '#FFF6E0', (g - .45) * 4, { stroke: INK, strokeW: .12 }); }
     frontGrass(t, 1010, 30);
     camEnd();
     // time-lapse speed marker
