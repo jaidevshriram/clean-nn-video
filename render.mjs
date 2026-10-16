@@ -84,9 +84,12 @@ if (args.video) {
   const list = join(segDir, 'list.txt'); writeFileSync(list, jobs.map(j => `file '${segName(j)}'`).join('\n'));
   const out = args.out || join(ROOT, 'out/video.mp4'), audio = args.audio || join(ROOT, 'audio/mix.wav');
   const hasAudio = existsSync(audio) && !args.noaudio;
+  const srt = join(ROOT, 'out/subtitles.srt'), hasSrt = existsSync(srt) && !args.range;
   await run('ffmpeg', ['-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', list,
-    ...(hasAudio ? ['-ss', String(ra), '-t', String((fb - fa) / FPS), '-i', audio, '-map', '0:v', '-map', '1:a', '-c:a', 'aac', '-b:a', '256k'] : []),
-    ...(existsSync(join(ROOT, 'out/subtitles.srt')) && !args.range ? ['-i', join(ROOT, 'out/subtitles.srt'), '-map', hasAudio ? '2:s' : '1:s', '-c:s', 'mov_text', '-metadata:s:s:0', 'language=eng'] : []),
+    ...(hasAudio ? ['-ss', String(ra), '-t', String((fb - fa) / FPS), '-i', audio] : []),
+    ...(hasSrt ? ['-i', srt] : []),
+    '-map', '0:v', ...(hasAudio ? ['-map', '1:a', '-c:a', 'aac', '-b:a', '256k'] : []),
+    ...(hasSrt ? ['-map', (hasAudio ? '2' : '1') + ':s', '-c:s', 'mov_text', '-metadata:s:s:0', 'language=eng'] : []),
     '-c:v', 'copy', '-movflags', '+faststart', out]);
   console.log('wrote ' + out + `  (${((Date.now() - start) / 60000).toFixed(1)} min)`);
   process.exit(0);

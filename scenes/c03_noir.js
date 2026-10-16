@@ -19,8 +19,8 @@
   let GRC = null;
   function fastGray(contrast) {
     POST.push(() => {
-      if (!GRC) GRC = createCanvas(W, H); const g = GRC.getContext('2d'); g.globalCompositeOperation = 'copy'; g.drawImage(CANVAS, 0, 0);
-      ctx.save(); ctx.globalCompositeOperation = 'copy'; ctx.filter = `grayscale(1) brightness(1.18) contrast(${contrast})`; ctx.drawImage(GRC, 0, 0); ctx.restore();
+      if (!GRC) GRC = createCanvas(W, H); const g = GRC.getContext('2d'); g.clearRect(0, 0, W, H); g.drawImage(CANVAS, 0, 0);
+      ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H); ctx.filter = `grayscale(1) brightness(1.18) contrast(${contrast})`; ctx.drawImage(GRC, 0, 0); ctx.restore();
       ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = '#F2EEE2'; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'lighten'; ctx.fillStyle = '#08080A'; ctx.fillRect(0, 0, W, H); ctx.restore();
     });
   }
