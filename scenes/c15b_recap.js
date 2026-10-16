@@ -5,13 +5,13 @@
 (() => {
   const HANDF = '"Patrick Hand"', MARK = '"Permanent Marker"', SERIF = '"DejaVu Serif"';
   const INKC = '#2A1E1E', PAPERP = '#F1E6CC';
-  // [cue word, nth, line 1, line 2, world, stop index, colour]
+  // [cue word, nth, line 1, line 2, world, stop index, colour, font size (default 48)]
   const TAKE = [
     ['one', 0, 'A mixed-up neuron is usually one idea', "we don't have a word for yet", 'the V neuron', 3, '#C2456A'],
-    ['two', 0, 'The evidence for the knot came from', 'blurry tools and older designs', 'better tools', 5, '#3A64B8'],
+    ['two', 0, 'Knot evidence came from blurry tools and', 'old designs: a last resort, not the default', 'better tools', 5, '#3A64B8'],
     ['three', 0, 'Similar things group together;', 'under pressure, groups just get broader', 'two theories', 7, '#7B5CA8'],
-    ['four', 0, 'Broad explanations win the learning', 'signal, so clean structure grows', "why it's clean", 12, '#2E8A86'],
-    ['five', 1, 'A mess is a lead: with better maps', 'and many scientists, it can be read', 'what clean means', 13, '#C98A2A'],
+    ['four', 0, 'Broad explanations win the signal, so clean', 'structure grows in image and language models', "why it's clean", 12, '#2E8A86', 44],
+    ['five', 1, 'A mess is a lead: with better maps', 'and many scientists, it might be read', 'what clean means', 13, '#C98A2A'],
   ];
   const ACT = ['#7B5CA8', '#C2456A', '#3A9C98', '#E8AA38'];
   // layout (in page coordinates; a gentle view transform is applied on top)
@@ -74,7 +74,7 @@
     // under the grid: where the current takeaway came from
     if (cur >= 0) { const k = seg(t, TW[cur] - .1, TW[cur] + .4), out = cur < 4 ? seg(t, TW[cur + 1] - .5, TW[cur + 1] - .25) : 0; if (k > out) { ctx.save(); ctx.globalAlpha = k * (1 - out); txt('from ' + TAKE[cur][4], LP.x + LP.w / 2, 942 - 12 * (1 - k), 50, TAKE[cur][6], { font: MARK, weight: '400' }); ctx.restore(); } }
     // right page: the five takeaways
-    TAKE.forEach(([w, n, l1, l2, from, stop, col], i) => {
+    TAKE.forEach(([w, n, l1, l2, from, stop, col, fs = 48], i) => {
       const tw = TW[i], k = seg(t, tw - .25, tw + .45); if (k <= 0) return;
       const y = rowY(i), isCur = i === cur, dim = isCur ? 1 : .62, s = lerp(1.6, 1, easeOut(clamp(k * 1.4)));
       // the highlighter band behind the line being spoken
@@ -83,8 +83,8 @@
       if (isCur) { ctx.globalAlpha *= .35 + .2 * Math.sin(t * 3); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 62 + 4 * Math.sin(t * 3), 0, TAU); ctx.stroke(); }
       ctx.restore();
       if (k > .2) { icon(i, RP.x + 74, y, s, col, t, isCur); ctx.save(); ctx.globalAlpha = clamp((k - .2) * 3); dot(RP.x + 30, y - 44, 22, col); txt(String(i + 1), RP.x + 30, y - 42, 34, '#FFF6E0', { font: MARK, weight: '400' }); ctx.restore(); }
-      writeOn(l1, RP.x + 150, y - 24, 48, INKC, seg(k, .3, .75), dim);
-      writeOn(l2, RP.x + 150, y + 28, 48, INKC, seg(k, .55, 1), dim);
+      writeOn(l1, RP.x + 150, y - 24, fs, INKC, seg(k, .3, .75), dim);
+      writeOn(l2, RP.x + 150, y + 28, fs, INKC, seg(k, .55, 1), dim);
     });
     // the gold thread from the lifted stamp to the line it explains
     if (cur >= 0) {

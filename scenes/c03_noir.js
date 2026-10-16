@@ -1,7 +1,7 @@
 // ch03 The case of the cat and the car: FILM NOIR. A rainy detective's office. The 4e:55 neuron's photos (cats and
 // cars) lie on the desk; time freezes on "what one thing could this be?"; the lamp's spotlight finds a V in every
 // photo and the ragged tear on the wall snaps into a V (every portal from now on is a V); the evidence board (flame,
-// fireboat, fox); the darkroom basement of round things that switch it off; new pointed suspects; the typewriter
+// fireboat, fox); the darkroom of round things that switch it off; new pointed suspects; the typewriter
 // (nouns vs verbs); the police sketch artist who wanders down the cat route; CASE 1 SOLVED, and CASE FILE #2.
 // Everything is grey except gold: the V strokes (generalization) and, at the very end, the next case's cover art.
 (() => {
@@ -52,11 +52,13 @@
     goldLine(P, k, o.sw ?? 7, o.a ?? 1);
     pop();
   }
-  function polaroid(name, x, y, w, h, rot, o = {}) { photoFlat(name, x, y, w, h, { border: o.border ?? 10, polaroid: true, rot, borderCol: o.col || '#ECE8DE' }); }
+  function polaroid(name, x, y, w, h, rot, o = {}) { if (o.crop) return polaroidC(name, x, y, w, h, rot, o.crop, o.border ?? 10); photoFlat(name, x, y, w, h, { border: o.border ?? 10, polaroid: true, rot, borderCol: o.col || '#ECE8DE' }); }
+  // a polaroid of one region (cr = [sx, sy, sw, sh] in image pixels) of a photo
+  function polaroidC(name, x, y, w, h, rot, cr, b) { const I = img(name); ctx.save(); ctx.translate(x + w / 2, y + h / 2); ctx.rotate(rot); ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(-w / 2 - b + 6, -h / 2 - b + 9, w + 2 * b, h + 5 * b); ctx.fillStyle = '#ECE8DE'; ctx.fillRect(-w / 2 - b, -h / 2 - b, w + 2 * b, h + 5 * b); ctx.drawImage(I, cr[0], cr[1], cr[2], cr[3], -w / 2, -h / 2, w, h); ctx.restore(); }
 
   // ---------- the office ----------
   const WIN = { x: 1290, y: 70, w: 500, h: 470 };
-  function outside(t, rt) {
+  function outside(t, rt, o = {}) {
     // the city in the rain, seen through the window (with a blinking neon sign: the neuron's building)
     ctx.save(); const P = new Path2D(); P.rect(WIN.x, WIN.y, WIN.w, WIN.h); ctx.clip(P);
     layer('c3out', () => {
@@ -70,7 +72,7 @@
     flat(rrPts(WIN.x + 196, WIN.y + 130, 70, 300, 10), '#1C1C22');
     ctx.save(); ctx.restore();
     glow(WIN.x + 231, WIN.y + 280, 190, '#FFFFFF', .45 * fl);
-    for (let i = 0; i < 5; i++) txt('4e:55'[i], WIN.x + 231, WIN.y + 168 + i * 56, 48, fl > .5 ? '#FFFFFF' : '#77777A', { font: 'serif' });
+    if (o.neon !== false) for (let i = 0; i < 5; i++) txt('4e:55'[i], WIN.x + 231, WIN.y + 168 + i * 56, 48, fl > .5 ? '#FFFFFF' : '#77777A', { font: 'serif' });
     rain(rt, 1, { n: 160, col: '#D8D8E0' });
     ctx.restore();
     // frame, mullions and the blind pulled half way
@@ -101,14 +103,16 @@
     return out;
   }
   function tear(t, m, o = {}) {
-    const [x, y, r] = TEAR, P = tearPts(x, y, r * (o.s ?? 1), m, t), path = polyPath(P);
+    const [x, y, r] = TEAR, P = tearPts(x, y, r * (o.s ?? 1), m, t), path = polyPath(P), dim = o.dim ?? 1;   // dim: a faint crack until the V is found
+    ctx.save(); ctx.globalAlpha *= dim;
     glow(x, y, r * 2.6, '#FFFFFF', .35 + .25 * m + .1 * Math.sin(t * 3));
     ctx.save(); ctx.clip(path); ctx.fillStyle = '#05060C'; ctx.fillRect(x - r * 3, y - r * 3, r * 6, r * 6);
     for (let i = 0; i < 60; i++) dot(x + (hash(i) - .5) * r * 3, y + (hash(i * 3) - .5) * r * 3, 1 + 1.5 * hash(i * 5), '#FFFFFF', .5 + .5 * Math.sin(t * 2 + i));
     ctx.restore();
     ctx.save(); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 5; ctx.shadowColor = '#FFFFFF'; ctx.shadowBlur = 24; ctx.lineJoin = 'round'; ctx.stroke(path); ctx.restore();
     if (m > .5) inColor(() => { ctx.strokeStyle = GOLD; ctx.globalAlpha *= clamp((m - .5) * 2) * (.55 + .2 * Math.sin(t * 4)); ctx.lineWidth = 4; ctx.shadowColor = '#FFC04A'; ctx.shadowBlur = 30; ctx.lineJoin = 'round'; ctx.stroke(path); });
-    for (let i = 0; i < 10; i++) { const p = P[Math.floor(hash(i * 7.3) * P.length)], f = frac(t * 1.1 + hash(i)); glow(p[0] + (hash(i * 3) - .5) * 60 * f, p[1] - 50 * f, 8 * (1 - f) + 2, '#FFFFFF', 1 - f); }
+    for (let i = 0; i < 10; i++) { const p = P[Math.floor(hash(i * 7.3) * P.length)], f = frac(t * 1.1 + hash(i)); glow(p[0] + (hash(i * 3) - .5) * 60 * f, p[1] - 50 * f, 8 * (1 - f) + 2, '#FFFFFF', (1 - f) * dim); }
+    ctx.restore();
   }
   function lamp(t, k, x = 300) {
     // a banker's lamp at the left of the desk; its light pool falls right
@@ -134,7 +138,7 @@
     for (let i = 0; i < 12; i++) { const q = i / 12 * TAU; flat(rectPts(cx + Math.cos(q) * 56 - 3, cy + Math.sin(q) * 56 - 3, 6, 6), '#1A1A1E'); }
     const hand = (a, l, w) => { ctx.save(); ctx.strokeStyle = '#1A1A1E'; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.sin(a) * l, cy - Math.cos(a) * l); ctx.stroke(); ctx.restore(); };
     hand(-.6, 34, 6); hand(1.9, 50, 4); hand(rt * TAU / 6, 56, 2);
-    outside(t, rt);
+    outside(t, rt, o);
     glow(WIN.x + 231, WIN.y + 280, 420, '#FFFFFF', .12 * (hash(Math.floor(rt * 8)) > .12 ? 1 : .3));
     if (o.tear !== false) tear(t, o.vm ?? 0, o);
     if (o.photos !== false) GRID.forEach((im, i) => polaroid(im, PX(i), PY(i), PW, PH, PR(i)));
@@ -163,7 +167,7 @@
     bg('#2A2A2E');
     camKeys(t, [[chapStart('ch03'), 1400, 330, 1.3], [a + 3, 1400, 340, 1.3], [tc - .6, 980, 600, 1], [tg + 1, 960, 700, 1.08], [q + 1.4, 950, 810, 1.15], [ce('cc_grid') + 1, 950, 815, 1.16]], .5 * (1 - frz));
     const lk = t < tc ? .12 : t < tc + .12 ? 1 : .92 + .08 * Math.sin(rt * 9) * (1 - frz);
-    office(t, rt, { lamp: lk });
+    office(t, rt, { lamp: lk, dim: .3 });
     // a lightning flicker outside early on
     // the "hundreds of times" pile: a fat stack of prints beside the cup
     const sk = seg(t, th - .8, th + .2);
@@ -178,7 +182,12 @@
     vignette(.55, '#000000');
     // frozen time: a faint ring of stopped rain and the question
     const kq = seg(t, wt('cc_grid', 'what') - .3, wt('cc_grid', 'be') + .3);
-    if (kq > 0) letter('what ONE thing could this be?', 960, 150, 64, CREAM, { face: 'marker', reveal: kq, shadow: false });
+    if (kq > 0) letter('what ONE thing could this be?', 1000, 345, 64, CREAM, { face: 'marker', reveal: kq, shadow: false });
+    // time has passed, and the new neurons looked clean
+    const ky = seg(t, a - .1, a + .6) * (1 - seg(t, wt('cc_return', 'finding') - .5, wt('cc_return', 'finding') - .1));
+    if (ky > 0) letter('years later…', 960, 110, 72, CREAM, { face: 'marker', reveal: ky, shadow: false });
+    const kc = seg(t, wt('cc_return', 'surprisingly') - .3, wt('cc_return', 'clean') + .3) * (1 - seg(t, tc - .6, tc - .2));
+    if (kc > 0) letter('modern models: surprisingly clean', 960, 110, 64, CREAM, { face: 'marker', reveal: kc, shadow: false });
     if (frz > 0) sfx('...', 1700, 600, 60, CREAM, t - q, { life: 1.6 });
     noir();
   }
@@ -192,7 +201,7 @@
     const cam = camKeys(t, [[cs('cc_v') - .2, 950, 815, 1.16], [to, 950, 815, 1.16], [wt('cc_v', 'neuron') - .1, 950, 810, 1.12], [tv - .1, 960, 560, .96], [tl + 2, 980, 560, 1.0]], .3);
     if (snap > 0 && snap < .5) { const [sx, sy] = shakeXY(t, 10 * (1 - snap * 2)); translate(sx, sy); }
     const vm = snap > 0 ? clamp(elasticOut(snap)) : 0;
-    office(t, rt, { lamp: lerp(.92, .35, ease(seg(t, to - .3, to + .2))) * (1 - .4 * pull) + .5 * pull, vm, blinds: .3 - .18 * (sweep * (1 - pull)) });
+    office(t, rt, { lamp: lerp(.92, .35, ease(seg(t, to - .3, to + .2))) * (1 - .4 * pull) + .5 * pull, vm, blinds: .3 - .18 * (sweep * (1 - pull)), dim: lerp(.3, 1, ease(seg(t, wt('cc_v', 'neuron') - .1, tv))) });
     // the spotlight sweeps along the photos; each V paints itself as the beam passes
     const sx = lerp(220, 1720, ease(sweep));
     if (sweep > 0 && pull < 1) {
@@ -209,6 +218,8 @@
     const kt = seg(t, tv - .1, tv + .5);
     if (kt > 0) letter('a V neuron', 960, 470, 96, GOLD, { face: 'marker', reveal: kt, shadow: false, stroke: '#141418', strokeW: .08 });
     if (snap > 0 && snap < 1) sfx('SNAP!', TEAR[0] - 40, 560, 62, CREAM, (t - tv) * 1.2, { rot: -.12 });
+    const kpt = seg(t, wt('cc_inputs', 'Pointed') - .2, wt('cc_inputs', 'up') + .2);
+    if (kpt > 0) letter('pointed things light it up', 960, 590, 56, CREAM, { face: 'marker', reveal: kpt, shadow: false, stroke: '#141418', strokeW: .1 });
     noir();
   }
 
@@ -233,7 +244,7 @@
     polaroid(GRID[0], 720, 320, 250, 220, -.08); polaroid(GRID[1], 985, 335, 250, 220, .07);
     vOver(720, 320, 250, 220, -.08, VAP[0], 1, { sw: 6, a: .5 + .5 * on }); vOver(985, 335, 250, 220, .07, VAP[1], 1, { sw: 6, a: .5 + .5 * on });
     dot(845, 312, 10, '#C8C4BA'); dot(1110, 327, 10, '#C8C4BA');
-    letter('4e:55', 975, 640, 56, CREAM, { face: 'marker', shadow: false });
+    letter('the V neuron', 975, 640, 56, GOLD, { face: 'marker', shadow: false });
     const SRC = [[V + 'c5a94a', 250, 130, tf, 'flame', -.06, { ax: .5, ay: .82, ty: .12, lx: .32, rx: .68 }, true], [V + 'c5a94c', 280, 540, tw, 'water jets', .05, { ax: .45, ay: .78, ty: .1, lx: .08, rx: .9 }], [V + 'c4d493a', 1400, 200, tx, 'fox faces', .07, { ax: .5, ay: .82, ty: .14, lx: .14, rx: .86 }]];
     SRC.forEach(([im, x, y, tw0, lab, r, vo, flip], i) => {
       const k = popk(t, tw0 - .55, .45); if (k <= 0) return;
@@ -255,15 +266,15 @@
     blinds(t, .22, 600);
     camEnd();
     vignette(.55, '#000000');
-    const kp = seg(t, tL - .4, tL + .3) * (1 - seg(t, tf - .8, tf - .5));
+    const kp = 1 - seg(t, tf - .8, tf - .5);   // carried over from the previous shot, already written
     if (kp > 0) letter('pointed things light it up', 960, 980, 52, CREAM, { face: 'marker', reveal: kp, shadow: false });
     noir();
   }
 
-  // 4 · the basement darkroom: round things switch it off. A ball bounces down the stairs and hits the switch.
-  const ROUND = [[V + 'n1070575', 'tennis', [.53, .68, .07]], [V + 'n1158528', 'clock', [.5, .45, .3]], [V + 'n282687', 'snail', [.55, .43, .13]], [V + 'n132986', 'shell', [.5, .45, .1]]];
-  function basement(t, lt, dur) {
-    const a = cs('cc_round'), toff = wt('cc_round', 'off'), tR = wt('cc_round', 'Round'), e = ce('cc_round');
+  // 4 · the darkroom downstairs: round things switch it off. A ball bounces down the stairs and hits the switch.
+  const ROUND = [[V + 'n1070575', 'tennis', [.53, .68, .07]], [V + 'n1158528', 'clock', [.5, .45, .3]], [V + 'n282687', 'snail', [.55, .43, .13]]];
+  function darkroom(t, lt, dur) {
+    const a = cs('cc_round'), toff = wt('cc_round', 'off'), tR = wt('cc_round', 'Round'), top = wt('cc_round', 'opposite'), tap = wt('cc_round', 'apart'), e = ce('cc_round');
     bg('#1A1A1E');
     camKeys(t, [[cs('cc_round') - .2, 700, 470, 1.08], [toff - .2, 820, 560, 1.0], [tR - .4, 1220, 500, 1.08], [e + .3, 1260, 480, 1.12]], .4);
     const lit = 1 - seg(t, toff, toff + .08);
@@ -283,19 +294,21 @@
     // darkness when the bulb is off (drawn under the photos, so they stay readable)
     if (lit < 1) { ctx.save(); ctx.globalAlpha = .45 * (1 - lit); ctx.fillStyle = '#000000'; ctx.fillRect(-400, -400, W + 800, H + 800); ctx.restore(); glow(1690, 120, 700, '#FFFFFF', .22 * (1 - lit)); }
     ctx.save(); ctx.strokeStyle = '#141418'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(bx, -200); ctx.lineTo(bxx, by); ctx.stroke(); ctx.restore();
-    flat(ellPts(bxx, by + 20, 24, 30, 16), lit > .5 ? '#FFFFFF' : '#6A6A70', { line: '#141418', lw: 3 });
-    if (lit > 0) { glow(bxx, by + 20, 760, '#FFFFFF', .6 * lit); }
+    flat(rectPts(bxx - 14, by - 14, 28, 22), '#2A2A30'); flat(ellPts(bxx, by + 38, 44, 50, 18), lit > .5 ? '#FFFFFF' : '#5A5A60', { line: '#141418', lw: 3 });
+    if (lit > 0) { glow(bxx, by + 38, 760, '#FFFFFF', .6 * lit); }
+    // the bulb is the V neuron: a gold V filament that dies when the light goes out
+    { const P = [[bxx - 22, by + 18], [bxx, by + 60], [bxx + 22, by + 18]]; if (lit > .02) goldLine(P, 1, 6, lit); else { ctx.save(); ctx.strokeStyle = '#2A2A30'; ctx.lineWidth = 5; ctx.lineJoin = 'round'; ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.restore(); } }
     // the switch on the wall
     flat(rrPts(750, 520, 50, 80, 6), '#C8C4BA', { line: '#141418', lw: 3 }); flat(rrPts(767, lit > .5 ? 534 : 562, 16, 24, 4), '#2A2A2E');
     // Clawd's flashlight beam on the photo being named
-    const TW = [wt('cc_round', 'tennis'), wt('cc_round', 'clock'), wt('cc_round', 'snail'), wt('cc_round', 'shell') + .45];
-    const ai = Math.min(3, Math.max(0, [0, 1, 2, 3].filter(i => t > TW[i] - .5).length - 1)), tx = 930 + ai * 285, fx = 720, fy = 850;
+    const TW = [wt('cc_round', 'tennis'), wt('cc_round', 'clock'), wt('cc_round', 'snail')];
+    const ai = Math.min(2, Math.max(0, [0, 1, 2].filter(i => t > TW[i] - .5).length - 1)), tx = 1060 + ai * 330, fx = 720, fy = 850;
     if (lit < 1 && t > toff + .4) { const fk = seg(t, toff + .4, toff + .6); ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(fx, fy, tx, 400); g.addColorStop(0, `rgba(255,255,240,${.5 * fk})`); g.addColorStop(1, `rgba(255,255,240,${.3 * fk})`); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(fx, fy - 10); ctx.lineTo(tx - 190, 260); ctx.lineTo(tx + 190, 600); ctx.lineTo(fx, fy + 10); ctx.closePath(); ctx.fill(); ctx.restore(); glow(tx, 420, 260, '#FFFFFF', .35 * fk); }
     // the clothesline with the round photos (the neuron's negative side), drying like a darkroom's prints
     ctx.save(); ctx.strokeStyle = '#B8B4AA'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(760, 250); ctx.quadraticCurveTo(1340, 320, 1900, 250); ctx.stroke(); ctx.restore();
     ROUND.forEach(([im, , rg], i) => {
       const k = popk(t, TW[i] - .45, .5); if (k <= 0) return;
-      const x = 800 + i * 285, w = 260, h = 260, sway = .05 * Math.sin(t * 2 + i), y = 262 + 26 * Math.sin((i + .5) / 4 * Math.PI);
+      const x = 930 + i * 330, w = 260, h = 260, sway = .05 * Math.sin(t * 2 + i), y = 262 + 26 * Math.sin((i + .5) / 3 * Math.PI);
       push(); translate(x + w / 2, y); rotate(sway + (1 - backOut(k)) * .6); translate(-(x + w / 2), -y);
       photoFlat(im, x, y + 14, w, h, { border: 9, borderCol: '#E2DED4' });
       flat(rectPts(x + w / 2 - 8, y - 6, 16, 34), '#8A867C');
@@ -309,21 +322,30 @@
     if (t > t0 && t < toff) { const u = seg(t, t0, toff - .5); ball = u < 1 ? P(u) : [lerp(P(1)[0], 775, ease(seg(t, toff - .5, toff))), lerp(P(1)[1], 560, ease(seg(t, toff - .5, toff))) - 120 * Math.sin(seg(t, toff - .5, toff) * Math.PI)]; }
     else if (t >= toff && t < toff + 3) { const u = seg(t, toff, toff + 3); ball = [lerp(775, 1500, easeOut(u)), 560 + (920 - 560) * Math.min(1, u * 3) - (u > .33 ? 90 * Math.abs(Math.sin((u - .33) * 9)) * (1 - u) : 0)]; }
     if (ball) { flat(ellPts(ball[0], ball[1] - 30, 30, 30, 18), '#D8D8C0', { line: '#141418', lw: 3 }); ctx.save(); ctx.strokeStyle = '#141418'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(ball[0] - 34, ball[1] - 30, 28, -.9, .9); ctx.stroke(); ctx.beginPath(); ctx.arc(ball[0] + 34, ball[1] - 30, 28, Math.PI - .9, Math.PI + .9); ctx.stroke(); ctx.restore(); }
+    letter('the V neuron', bxx + 190, by + 40, 46, CREAM, { face: 'marker', shadow: false, alpha: seg(t, a, a + .5) * (1 - seg(t, tR - .6, tR - .2)) });
     // Clawd at the foot of the stairs: ducks the ball, then holds the flashlight
-    const em = emotions(t, [[cs('cc_round') - .2, 'neutral'], [t0 + 1.5, 'scared'], [toff + .8, 'determined'], [TW[3], 'suspicious']]);
+    const em = emotions(t, [[cs('cc_round') - .2, 'neutral'], [t0 + 1.5, 'scared'], [toff + .8, 'determined'], [TW[2], 'suspicious'], [top, 'thinking']]);
     tourist(660, 940, 12, 'fedora', { ...em, view: 'q', aR: t > toff + .4 ? .9 : em.aR, armR: t > toff + .4 ? (u, sw) => { flat(rrPts(0, -u * .6, u * 2.2, u * 1.2, u * .3), '#2A2A2E', { line: '#141418', lw: 2 }); flat(ellPts(u * 2.3, 0, u * .4, u * .7, 10), '#FFFFFF'); } : undefined, boilKey: 'c3c' });
     camEnd();
     vignette(.4, '#000000');
     if (t > toff && t < toff + .8) sfx('click', 860, 470, 54, CREAM, t - toff);
     const kb = seg(t, wt('cc_round', 'switches') - .2, wt('cc_round', 'switches') + .5) * (1 - seg(t, tR - .7, tR - .3));
     if (kb > 0) letter('what switches it OFF', 1100, 980, 54, CREAM, { face: 'marker', reveal: kb, shadow: false });
-    const kr = seg(t, tR - .2, tR + .4);
+    const kr = seg(t, tR - .2, tR + .4) * (1 - seg(t, top - .5, top - .1));
     if (kr > 0) letter('round things', 1300, 980, 74, CREAM, { face: 'marker', reveal: kr, shadow: false });
+    // not the V's opposite: what the V is told apart from. A gold V beside a cream O
+    const kv = seg(t, top - .3, top + .3);
+    if (kv > 0) {
+      goldLine([[930, 900], [1000, 1030], [1070, 900]], kv, 12);
+      letter('vs', 1170, 965, 60, CREAM, { face: 'marker', shadow: false, alpha: kv });
+      ctx.save(); ctx.setLineDash([]); ctx.globalAlpha = kv; ctx.strokeStyle = CREAM; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(1330, 965, 64, -Math.PI / 2, -Math.PI / 2 + TAU * Math.min(kv, .999)); ctx.stroke(); ctx.restore();
+      const ka = seg(t, tap - .5, tap + .3); if (ka > 0) letter('told apart', 1620, 965, 64, CREAM, { face: 'marker', reveal: ka, shadow: false });
+    }
     noir();
   }
 
-  // 5 · new suspects: a bullet train, a rack of pool balls, a pickup truck. Each gets a V. Cats and cars get shoved off.
-  const NEW = [[V + 'pTrain34', 'Bullet', { ax: .52, ay: .62, ty: .5, lx: .2, rx: .95 }], [V + 'pPool13', 'triangle', { ax: .5, ay: .72, ty: .36, lx: .24, rx: .76 }], [V + 'pCarX5', 'fires', { ax: .52, ay: .9, ty: .45, lx: .3, rx: .78 }]];
+  // 5 · new suspects: a bullet train, the rack of pool balls, a cocktail glass. Each gets a V. Cats and cars get shoved off.
+  const NEW = [[V + 'pTrain34', 'Bullet', { ax: .52, ay: .62, ty: .5, lx: .2, rx: .95 }], [V + 'pPool13', 'triangle', { ax: .56, ay: .62, ty: .3, lx: .4, rx: .72 }, [285, 92, 120, 101]], [V + 'c5a317d', 'fires', { ax: .5, ay: .66, ty: .14, lx: .16, rx: .84 }]];
   function newShot(t, lt, dur) {
     const tn = wt('cc_new', 'never'), ts = wt('cc_new', 'shape'), e = ce('cc_new');
     bg('#2A2A2E');
@@ -332,11 +354,11 @@
     // the old cat and car prints at the front of the desk: Clawd shoves them off
     const push_ = seg(t, tn - .3, tn + 1.1);
     [[0, 330, 930, -.12], [1, 560, 950, .1], [4, 1500, 940, .14], [3, 1290, 950, -.08]].forEach(([g, x, y, r], i) => { const f = easeIn(clamp(push_ * 1.4 - i * .12)); polaroid(GRID[g], x + f * 120 * (i < 2 ? -1 : 1), y + f * 420, 150, 130, r + f * 1.5 * (i % 2 ? 1 : -1)); });
-    NEW.forEach(([im, w0, vo], i) => {
+    NEW.forEach(([im, w0, vo, crop], i) => {
       const tw = wt('cc_new', w0), k = seg(t, tw - .5, tw + .1); if (k <= 0) return;
       const x = 330 + i * 450, y = 600 + (i % 2) * 30, w = 380, h = 320, r = (i - 1) * .06;
       const ox = lerp(1500, 0, easeOut(k)), rot = r + (1 - easeOut(k)) * 1.2;
-      polaroid(im, x + ox, y - 80 * Math.sin(k * Math.PI), w, h, rot, { border: 14 });
+      polaroid(im, x + ox, y - 80 * Math.sin(k * Math.PI), w, h, rot, { border: 14, crop });
       if (k >= 1) vOver(x, y, w, h, r, vo, seg(t, tw + .15, tw + .6), { sw: 9 });
     });
     const em = emotions(t, [[cs('cc_new') - .2, 'excited'], [tn - .4, 'determined'], [tn + 1.1, 'smug'], [ts, 'proud']]);
@@ -354,10 +376,10 @@
   // 6 · the typewriter: SUSPECTS: CATS, CARS (nouns) is struck out; a neuron is a verb: POINTED, NOT ROUND
   function typewriter(t, lt, dur) {
     const a = cs('cc_noun'), tAI = wt('cc_noun', 'AI'), tB = wt('cc_noun', 'But'), tpass = wt('cc_noun', 'passing'), e = ce('cc_noun');
-    const L = [[wt('cc_noun', 'describing'), wt('cc_noun', 'cars') + .3, 'SUSPECTS: CATS, CARS'], [wt('cc_noun', 'often') - .2, wt('cc_noun', 'verb') + .25, 'NOT A NOUN. A VERB.'], [wt('cc_noun', 'distinction') - .2, wt('cc_noun', 'round') + .3, 'POINTED, NOT ROUND.']];
+    const tno = wt('cc_noun', 'nouns'), L = [[tno - .1, tno + .9, 'RULE: NO NOUNS.'], [wt('cc_noun', 'describing'), wt('cc_noun', 'cars') + .3, 'SUSPECTS: CATS, CARS'], [wt('cc_noun', 'often') - .2, wt('cc_noun', 'verb') + .25, 'NOT A NOUN. A VERB.'], [wt('cc_noun', 'distinction') - .2, wt('cc_noun', 'round') + .3, 'POINTED, NOT ROUND.']];
     bg('#2A2A2E');
-    const fly = seg(t, tpass - .1, tpass + 1.1);
-    camKeys(t, [[a - .2, 960, 560, 1.0], [L[1][0], 960, 520, 1.08], [L[2][1], 960, 500, 1.12], [e + .5, 980, 480, 1.0]], .4);
+    const fly = seg(t, tpass - .1, tpass + 1.7);
+    camKeys(t, [[a - .2, 960, 560, 1.0], [L[2][0], 960, 520, 1.08], [L[3][1], 960, 500, 1.12], [e + .5, 980, 480, 1.0]], .4);
     layer('c3tw', () => { flat(rectPts(-200, -200, W + 400, 900), '#4A4A50'); for (let i = 0; i < 30; i++) flat(rectPts(-200 + i * 80, -200, 3, 900), '#47474D'); flat(rectPts(-200, 760, W + 400, 600), '#3A2E26'); flat(rectPts(-200, 760, W + 400, 14), '#5A4636'); }, { x: -200, y: -200, w: W + 400, h: H + 400, variants: 1 });
     blinds(t, .3, 900);
     lamp(t, .9, 260);
@@ -376,7 +398,7 @@
       push(); translate(960 + carX * 0, -500 * easeIn(pfly));
       flat(rectPts(-380 + carX + 0, py - 120, 760, 760), '#EDE9DF', { shadow: [8, 10, 'rgba(0,0,0,.35)'] });
       cur.forEach((s, i) => { if (!s) return; txt(s, -340 + carX, py + 30 + i * 86, 50, '#1A1A1E', { font: 'monospace', align: 'left', weight: '700' }); });
-      if (t > tB) { const sk = seg(t, tB, tB + .6); ctx.save(); ctx.strokeStyle = '#1A1A1E'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(-350 + carX, py + 30); ctx.lineTo(-350 + carX + 640 * sk, py + 30 + 4 * Math.sin(sk * 9)); ctx.stroke(); ctx.restore(); }
+      if (t > tB) { const sk = seg(t, tB, tB + .6); ctx.save(); ctx.strokeStyle = '#1A1A1E'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(-350 + carX, py + 116); ctx.lineTo(-350 + carX + 640 * sk, py + 116 + 4 * Math.sin(sk * 9)); ctx.stroke(); ctx.restore(); }
       pop();
     }
     // the typewriter body (the carriage slides with the typing)
@@ -388,11 +410,18 @@
     for (let r = 0; r < 4; r++) for (let c = 0; c < 11 - (r === 3 ? 3 : 0); c++) { const kx = -400 + r * 22 + c * 76 + (r === 3 ? 76 : 0), ky = 730 + r * 52, hit = nLines && cur[nLines - 1] && hash(Math.floor(t * 14) * 7 + c + r * 11) > .93 && t < (L[nLines - 1][1]) ? 5 : 0; flat(ellPts(kx + 30, ky + 18 + hit, 26, 20, 16), '#14141A'); flat(ellPts(kx + 30, ky + 14 + hit, 22, 16, 16), '#CFCBC0', { line: '#0E0E10', lw: 2 }); }
     flat(rrPts(-250, 940, 500, 34, 10), '#14141A');
     pop();
+    // the next neuron down the road: a little house on the shelf; the paper plane flies to it and lands at its door
+    const land = seg(fly, .97, 1), HX = 1700, HY = 330;
+    flat(rectPts(HX - 140, HY + 52, 280, 16), '#2A2420', { line: '#141418', lw: 2 });
+    flat(rectPts(HX - 60, HY - 28, 120, 80), '#5A5A62', { line: '#141418', lw: 3 }); flat([[HX - 74, HY - 26], [HX, HY - 86], [HX + 74, HY - 26]], '#34343A', { line: '#141418', lw: 3 }); flat(rectPts(HX - 12, HY + 12, 24, 40), '#26262C');
+    for (const wx of [HX - 42, HX + 20]) flat(rectPts(wx, HY - 14, 22, 20), land > 0 ? mixCol('#3A3A40', '#FFFFFF', land) : '#3A3A40', { line: '#141418', lw: 2 });
+    if (land > 0) glow(HX, HY, 220, '#FFFFFF', .6 * land);
     // the paper plane after it's yanked out
-    if (fly > .2) { const u = seg(fly, .2, 1), px = lerp(980, 2200, easeIn(u)), py = lerp(260, -80, u) + 60 * Math.sin(u * 6); push(); translate(px, py); rotate(-.3 + .2 * Math.sin(u * 6)); scale(2.2); flat([[-70, -10], [70, 0], [-70, 26], [-40, 4]], '#EDE9DF', { line: '#1A1A1E', lw: 3 }); pop(); }
+    if (fly > .2) { const u = seg(fly, .2, 1), px = lerp(980, HX - 20, easeInOut(u)), py = lerp(260, HY + 30, u) - 120 * Math.sin(u * Math.PI), s = lerp(2.2, .6, u); if (u < 1 || t < tpass + 2.2) { push(); translate(px, py); rotate(lerp(-.3, .1, u) + .15 * Math.sin(u * 9) * (1 - u)); scale(s); flat([[-70, -10], [70, 0], [-70, 26], [-40, 4]], '#EDE9DF', { line: '#1A1A1E', lw: 3 }); pop(); } }
+    if (land > 0) letter('the next neuron', HX, HY + 105, 50, CREAM, { face: 'marker', shadow: false, alpha: land });
     // Clawd types (and blushes at "AI assistants")
     const typing = L.some(([t0, t1]) => t > t0 && t < t1);
-    const em = emotions(t, [[a - .2, 'determined'], [tAI - .1, 'shy'], [wt('cc_noun', 'love') + .9, 'determined'], [tB, 'surprised'], [L[1][0] + .3, 'idea'], [L[2][0], 'determined'], [tpass, 'proud']]);
+    const em = emotions(t, [[a - .2, 'determined'], [tAI - .1, 'shy'], [wt('cc_noun', 'love') + .9, 'determined'], [tB, 'surprised'], [L[2][0] + .3, 'idea'], [L[3][0], 'determined'], [tpass, 'proud']]);
     const ty = typing ? { aL: .3 + .6 * Math.abs(Math.sin(t * 17)), aR: .3 + .6 * Math.abs(Math.cos(t * 17)) } : {};
     tourist(1620, 900, 14, 'fedora', { ...em, ...ty, view: t > tAI - .1 && t < wt('cc_noun', 'love') + .9 ? 'front' : 'q', flip: true, boilKey: 'c3c' });
     // dings at the end of lines
@@ -402,6 +431,7 @@
     vignette(.55, '#000000');
     const kp = seg(t, tpass - .2, tpass + .5);
     if (kp > 0) letter('...and passing that on', 960, 120, 64, CREAM, { face: 'marker', reveal: kp, shadow: false });
+
     noir();
   }
 
@@ -433,10 +463,11 @@
     artist(t, 470, 990, 1.85, { img: rew < 1 ? V + 'fv-pointed' : V + 'gen-pointed-old', k: rew < 1 ? showFirst : redo, img2: V + 'fv-pointed', k2: rew < 1 ? 0 : cat, paintCol: '#CFCBC0' });
     // canvas rect in world coords (artist local 140..360, -410..-190, scaled 1.85 about (470, 990))
     const s = 1.85, cx0 = 470 + 140 * s, cy0 = 990 - 410 * s, cw = 220 * s;
-    if (t > tw1 - .3 && t < tE - .9) { const rk = seg(t, tw1 - .3, tw1 + .3); ctx.save(); ctx.strokeStyle = CREAM; ctx.lineWidth = 7; ctx.beginPath(); ctx.ellipse(cx0 + cw * .5, cy0 + cw * .66, cw * .32, cw * .16, 0, 0, TAU * rk); ctx.stroke(); ctx.restore(); }
+    if (t > tw1 - .3 && t < tE - .9) { const rk = seg(t, tw1 - .3, tw1 + .3); ctx.save(); ctx.strokeStyle = '#141418'; ctx.lineWidth = 9; ctx.setLineDash([22, 12]); ctx.beginPath(); ctx.ellipse(cx0 + cw * .5, cy0 + cw * .66, cw * .32, cw * .16, 0, 0, TAU * rk); ctx.stroke(); ctx.restore(); }
     // the whiskers flourish
     const wk = seg(t, tw2 - .5, tw2 + .3);
-    if (wk > 0) for (let i = 0; i < 6; i++) { const sd = i < 3 ? -1 : 1, j = i % 3, P = [[cx0 + cw * (.5 + sd * .1), cy0 + cw * (.62 + j * .04)], [cx0 + cw * (.5 + sd * .45), cy0 + cw * (.52 + j * .1)]]; goldLine(P, clamp(wk * 3 - i * .3), 4); }
+    // (in ink, not gold: gold is the V's colour, and the whiskers are the artist's detour)
+    if (wk > 0) for (let i = 0; i < 6; i++) { const sd = i < 3 ? -1 : 1, j = i % 3, A = [cx0 + cw * (.5 + sd * .1), cy0 + cw * (.62 + j * .04)], B = [cx0 + cw * (.5 + sd * .45), cy0 + cw * (.52 + j * .1)], k = clamp(wk * 3 - i * .3); if (k > 0) { ctx.save(); ctx.strokeStyle = '#141418'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(lerp(A[0], B[0], k), lerp(A[1], B[1], k)); ctx.stroke(); ctx.restore(); } }
     if (redo > 0 && rew >= 1) vOver(cx0, cy0, cw, cw, 0, { ax: .5, ay: .82, ty: .1, lx: .12, rx: .88 }, seg(t, tE + .1, tE + .8) * (1 - .7 * cat), { sw: 7 });
     const em = emotions(t, [[a - .2, 'confused'], [tf, 'neutral'], [tw1, 'surprised'], [tE, 'thinking'], [tc + .5, 'suspicious'], [tw2 + .2, 'bored']]);
     tourist(1520, 975, 12, 'fedora', { ...em, view: 'q', flip: true, boilKey: 'c3c' });
@@ -456,20 +487,20 @@
     const a = cs('cc_lesson'), to = wt('cc_lesson', 'one'), tg = wt('cc_lesson', 'grouping'), tc = wt('cc_lesson', 'clue'), t2 = ce('cc_lesson') + .5;
     bg('#2A2A2E');
     camKeys(t, [[a - .2, 1000, 790, 1.22], [tg, 1000, 800, 1.28], [t2 + .3, 1040, 795, 1.28], [chapStart('ch04') + .1, 1440, 770, 1.6], [chapStart('ch04') + 2, 1440, 770, 1.9]], .3);
-    office(t, t, { photos: false, vm: 1, lamp: .95, tear: false });
+    office(t, t, { photos: false, vm: 1, lamp: .95, tear: false, neon: false });
     // the CASE 1 folder
     const fk = popk(t, a + .1, .6);
     if (fk > 0) {
       push(); translate(860, 860); rotate(-.05); scale(backOut(fk)); translate(-860, -860);
-      flat(rrPts(520, 700, 220, 50, 10), '#A8A090'); flat(rrPts(500, 720, 720, 330, 10), '#B8B0A0', { shadow: [10, 14, 'rgba(0,0,0,.4)'] });
-      txt('CASE 1 · 4e:55', 630, 726, 30, '#1A1A1E', { font: 'monospace', weight: '700' });
+      flat(rrPts(505, 700, 330, 50, 10), '#A8A090'); flat(rrPts(500, 720, 720, 330, 10), '#B8B0A0', { shadow: [10, 14, 'rgba(0,0,0,.4)'] });
+      txt('CASE 1 · CAT & CAR', 670, 726, 28, '#1A1A1E', { font: 'monospace', weight: '700' });
       polaroid(GRID[0], 590, 770, 220, 190, -.07); polaroid(GRID[1], 900, 780, 220, 190, .06);
       // one V across both: one thing
       goldLine([[620, 790], [860, 1000], [1110, 790]], seg(t, to - .3, to + .6), 10);
       pop();
     }
     // Clawd with the rubber stamp: stamps the folder, then (by mistake) his own forehead
-    const ts1 = tc - .15, ts2 = tc + .85;
+    const ts1 = tc - .15, ts2 = tc + .65;
     const hop1 = env(t, ts1 - .5, ts1 + .1, .3, .1), hop2 = env(t, ts2 - .4, ts2 + .1, .25, .1);
     if (t > ts1) { const k = popk(t, ts1, .2), s = lerp(1.5, 1, easeOut(k)); push(); translate(880, 985); rotate(-.08); scale(s); ctx.strokeStyle = '#141418'; ctx.lineWidth = 8; ctx.strokeRect(-170, -46, 340, 92); pop(); txt('SOLVED', 880, 985, 74 * s, '#141418', { font: 'serif', rot: -.08 }); }
     const em = emotions(t, [[a - .2, 'happy'], [tg, 'proud'], [ts1, 'excited'], [ts2, 'dizzy'], [ts2 + 1.2, 'laugh']]);
@@ -478,9 +509,9 @@
     const stampArm = (u, sw) => { flat(rectPts(0, -u * .5, u * 1.4, u), '#2A2A2E'); flat(rrPts(u * 1.4, -u * 1.2, u * 1.2, u * 2.4, u * .2), '#5A4636', { line: '#141418', lw: 2 }); };
     tourist(cxx, 1000 - 60 * Math.sin(hop1 * Math.PI) - 40 * Math.sin(hop2 * Math.PI), 16, 'fedora', { ...em, view: 'q', flip: cxx > 800, aR: t > ts2 - .5 && t < ts2 + .2 ? 2.4 : 1.0, armR: stampArm, boilKey: 'c3c' });
     if (t > ts2) txt('SOLVED', cxx - 14, 1000 - 16 * 6.4, 34, '#141418', { font: 'serif', rot: .12 });
-    if (t > ts2 && t < ts2 + .7) sfx('thunk!', cxx - 30, 800, 54, CREAM, t - ts2);
+    if (t > ts2 && t < ts2 + .5) sfx('thunk!', cxx - 30, 800, 54, CREAM, t - ts2, { life: .5 });
     // CASE FILE #2 slides onto the desk: its cover art is the next world (orange and black cut paper), in colour
-    const k2 = seg(t, t2 - .4, t2 + .4);
+    const k2 = seg(t, t2 + .1, t2 + .7);   // after the stamps have landed
     if (k2 > 0) {
       const x = lerp(2400, 1440, easeOut(k2)), y = 770, r = lerp(.4, .06, easeOut(k2));
       push(); translate(x, y); rotate(r);
@@ -494,7 +525,7 @@
         for (let i = 0; i < 4; i++) { const hx = -125 + i * 82; ctx.fillStyle = cols[i]; ctx.beginPath(); ctx.moveTo(hx - 30, 100); ctx.lineTo(hx, 64); ctx.lineTo(hx + 30, 100); ctx.lineTo(hx + 30, 150); ctx.lineTo(hx - 30, 150); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#1A1A1A'; ctx.fillRect(hx - 9, 120, 18, 30); }
         ctx.fillStyle = '#E8862A'; ctx.beginPath(); ctx.moveTo(-70, 195); ctx.lineTo(-58, 172); ctx.lineTo(-20, 160); ctx.lineTo(25, 160); ctx.lineTo(50, 178); ctx.lineTo(62, 195); ctx.closePath(); ctx.fill();
         ctx.fillStyle = '#1A1A1A'; ctx.font = '900 46px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('CASE 2', 0, -150); ctx.font = '900 34px serif'; ctx.fillText('THE HIDDEN CAR', 0, -95);
-        ctx.fillStyle = '#F3E2BE'; ctx.font = '400 24px serif'; ctx.fillText('a heist in superposition', 0, -55);
+        ctx.fillStyle = '#F3E2BE'; ctx.font = '400 24px serif'; ctx.fillText('a case in superposition', 0, -55);
       });
       pop();
     }
@@ -504,8 +535,10 @@
     if (kl > 0) letter("a grouping isn't noise — it's a clue", 960, 140, 62, CREAM, { face: 'marker', reveal: kl, shadow: false });
     const k1 = seg(t, wt('cc_lesson', 'one', 0) - .2, wt('cc_lesson', 'one', 0) + .4) * (1 - seg(t, tg - .7, tg - .3));
     if (k1 > 0) letter('one thing we have no word for yet', 960, 140, 58, CREAM, { face: 'marker', reveal: k1, shadow: false });
+    const ks = seg(t, wt('cc_lesson', 'small') - .3, wt('cc_lesson', 'ones') + .2) * (1 - seg(t, tg - .7, tg - .3));
+    if (ks > 0) letter('…or a small family of related ones', 960, 215, 46, CREAM, { face: 'marker', reveal: ks, shadow: false });
     noir();
   }
 
-  shots([[chapStart('ch03'), returnShot], [cs('cc_v') - .2, vShot], [wt('cc_inputs', 'Look') - .4, inputs], [cs('cc_round') - .2, basement], [cs('cc_new') - .2, newShot], [cs('cc_noun') - .2, typewriter], [cs('cc_whiskers') - .2, sketch], [cs('cc_lesson') - .2, lesson]]);
+  shots([[chapStart('ch03'), returnShot], [cs('cc_v') - .2, vShot], [wt('cc_inputs', 'Look') - .4, inputs], [cs('cc_round') - .2, darkroom], [cs('cc_new') - .2, newShot], [cs('cc_noun') - .2, typewriter], [cs('cc_whiskers') - .2, sketch], [cs('cc_lesson') - .2, lesson]]);
 })();

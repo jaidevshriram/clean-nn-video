@@ -3,8 +3,8 @@
 // the narrow meerkat (one pixel) and the broad grazer (grass + tan fur) race to explain it; the learning signal pours
 // into the grazer, which grows while the meerkat starves; the next grassy photo and the grazer's head start; a
 // time-lapse of herds where newcomers join their own kind; a search for rare things, then one great triceratops;
-// camera-trap prints of understandable mistakes; the Knot paints a cat face on the skull and the real jaguars wake;
-// an aerial view of migration trails, where in nine steps an off-ramp joins the umbrella trail to the bee trail; a
+// an attack paints a cat face on the skull and the real jaguars wake; an aerial view of migration roads, where in
+// nine steps an off-ramp joins the umbrella road to the bee road; a
 // sterile zoo of strangers beside the living savanna; then the camera rises into the sky, toward orbit.
 (() => {
   const OL = 'blog/raw/one-image-logits/', UC = 'blog/raw/umbrella-circuit/', AD = 'blog/raw/adversarial-appendix/', DV = 'blog/derived/', NP = 'blog/raw/negative-poles-v2/';
@@ -13,19 +13,19 @@
 
   // ---------- the savanna ----------
   function skyL(k = 0) {
-    layer('c12sky', () => { ctx.fillStyle = lgrad(0, -300, 0, HZ + 40, [[0, '#F0A24E'], [.55, '#F6C27A'], [1, '#F8DCA0']]); ctx.fillRect(-400, -400, W + 800, HZ + 500); }, { x: -400, y: -400, w: W + 800, h: HZ + 500, variants: 1 });
+    layer('c12sky', () => { ctx.fillStyle = lgrad(0, -300, 0, HZ + 40, [[0, '#F0A24E'], [.55, '#F6C27A'], [1, '#F8DCA0']]); ctx.fillRect(-800, -400, W + 1600, HZ + 500); }, { x: -800, y: -400, w: W + 1600, h: HZ + 500, variants: 1 });
   }
   function acacia(x, y, s, col = '#3A2410') { ctx.save(); ctx.translate(x, y); ctx.scale(s, s); flat(taper([[0, 0], [10, -140], [-10, -260]], [30, 22, 16]), col); flat(taper([[2, -150], [60, -210], [110, -250]], [14, 10, 8]), col); flat(taper([[-4, -170], [-60, -230], [-120, -255]], [14, 10, 8]), col); for (let k = 0; k < 5; k++) flat(ellPts(-130 + k * 62, -266 - 10 * Math.sin(k * 1.3), 92, 26, 20), col); ctx.restore(); }
   function groundL() {
     layer('c12ground', () => {
       // distant hills, haze
-      flat([[-400, HZ + 10], [-100, HZ - 40], [300, HZ - 20], [700, HZ - 60], [1100, HZ - 25], [1500, HZ - 55], [1900, HZ - 20], [2400, HZ - 40], [2400, HZ + 40], [-400, HZ + 40]].map(p => p), '#D9A86A');
-      flat([[-400, HZ + 10], [200, HZ - 10], [800, HZ + 4], [1300, HZ - 14], [2400, HZ + 6], [2400, HZ + 60], [-400, HZ + 60]], '#CDA060');
+      flat([[-800, HZ + 10], [-500, HZ - 30], [-100, HZ - 40], [300, HZ - 20], [700, HZ - 60], [1100, HZ - 25], [1500, HZ - 55], [1900, HZ - 20], [2400, HZ - 40], [2800, HZ - 15], [2800, HZ + 40], [-800, HZ + 40]], '#D9A86A');
+      flat([[-800, HZ + 10], [200, HZ - 10], [800, HZ + 4], [1300, HZ - 14], [2400, HZ + 6], [2800, HZ - 4], [2800, HZ + 60], [-800, HZ + 60]], '#CDA060');
       acacia(-60, HZ + 30, .7, '#7A5A3A'); acacia(1580, HZ + 26, .6, '#6A4A2A'); acacia(1820, HZ + 22, .42, '#8A6A4A'); acacia(560, HZ + 22, .38, '#9A7A5A');
-      ctx.fillStyle = lgrad(0, HZ + 20, 0, 1300, [[0, '#D2A048'], [.35, '#C9963A'], [1, '#A87428']]); ctx.fillRect(-400, HZ + 20, W + 800, 1300 - HZ);
-      for (let i = 0; i < 520; i++) { const x = -400 + hash(i) * (W + 800), yy = Math.pow(hash(i * 3), 1.6), y = HZ + 40 + yy * 660, h = (6 + 26 * hash(i * 5)) * (.4 + 1.6 * yy); ctx.strokeStyle = mixCol('#8C6424', '#EBC67E', hash(i * 7)); ctx.lineWidth = 1.5 + 2 * yy; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 3, y - h * .6, x + 8 * (hash(i) - .5), y - h); ctx.stroke(); }
-      for (let i = 0; i < 14; i++) { const x = -300 + hash(i * 4.4) * (W + 600), y = HZ + 120 + hash(i * 1.9) * 500; ctx.fillStyle = 'rgba(120,80,30,.18)'; ctx.beginPath(); ctx.ellipse(x, y, 120 + 80 * hash(i), 16 + 10 * hash(i * 2), 0, 0, TAU); ctx.fill(); }
-    }, { x: -400, y: HZ - 120, w: W + 800, h: 1300 - HZ + 120, variants: 1 });
+      ctx.fillStyle = lgrad(0, HZ + 20, 0, 1300, [[0, '#D2A048'], [.35, '#C9963A'], [1, '#A87428']]); ctx.fillRect(-800, HZ + 20, W + 1600, 1300 - HZ);
+      for (let i = 0; i < 720; i++) { const x = -800 + hash(i) * (W + 1600), yy = Math.pow(hash(i * 3), 1.6), y = HZ + 40 + yy * 660, h = (6 + 26 * hash(i * 5)) * (.4 + 1.6 * yy); ctx.strokeStyle = mixCol('#8C6424', '#EBC67E', hash(i * 7)); ctx.lineWidth = 1.5 + 2 * yy; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + 3, y - h * .6, x + 8 * (hash(i) - .5), y - h); ctx.stroke(); }
+      for (let i = 0; i < 14; i++) { const x = -700 + hash(i * 4.4) * (W + 1400), y = HZ + 120 + hash(i * 1.9) * 500; ctx.fillStyle = 'rgba(120,80,30,.18)'; ctx.beginPath(); ctx.ellipse(x, y, 120 + 80 * hash(i), 16 + 10 * hash(i * 2), 0, 0, TAU); ctx.fill(); }
+    }, { x: -800, y: HZ - 120, w: W + 1600, h: 1300 - HZ + 120, variants: 1 });
   }
   function sun(x = 1400, y = 380, r = 110) { glow(x, y, r * 3.4, '#FFF2C8', .8); dot(x, y, r, '#FFE9B0'); }
   function savanna(t, o = {}) {
@@ -42,14 +42,15 @@
   function dust(t, k = 1) { for (let i = 0; i < 22; i++) { const f = frac(t * .04 + hash(i)), x = hash(i * 3.3) * W * 1.2 - 100 + f * 200, y = 300 + hash(i * 7.1) * 700 - f * 80; dot(x, y, 2 + 3 * hash(i * 5), '#FFF2C8', .4 * k * Math.sin(f * Math.PI)); } }
   // documentary grade, letterbox and lower thirds (a plain name over a short gloss)
   function docPost(t) { GRAIN = .75; fxLetterbox(90); }
-  function lower(t, a, b, latin, common, side = 0) {
+  // a plain-English title over a short gloss; side 1 = right; top = up in the sky instead of over the grass
+  function lower(t, a, b, title, gloss, side = 0, top = false) {
     const k = ease(seg(t, a, a + .6)) * (1 - ease(seg(t, b - .5, b))); if (k <= 0) return;
     POST.push(() => {
       ctx.save(); ctx.globalAlpha = k;
-      ctx.font = 'italic 58px "DejaVu Serif"'; const w1 = ctx.measureText(latin).width; ctx.font = '40px "DejaVu Serif"'; const w2 = ctx.measureText(common).width, w = Math.max(w1, w2) + 90;
-      const x0 = side ? W - 110 - w : 110;
-      ctx.fillStyle = 'rgba(20,12,4,.6)'; ctx.fillRect(x0, 800, w, 160); ctx.fillStyle = '#F0BE46'; ctx.fillRect(x0, 800, 8, 160);
-      ctx.fillStyle = '#FFF2C8'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = 'italic 58px "DejaVu Serif"'; ctx.fillText(latin, x0 + 40, 850); ctx.font = '40px "DejaVu Serif"'; ctx.fillStyle = '#F3DDB0'; ctx.fillText(common, x0 + 40, 915);
+      ctx.font = 'italic 58px "DejaVu Serif"'; const w1 = ctx.measureText(title).width; ctx.font = '40px "DejaVu Serif"'; const w2 = ctx.measureText(gloss).width, w = Math.max(w1, w2) + 90;
+      const x0 = side ? W - 110 - w : 110, y0 = top ? 110 : 800;
+      ctx.fillStyle = 'rgba(20,12,4,.6)'; ctx.fillRect(x0, y0, w, 160); ctx.fillStyle = '#F0BE46'; ctx.fillRect(x0, y0, 8, 160);
+      ctx.fillStyle = '#FFF2C8'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.font = 'italic 58px "DejaVu Serif"'; ctx.fillText(title, x0 + 40, y0 + 50); ctx.font = '40px "DejaVu Serif"'; ctx.fillStyle = '#F3DDB0'; ctx.fillText(gloss, x0 + 40, y0 + 115);
       ctx.restore();
     });
   }
@@ -143,7 +144,7 @@
       }, { x: -200, y: -200, w: W + 400, h: H + 400, variants: 1, res: 1.5 });
       glow(1380, 330, 300, '#FFF2C8', .25 + .05 * Math.sin(t * 2));
       for (let i = 0; i < 40; i++) { const x = hash(i * 9.1) * W, y = 900 + hash(i * 2.3) * 200, h = 120 + 120 * hash(i * 4.7), sw = Math.sin(t * 1.6 + i) * 14; ctx.strokeStyle = mixCol('#9C7028', '#F0CC80', hash(i * 1.3)); ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + sw * .4, y - h * .6, x + sw, y - h); ctx.stroke(); }
-      sprout(t, 960, 840, 2.6);
+      { const sa = 1 - clamp(xf * 5); if (sa > 0) { ctx.save(); ctx.globalAlpha = sa; sprout(t, 960, 840, 2.6); ctx.restore(); } }   // the big sprout leaves first, so no ghost of it lingers in the crossfade
       camEnd();
       if (xf <= 0) { docPost(t); return; }
     }
@@ -153,13 +154,13 @@
     sprout(t, 960, 930, .9);
     // the Knot peeks out of the grass, looks around, ducks
     const up = env(t, tw - .3, tk + 1.2, .35, .4);
-    if (up > 0) { ctx.save(); ctx.beginPath(); ctx.rect(1300, 300, 600, 470); ctx.clip(); knotBeast(1560, 770 - 110 * up, 70, { hat: 'safari', look: [Math.sin(t * 3), -.2] }); ctx.restore(); for (let i = 0; i < 14; i++) { const x = 1470 + i * 14, h = 40 + 30 * hash(i); ctx.strokeStyle = mixCol('#8C6424', '#E8C27A', hash(i * 3)); ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, 780); ctx.quadraticCurveTo(x + 4, 780 - h * .6, x + Math.sin(t * 2 + i) * 6, 780 - h); ctx.stroke(); } }
+    if (up > 0) { ctx.save(); ctx.beginPath(); ctx.rect(1300, 300, 600, 470); ctx.clip(); knotBeast(1560, 780 - 160 * up, 105, { hat: 'safari', look: [Math.sin(t * 3), -.2] }); ctx.restore(); for (let i = 0; i < 14; i++) { const x = 1470 + i * 14, h = 40 + 30 * hash(i); ctx.strokeStyle = mixCol('#8C6424', '#E8C27A', hash(i * 3)); ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, 780); ctx.quadraticCurveTo(x + 4, 780 - h * .6, x + Math.sin(t * 2 + i) * 6, 780 - h); ctx.stroke(); } }
     filmer(t, 640, 960, 13, [[CH, 'happy'], [a, 'thinking'], [tk + .1, 'surprised'], [tk + 1.4, 'suspicious']], { flip: false, aR: 1.1, armR: camProp });
+    { const ck = ease(seg(t, tk - .4, tk + .1)) * (1 - ease(seg(t, ce('hl_q') + .2, ce('hl_q') + .6))); if (ck > 0) letter('why not a knot?', 1560, 420, 64, '#FFF6E0', { face: 'hand', shadow: false, alpha: ck, stroke: '#3A2410', strokeW: .16 }); }
     frontGrass(t, 1000, 30);
     dust(t);
     camEnd();
     ctx.restore();
-    caption(t, tk - .4, ce('hl_q') + .6, 'why not a knot?', 860);
     docPost(t);
   }
 
@@ -167,29 +168,31 @@
   function race(t, lt, dur) {
     const a = cs('hl_race'), tPh = wt('hl_race', 'photo'), tLa = wt('hl_race', 'Labrador'), tTw = wt('hl_race', 'Two'), tRa = wt('hl_race', 'race'), tMe = wt('hl_race', 'meerkat'), tGz = wt('hl_race', 'grazer'), tWin = wt('hl_race', 'wins'), tHy = wt('hl_race', 'hyper-specific'), tPx = wt('hl_race', 'pixel'), tBr = wt('hl_race', 'broad'), tGr = wt('hl_race', 'green'), tFu = wt('hl_race', 'fur');
     const w0 = cs('hl_win'), tPi = wt('hl_win', 'picture'), tSi = wt('hl_win', 'signal'), tGo = wt('hl_win', 'grows'), tSt = wt('hl_win', 'starves'), tNx = wt('hl_win', 'next'), tHe = wt('hl_win', 'head'), e = ce('hl_win');
-    camKeys(t, [[t - lt, 1040, 560, 1.0], [tTw, 900, 600, 1.02], [tHy - .2, 1060, 640, 1.3], [tPx + .8, 1060, 640, 1.3], [tBr - .1, 900, 600, 1.08], [tFu + .5, 880, 580, 1.02], [tGo, 860, 580, 1.0], [tNx - .4, 1260, 560, .92], [tHe, 1440, 560, .95], [e + .6, 1460, 560, .96]], .5);
+    camKeys(t, [[t - lt, 1040, 560, 1.0], [tTw, 900, 600, 1.02], [tHy - .2, 1060, 640, 1.3], [tPx + .8, 1060, 640, 1.3], [tMe - .6, 720, 620, 1.1], [tBr - .1, 900, 600, 1.08], [tFu + .5, 880, 580, 1.02], [tGo, 860, 580, 1.0], [tNx - .4, 1360, 560, .92], [tHe, 1620, 560, .95], [e + .6, 1640, 560, .96]], .5);
     savanna(t);
     // the brand-new network: the seedling from the last shot, until the racers arrive
     { const sk = 1 - seg(t, tMe - .6, tMe); if (sk > 0) { ctx.save(); ctx.globalAlpha = sk; sprout(t, 960, 930, .9); ctx.restore(); } }
     const P1 = photoPost(OL + 'trained-on', 1240, 940, 520, 390, popk(t, tPh - .5, .6));
-    const P2 = t > tNx - .6 ? photoPost(OL + 'after-01', 2000, 940, 440, 330, popk(t, tNx - .6, .6)) : null;
+    const P2 = t > tNx - .6 ? photoPost(OL + 'after-01', 2270, 940, 440, 330, popk(t, tNx - .6, .6)) : null;
     // the racers
     const go = seg(t, tWin - .1, tWin + 1.2), grow = easeOut(seg(t, tGo - .4, tSt)), starve = seg(t, tGo, tSt + .6);
-    const bs = lerp(.75, 1.05, grow), ms = lerp(1.45, 1.05, starve), mx = lerp(160, 1010, easeOut(seg(t, tWin - .2, tWin + .7))), bx0 = lerp(-600, 260, easeOut(seg(t, tGz - .7, tGz + .5))), bx = lerp(bx0, 520, ease(go)) + lerp(0, 1000, easeInOut(seg(t, tNx - .2, tHe - .2)));
+    const bs = lerp(.75, 1.05, grow), ms = lerp(1.45, 1.05, starve), mx = lerp(160, 900, easeOut(seg(t, tWin - .2, tWin + .7))), bx0 = lerp(-600, 260, easeOut(seg(t, tGz - .7, tGz + .5))), bx = lerp(bx0, 520, ease(go)) + lerp(0, 1200, easeInOut(seg(t, tNx - .2, tHe - .2)));
     // the learning signal: light pouring from the photo into the circuit that explains more of it
     if (P1 && t > tPi - .6) {
-      const kk = seg(t, tPi - .6, tPi), bx1 = bx + 200 * bs, by1 = 960 - 250 * bs;
-      for (let i = 0; i < 30; i++) { const f = frac(t * .7 + i / 30), sx = P1.x0 + hash(i * 3.3) * P1.w, sy = P1.y0 + hash(i * 5.1) * P1.h, toM = i === 7; if (t > tNx && toM) continue; const tx = toM ? mx + 24 * ms : bx1, ty = toM ? 960 - 120 * ms : by1, p = arcPt([sx, sy], [tx, ty], 80, easeIn(f)); glow(p[0], p[1], 22, '#FFE08A', .9 * kk * (1 - f * .3)); dot(p[0], p[1], 5, '#FFF6D8', kk); }
+      const kk = seg(t, tPi - .6, tPi) * (1 - seg(t, tNx, tNx + .8)), bx1 = bx + 200 * bs, by1 = 960 - 250 * bs;
+      if (kk > 0) for (let i = 0; i < 30; i++) { const f = frac(t * .7 + i / 30), sx = P1.x0 + hash(i * 3.3) * P1.w, sy = P1.y0 + hash(i * 5.1) * P1.h, toM = i === 7; if (t > tNx && toM) continue; const tx = toM ? mx + 24 * ms : bx1, ty = toM ? 960 - 120 * ms : by1, p = arcPt([sx, sy], [tx, ty], 80, easeIn(f)); glow(p[0], p[1], 22, '#FFE08A', .9 * kk * (1 - f * .3)); dot(p[0], p[1], 5, '#FFF6D8', kk); }
     }
+    // the next grassy photo feeds the grazer straight away: its head start
+    if (P2 && t > tNx) { const kk = seg(t, tNx, tNx + .6), bx1 = bx + 200 * bs, by1 = 960 - 250 * bs; for (let i = 0; i < 18; i++) { const f = frac(t * .7 + i / 18), sx = P2.x0 + hash(i * 4.1) * P2.w, sy = P2.y0 + hash(i * 6.3) * P2.h, p = arcPt([sx, sy], [bx1, by1], 60, easeIn(f)); glow(p[0], p[1], 22, '#FFE08A', .9 * kk * (1 - f * .3)); dot(p[0], p[1], 5, '#FFF6D8', kk); } }
     // highlights on the photo: one pixel (narrow) vs grass and fur (broad)
     if (P1) {
-      const pk = env(t, tPx - .4, tBr - .2, .3, .3); if (pk > 0) { const px = P1.x0 + P1.w * .58, py = P1.y0 + P1.h * .82; ctx.save(); ctx.globalAlpha = pk; ctx.strokeStyle = '#3A64B8'; ctx.lineWidth = 6; ctx.strokeRect(px - 9, py - 9, 18, 18); ctx.lineWidth = 3; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.moveTo(px - 10, py + 10); ctx.lineTo(mx + 34 * ms, 960 - 100 * ms); ctx.stroke(); ctx.restore(); }
+      const pk = env(t, tPx - .4, tBr - .2, .3, .3); if (pk > 0) { const px = P1.x0 + P1.w * .58, py = P1.y0 + P1.h * .82; ctx.save(); ctx.globalAlpha = pk; ctx.strokeStyle = '#3A64B8'; ctx.lineWidth = 6; ctx.strokeRect(px - 9, py - 9, 18, 18); ctx.globalAlpha = pk * seg(t, tMe - .3, tMe + .1); ctx.lineWidth = 3; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.moveTo(px - 10, py + 10); ctx.lineTo(mx + 34 * ms, 960 - 100 * ms); ctx.stroke(); ctx.restore(); }
       const gk = env(t, tGr - .3, tPi + 1.5, .3, .5), fk = env(t, tFu - .3, tPi + 1.5, .3, .5);
       if (gk > 0) { ctx.save(); ctx.globalAlpha = gk; ctx.strokeStyle = '#7AE05A'; ctx.lineWidth = 7; ctx.setLineDash([16, 10]); ctx.beginPath(); ctx.rect(P1.x0 + 8, P1.y0 + P1.h * .62, P1.w - 16, P1.h * .36); ctx.stroke(); ctx.restore(); if (gk > .5) letter('grass', P1.x0 + 70, P1.y0 + P1.h * .62 - 30, 48, '#E8FFD0', { face: 'marker', shadow: false, stroke: '#2A4A1A', strokeW: .16 }); }
       if (fk > 0) { ctx.save(); ctx.globalAlpha = fk; ctx.strokeStyle = '#FFC266'; ctx.lineWidth = 7; ctx.setLineDash([16, 10]); ctx.beginPath(); ctx.ellipse(P1.x0 + P1.w * .5, P1.y0 + P1.h * .3, P1.w * .34, P1.h * .3, -.1, 0, TAU); ctx.stroke(); ctx.restore(); if (fk > .5) letter('tan fur', P1.x0 + P1.w * .82, P1.y0 + 40, 48, '#FFF0C8', { face: 'marker', shadow: false, stroke: '#5A3A10', strokeW: .16 }); }
     }
     // the meerkat's burrow
-    ctx.fillStyle = '#6A4620'; ctx.beginPath(); ctx.ellipse(160, 966, 70, 16, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(160, 964, 40, 9, 0, 0, TAU); ctx.fill();
+    { const bk = seg(t, tMe - .6, tMe - .2); if (bk > 0) { ctx.save(); ctx.globalAlpha = bk; ctx.fillStyle = '#6A4620'; ctx.beginPath(); ctx.ellipse(160, 966, 70, 16, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(160, 964, 40, 9, 0, 0, TAU); ctx.fill(); ctx.restore(); } }
     const mUp = easeOut(seg(t, tMe - .5, tMe)), mHop = t > tWin - .2 && t < tWin + .7 ? Math.abs(Math.sin(t * 18)) * 20 : 0;
     if (mUp > 0) { ctx.save(); if (t < tWin - .2) { ctx.beginPath(); ctx.rect(-400, 0, 3000, 966); ctx.clip(); } meerkat(mx, 966 + (1 - mUp) * 200 - mHop, ms, { sad: t > tSt - .3, pixel: '#7A9A4A' }); ctx.restore(); }
     if (t > tSt - .2 && t < tNx + 1) { const k = popk(t, tSt - .2, .4); ctx.save(); ctx.translate(mx + 20, 966 - 230 * ms); ctx.scale(backOut(k), backOut(k)); flat(ellPts(0, 0, 50, 26, 18), '#8A93A8'); flat(ellPts(-24, 6, 30, 18, 14), '#8A93A8'); for (let i = 0; i < 4; i++) { const f = frac(t * 1.5 + i / 4); ctx.strokeStyle = '#7FA6D8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-20 + i * 14, 24 + f * 40); ctx.lineTo(-22 + i * 14, 34 + f * 40); ctx.stroke(); } ctx.restore(); }
@@ -200,21 +203,23 @@
     dust(t);
     camEnd();
     caption(t, a - .3, tPh - .5, 'a brand-new network', 180);
-    caption(t, tPh - .4, tTw - .3, 'one photo: a Labrador on grass', 180);
+    caption(t, tPh - .4, tTw - .3, 'one photo: a dog on grass', 180);
     caption(t, tRa - .4, tHy - .3, 'two circuits race to explain it', 180);
-    lower(t, tMe - .3, tBr - .4, 'the narrow circuit', 'the meerkat · checks one exact pixel');
+    lower(t, tMe - .3, tBr - .4, 'the narrow circuit', 'the meerkat · checks one exact pixel', 1);
     lower(t, tGz - .3, w0 + .4, 'the broad circuit', 'the grazer · looks for grass and tan fur', 1);
     caption(t, tPi - .5, tGo - .3, 'it explains more, so it gets more of the learning signal', 180);
     caption(t, tGo - .2, tNx - .4, 'it grows · the narrow one starves', 180);
-    lower(t, tNx - .3, e + 1, 'a head start', 'the next grassy photo is already half explained');
+    lower(t, tNx - .3, e + 1, 'a head start', 'the next grassy photo is already half explained', 0, true);
     docPost(t);
   }
 
   // ---------- 4 · ecology: a time-lapse of herds; newcomers join their own kind ----------
   const FAMS = [[NP + 'wolves-positive-1', NP + 'wolves-positive-2', 330], [NP + 'toucans-positive-1', NP + 'toucans-positive-2', 960], [NP + 'taxis-positive-1', NP + 'taxis-positive-2', 1590]];
   const SLOT = [[-120, 0], [130, 20], [10, 110], [-190, 120]];
+  // the earlier neuron's growth (yellow flowers → dogs → tennis balls → broccoli), the essay's photos
+  const NO = 'blog/raw/neuron-overflow/', GROW = [[NO + 'iv1_1654_0_0', 'yellow', 'flowers'], [NO + 'iv1_30024_3_1', 'dogs', 'dogs'], [NO + 'iv1_3753_1_2', 'tennis', 'tennis balls'], [NO + 'iv1_30024_4_0', 'broccoli', 'broccoli']];
   function ecology(t, lt, dur) {
-    const a = cs('hl_ecology'), e = ce('hl_ecology'), tEc = wt('hl_ecology', 'ecosystem'), tCa = wt('hl_ecology', 'captures'), tCl = wt('hl_ecology', 'cluster'), tEd = wt('hl_ecology', 'growth');
+    const a = cs('hl_ecology'), e = ce('hl_ecology'), tEc = wt('hl_ecology', 'ecosystem'), tCa = wt('hl_ecology', 'captures'), tCl = wt('hl_ecology', 'cluster'), tEd = wt('hl_ecology', 'growth'), tSa = wt('hl_ecology', 'same');
     const day = seg(t, a - .3, e + .5);
     camKeys(t, [[t - lt, 960, 690, 1.0], [e + .5, 960, 700, 1.04]], .3);
     // time-lapse sky: the sun sweeps, the light warms and cools
@@ -224,6 +229,8 @@
     for (let i = 0; i < 3; i++) { const x = -600 + frac(day * 3 + i / 3) * 3200; ctx.fillStyle = 'rgba(60,30,0,.14)'; ctx.beginPath(); ctx.ellipse(x, 820 + i * 60, 360, 50, 0, 0, TAU); ctx.fill(); }
     // the herds: each grows as newcomers arrive and join their own kind
     const grownN = Math.floor(lerp(2, 4.99, seg(t, a + .5, tEd)));
+    const gk = seg(t, tSa - .4, tSa + .2) * (1 - seg(t, e + .2, e + .6));
+    { const sa = 1 - gk; if (sa > 0) { ctx.save(); ctx.globalAlpha = sa; FAMS.forEach(([im1, im2, cx], f) => photoPost(im1, cx, 640, 230, 150, popk(t, a - .2 + f * .25, .6))); ctx.restore(); } }   // each herd's family, on a big sign
     FAMS.forEach(([im1, im2, cx], f) => {
       const n = grownN;
       for (let i = n - 1; i >= 0; i--) {
@@ -236,103 +243,87 @@
     });
     // a newcomer wanders toward the wrong herd, is nudged away, and trots home (a gag at "before anyone new can move in")
     const g = seg(t, tCa - 1, tCl + .3);
-    if (g > 0 && g < 1) { const x = g < .5 ? lerp(-200, 560, easeOut(g / .5)) : lerp(560, 820, ease((g - .5) / .5)), y = 880 - (g > .45 && g < .55 ? Math.abs(Math.sin(t * 20)) * 20 : 0); beast(x, y, .5, t, { im: NP + 'toucans-positive-2', walk: t * 3, flip: false, lit: 1 }); if (g > .45 && g < .7) sfx('?!', x + 40, y - 200, 60, '#FFF6E0', (g - .45) * 4, { stroke: INK, strokeW: .12 }); }
+    if (g > 0 && g < 1) { const x = g < .5 ? lerp(-200, 560, easeOut(g / .5)) : lerp(560, 820, ease((g - .5) / .5)), y = 880 - (g > .45 && g < .55 ? Math.abs(Math.sin(t * 20)) * 20 : 0); beast(x, y, .5, t, { im: NP + 'toucans-positive-2', walk: t * 3, flip: false, lit: 1 }); if (g > .45 && g < .7) sfx('?!', x + 40, y - 220, 110, '#FFF6E0', (g - .45) * 4, { stroke: INK, strokeW: .12 }); }
     frontGrass(t, 1010, 30);
     camEnd();
     // time-lapse speed marker
-    letter('×1000', 1740, 170, 52, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, screen: true, alpha: .9 });
+    letter('×1000', 1740, 170, 52, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, screen: true, alpha: .9 * (1 - seg(t, tSa - .6, tSa - .2)) });
+    // the callback: the same growth as one neuron spreading, photo by photo
+    if (gk > 0) { ctx.save(); ctx.globalAlpha = gk; ctx.fillStyle = 'rgba(20,12,4,.55)'; ctx.beginPath(); ctx.roundRect(330, 110, 1260, 250, 20); ctx.fill(); ctx.restore(); letter("one neuron's growth", 960, 140, 44, '#F3DDB0', { face: 'hand', shadow: false, alpha: gk, screen: true });
+      GROW.forEach(([im, w, lab], i) => { const k = popk(t, wt('hl_ecology', w) - .3, .4) * gk; if (k <= 0) return; const x = 480 + i * 320; if (i) { ctx.save(); ctx.globalAlpha = gk; ctx.strokeStyle = '#FFE08A'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - 220, 245); ctx.lineTo(x - 108, 245); ctx.moveTo(x - 124, 232); ctx.lineTo(x - 108, 245); ctx.lineTo(x - 124, 258); ctx.stroke(); ctx.restore(); } ctx.save(); ctx.translate(x, 245); ctx.scale(backOut(k), backOut(k)); photoFlat(im, -90, -70, 180, 120, { border: 6, borderCol: '#F3DDB0', shadow: false }); ctx.restore(); letter(lab, x, 336, 36, '#FFF6E0', { face: 'hand', shadow: false, alpha: clamp(k), screen: true }); }); }
     caption(t, tEc - .5, tCa, "it's like an ecosystem", 180);
     lower(t, tCa - .2, tEd - .5, 'like joins like', 'a neighbourhood captures the next related thing');
-    caption(t, tCl - .5, e + .5, "that's why things cluster", 180);
+    caption(t, tCl - .5, tSa - .3, "that's why things cluster", 180);
     docPost(t);
   }
 
   // ---------- 5 · rare things: the search, then one triceratops ----------
-  const ODD = [[DV + 'rare-hummingbird', 'ice cream?', DV + 'n755-icecream-1', 'hummingbird'], [DV + 'rare-wheelbarrow', 'lawn mower?', DV + 'n786-mower-1', 'wheelbarrow'], [DV + 'rare-banana', 'vaulted ceiling?', DV + 'n58-vault-1', 'ordinary']];
   function rare(t, lt, dur) {
-    const a = cs('hl_rare'), tHi = wt('hl_rare', 'hidden'), tOd = wt('hl_rare', 'odd'), tIn = wt('hl_rare', 'Instead'), tCo = wt('hl_rare', 'gathered'), tTr = wt('hl_rare', 'triceratops'), tSt = ce('hl_rare') + 1, tOr = wt('hl_rare', 'ordinary'), tMi = wt('hl_rare', 'mistakes'), e = ce('hl_rare');
-    const gal = 0;   // the gallery of understandable mistakes was cut from the narration; the shot stays on the triceratops
-    if (gal < 1) {
-      // the search: Clawd with binoculars; odd hiding places are empty; then the triceratops rises over the kopje
-      camKeys(t, [[t - lt, 300, 640, 1.25], [tHi, 520, 660, 1.3], [tOd + .6, 1100, 650, 1.25], [tIn, 1100, 600, 1.0], [tTr, 1150, 560, .95], [tSt, 1150, 560, .95]], .4);
-      savanna(t, { sx: 1180, sy: 360 });
-      // a hollow log and a termite mound: empty
-      flat(rrPts(380, 860, 300, 90, 40), '#6A4A2A', { line: INK, lw: 4 }); dot(400, 905, 38, '#2A1A0A'); dot(400, 905, 26, '#120A04');
-      flat([[880, 960], [920, 760], [960, 720], [1010, 780], [1040, 960]], '#B0743A', { line: INK, lw: 4 }); dot(955, 840, 16, '#3A2010');
-      if (t > tHi + .3 && t < tIn) { sfx('empty', 420, 820, 50, '#FFF6E0', t - tHi - .3, { life: 1.4, stroke: INK, strokeW: .12 }); sfx('empty', 960, 690, 50, '#FFF6E0', t - tOd - .1, { life: 1.4, stroke: INK, strokeW: .12 }); }
-      // the kopje: a rock outcrop; the triceratops climbs into view against the sun
-      flat([[1260, 960], [1300, 760], [1420, 700], [1560, 720], [1660, 800], [1720, 960]], '#9A6A3A', { line: INK, lw: 4 }); flat([[1320, 780], [1420, 720], [1520, 740], [1460, 800]], '#B88450');
-      const rise = easeOut(seg(t, tCo - .6, tTr - .1));
-      if (rise > 0) triceratops(1490, 720 + (1 - rise) * 260, .9, t, { im: rise > .6 ? AD + 'iv_clean' : null, lit: seg(t, tTr - .3, tTr + .4) });
-      ctx.fillStyle = '#9A6A3A'; ctx.beginPath(); ctx.moveTo(1250, 1000); ctx.lineTo(1290, 800); ctx.lineTo(1700, 820); ctx.lineTo(1740, 1000); ctx.fill();
-      ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1290, 800); ctx.lineTo(1700, 820); ctx.stroke();
-      filmer(t, 220, 980, 15, [[t - lt, 'thinking'], [tHi, 'confused'], [tIn, 'surprised'], [tTr, 'starstruck']], { aR: 1.2, armR: binoProp });
-      frontGrass(t, 1010, 34);
-      camEnd();
-      caption(t, a + .2, tIn - .3, 'rare things: hidden somewhere odd?', 180);
-      lower(t, tTr - .4, ce('hl_rare') + .3, 'one triceratops neuron', 'rare things gather in one place');
-    }
-    if (gal > 0) {
-      // camera-trap prints: odd photos and the ordinary neurons that misread them
-      ctx.save(); ctx.globalAlpha = gal;
-      camKeys(t, [[tSt - .6, 960, 560, 1.06], [e + .5, 960, 560, 1.0]], .4);
-      savanna(t, { sx: 1180, sy: 360 });
-      ODD.forEach(([im, guess, ref], i) => {
-        const tg = i === 0 ? tSt + .5 : i === 1 ? wt('hl_rare', 'wheelbarrow') : tOr - .6, k = popk(t, tg - .5, .6), x = 400 + i * 560, y = 850;
-        if (k <= 0) return;
-        ctx.save(); ctx.translate(x, y); ctx.rotate((i - 1) * .04); ctx.scale(backOut(k), backOut(k));
-        flat(rectPts(-10, -40, 20, 140), '#6A4A2A', { line: INK, lw: 3 });
-        flat(rectPts(-190, -480, 380, 440), '#F7F1E4', { shadow: [10, 14, 'rgba(40,20,0,.35)'], line: INK, lw: 2 });
-        photoFlat(im, -170, -460, 340, 340, {});
-        ctx.restore();
-        const tq = i === 0 ? wt('hl_rare', 'ice') - .4 : tg + .9, gk = seg(t, tq, tq + .5);
-        if (gk > 0) { ctx.save(); ctx.translate(x + 170, y - 470); ctx.rotate(.08); ctx.scale(backOut(gk), backOut(gk)); photoFlat(ref, -100, -100, 200, 200, { border: 10, borderCol: '#FFF6E0' }); ctx.restore(); letter(guess, x, y - 82, 50, '#C2456A', { face: 'marker', shadow: false, rot: (i - 1) * .04, pop: gk < 1 ? gk : null }); }
-      });
-      filmer(t, 1800, 990, 12, [[tSt - .6, 'thinking'], [wt('hl_rare', 'cream') + .2, 'laugh'], [tOr, 'happy']], { flip: true, aR: 1.1, armR: camProp });
-      frontGrass(t, 1030, 26);
-      camEnd();
-      ctx.restore();
-      lower(t, tOr - .4, e + .5, 'Erratum intellegibile', 'ordinary neurons, understandable mistakes');
-    }
+    const a = cs('hl_rare'), tHi = wt('hl_rare', 'hidden'), tOd = wt('hl_rare', 'odd'), tIn = wt('hl_rare', 'Instead'), tCo = wt('hl_rare', 'gathered'), tTr = wt('hl_rare', 'triceratops'), tSt = ce('hl_rare') + 1;
+    // the search: Clawd with binoculars; odd hiding places are empty; then the triceratops rises over the kopje
+    camKeys(t, [[t - lt, 300, 640, 1.25], [tHi, 520, 660, 1.3], [tOd + .6, 1100, 650, 1.25], [tIn, 1100, 600, 1.0], [tTr, 1150, 560, .95], [tSt, 1150, 560, .95]], .4);
+    savanna(t, { sx: 1180, sy: 360 });
+    // a hollow log and a termite mound: empty
+    flat(rrPts(440, 860, 300, 90, 40), '#6A4A2A', { line: INK, lw: 4 }); dot(460, 905, 38, '#2A1A0A'); dot(460, 905, 26, '#120A04');
+    flat([[880, 960], [920, 760], [960, 720], [1010, 780], [1040, 960]], '#B0743A', { line: INK, lw: 4 }); dot(955, 840, 16, '#3A2010');
+    if (t > tHi + .3) sfx('empty', 540, 800, 64, '#FFF6E0', t - tHi - .3, { life: 1.6, stroke: INK, strokeW: .12 });
+    if (t > tOd) sfx('empty', 960, 670, 64, '#FFF6E0', t - tOd, { life: 1.6, stroke: INK, strokeW: .12 });
+    // the kopje: a rock outcrop; the triceratops climbs into view against the sun
+    flat([[1260, 960], [1300, 760], [1420, 700], [1560, 720], [1660, 800], [1720, 960]], '#9A6A3A', { line: INK, lw: 4 }); flat([[1320, 780], [1420, 720], [1520, 740], [1460, 800]], '#B88450');
+    const rise = easeOut(seg(t, tCo - .6, tTr - .1)), lit = seg(t, tTr - .3, tTr + .4);
+    if (rise > 0) triceratops(1490, 720 + (1 - rise) * 260, .9, t, { im: rise > .6 ? AD + 'iv_clean' : null, lit });
+    ctx.fillStyle = '#9A6A3A'; ctx.beginPath(); ctx.moveTo(1250, 1000); ctx.lineTo(1290, 800); ctx.lineTo(1700, 820); ctx.lineTo(1740, 1000); ctx.fill();
+    ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1290, 800); ctx.lineTo(1700, 820); ctx.stroke();
+    // the neuron's window, held up big: one triceratops neuron
+    if (lit > 0) { const k = backOut(popk(t, tTr - .3, .5)); ctx.save(); ctx.translate(1440, 300); ctx.rotate(-.03); ctx.scale(k, k); photoFlat(AD + 'iv_clean', -170, -115, 340, 230, { border: 12, borderCol: '#F3DDB0' }); ctx.restore(); }
+    filmer(t, 290, 980, 15, [[t - lt, 'thinking'], [tHi, 'confused'], [tIn, 'surprised'], [tTr, 'starstruck']], { aR: 1.2, armR: binoProp });
+    frontGrass(t, 1010, 34);
+    camEnd();
+    caption(t, a + .2, tIn - .3, 'rare things: hidden somewhere odd?', 180);
+    lower(t, tTr - .4, ce('hl_rare') + .3, 'one triceratops neuron', 'rare things gather in one place', 1);
     docPost(t);
   }
 
   // ---------- 6 · the attack paints a cat face; the real jaguars wake ----------
   function adversarial(t, lt, dur) {
-    const a = cs('hl_adversarial'), tAt = wt('hl_adversarial', 'attacks'), tNo = wt('hl_adversarial', 'normal'), tMa = wt('hl_adversarial', 'Make'), tJa = wt('hl_adversarial', 'jaguar'), tPa = wt('hl_adversarial', 'paints'), tFu = wt('hl_adversarial', 'fur'), tSw = wt('hl_adversarial', 'switching'), tRe = wt('hl_adversarial', 'jaguar', 1), e = ce('hl_adversarial');
+    const a = cs('hl_adversarial'), tMa = wt('hl_adversarial', 'Make'), tJa = wt('hl_adversarial', 'jaguar'), tSh = wt('hl_adversarial', 'shifted'), tTu = wt('hl_adversarial', 'turned'), tPa = wt('hl_adversarial', 'paints'), tFu = wt('hl_adversarial', 'fur'), tSw = wt('hl_adversarial', 'switching'), tRe = wt('hl_adversarial', 'jaguar', 1), e = ce('hl_adversarial');
     const zoomP = seg(t, tMa - .6, tMa + .4);
     camKeys(t, [[t - lt, 1100, 560, .95], [tMa - .6, 1160, 560, 1.0], [tMa + .4, 1060, 470, 1.6], [tFu + .4, 1060, 470, 1.6], [tSw - .1, 1000, 560, 1.0], [e + .5, 1000, 560, .98]], .4);
     savanna(t, { sx: 1180, sy: 360 });
-    const jOn = seg(t, tSw - .2, tRe);
-    jaguar(330, 1000, 1.2, t, jOn, { im: NP + 'cats-positive-1' });
-    jaguar(1630, 1010, 1.15, t, jOn * seg(t, tSw, tRe + .3), { flip: true, im: NP + 'cats-positive-2' });
+    // the jaguars rise out of the grass on "jaguar", asleep until their neurons switch on
+    const jIn = easeOut(seg(t, tJa - .4, tJa + .4)), jOn = seg(t, tSw - .2, tRe);
+    if (jIn > 0) { ctx.save(); ctx.globalAlpha = jIn; jaguar(330, 1000 + (1 - jIn) * 120, 1.2, t, jOn, { im: NP + 'cats-positive-1' }); jaguar(1630, 1010 + (1 - jIn) * 120, 1.15, t, jOn * seg(t, tSw, tRe + .3), { flip: true, im: NP + 'cats-positive-2' }); ctx.restore(); }
     // the triceratops grazes; its window grows into a big print for the attack
     triceratops(1150, 940, .9, t, {});
     const fx = 1150 - 27, fy = 940 - 225, fw = 180, fh = 117;
     const P = { x: lerp(fx, 860, zoomP), y: lerp(fy, 300, zoomP), w: lerp(fw, 400, zoomP), h: lerp(fh, 300, zoomP) };
+    // a strong attack has to survive being shifted and turned: the print slides and tilts while it is checked
+    const wob = env(t, tSh - .2, tTu + .7, .2, .3);
+    ctx.save(); if (wob > 0) { ctx.translate(P.x + P.w / 2 + 40 * Math.sin(t * 5) * wob, P.y + P.h / 2); ctx.rotate(.12 * Math.sin(t * 3.4) * wob); ctx.translate(-P.x - P.w / 2, -P.y - P.h / 2); }
     flat(rectPts(P.x - 10, P.y - 10, P.w + 20, P.h + 20), '#F3DDB0', { shadow: [8, 10, 'rgba(40,20,0,.35)'] });
     photoFlat(AD + 'iv_clean', P.x, P.y, P.w, P.h, {});
     const pk = seg(t, tPa - .4, tFu + .2);
     if (pk > 0) { ctx.save(); ctx.beginPath(); ctx.rect(P.x, P.y, P.w * pk, P.h); ctx.clip(); photoFlat(AD + 'iv_adv', P.x, P.y, P.w, P.h, {}); ctx.restore(); }
-    // the Knot, the painter of the attack, with a brush; it shrinks when the jaguars wake
-    const kIn = easeOut(seg(t, tAt - .6, tAt + .4)), shrink = seg(t, tSw, tRe + .5);
-    if (kIn > 0) {
-      const kx = lerp(1700, 1360, kIn), ky = 900, ks = 90 * (1 - .35 * shrink), bxp = P.x + P.w * pk, byp = P.y + P.h * (.5 + .35 * Math.sin(t * 9));
-      ctx.save(); ctx.fillStyle = 'rgba(40,20,0,.28)'; ctx.beginPath(); ctx.ellipse(kx, ky + ks, ks * 1.1, 14, 0, 0, TAU); ctx.fill(); ctx.restore();
-      knotBeast(kx, ky, ks, { hat: 'beret', grin: shrink < .3, look: [-1, -.5] });
-      if (pk > 0 && pk < 1) { ctx.strokeStyle = '#6A4A2A'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(kx - ks * .6, ky - ks * .2); ctx.lineTo(bxp + 20, byp); ctx.stroke(); dot(bxp + 10, byp, 12, '#C27A3A'); }
-      if (shrink > .2 && shrink < 1) sfx('oops', kx, ky - ks - 40, 52, '#E7D4FF', (shrink - .2) * 2, { stroke: '#2A1A3A', strokeW: .14 });
+    ctx.restore();
+    // the attack itself: a plain brush that paints the change across the print, then leaves
+    const bIn = seg(t, tPa - .8, tPa - .3) * (1 - seg(t, tSw - .4, tSw));
+    if (bIn > 0) {
+      const bxp = P.x + P.w * pk, byp = P.y + P.h * (.5 + .35 * Math.sin(t * 9)), hx = bxp + 150 + (1 - bIn) * 400, hy = byp + 190;
+      ctx.save(); ctx.globalAlpha = bIn; ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 22; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(bxp + 30 + (1 - bIn) * 400, byp + 30); ctx.stroke(); ctx.strokeStyle = '#8C5A2A'; ctx.lineWidth = 14; ctx.stroke();
+      flat(rectPts(-10, -14, 24, 28).map(([x, y]) => [x + bxp + 22 + (1 - bIn) * 400, y + byp + 18]), '#B9B4A8', { line: INK, lw: 2 }); dot(bxp + 10 + (1 - bIn) * 400, byp + 6, 14, '#C27A3A');
+      ctx.restore();
+      letter('the attack', P.x + P.w + 90, P.y + 20, 34, '#FFF6E0', { face: 'marker', shadow: false, alpha: bIn, stroke: INK, strokeW: .16 });
     }
-    filmer(t, 640, 990, 12, [[t - lt, 'neutral'], [tAt, 'suspicious'], [tPa, 'surprised'], [tSw, 'scared'], [tRe + .6, 'excited']], { aR: 1.1, armR: camProp });
+    filmer(t, 640, 990, 12, [[t - lt, 'neutral'], [a + 1, 'suspicious'], [tPa, 'surprised'], [tSw, 'scared'], [tRe + .6, 'excited']], { aR: 1.1, armR: camProp });
     frontGrass(t, 1020, 30);
     camEnd();
     caption(t, a + .1, tMa - .5, 'even attacks use the normal roads', 180);
-    if (zoomP > .9) { const k = seg(t, tMa + .2, tMa + .7) * (1 - seg(t, tSw - .6, tSw - .2)); if (k > 0) letter(pk > .5 ? 'a cat face, spotted fur' : 'make the skull look like a jaguar', 960, 170, 56, '#FFF6E0', { face: 'hand', shadow: false, alpha: k, stroke: INK, strokeW: .16, screen: true }); }
-    lower(t, tSw - .3, e + .5, 'Panthera onca', 'the real jaguar neurons switch on');
+    if (zoomP > .9) { const k = seg(t, tMa + .2, tMa + .7) * (1 - seg(t, tSw - .6, tSw - .2)); if (k > 0) letter(t < tSh - .3 ? 'make the skull look like a jaguar' : t < tPa - .3 ? 'it must survive being shifted and turned' : 'it paints a cat face and spotted fur', 960, 170, 56, '#FFF6E0', { face: 'hand', shadow: false, alpha: k, stroke: INK, strokeW: .16, screen: true }); }
+    lower(t, tSw - .3, e + .5, 'the real jaguars wake', 'the real jaguar neurons switch on', 0, true);
     docPost(t);
   }
 
-  // ---------- 7 · aerial view: the umbrella trail, the bee trail, and the off-ramp built in nine steps ----------
+  // ---------- 7 · aerial view: the umbrella road, the bee road, and the off-ramp built in nine steps ----------
   const UMB = ['b18-240-ex1', 'b18-240-ex2', 'b18-240-ex3', 'b18-240-ex4'].map(s => UC + s), BEE = ['b18-752-ex1', 'b18-752-ex2', 'b17-797-ex1', 'b18-752-ex3', 'b17-797-ex2', 'b18-752-ex4', 'b17-797-ex3'].map(s => UC + s);
   const TU = [[-300, 330], [300, 350], [800, 300], [1300, 330], [2300, 300]], TB = [[-300, 800], [400, 760], [1000, 790], [1600, 760], [2300, 780]], RAMP = [[620, 335], [760, 450], [900, 620], [1060, 760], [1180, 778]];
   function trail(P, w, col) { const C = through(P, 12); ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = mixCol(col, '#000000', .15); ctx.lineWidth = w + 10; ctx.beginPath(); C.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke(); ctx.restore(); return C; }
@@ -366,23 +357,23 @@
     else { const f = seg(t, tOf + .6, e - .3), [x, y, ang] = f < .99 ? along(CR, f) : along(CB, .58 + .1 * seg(t, e - .3, e + 2)); topAnimal(x, y, ang, 1.15, umb, t, { lit: 1 }); }
     // the secret hidden detector it did NOT build: a dug-out hideaway, crossed out
     const hk = env(t, tSe - .5, tNi - .2, .3, .3);
-    if (hk > 0) { ctx.save(); ctx.globalAlpha = hk; ctx.fillStyle = '#5A3A1A'; ctx.beginPath(); ctx.ellipse(1500, 560, 110, 70, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(1500, 560, 70, 42, 0, 0, TAU); ctx.fill(); ctx.restore(); if (hk > .6) { letter('secret "umbrella-bee" den?', 1500, 450, 46, '#FFF6E0', { face: 'hand', shadow: false, stroke: INK, strokeW: .16 }); if (t > tDe - .2) { const ck = seg(t, tDe - .2, tDe + .2); ctx.save(); ctx.strokeStyle = '#D2473F'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(1400, 480); ctx.lineTo(1400 + 200 * ck, 480 + 160 * ck); if (ck > .5) { ctx.moveTo(1600, 480); ctx.lineTo(1600 - 200 * (ck - .5) * 2, 480 + 160 * (ck - .5) * 2); } ctx.stroke(); ctx.restore(); } } }
+    if (hk > 0) { ctx.save(); ctx.globalAlpha = hk; ctx.fillStyle = '#5A3A1A'; ctx.beginPath(); ctx.ellipse(1500, 560, 110, 70, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(1500, 560, 70, 42, 0, 0, TAU); ctx.fill(); ctx.restore(); if (hk > .6) { letter('a secret "umbrella-bee" den?', 1500, 440, 62, '#FFF6E0', { face: 'hand', shadow: false, stroke: INK, strokeW: .18 }); if (t > tDe - .2) { const ck = seg(t, tDe - .2, tDe + .2); ctx.save(); ctx.strokeStyle = '#D2473F'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(1400, 480); ctx.lineTo(1400 + 200 * ck, 480 + 160 * ck); if (ck > .5) { ctx.moveTo(1600, 480); ctx.lineTo(1600 - 200 * (ck - .5) * 2, 480 + 160 * (ck - .5) * 2); } ctx.stroke(); ctx.restore(); } } }
     // trail signs
-    for (const [x, y, s, k] of [[236, 230, 'umbrella trail', 1], [1660, 880, 'bee trail', 1]]) { letter(s, x, y, 48, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, alpha: k }); }
+    for (const [x, y, s, k] of [[236, 230, 'umbrella road', 1], [1660, 880, 'bee road', 1]]) { letter(s, x, y, 48, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, alpha: k }); }
     camEnd();
     // the lesson card: an umbrella photo, taught "bee"
     const ck = env(t, a + .2, tSe - .3, .4, .4);
-    if (ck > 0) { ctx.save(); ctx.translate(960, 560); ctx.rotate(-.03); ctx.scale(backOut(popk(t, a + .2, .5)), backOut(popk(t, a + .2, .5))); ctx.globalAlpha = ck; photoFlat(umb, -170, -230, 340, 340, { border: 14, borderCol: '#F7F1E4', polaroid: true }); ctx.restore(); if (t > tBe - .3) letter('"this is a bee"', 960, 820, 60, '#C2456A', { face: 'marker', shadow: false, alpha: ck, rot: -.03, screen: true, pop: seg(t, tBe - .3, tBe + .1) < 1 ? seg(t, tBe - .3, tBe + .1) : null }); }
+    if (ck > 0) { ctx.save(); ctx.translate(960, 560); ctx.rotate(-.03); ctx.scale(backOut(popk(t, a + .2, .5)), backOut(popk(t, a + .2, .5))); ctx.globalAlpha = ck; photoFlat(umb, -170, -230, 340, 340, { border: 14, borderCol: '#F7F1E4', polaroid: true }); ctx.restore(); if (t > tBe - .3) letter('"this is a bee"', 960, 830, 72, '#FFF6E0', { face: 'marker', shadow: false, stroke: '#8A1A3A', strokeW: .18, alpha: ck, rot: -.03, screen: true, pop: seg(t, tBe - .3, tBe + .1) < 1 ? seg(t, tBe - .3, tBe + .1) : null }); }
     if (steps > 0) letter('step ' + steps + ' of 9', 1640, 170, 60, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, screen: true });
-    lower(t, tOf - .3, e + .5, 'Via derivata', 'an off-ramp onto the existing bee trail');
+    lower(t, tOf - .3, e + .5, 'an off-ramp', 'from the umbrella road onto the existing bee road');
     docPost(t);
   }
 
   // ---------- 8 · the toy world (a zoo of strangers) vs the living savanna; then up into the sky ----------
   function toy(t, lt, dur) {
-    const a = cs('hl_toy'), tTo = wt('hl_toy', 'Toy'), tPa = wt('hl_toy', 'packing'), tSt = wt('hl_toy', 'stranger'), tRe = wt('hl_toy', 'real'), tRel = wt('hl_toy', 'related'), e = ce('hl_toy');
+    const a = cs('hl_toy'), tTo = wt('hl_toy', 'Toy'), tPa = wt('hl_toy', 'packing'), tSt = wt('hl_toy', 'stranger'), tRe = wt('hl_toy', 'real'), tRel = wt('hl_toy', 'related'), tFe = wt('hl_toy', 'feature'), tCo = wt('hl_toy', 'combining'), tGo = wt('hl_toy', 'good'), tWo = wt('hl_toy', 'worry'), tUn = wt('hl_toy', 'unrelated'), e = ce('hl_toy');
     const r0 = e + .25, rise = easeInOut(seg(t, r0, NEXT + 2.2));
-    camKeys(t, [[t - lt, 560, 560, 1.0], [tSt + .3, 600, 560, 1.0], [tRe + .4, 1340, 560, 1.0], [e, 1360, 560, 1.0], [NEXT + 2.2, 1360, 560, 1.0]], .4);
+    camKeys(t, [[t - lt, 560, 560, 1.0], [tSt + .3, 600, 560, 1.0], [tRe + .4, 1340, 560, 1.0], [tFe - .7, 1340, 560, 1.0], [tFe + .2, 980, 560, 1.0], [e, 980, 560, 1.0], [NEXT + 2.2, 1360, 560, 1.0]], .4);
     ctx.save(); ctx.translate(0, rise * 1300);
     // the living savanna, on the right
     skyL(); sun(1900, 380); groundL();
@@ -391,15 +382,21 @@
     const LIV = [[1350, 860, .36, NP + 'wolves-positive-1'], [1560, 900, .36, NP + 'wolves-positive-2'], [1800, 850, .34, NP + 'toucans-positive-1'], [2040, 900, .36, NP + 'toucans-positive-2'], [2260, 860, .34, NP + 'taxis-positive-1']];
     if (conn > 0) { ctx.save(); ctx.strokeStyle = '#FFE08A'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.globalAlpha = .8; for (let i = 0; i < LIV.length; i++) for (let j = i + 1; j < LIV.length; j++) { if (hash(i * 7 + j) < .3) continue; const p = LIV[i], q = LIV[j], k = clamp(conn * 2 - (i + j) * .1); if (k <= 0) continue; const m = [(p[0] + q[0]) / 2, Math.min(p[1], q[1]) - 220 - 40 * hash(i + j)], C = through([[p[0], p[1] - 160], m, [q[0], q[1] - 160]], 10), n = Math.max(2, Math.round(C.length * k)); ctx.beginPath(); C.slice(0, n).forEach((pp, ii) => ii ? ctx.lineTo(pp[0], pp[1]) : ctx.moveTo(pp[0], pp[1])); ctx.stroke(); } ctx.restore(); }
     LIV.forEach(([x, y, s, im], i) => beast(x, y, s, t + i, { im, walk: .1 * i, flip: i % 2 === 1, lit: conn * (.6 + .4 * Math.sin(t * 3 + i)) }));
+    // combining neurons: two lamps light together and between them hold one more idea (good news)
+    const cb = env(t, tCo - .5, tWo - .2, .4, .4);
+    if (cb > 0) { const NX = [1365, 1495, 1625, 1755], ny = 540, gx = 1560, gy = 900 - 250 * .36; ctx.save(); ctx.globalAlpha = cb; ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1320, ny - 50); ctx.lineTo(1800, ny - 50); ctx.stroke(); NX.forEach((x, i) => { const on = (i === 1 || i === 2) ? seg(t, tCo - .2 + i * .15, tCo + .3 + i * .15) : 0; ctx.beginPath(); ctx.moveTo(x, ny - 50); ctx.lineTo(x, ny - 32); ctx.stroke(); if (on > 0) { glow(x, ny, 100, '#FFE08A', on); ctx.save(); ctx.globalAlpha = cb * on * .5; ctx.fillStyle = '#FFE08A'; ctx.beginPath(); ctx.moveTo(x - 22, ny + 16); ctx.lineTo(x + 22, ny + 16); ctx.lineTo(gx + 30 * (i - 1.5), gy); ctx.closePath(); ctx.fill(); ctx.restore(); } dot(x, ny, 32, mixCol('#6A5A4A', '#FFE9A8', on)); ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, ny, 32, 0, TAU); ctx.stroke(); }); ctx.restore(); if (t > tCo + .4) glow(gx, gy - 40, 160, '#FFE08A', .7 * cb); }
     // birds riding on a back (everything relates to something)
     for (let i = 0; i < 3; i++) { const bx = 1560 - 40 + i * 30, by = 900 - 330 * .36 - 4 + Math.sin(t * 6 + i) * 3; dot(bx, by, 9, '#3A2A2A'); dot(bx + 8, by - 4, 5, '#3A2A2A'); }
     // the zoo of strangers, on the left: concrete, fences, one identical grey animal per cage
     ctx.fillStyle = '#CFCBC0'; ctx.fillRect(-500, -500, 1500, 1060); ctx.fillStyle = '#B9B4A8'; ctx.fillRect(-500, 560, 1500, 800);
     ctx.fillStyle = '#A9A498'; for (let i = 0; i < 12; i++) ctx.fillRect(-500 + i * 130, 560, 4, 800);
+    // the worry was only strangers packed together: the cages flash
+    const fl = env(t, tUn - .3, e + .4, .2, .3) * (.6 + .4 * Math.sin(t * 14));
     const pack = seg(t, tPa - .4, tPa + .6);
     for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
       const cw = lerp(300, 262, pack), x = 40 + c * cw + r * 40, y = 610 + r * 200, turn = seg(t, tSt - .3 + c * .1, tSt + .2 + c * .1);
       ctx.save(); ctx.filter = 'grayscale(1) contrast(.9)'; beast(x + cw / 2 - 20, y, .36, 3 + r * 4 + c, { flip: (r + c) % 2 === (turn > .5 ? 1 : 0) }); ctx.restore();
+      if (fl > 0) { ctx.save(); ctx.globalAlpha = fl; ctx.strokeStyle = '#D2473F'; ctx.lineWidth = 14; ctx.strokeRect(x - 4, y - 184, cw - 2, 198); ctx.restore(); }
       ctx.strokeStyle = '#5A5A60'; ctx.lineWidth = 5; ctx.strokeRect(x, y - 180, cw - 10, 190); ctx.lineWidth = 2; for (let k = 1; k < 9; k++) { ctx.beginPath(); ctx.moveTo(x + k * (cw - 10) / 9, y - 180); ctx.lineTo(x + k * (cw - 10) / 9, y + 10); ctx.stroke(); }
     }
     if (t > tSt - .2 && t < tRe) for (let c = 0; c < 3; c++) sfx('…', 200 + c * 300, 450, 70, '#5A5A60', t - tSt - c * .15, { life: 1.6 });
@@ -407,6 +404,8 @@
     ctx.strokeStyle = '#4A4A50'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(1040, 400); ctx.lineTo(1040, 1100); ctx.stroke(); ctx.lineWidth = 3; for (let k = 0; k < 14; k++) { ctx.beginPath(); ctx.moveTo(1010, 420 + k * 50); ctx.lineTo(1070, 440 + k * 50); ctx.stroke(); }
     flat(rectPts(540, 290, 480, 110), '#E9E6DE', { line: '#5A5A60', lw: 6 }); txt('TOY WORLD', 780, 349, 66, '#5A5A60', { font: '"Permanent Marker"', weight: '400' });
     for (const lx of [120, 960]) { flat(rectPts(lx - 50, 110, 100, 20), '#8A8A90'); glow(lx, 140, 160, '#E8F4FF', .4); }
+    // Nick's reading, stamped on the sign: the packing is real, but it belongs to the toy world
+    const sk = popk(t, tFe - .3, .35); if (sk > 0) { ctx.save(); ctx.translate(800, 350); ctx.rotate(-.09); ctx.scale(lerp(1.5, 1, easeOut(sk)), lerp(1.5, 1, easeOut(sk))); ctx.globalAlpha = .9 * clamp(sk * 2); ctx.fillStyle = 'rgba(255,246,236,.75)'; ctx.fillRect(-280, -56, 560, 112); ctx.strokeStyle = '#C2302A'; ctx.lineWidth = 8; ctx.strokeRect(-280, -56, 560, 112); txt('REAL, BUT ONLY HERE', 0, 4, 44, '#C2302A', { font: '"Permanent Marker"', weight: '400' }); ctx.restore(); }
     filmer(t, 1180, 1000, 13, [[t - lt, 'bored'], [tSt, 'sleepy'], [tRe, 'surprised'], [tRel, 'happy']], { flip: tRe > t, aR: 1.1, armR: camProp });
     frontGrass(t, 1020, 26, { seed: 3 });
     ctx.restore();
@@ -420,7 +419,10 @@
     camEnd();
     lower(t, tTo - .3, tSt + .6, 'a toy world', '"Toy Models of Superposition": careful work, real packing');
     caption(t, tSt - .4, tRe - .2, 'in the toy world, every idea is a stranger', 180);
-    caption(t, tRe - .2, e + .3, 'in real data, almost nothing is related to nothing', 180);
+    caption(t, tRe - .2, tFe - .4, 'in real data, almost nothing is related to nothing', 180);
+    caption(t, tFe - .3, tCo - .5, 'real packing, but a feature of the toy world', 180);
+    caption(t, tCo - .4, tWo - .3, 'combining neurons: room for more ideas. good news', 180);
+    caption(t, tWo - .2, e + .6, 'the worry: strangers packed together', 180);
     docPost(t);
   }
 

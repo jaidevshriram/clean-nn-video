@@ -3,7 +3,7 @@
 // "Already clean" = built to be read (a street sign in an unknown alphabet that the city's own buildings read, and then
 // we can too); a small town vs New York; looking for Brooklyn in Tokyo (70 scraps stitched, a collapse, the V neuron);
 // better maps down to the "killer whale" decision with three drawn routes; a huge lit building nobody noticed; the
-// asymmetry (a lead vs a dead end); a postcard to my younger self, posted through time; the crossword that fills
+// asymmetry (a lead vs a dead end); a postcard to Nick's younger self, posted through time; the crossword that fills
 // slowly and then in a rush; the last postcard flips over and its back is a World's Fair poster.
 (() => {
   const V = 'blog/raw/v-figure-10x/', SL = 'blog/raw/sae-last-layer/img/';
@@ -101,7 +101,7 @@
   // ---------- Clawd the tourist ----------
   const tour = (t, x, y, u, keys, o = {}) => tourist(x, y, u, 'beret', { ...emotions(t, keys), view: 'q', ...o });
   const bookProp = (lit = 0) => (u, sw) => { if (lit > 0) glow(u * 1.2, -u * .4, u * 5, '#FFE08A', .7 * lit); flat([[0, -u * 1.4], [u * 1.3, -u * 1.7], [u * 1.3, u * .5], [0, u * .8]], '#F3EBDC', { line: '#2A2340', lw: 2 }); flat([[0, -u * 1.4], [-u * 1.3, -u * 1.7], [-u * 1.3, u * .5], [0, u * .8]], '#E9DFC8', { line: '#2A2340', lw: 2 }); };
-  const cardProp = (label) => (u, sw) => { ctx.save(); ctx.rotate(-.3); flat(rectPts(-u * .4, -u * 3.2, u * 4.4, u * 3), '#F3EBDC', { line: '#2A2340', lw: 2 }); ctx.fillStyle = '#E8B48A'; ctx.fillRect(-u * .1, -u * 2.9, u * 3.8, u * 1.8); ctx.strokeStyle = '#3A2A2A'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-u * .1, -u * 1.9); ctx.quadraticCurveTo(u * 1.8, -u * 3, u * 3.7, -u * 1.9); ctx.stroke(); T(label, u * 1.8, -u * .6, u * .9, '#C2456A', { font: SERIF, weight: '900' }); ctx.restore(); };
+  const cardProp = (label) => (u, sw) => { ctx.save(); ctx.rotate(1.2); ctx.scale(1.7, 1.7); flat(rectPts(-u * .4, -u * 3.2, u * 6, u * 3.4), '#F3EBDC', { line: '#2A2340', lw: 2 }); ctx.fillStyle = '#E8B48A'; ctx.fillRect(-u * .1, -u * 2.9, u * 5.4, u * 1.8); ctx.strokeStyle = '#3A2A2A'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-u * .1, -u * 1.9); ctx.quadraticCurveTo(u * 2.6, -u * 3, u * 5.3, -u * 1.9); ctx.stroke(); T(label, u * 2.6, -u * .5, u * .74, '#C2456A', { font: SERIF, weight: '900' }); ctx.restore(); };
 
   // ---------- 1 · the globe; "already clean" ----------
   function orbit(t, lt, dur) {
@@ -115,7 +115,7 @@
     // the title, in postcard lettering
     const k = seg(t, tAl - .3, tAl + .5) * (1 - seg(t, tGo - .9, tGo - .5));
     if (k > 0) { ctx.save(); ctx.globalAlpha = k; ctx.translate(1120, 980); ctx.rotate(-.02); T('"already clean"', 0, -40, 96, '#FFE08A', { font: SERIF, weight: '900', stroke: '#5A1A10', sw: 12 }); ctx.restore(); }
-    if (t > tNo - .3) { const k2 = seg(t, tNo - .3, tNo + .3) * (1 - seg(t, tGo - .5, tGo - .2)); letter('not: every neuron matches a word we have', 1120, 160, 50, '#FFF6E0', { face: 'hand', shadow: false, alpha: k2, screen: true }); }
+    if (t > tNo - .3) { const k2 = seg(t, tNo - .3, tNo + .3) * (1 - seg(t, tGo - .5, tGo - .2)); letter('not: every neuron\nmatches a word we have', 400, 500, 54, '#FFF6E0', { face: 'hand', shadow: false, alpha: k2, screen: true }); }
     flash(zf * .92, '#FFF6E0');
   }
 
@@ -171,13 +171,28 @@
     if (kF > 0) glow(w * .5, h * .4, 260, '#FFE08A', .6 * kF);
     flat(rectPts(0, h * .78, w, h * .22), '#2A3A5A'); for (let i = 0; i < 9; i++) flat(rectPts(i * 100 + 20, h * .86, 60, 6), '#8AA0C8', { alpha: .6 });
     // the fold-out map: the district is circled, found in under a minute
-    if (kM > 0) { const s = backOut(kM); ctx.save(); ctx.translate(w * .5, h * .42); ctx.rotate(.04); ctx.scale(s, s); flat(rectPts(-250, -150, 500, 300), '#F3E2BE', { line: INK, lw: 3, shadow: [8, 10, 'rgba(0,0,0,.4)'] }); for (let i = 0; i < 7; i++) { ctx.strokeStyle = '#C9B48E'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-240, -130 + i * 44); ctx.lineTo(240, -110 + i * 40); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-220 + i * 76, -150); ctx.lineTo(-200 + i * 70, 150); ctx.stroke(); } ctx.fillStyle = 'rgba(194,69,106,.25)'; ctx.beginPath(); ctx.ellipse(40, 40, 110, 70, -.1, 0, TAU); ctx.fill(); ctx.strokeStyle = '#C2456A'; ctx.lineWidth = 8; ctx.stroke(); T('financial district', 40, 40, 36, '#C2456A', { font: MARK }); dot(170, -100, 46, '#FFFFFF'); ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(170, -100, 46, 0, TAU); ctx.stroke(); T('0:59', 170, -98, 32, INK, { font: SERIF, weight: '900' }); ctx.restore(); }
+    if (kM > 0) { const s = backOut(kM); ctx.save(); ctx.translate(w * .5, h * .42); ctx.rotate(.04); ctx.scale(s, s); flat(rectPts(-250, -150, 500, 300), '#F3E2BE', { line: INK, lw: 3, shadow: [8, 10, 'rgba(0,0,0,.4)'] }); for (let i = 0; i < 7; i++) { ctx.strokeStyle = '#C9B48E'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(-240, -130 + i * 44); ctx.lineTo(240, -110 + i * 40); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-220 + i * 76, -150); ctx.lineTo(-200 + i * 70, 150); ctx.stroke(); } ctx.fillStyle = 'rgba(194,69,106,.25)'; ctx.beginPath(); ctx.ellipse(30, 50, 205, 80, -.06, 0, TAU); ctx.fill(); ctx.strokeStyle = '#C2456A'; ctx.lineWidth = 8; ctx.stroke(); T('financial district', 30, 50, 38, '#8A1A3A', { font: MARK }); dot(170, -100, 46, '#FFFFFF'); ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(170, -100, 46, 0, TAU); ctx.stroke(); T('0:59', 170, -98, 32, INK, { font: SERIF, weight: '900' }); ctx.restore(); }
+  }
+  // the car neurons: a broad "car" building (smallest network) that splits into three specialist towers (biggest)
+  const NPB = 'blog/raw/negative-poles-v2/';
+  function carSplit(w, h, t, k) {
+    ctx.fillStyle = lgrad(0, 0, 0, h, [[0, '#9FC0E6'], [1, '#F2E2C0']]); ctx.fillRect(0, 0, w, h);
+    flat(rectPts(0, h * .82, w, h * .18), '#8A9A7A');
+    T(k < .5 ? 'the smallest network' : 'the biggest network', w / 2, 50, 46, INK, { font: SERIF, weight: '900' });
+    const S = [[V + 'c4d201c', 'cars'], [NPB + 'taxis-positive-1', 'taxis'], [V + 'c4d201d', 'vans'], [V + 'pCarX5', 'sports cars']];
+    // the one broad building
+    if (k < 1) { ctx.save(); ctx.globalAlpha = 1 - k; const bw = 380, bh = 330, x0 = w / 2 - bw / 2, y0 = h * .82 - bh; flat(rectPts(x0, y0, bw, bh), '#C98A7A', { line: INK, lw: 4 }); flat([[x0 - 20, y0], [w / 2, y0 - 70], [x0 + bw + 20, y0]], '#B5533C', { line: INK, lw: 4 }); photoFlat(S[0][0], x0 + 40, y0 + 30, bw - 80, 180, { border: 6, borderCol: '#2A2340', shadow: false }); flat(rrPts(w / 2 - 110, y0 + 236, 220, 66, 12), CREAM, { line: INK, lw: 3 }); T('car', w / 2, y0 + 270, 46, INK, { font: MARK }); ctx.restore(); }
+    // three narrow specialists
+    if (k > 0) for (let i = 0; i < 3; i++) { const tw = 190, th = 330 + 60 * (i === 1), cx = lerp(w / 2, w / 2 + (i - 1) * 240, k), y0 = h * .82 - th; ctx.save(); ctx.globalAlpha = clamp(k * 2); flat(rectPts(cx - tw / 2, y0, tw, th), ['#3A64B8', '#E8AA38', '#3A9C98'][i], { line: INK, lw: 4 }); photoFlat(S[i + 1][0], cx - tw / 2 + 18, y0 + 24, tw - 36, 130, { border: 5, borderCol: '#2A2340', shadow: false }); flat(rrPts(cx - 92, y0 + 176, 184, 56, 10), CREAM, { line: INK, lw: 3 }); T(S[i + 1][1], cx, y0 + 205, 28, INK, { font: MARK }); ctx.restore(); }
   }
   function bigger(t, lt, dur) {
-    const a = cs('zo_bigger'), tSm = wt('zo_bigger', 'small'), tBa = wt('zo_bigger', 'bank'), tOf = wt('zo_bigger', 'office'), tNY = wt('zo_bigger', 'New'), tMa = wt('zo_bigger', 'map'), tBi = wt('zo_bigger', 'Bigger', 1), e = ce('zo_bigger');
+    const a = cs('zo_bigger'), tSm = wt('zo_bigger', 'small'), tBa = wt('zo_bigger', 'bank'), tOf = wt('zo_bigger', 'office'), tNY = wt('zo_bigger', 'New'), tMa = wt('zo_bigger', 'map'), tBi = wt('zo_bigger', 'Bigger', 1), tRm = wt('zo_bigger', 'Remember'), tSp = wt('zo_bigger', 'specialists'), e = ce('zo_bigger');
     space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const L = slide(t, t - lt, e + .4, -1, 0), Rr = slide(t, tNY - .6, e + .4, 1, 0);
     postcard(500 + L.x, 520, 860, 660, { rot: -.035 + L.rot, caption: 'SMALL TOWN', capW: 700 }, (w, h) => { smallTown(w, h, t, popk(t, tBa - .2, .4), popk(t, tOf - .2, .4)); });
+    // remember the car neurons: one broad car building in the smallest network, three specialists in the biggest
+    const Cc = slide(t, tRm - .5, tNY - .7, 1, 0);
+    if (Cc.k > 0) postcard(1440 + Cc.x, 520, 800, 640, { rot: .03 - Cc.rot, paper: '#F3EBDC' }, (w, h) => { carSplit(w, h, t, easeInOut(seg(t, tSp - .4, tSp + .6))); });
     postcard(1430 + Rr.x, 500, 860, 660, { rot: .03 - Rr.rot, caption: 'NEW YORK', capW: 640 }, (w, h) => { newYork(w, h, t, seg(t, tNY, tNY + .8), popk(t, tMa - .5, .5)); });
     const tk = seg(t, a, a + .6) * (1 - seg(t, tNY - .6, tNY - .2));
     if (tk > 0) letter("bigger isn't harder", 960, 125, 80, '#FFE08A', { face: 'marker', shadow: false, alpha: tk, stroke: '#5A1A10', strokeW: .12, screen: true });
@@ -196,7 +211,7 @@
     ctx.fillStyle = '#0A0814'; for (let i = 0; i < holes; i++) { const S = SCR[i]; ctx.fillRect(S.sx, S.sy, S.sw, S.sh); }
   }
   function tokyo(t, lt, dur) {
-    const a = cs('zo_tokyo'), tFo = wt('zo_tokyo', 'forcing'), tTk = wt('zo_tokyo', 'Tokyo'), tBr = wt('zo_tokyo', 'Brooklyn'), tSt = wt('zo_tokyo', 'stitch'), tSe = wt('zo_tokyo', 'seventy'), tDe = wt('zo_tokyo', 'decide'), tMe = wt('zo_tokyo', 'mess'), tTh = wt('zo_tokyo', "That's"), tV = wt('zo_tokyo', 'V'), tCa = wt('zo_tokyo', 'cats'), e = ce('zo_tokyo');
+    const a = cs('zo_tokyo'), tFo = wt('zo_tokyo', 'forcing'), tTk = wt('zo_tokyo', 'Tokyo'), tBr = wt('zo_tokyo', 'Brooklyn'), tSt = wt('zo_tokyo', 'stitch'), tSe = wt('zo_tokyo', 'seventy'), tDe = wt('zo_tokyo', 'decide'), tMe = wt('zo_tokyo', 'mess'), tTh = wt('zo_tokyo', "That's"), tV = wt('zo_tokyo', 'V'), tCa = wt('zo_tokyo', 'cats'), tUf = wt('zo_tokyo', 'Unfolding'), tSp = wt('zo_tokyo', 'splits'), e = ce('zo_tokyo');
     space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const ki = easeOut(seg(t, t - lt, t - lt + .6));
     const cut = seg(t, tSt - .3, tSe + 1.2), held = Math.floor(70 * cut), fall = seg(t, tMe - .4, tMe + 1.2);
@@ -215,18 +230,30 @@
         }
         if (held > 0 && fall < .2) { T(String(held), 1480, 80, 72, '#FFE08A', { font: SERIF, weight: '900', stroke: '#2A1A3A', sw: 10 }); T('scraps', 1480, 140, 40, '#FFF6E0', { font: KAL, weight: '700' }); }
       } else {
-        // the back: the V neuron, a Tokyo tower with a V roof, its windows full of cats and cars
+        // the back: the V neuron, a Tokyo tower with a V roof, its windows full of cats and cars; then an Unfolding
+        // Machine splits it down the V into a cat piece (left) and a car piece (right)
         ctx.fillStyle = lgrad(0, 0, 0, h, [[0, '#120E2A'], [1, '#2A1E4A']]); ctx.fillRect(0, 0, w, h);
         for (let i = 0; i < 40; i++) dot(hash(i * 3.1) * w, hash(i * 7.7) * h * .5, 2, '#FFFFFF', .5);
-        const bx = w / 2, by = h * .95, bw = 520, bh = 560, hi = seg(t, tCa - .4, tCa + .4);
-        glow(bx, by - bh * .5, 600, '#C9A0FF', .35);
-        flat(rectPts(bx - bw / 2, by - bh, bw, bh), '#5C4A7A', { line: '#F3EBDC', lw: 5 });
-        flat([[bx - bw / 2 - 30, by - bh - 240], [bx, by - bh + 10], [bx + bw / 2 + 30, by - bh - 240], [bx + bw / 2 + 30, by - bh], [bx - bw / 2 - 30, by - bh]], '#8A5A9A', { line: '#F3EBDC', lw: 5 });
-        [V + 'p47742', V + 'c4d201c', V + 'c4d201d', V + 'p42708'].forEach((im, i) => { const wx = bx - bw / 2 + 40 + (i % 2) * 240, wy = by - bh + 50 + Math.floor(i / 2) * 230; flat(rectPts(wx - 8, wy - 8, 216, 196), '#2A2340'); photoFlat(im, wx, wy, 200, 180, {}); if (hi > 0) { ctx.save(); ctx.strokeStyle = i === 3 ? '#9AA3B5' : '#FFE08A'; ctx.globalAlpha = hi; ctx.lineWidth = 8; ctx.strokeRect(wx - 4, wy - 4, 208, 188); ctx.restore(); } });
+        const bx = w / 2, by = h * .95, bw = 520, bh = 560, hi = seg(t, tCa - .4, tCa + .4), sp = easeInOut(seg(t, tSp - .3, tSp + .9));
+        glow(bx, by - bh * .5, 600, '#C9A0FF', .35 * (1 - sp));
+        for (const sd of [-1, 1]) {
+          ctx.save(); ctx.translate(sd * 330 * sp, 0); ctx.rotate(sd * .05 * sp); ctx.beginPath(); ctx.rect(sd < 0 ? -w : bx, -h, w + (sd < 0 ? bx : 0) + (sd > 0 ? w : 0), 3 * h); ctx.clip();
+          if (sp > 0) glow(bx + sd * bw * .25, by - bh * .5, 380, sd < 0 ? '#FFB3D9' : '#9FD8FF', .4 * sp);
+          flat(rectPts(bx - bw / 2, by - bh, bw, bh), '#5C4A7A', { line: '#F3EBDC', lw: 5 });
+          flat([[bx - bw / 2 - 30, by - bh - 240], [bx, by - bh + 10], [bx + bw / 2 + 30, by - bh - 240], [bx + bw / 2 + 30, by - bh], [bx - bw / 2 - 30, by - bh]], '#8A5A9A', { line: '#F3EBDC', lw: 5 });
+          // left column: the cat and the fox (pointed faces); right column: the two cars
+          [V + 'p47742', V + 'c4d201c', V + 'p42708', V + 'c4d201d'].forEach((im, i) => { const wx = bx - bw / 2 + 40 + (i % 2) * 240, wy = by - bh + 50 + Math.floor(i / 2) * 230; flat(rectPts(wx - 8, wy - 8, 216, 196), '#2A2340'); photoFlat(im, wx, wy, 200, 180, {}); if (hi > 0) { ctx.save(); ctx.strokeStyle = '#FFE08A'; ctx.globalAlpha = hi * (1 - sp); ctx.lineWidth = 8; ctx.strokeRect(wx - 4, wy - 4, 208, 188); ctx.restore(); } });
+          ctx.restore();
+          if (sp > .4) { const k = backOut(clamp((sp - .4) / .5)), tx = bx + sd * (bw * .25 + 330 * sp); ctx.save(); ctx.translate(tx, by - bh - 40); ctx.scale(k, k); flat(rrPts(-130, -42, 260, 84, 14), sd < 0 ? '#C2456A' : '#3A64B8', { line: '#F3EBDC', lw: 4 }); T(sd < 0 ? 'cat piece' : 'car piece', 0, 2, 52, '#FFF6E0', { font: MARK }); ctx.restore(); }
+        }
+        // the Unfolding Machine's cut: a bright seam down the middle of the V
+        const cutK = env(t, tSp - .6, tSp + .6, .3, .4); if (cutK > 0) { ctx.save(); ctx.globalAlpha = cutK; ctx.strokeStyle = '#FFF6D8'; ctx.lineWidth = 10; ctx.setLineDash([26, 14]); ctx.lineDashOffset = -t * 120; ctx.beginPath(); ctx.moveTo(bx, by - bh); ctx.lineTo(bx, by); ctx.stroke(); ctx.restore(); glow(bx, by - bh * .5, 200, '#FFF6D8', .6 * cutK); }
       }
     });
     if (fall > .05 && fx > 0) capL('"Tokyo is a mess!"', 960, 1016, 66, '#FFE08A', { face: 'marker', shadow: false, stroke: '#2A1A3A', strokeW: .12, screen: true, pop: seg(t, tMe - .3, tMe + .1) < 1 ? seg(t, tMe - .3, tMe + .1) : null });
-    if (t > tCa - .4) capL('we saw cats and cars', 960, 1016, 60, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tCa - .4, tCa + .6) });
+    if (t > tV - .2 && t < tCa - .4) capL('the V neuron', 960, 1016, 60, '#FFE08A', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tV - .2, tV + .4) });
+    if (t > tCa - .4 && t < tUf - .4) capL('they went looking for cats and cars', 960, 1016, 60, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tCa - .4, tCa + .6) });
+    if (t > tUf - .4) capL('an Unfolding Machine: a cat piece + a car piece', 960, 1016, 58, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tUf - .4, tSp + .4) });
     if (t > tSt - .3 && t < tDe) capL('stitching Brooklyn out of Tokyo', 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tSt - .3, tSt + .8) });
   }
 
@@ -240,21 +267,21 @@
     space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const unf = easeOut(seg(t, t - lt + .1, tMa + .4)), ki = easeOut(seg(t, t - lt, t - lt + .6));
     const zk = easeInOut(seg(t, tZo - .3, tKi + .5));
-    postcard(960, 520 + (1 - ki) * 1100, 1680, 900, { flipX: Math.max(.12, unf), caption: zk < .5 ? 'the MAP' : null, capW: 560, paper: '#F3E2BE' }, (w, h) => {
+    postcard(960, 520 + (1 - ki) * 1100, 1680, 900, { flipX: Math.max(.12, unf), caption: t < tMa - .3 ? 'the MAP' : null, capW: 560, paper: '#F3E2BE' }, (w, h) => {
       ctx.fillStyle = '#EFE0C0'; ctx.fillRect(0, 0, w, h);
       // zoom into the sea-life district
       ctx.save(); const zc = [w / 2 + 300, h / 2 + 90], zs = lerp(1, 3.6, zk); ctx.translate(w / 2, h / 2); ctx.scale(zs, zs); ctx.translate(-lerp(w / 2, zc[0], zk), -lerp(h / 2, zc[1], zk));
       ctx.translate(w / 2, h / 2);
       // the overview: neighbourhood blobs and the streets between them
       ctx.strokeStyle = '#D9C49A'; ctx.lineWidth = 10; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(-800, -330 + i * 130); ctx.quadraticCurveTo(0, -300 + i * 130 + 40 * Math.sin(i), 800, -330 + i * 130); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-700 + i * 280, -420); ctx.quadraticCurveTo(-660 + i * 280, 0, -700 + i * 280, 420); ctx.stroke(); }
-      HOODS.forEach(([x, y, lab, col], i) => { const k = popk(t, tMa - .5 + i * .14, .5); if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(backOut(k), backOut(k)); flat(ellPts(0, 0, 170, 100, 24), col, { line: '#8A7A5A', lw: 4 }); T(lab, 0, -2, 46, '#4A3A2A', { font: SERIF, weight: '900', alpha: 1 - seg(zk, .1, .4) }); ctx.restore(); });
-      // little buildings rise along the streets: still connected to the real thing underneath
+      HOODS.forEach(([x, y, lab, col], i) => { const k = popk(t, tMa - .5 + i * .14, .5); if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(backOut(k), backOut(k)); flat(ellPts(0, 0, 170, 100, 24), col, { line: '#8A7A5A', lw: 4 }); T(lab, 0, -34, 44, '#4A3A2A', { font: SERIF, weight: '900', alpha: 1 - seg(zk, .1, .4) }); ctx.restore(); });
+      // inside each neighbourhood, its real buildings rise on a street that joins the label: zoomed out, still connected
       const bk = seg(t, tSt - .3, tBu + .3);
-      for (let i = 0; i < 26; i++) { const k = clamp(bk * 26 - i); if (k <= 0) continue; const x = -720 + (i % 9) * 180 + 40 * hash(i), y = -340 + Math.floor(i / 9) * 330 + 60 * hash(i * 2); ctx.save(); ctx.translate(x, y); ctx.scale(1, backOut(k)); flat(rectPts(-18, -40, 36, 40), ['#C2456A', '#3A64B8', '#3A9C98', '#E8862A'][i % 4], { line: INK, lw: 2 }); flat(rectPts(-10, -32, 20, 14), '#FFE08A'); ctx.restore(); }
+      HOODS.forEach(([hx, hy], j) => { if (j === 5 && zk > .3) return; const k0 = clamp(bk * 8 - j); if (k0 <= 0) return; ctx.save(); ctx.globalAlpha = clamp(k0 * 3); ctx.strokeStyle = '#8A7A5A'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(hx - 100, hy + 56); ctx.lineTo(hx + 100, hy + 56); ctx.moveTo(hx, hy - 6); ctx.lineTo(hx, hy + 56); ctx.stroke(); ctx.restore(); for (let i = 0; i < 4; i++) { const k = clamp(k0 * 2 - i * .25); if (k <= 0) continue; ctx.save(); ctx.translate(hx - 84 + i * 56, hy + 52); ctx.scale(1, backOut(k)); flat(rectPts(-18, -46, 36, 46), ['#C2456A', '#3A64B8', '#3A9C98', '#E8862A'][(i + j) % 4], { line: INK, lw: 2 }); flat(rectPts(-10, -38, 20, 14), '#FFE08A'); ctx.restore(); } });
       // the killer-whale tower and its three routes (visible once we zoom in)
       if (zk > .3) {
         ctx.save(); ctx.globalAlpha = clamp((zk - .3) / .4); ctx.translate(300, 90); ctx.scale(1 / 3.6, 1 / 3.6);
-        ctx.fillStyle = '#A9D9E9'; ctx.fillRect(-900, -400, 1800, 800);
+        ctx.fillStyle = '#A9D9E9'; ctx.fillRect(-1200, -700, 2400, 1400);
         const R3 = [[tWh, [[-470, -230], [-260, -190], [-60, -60]], '#3A64B8'], [tSh, [[-470, 20], [-260, 15], [-60, 0]], '#6A7A9A'], [tFi, [[-470, 260], [-260, 200], [-60, 60]], '#C2456A']];
         R3.forEach(([tt, P, col], i) => { const k = seg(t, tTh - .4 + i * .25, tTh + .4 + i * .25), C = through(P, 10), n = Math.max(2, Math.round(C.length * k)); ctx.strokeStyle = col; ctx.lineWidth = 34; ctx.lineCap = 'round'; ctx.beginPath(); C.slice(0, n).forEach((p, j) => j ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); const lk = seg(t, tt - .3, tt + .3); if (lk > 0) for (let j = 0; j < 3; j++) { const q = C[Math.floor(frac(t * .5 + j / 3) * (C.length - 1))]; glow(q[0], q[1], 50, '#FFF2C8', lk); } });
         const wk = popk(t, tWh - .4, .5), sk = popk(t, tSh - .4, .5), fk = popk(t, tFi - .3, .5);
@@ -276,10 +303,10 @@
 
   // ---------- 6 · deception can't hide from the model's own circuits ----------
   function deception(t, lt, dur) {
-    const a = cs('zo_deception'), tDe = wt('zo_deception', 'deception'), tHi = wt('zo_deception', 'hide'), tEl = wt('zo_deception', 'else'), tPl = wt('zo_deception', 'plain'), tRe = wt('zo_deception', 'read'), tAn = wt('zo_deception', 'answers'), tBu = wt('zo_deception', 'But'), tCi = wt('zo_deception', 'circuits'), tBe = wt('zo_deception', 'become'), tUs = wt('zo_deception', 'us'), e = ce('zo_deception');
+    const a = cs('zo_deception'), tDe = wt('zo_deception', 'deception'), tHi = wt('zo_deception', 'hide'), tEl = wt('zo_deception', 'else'), tPl = wt('zo_deception', 'plain'), tRe = wt('zo_deception', 'read'), tAn = wt('zo_deception', 'answers'), tBu = wt('zo_deception', 'But'), tCi = wt('zo_deception', 'circuits'), tBe = wt('zo_deception', 'become'), tUs = wt('zo_deception', 'us'), tFe = wt('zo_deception', 'fear'), e = ce('zo_deception');
     space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
-    const ki = easeOut(seg(t, t - lt, t - lt + .6)), circ = seg(t, tBu, tCi + .6), rd = seg(t, tBe - .2, tUs);
-    postcard(960, 520 + (1 - ki) * 1100, 1680, 900, { rot: .012, caption: 'the NETWORK by night', capW: 900, capCol: '#3A2A6A' }, (w, h) => {
+    const ki = easeOut(seg(t, t - lt, t - lt + .6)), circ = seg(t, tBu, tCi + .6), rd = seg(t, tBe - .2, tUs) * (1 - seg(t, tFe, tFe + .8));
+    postcard(960, 520 + (1 - ki) * 1100, 1680, 900, { rot: .012, caption: t < a + 1.2 ? 'the NETWORK by night' : null, capW: 900, capCol: '#3A2A6A' }, (w, h) => {
       ctx.fillStyle = lgrad(0, 0, 0, h, [[0, '#0E1236'], [1, '#2A2A5A']]); ctx.fillRect(0, 0, w, h);
       for (let i = 0; i < 60; i++) dot(hash(i * 3.1) * w, hash(i * 7.7) * h * .4, 1.5 + hash(i), '#FFFFFF', .6);
       // ordinary buildings, left and right
@@ -297,13 +324,15 @@
       flat(rectPts(0, h * .74, w, h * .26), '#1E1A36');
       for (let i = 0; i < 7; i++) { const ph = frac((t - a) * .04 + i / 7), x = -80 + ph * (w + 160); person(x, h * .9 + (i % 2) * 20, 1.1, { col: ['#3A9C98', '#C2456A', '#E8AA38', '#7B5CA8', '#3A64B8', '#6E9F58', '#D97757'][i], key: 'c13pp' + i, walk: t * 2 + i, look: .2, flip: false }); }
       // the answer booth: reads only the model's answers, and smiles
-      flat(rectPts(w * .2 - 110, h * .74 - 220, 220, 220), '#3A6A5A', { line: '#F3EBDC', lw: 4 }); T('ANSWERS', w * .2, h * .74 - 180, 34, '#F3EBDC', { font: SERIF, weight: '900' }); const ak = seg(t, tAn - .6, tAn); if (ak > 0) T('all fine :)', w * .2, h * .74 - 100, 40, '#9FE3A6', { font: HANDF, alpha: ak });
+      flat(rectPts(w * .2 - 170, h * .74 - 240, 340, 240), '#3A6A5A', { line: '#F3EBDC', lw: 4 }); T('ANSWERS', w * .2, h * .74 - 196, 44, '#F3EBDC', { font: SERIF, weight: '900' }); const ak = seg(t, tAn - .6, tAn); if (ak > 0) T('all fine :)', w * .2, h * .74 - 100, 72, '#9FE3A6', { font: HANDF, alpha: ak });
       const turn = seg(t, tBe - .4, tBe);
-      tour(t, w * .77, h * .97, 19, [[t - lt, 'neutral'], [tPl, 'thinking'], [tRe, 'confused'], [tAn, 'suspicious'], [tBe, 'surprised'], [tUs, 'excited']], { flip: true, aR: turn > .5 ? 1.8 : .4, armR: turn > .5 ? bookProp(1) : null });
+      const shut = seg(t, tFe - .2, tFe + .3);
+      tour(t, w * .88, h * .97, 19, [[t - lt, 'neutral'], [tPl, 'thinking'], [tRe, 'confused'], [tAn, 'suspicious'], [tBe, 'surprised'], [tUs, 'excited'], [tFe, 'nervous']], { flip: true, aR: turn > .5 && shut < .5 ? 1.8 : .4, armR: turn > .5 && shut < .5 ? bookProp(1) : null });
     });
     capL('the answer was in plain sight', 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tPl - .5, tPl + .5), alpha: 1 - seg(t, tAn - 1.2, tAn - .8) });
     if (t > tCi - .6) capL("it can't hide from the model's own circuits", 960, 1016, 54, '#FFE08A', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tCi - .6, tCi + .4), alpha: 1 - seg(t, tBe - .5, tBe - .2) });
-    if (t > tBe - .2) capL('become a reader', 960, 1016, 66, '#FFE08A', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tBe - .2, tBe + .5) });
+    if (t > tBe - .2 && t < tFe - .3) capL('become readers too, and we can read it', 960, 1016, 60, '#FFE08A', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tBe - .2, tBe + .5) });
+    if (t > tFe - .3) capL("Nick's fear: right there, and unread", 960, 1016, 60, '#E7D4FF', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tFe - .3, tFe + .6) });
   }
 
   // ---------- 7 · the asymmetry: a lead, or a dead end ----------
@@ -343,8 +372,8 @@
     if (t > tMa - .2) capL('Nick made that mistake for years', 960, 1016, 58, '#FFF6E0', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tMa - .2, tYe + .2) });
   }
 
-  // ---------- 8 · a postcard to my younger self, posted through time ----------
-  const TIPS = [['look at the giant pose circuit', 'pose'], ['the negative side is a gate', 'gate'], ["don't trust the late sketch artist", 'trust'], ['a mess? look harder', 'harder']];
+  // ---------- 8 · a postcard to Nick's younger self, posted through time ----------
+  const TIPS = [['look at the giant pose circuit', 'pose'], ['what switches it off is a gate', 'gate'], ["last districts: don't trust the Sketch Artist", 'trust', 47], ['a mess? look harder', 'harder']];
   function advice(t, lt, dur) {
     const a = cs('zo_advice'), tNo = wt('zo_advice', 'note'), tEi = wt('zo_advice', 'eight'), tMe = wt('zo_advice', 'mess', 1), tUn = wt('zo_advice', 'understood'), e = ce('zo_advice');
     space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
@@ -362,7 +391,7 @@
       ctx.save(); ctx.translate(w - 150, 140); flat(rectPts(-80, -100, 160, 200), '#FFFFFF', { line: '#C9B48E', lw: 3 }); ctx.fillStyle = lgrad(0, -80, 0, 80, [[0, '#F0A24E'], [1, '#C9963A']]); ctx.fillRect(-64, -84, 128, 168); dot(20, -30, 26, '#FFE9B0'); acaciaMini(-20, 60, .5); ctx.restore();
       if (stampK > 0) { ctx.save(); ctx.translate(w - 270, 170); ctx.rotate(-.25); ctx.scale(lerp(1.6, 1, easeOut(stampK)), lerp(1.6, 1, easeOut(stampK))); ctx.globalAlpha = .85; ctx.strokeStyle = '#3A3A6A'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, 90, 0, TAU); ctx.stroke(); T('2026', 0, 0, 44, '#3A3A6A', { font: SERIF, weight: '900' }); for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(100, -30 + i * 20); ctx.quadraticCurveTo(160, -40 + i * 20, 220, -30 + i * 20); ctx.stroke(); } ctx.restore(); }
       T('Dear Nick,', 70, 90, 60, INK, { font: HANDF, align: 'left', alpha: seg(t, tNo - .3, tNo + .3) });
-      TIPS.forEach(([s1, w1], i) => { const tw = wt('zo_advice', w1), k = seg(t, tw - .8, tw + .4); if (k <= 0) return; ctx.save(); ctx.beginPath(); ctx.rect(40, 150 + i * 150, 60 + 860 * k, 140); ctx.clip(); dot(80, 230 + i * 150, 10, '#C2456A'); T(s1, 110, 230 + i * 150, 58, '#C2456A', { font: HANDF, align: 'left' }); ctx.restore(); });
+      TIPS.forEach(([s1, w1, fs = 58], i) => { const tw = wt('zo_advice', w1), k = seg(t, tw - .8, tw + .4); if (k <= 0) return; ctx.save(); ctx.beginPath(); ctx.rect(40, 150 + i * 150, 60 + 860 * k, 140); ctx.clip(); dot(80, 230 + i * 150, 10, '#C2456A'); T(s1, 110, 230 + i * 150, fs, '#C2456A', { font: HANDF, align: 'left' }); ctx.restore(); });
     });
     if (t > tEi - .3 && t < tNo + 3.5) capL('a note back in time', 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, a, a + .8) });
     tour(t, 1440, 1010, 13, [[t - lt, 'thinking'], [tMe, 'determined'], [tUn, 'happy']], { flip: true, aR: post > 0 ? 1.4 : .3 });

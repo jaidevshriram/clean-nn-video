@@ -128,7 +128,7 @@
     b1: [640, 560, 220, -2.55], b2: [790, 622, 160, -1.85], c1: [440, 742, 200, 3.05], c2: [570, 712, 150, 2.1],
     d1: [1300, 500, 220, -.5], d2: [1140, 556, 160, -1.25], e1: [1500, 702, 210, .12], e2: [1360, 664, 150, 1.05],
   };
-  const LBL = { a: ['a. flores', 1190, 290], b: ['b. pilae', 330, 390], c: ['c. poma', 270, 660], d: ['d. canes', 1590, 330], e: ['e. brassica', 1640, 600] };
+  const LBL = { a: ['a. flowers', 1190, 290], b: ['b. tennis balls', 350, 390], c: ['c. fruit', 270, 660], d: ['d. dogs', 1590, 330], e: ['e. broccoli', 1640, 600] };
   const IM_OLD = { a1: iv(1654, 0, 0), a2: iv(1654, 0, 3), a3: iv(3753, 0, 1), a4: iv(1654, 3, 0), b1: iv(3753, 1, 2), b2: iv(7506, 1, 0), c1: iv(3753, 2, 0), c2: iv(7506, 2, 0), d1: iv(3753, 3, 2), d2: iv(7506, 3, 1), e1: iv(7506, 4, 1), e2: iv(15012, 4, 2) };
   const IM_FINAL = { a1: iv(30024, 0, 1), a2: iv(30024, 0, 2), a3: iv(15012, 0, 1), a4: iv(3753, 3, 0), b1: iv(30024, 1, 3), b2: iv(30024, 1, 5), c1: iv(30024, 2, 2), c2: iv(30024, 2, 3), d1: iv(30024, 3, 1), d2: iv(30024, 3, 2), e1: iv(30024, 4, 0), e2: iv(30024, 4, 3) };
   // G: growth state {stem, br: [4], lv: {id: k}, shrink, wilt, imgs, fire: {id: a}}
@@ -164,8 +164,8 @@
   }
   // Clawd's watering can (armR hook); tip 0..1 tilts it
   const can = tip => (u, sw) => { push(); rotate(-.2 - tip * .9); flat(rrPts(-u * .4, -u * 1.2, u * 2.6, u * 2.2, u * .3), '#7A8A94', { line: INK, lw: 2 }); flat([[u * 2.1, -u * .6], [u * 4.2, -u * 2.2], [u * 4.4, -u * 1.8], [u * 2.2, u * .1]], '#6A7A84', { line: INK, lw: 1.6 }); ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(u * .9, -u * 1.2, u * .9, Math.PI, TAU); ctx.stroke(); ctx.restore(); pop(); };
-  // long-handled loppers (armR hook): open 0..1
-  const loppers = open => (u, sw) => { ctx.save(); ctx.strokeStyle = '#6A4B30'; ctx.lineWidth = u * .5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 26, 0); ctx.stroke(); translate(u * 26, 0); for (const sd of [-1, 1]) { ctx.save(); ctx.rotate(sd * (.08 + .35 * open)); flat([[0, -u * .25], [u * 3.2, sd * -u * .5], [u * 3.4, 0], [0, u * .25]], '#B9C0CE', { line: INK, lw: 1.4 }); ctx.restore(); } ctx.restore(); };
+  // a small spade (armR hook)
+  const spade = (u, sw) => { ctx.save(); ctx.strokeStyle = '#6A4B30'; ctx.lineWidth = u * .45; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 4, u * 1.5); ctx.stroke(); ctx.restore(); flat([[u * 3.6, u * .9], [u * 5.6, u * 1.6], [u * 5, u * 3.4], [u * 3, u * 2.6]], '#9AA2AE', { line: INK, lw: 1.4 }); };
 
   // ---------- 1 · Fig. VI: the seed lands, the neuron grows ----------
   function grow(t, lt, dur) {
@@ -216,7 +216,7 @@
       ctx.save(); ctx.globalAlpha = ik; const cp = new Path2D(); cp.arc(ix, iy, ir, 0, TAU); ctx.clip(cp); ctx.fillStyle = '#F6EEDA'; ctx.fillRect(ix - ir, iy - ir, ir * 2, ir * 2);
       ctx.translate(ix, iy + 60); ctx.scale(3.2, 3.2); ctx.translate(-960, -(GROUND - 30)); seedScene(); ctx.restore();
       ctx.save(); ctx.globalAlpha = ik; ctx.strokeStyle = SEPIA; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(ix, iy, ir, 0, TAU); ctx.stroke(); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(ix, iy, ir + 10, 0, TAU); ctx.stroke(); ctx.restore();
-      caption('fig. a · semen, ×3', ix, iy + 290, ik, 48, INK);
+      caption('fig. a · the seed, ×3', ix, iy + 290, ik, 48, INK);
     }
     // the watering-can droplets
     const wk = env(t, tRand + .3, tWatch - .1, .3, .3);
@@ -234,7 +234,7 @@
     camEnd();
     // plate typography
     if (t > tYel + 1.5 && t < tYel + 2.9) sfx('achoo!', 1600, 720, 60, RED, t - tYel - 1.5, { face: 'hand', life: 1.4 });
-    plateTitle('Neuronium recursivum', 960, 132, seg(t, c0 + 6.7, c0 + 7.9));
+    plateTitle('One neuron, growing', 960, 132, seg(t, c0 + 6.7, c0 + 7.9));
     caption('Fig. VI · one neuron, grown over 30,024 steps of training', 960, 206, seg(t, c0 + 7.6, c0 + 9), 44);
   }
 
@@ -248,9 +248,10 @@
     plateFrame();
     ctx.save(); ctx.strokeStyle = SEPIA; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(960, 250); ctx.lineTo(960, 1000); ctx.stroke(); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(972, 250); ctx.lineTo(972, 1000); ctx.stroke(); ctx.restore();
     // a · the old network, fully grown
-    push(); translate(510, 930); scale(.56); translate(-960, -930); soil(); plant(t, FULL); pop();
-    // b · the modern network: the ball and fruit branch grows early, is snipped, and falls away
-    const cut = tLet - .05, fall = seg(t, cut, cut + 1.2), grow2 = ease(seg(t, tRe - .5, tB)), g3 = ease(seg(t, tB, tF));
+    push(); translate(510, 930); scale(.6); translate(-960, -930); soil(); plant(t, FULL); pop();
+    // b · the modern network: the ball and fruit branch grows early, then the plant lets it go by itself: it withers,
+    //     folds down and drops (nobody cuts it)
+    const cut = tLet - .05, wl = ease(seg(t, cut - .3, cut + .5)), fall = seg(t, cut + .4, cut + 1.6), grow2 = ease(seg(t, tRe - .5, tB)), g3 = ease(seg(t, tB, tF));
     const keep = 1 + .2 * ease(seg(t, tStay - .3, tFld));
     push(); translate(1400, 930); scale(.7); translate(-960, -930);
     soil();
@@ -258,15 +259,14 @@
     plant(t, GM);
     // the doomed branch: drawn in its own transform so it can drop
     push(); translate(1920, 0); scale(-1, 1);
-    if (fall > 0) { const yy = 700 + 330 * easeIn(fall) + 60 * Math.sin(fall * Math.PI), rr = -1.3 * ease(fall); translate(958, yy); rotate(rr); translate(-958, -700); ctx.globalAlpha = 1 - seg(fall, .7, 1); }
-    stem(BR[0].P, grow2, 12, 5);
-    leaf(...LV.b1, IM_MOD.b1, popk(t, tB - .1, .6), { fire: .7 * env(t, tB, cut, .3, .3) }); leaf(...LV.b2, IM_MOD.c1, popk(t, tF - .1, .6), { fire: .7 * env(t, tF, cut, .3, .3) }); leaf(870, 655, 130, 2.4, IM_MOD.b2, popk(t, tB + .3, .6));
+    { const dr = -.55 * wl; translate(958, 700); rotate(dr); translate(-958, -700); }
+    if (fall > 0) { const yy = 700 + 110 * easeIn(fall), rr = -.4 * ease(fall); translate(958, yy); rotate(rr); translate(-958, -700); ctx.globalAlpha = 1 - seg(fall, .15, .6); }
+    stem(BR[0].P, grow2, 12, 5, mixCol(STEM, '#A8925A', wl));
+    leaf(...LV.b1, IM_MOD.b1, popk(t, tB - .1, .6), { fire: .7 * env(t, tB, cut, .3, .3), wilt: wl, droop: .5 * wl }); leaf(...LV.b2, IM_MOD.c1, popk(t, tF - .1, .6), { fire: .7 * env(t, tF, cut, .3, .3), wilt: wl, droop: .5 * wl }); leaf(870, 655, 130, 2.4, IM_MOD.b2, popk(t, tB + .3, .6), { wilt: wl, droop: .4 * wl });
     pop();
     pop();
-    // the snip: Clawd beside the plant with long loppers
-    const open = t < cut - .5 ? .2 : t < cut ? 1 - .8 * seg(t, cut - .5, cut - .1) + .8 * seg(t, cut - .5, cut - .3) : seg(t, cut, cut + .1) * .3;
-    tourist(1090, GROUND, 10, 'safari', { ...emotions(t, [[a, 'thinking'], [tB, 'suspicious'], [cut - .5, 'determined'], [cut + .3, 'proud'], [tStay, 'happy']]), view: 'q', flip: false, aR: lerp(.2, .49, ease(seg(t, tB, cut - .6))), armR: loppers(open), boilKey: 'c6c3' });
-    if (t > cut && t < cut + .7) sfx('snip!', 1420, 690, 54, RED, t - cut, { face: 'hand' });
+    // Clawd only watches: the branch goes by itself
+    tourist(1090, GROUND, 10, 'safari', { ...emotions(t, [[a, 'thinking'], [tB, 'excited'], [cut, 'surprised'], [cut + 1.2, 'happy'], [tStay, 'love']]), view: 'q', flip: false, lookY: -.5, lookX: .4, boilKey: 'c6c3' });
     camEnd();
     plateTitle('Fig. VII', 960, 130, seg(lt, .5, 1.1), 60);
     caption('the old network', 480, 220, seg(lt, .7, 1.5), 50, INK); caption('the modern network', 1440, 220, seg(lt, .9, 1.7), 50, INK);
@@ -304,7 +304,9 @@
     plateTitle('Fig. VIII', 960, 120, seg(lt, .5, 1.1), 52);
     const kt = seg(t, tRec - .2, tRec + 1);
     if (kt > 0) { letter('recursive generalization', 960, 200, 76, '#B07A18', { face: 'marker', shadow: false, reveal: kt }); }
-    caption('every branch makes sense on its own', 960, 1012, seg(t, tEv - .1, tOwn + .3), 44, INK);
+    const tMM = wt('gr_name', 'Multimodal'), kM = seg(t, tMM - .3, tMM + .6) * (1 - seg(t, tGen - .4, tGen));
+    caption('first spotted in the paper\n“Multimodal Neurons”', 370, 912, kM, 42, INK);
+    caption('every branch makes sense\non its own', 370, 912, seg(t, tEv - .1, tOwn + .3), 44, INK);
   }
 
   // ---------- 4 · Fig. IX: language too, a vine of word-leaves ----------
@@ -314,23 +316,24 @@
     const size = o.size || 52;
     leaf(x, y, L, a, null, k, { wr: .36, fire: o.fire || 0, draw: (cx, cy, LL) => {
       ctx.fillStyle = '#E3E8C2'; ctx.fillRect(cx - LL, cy - LL, LL * 2, LL * 2);
-      ctx.save(); ctx.font = `italic 700 ${size * LL / L}px ${SERIF}`; ctx.textBaseline = 'middle'; ctx.translate(cx, cy); ctx.rotate(a * .5); ctx.translate(-cx, -cy); const ws = parts.map(p => ctx.measureText(p[0]).width), tot = ws.reduce((s, w) => s + w, 0); let xx = cx - tot / 2;
-      parts.forEach(([s, g], i) => { if (g) { ctx.fillStyle = rgba(GOLDLT, .85); ctx.fillRect(xx - 2, cy - size * .42, ws[i] + 4, size * .84); } ctx.fillStyle = g ? RED : INK; ctx.fillText(s, xx, cy + 2); xx += ws[i]; }); ctx.restore();
+      ctx.save(); ctx.textBaseline = 'middle'; ctx.translate(cx, cy); ctx.rotate(a * .5); ctx.translate(-cx, -cy);
+      const line = (parts, sz, yy) => { ctx.font = `italic 700 ${sz * LL / L}px ${SERIF}`; const ws = parts.map(p => ctx.measureText(p[0]).width), tot = ws.reduce((s, w) => s + w, 0); let xx = cx - tot / 2; parts.forEach(([s, g], i) => { if (g) { ctx.fillStyle = rgba(GOLDLT, .85); ctx.fillRect(xx - 2, yy - sz * .42, ws[i] + 4, sz * .84); } ctx.fillStyle = g ? RED : INK; ctx.fillText(s, xx, yy + 2); xx += ws[i]; }); };
+      const sk = o.subK || 0; ctx.globalAlpha = 1; line(parts, size, cy - size * .32 * sk); if (sk > 0) { ctx.globalAlpha = sk; line(o.sub, size * .42, cy + size * .5); } ctx.restore();
     } });
   }
   const VINE = [[300, 930], [320, 820], [400, 730], [520, 660], [650, 610], [820, 625], [1000, 665], [1150, 640], [1280, 585], [1350, 545]];
   function iy(t, lt, dur) {
     const a = cs('gr_iy'), e = ce('gr_iy'), tLang = wt('gr_iy', 'language'), tLet = wt('gr_iy', 'letters'), tMiy = wt('gr_iy', 'Miyazaki'), tD = wt('gr_iy', 'D'), tDo = wt('gr_iy', 'do'), tYour = wt('gr_iy', 'yourself'), tCon = wt('gr_iy', 'contain'), tAll = wt('gr_iy', 'all');
     const dx = slide(t, lt, name, ce('gr_name') + .3);
-    cam(t, [[a - .4, 420, 790, 1.85], [tLet - .3, 470, 760, 1.6], [tMiy, 760, 560, 1.05], [tD, 960, 560, 1], [tDo, 1180, 540, 1.05], [tCon, 1150, 520, 1.1], [e + 1, 1120, 540, 1.04]], dx);
+    cam(t, [[a - .4, 420, 790, 1.85], [tLet - .3, 470, 760, 1.6], [tMiy, 560, 700, 1.35], [tD, 860, 620, 1.05], [tDo, 1040, 560, 1.0], [tCon, 1040, 560, 1.0], [e + 1, 1000, 560, .98]], dx);
     plateFrame(); soil(300, 150);
     const vk = .26 * ease(seg(t, a - .3, a + 2)) + .3 * ease(seg(t, tLet, tMiy)) + .2 * ease(seg(t, tMiy, tD)) + .3 * ease(seg(t, tD + .3, tDo + .2));
     roots(300, 1);
     stem(VINE, vk, 14, 6);
     tendril(520, 660, -1.9, 40, seg(t, tMiy - .2, tMiy + .8), 1); tendril(1020, 660, 1.4, 40, seg(t, tD, tD + 1), -1);
     { const bk = popk(t, a + 1.2, .5) * (1 - seg(t, tLet, tLet + .3)); if (bk > 0) { push(); translate(400, 730); rotate(-.55 + Math.PI / 2); scale(backOut(bk) * (1 + .08 * Math.sin(t * 6))); flat([[0, 6], [-22, -26], [0, -70], [22, -26]], '#9FB85A', { line: STEMDK, lw: 2.4 }); pop(); } }
-    wordLeaf(400, 730, 240, -.55, [['iy', 1]], popk(t, tLet + .2, .6), { size: 72, fire: .8 * env(t, tLet + .2, tMiy + .5, .3, .5) });
-    wordLeaf(650, 610, 380, -.32, [['M', 0], ['iy', 1], ['azaki', 0]], popk(t, tMiy - .2, .6), { size: 58, fire: .8 * env(t, tMiy - .2, tD + .3, .3, .5) });
+    // the first leaf: "iy", with the word it came from written small under it ("in words like Miyazaki")
+    wordLeaf(400, 730, 330, -.55, [['iy', 1]], popk(t, tLet + .2, .6), { size: 72, fire: .8 * env(t, tLet + .2, tD + .3, .3, .5), sub: [['as in M', 0], ['iy', 1], ['azaki', 0]], subK: seg(t, tMiy - .4, tMiy + .2) });
     wordLeaf(1000, 665, 260, .38, [['d', 0], ['iy', 1]], popk(t, tD - .2, .6), { size: 70, fire: .8 * env(t, tD - .2, tDo + .3, .3, .5) });
     wordLeaf(1280, 585, 500, -.28, [['do it yourself', 0]], popk(t, tDo, .7), { size: 54, fire: .8 * env(t, tDo, e + 2, .3, .5) });
     // Clawd checks the last leaf with a magnifying glass: no "iy" in it
@@ -342,10 +345,10 @@
     }
     tourist(1740, GROUND, 10, 'safari', { ...emotions(t, [[a, 'neutral'], [tMiy, 'happy'], [tYour, 'thinking'], [tAll - .2, 'confused']]), view: 'q', flip: true, aR: t > tYour && !shrug ? .9 : undefined, boilKey: 'c6c5' });
     camEnd();
-    if (lt > .4) letter('Fig. IX · Neuronium verbale', 960, 110, 56, INK, { face: 'marker', shadow: false, reveal: seg(lt, .5, 1.3), screen: true });
+    if (lt > .4) letter('Fig. IX · a language neuron', 960, 110, 56, INK, { face: 'marker', shadow: false, reveal: seg(lt, .5, 1.3), screen: true });
     if (t > tLang - .3) letter('it happens in language too', 960, 185, 52, INK, { face: 'hand', shadow: false, screen: true, reveal: seg(t, tLang - .3, tLang + .6), alpha: 1 - seg(t, tMiy + .5, tMiy + 1) });
     if (false) caption('', 960, 200, seg(t, tLang - .3, tLang + .6) * (1 - seg(t, tMiy + .5, tMiy + 1)), 46, INK);
-    if (t > tCon - .1) letter('no "iy" at all!', 1480, 300, 60, RED, { face: 'marker', shadow: false, pop: clamp((t - tCon + .1) * 2.2) });
+    if (t > tCon - .1) letter('no "iy" at all!', 1300, 330, 60, RED, { face: 'marker', shadow: false, pop: clamp((t - tCon + .1) * 2.2) });
   }
 
   // ---------- 5 · Figs. X & XI: weird, but never random ----------
@@ -365,26 +368,29 @@
   }
   function geology(t, lt, dur) {
     const a = cs('gr_geology'), e = ce('gr_geology'), tGeo = wt('gr_geology', 'geology'), tBr = wt('gr_geology', 'branch'), tCes = wt('gr_geology', 'Cesium'), tMaps = wt('gr_geology', 'maps');
-    const tEn = wt('gr_geology', 'enemy'), tRus = wt('gr_geology', 'Russian'), tPoem = wt('gr_geology', 'poem'), tWeird = wt('gr_geology', 'none'), tRand = wt('gr_geology', 'random');
+    const tEn = wt('gr_geology', 'enemy'), tRus = wt('gr_geology', 'Russian'), tPoem = wt('gr_geology', 'poem'), tWeird = wt('gr_geology', 'none'), tRand = wt('gr_geology', 'random'), tDig = wt('gr_geology', 'digging');
     const dx = slide(t, lt, iy, ce('gr_iy') + .3);
     cam(t, [[a - .4, 560, 580, 1.15], [tCes, 680, 560, 1.12], [tMaps + .8, 720, 560, 1.12], [tEn + .2, 1350, 560, 1.12], [tPoem, 1420, 560, 1.12], [tWeird, 960, 560, .98], [e + 2, 960, 560, .96]], dx);
     plateFrame();
     const geoL = [[960, 562, 210, -Math.PI / 2, strata], [954, 640, 180, -2.6, strata], [966, 700, 180, -.5, strata], [956, 780, 150, 2.8, strata]];
     minorPlant(t, 480, .78, geoL, { P: [[962, 760], [1060, 720], [1150, 650], [1220, 600]], k: ease(seg(t, tBr - .3, tCes)) }, { x: 1220, y: 600, L: 330, a: -.55, k: popk(t, tCes - .1, .7), draw: codeLeaf, fire: .9 * env(t, tCes, tMaps + 1.5, .3, .5) });
     const enL = [[960, 562, 210, -Math.PI / 2, thorny], [954, 640, 180, -2.6, thorny], [966, 700, 180, -.5, thorny], [956, 780, 150, 2.8, thorny]];
-    minorPlant(t, 1440, .78, enL.map(l => l.slice()), { P: [[958, 760], [860, 720], [770, 650], [700, 600]], k: ease(seg(t, tRus - .5, tPoem)) }, { x: 700, y: 600, L: 360, a: -2.6, k: popk(t, tPoem - .1, .7), draw: poemLeaf, fire: .9 * env(t, tPoem, e + 2, .3, .5) });
+    const kE = popk(t, tEn - .7, .7);   // the enemy specimen grows onto the plate only when it is named
+    if (kE > 0) minorPlant(t, 1440, .78 * backOut(kE), enL.map(l => l.slice()), { P: [[958, 760], [860, 720], [770, 650], [700, 600]], k: ease(seg(t, tRus - .5, tPoem)) }, { x: 700, y: 600, L: 360, a: -2.6, k: popk(t, tPoem - .1, .7), draw: poemLeaf, fire: .9 * env(t, tPoem, e + 2, .3, .5) });
     // the odd branches, named on the plate
     // (the left names fade while the camera visits the right specimen, and come back for the wide view)
     const kCes = 1 - seg(t, tMaps + .9, tMaps + 1.4) + seg(t, tWeird - .5, tWeird + .1);
     if (t > tCes - .1 && kCes > 0) { letter('Cesium', 620, 380, 58, RED, { face: 'marker', shadow: false, pop: clamp((t - tCes + .1) * 2.4), alpha: kCes }); caption('code for maps of the earth', 620, 445, seg(t, tCes + .4, tMaps + .6), 44, INK, { alpha: kCes }); }
     if (t > tPoem - .1) { letter('стихи о врагах', 1300, 380, 52, RED, { face: SERIF, shadow: false, pop: clamp((t - tPoem + .1) * 2.4) }); caption('a Russian poem about enemies', 1300, 445, seg(t, tPoem + .2, tPoem + 1), 44, INK); }
     // Clawd between the two specimens, in a geologist's hard hat for the occasion
-    tourist(960, GROUND, 9, 'hard', { ...emotions(t, [[a, 'neutral'], [tCes, 'surprised'], [tEn, 'scared'], [tWeird, 'happy']]), view: 'q', flip: t > tEn - .4, boilKey: 'c6c6' });
+    const dig = env(t, tDig - .4, tDig + 1.5, .2, .3), dph = Math.sin((t - tDig) * 9);
+    if (dig > 0) for (let i = 0; i < 8; i++) { const f = frac((t - tDig) * 1.6 + i / 8); dot(1010 + 70 * f + 10 * hash(i), GROUND - 10 - 120 * f * (1 - f) * 3, 4 + 2 * hash(i * 3), '#7A5B3E', dig * (1 - f)); }
+    tourist(960, GROUND, 9, 'hard', { ...emotions(t, [[a, 'neutral'], [tCes, 'surprised'], [tEn, 'scared'], [tDig - .4, 'determined'], [tWeird, 'happy']]), view: 'q', flip: dig > 0 ? false : t > tEn - .4, aR: dig > 0 ? -.4 + .5 * dph : undefined, armR: dig > 0 ? spade : undefined, boilKey: 'c6c6' });
     camEnd();
-    plateTitle('Fig. X · geologicum', 480, 128, seg(lt, .5, 1.2), 50); plateTitle('Fig. XI · inimicum', 1440, 128, seg(t, tEn - .5, tEn + .4), 50);
-    const kw = 1 - seg(t, tWeird - .5, tWeird - .1); caption('geology', 480, 205, seg(t, tGeo - .2, tGeo + .5) * kw, 46, INK); caption('enemies', 1440, 205, seg(t, tEn - .2, tEn + .5) * kw, 46, INK);
-    
-    stamp('WEIRD, BUT NEVER RANDOM', 960, 240, tWeird - .1, t, { col: RED, size: 76, rot: -.06 });
+    plateTitle('Fig. X · a geology neuron', 480, 128, seg(lt, .5, 1.2), 50); plateTitle('Fig. XI · an enemy neuron', 1440, 128, seg(t, tEn - .5, tEn + .4), 50);
+    const kD = seg(t, tDig - .3, tDig + .4) * (1 - seg(t, tWeird - .6, tWeird - .2));
+    caption('some take digging', 960, 750, kD, 46, INK);
+    stamp('SO FAR, ALMOST NONE RANDOM', 960, 240, tWeird - .1, t, { col: RED, size: 68, rot: -.06 });
   }
 
   // ---------- 6 · Specimen No. 1 is potted and wheeled off the plate (to the game show) ----------

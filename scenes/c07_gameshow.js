@@ -17,10 +17,11 @@
     const a = edgeA(x, y, w, size * 1.1); if (a <= 0) return;
     ctx.save(); ctx.globalAlpha *= a; txt(s, x, y, size, col, o); ctx.restore();
   }
-  // machine() letters its 'SAE' plate in its own local units; place it on the plate through the current transform
+  // machine() letters an 'SAE' plate on its body; the show calls it the Unfolding Machine (named in a lower third), so
+  // the jargon plate is dropped and the panel stays blank
   function machineL(t, x, y, s, o) {
-    const n = LETTERS.length, M = ctx.getTransform(), C0 = CAM, a = ctx.globalAlpha; CAM = null; machine(t, x, y, s, o); CAM = C0;
-    for (let i = n; i < LETTERS.length; i++) { const L = LETTERS[i]; if (L.txt !== 'SAE') continue; const lx = x + L.x * s, ly = y + L.y * s; L.x = M.a * lx + M.c * ly + M.e; L.y = M.b * lx + M.d * ly + M.f; L.size *= s * Math.hypot(M.a, M.b); L.rot = (L.rot || 0) + Math.atan2(M.b, M.a); L.alpha = (L.alpha ?? 1) * a; L.screen = true; }
+    const n = LETTERS.length, C0 = CAM; CAM = null; machine(t, x, y, s, o); CAM = C0;
+    for (let i = LETTERS.length - 1; i >= n; i--) if (LETTERS[i].txt === 'SAE') LETTERS.splice(i, 1);
   }
   const R = 'blog/raw/', V = R + 'v-figure-10x/', RM = R + 'roadmap/', C3 = R + 'crushed-3b-v3/', CE = R + 'crushed-3b/examples/', CL = R + 'crushed-last-layer/images/';
   const TV = R + 'tiny-vehicles/', CP = R + 'car-path-distinctions/', NP = R + 'negative-poles-v2/', NO = R + 'neuron-overflow/';
@@ -63,7 +64,7 @@
     if (y0 < -260) return;
     ctx.save(); ctx.strokeStyle = '#2A0A30'; ctx.lineWidth = 4; for (const x of [560, 1360]) { ctx.beginPath(); ctx.moveTo(x, -300); ctx.lineTo(x, y0); ctx.stroke(); } ctx.restore();
     flat(rrPts(460, y0, 1000, 170, 30), '#F0BE46', { line: '#3A1A0A', lw: 6, shadow: [8, 10, 'rgba(0,0,0,.35)'] });
-    txt(txtS, 960, y0 + 87, 84, RED, { font: 'serif', stroke: CREAM, sw: 8 });
+    if ((CAM ? toScreen(960, y0 + 87)[1] : y0 + 87) > 50) txt(txtS, 960, y0 + 87, 84, RED, { font: 'serif', stroke: CREAM, sw: 8 });
     for (let i = 0; i < 26; i++) { const u = i / 26, x = 470 + u * 980; dot(x, y0 + 10, 9, Math.floor(t * 6 + i) % 2 ? CREAM : '#C98A2A'); dot(x, y0 + 162, 9, Math.floor(t * 6 + i + 1) % 2 ? CREAM : '#C98A2A'); }
   }
   function podium(t, x, col, label, score, o = {}) {
@@ -82,14 +83,14 @@
     flat(rrPts(x + 10, y + 10, 190, 92, 8), GOLD); flat(rrPts(x + 205, y + 10, 165, 92, 8), VIO);
     txt('GENERALIZATION', x + 105, y + 28, 21, DARK, { font: SERIF, weight: '700' }); txt('SUPERPOS.', x + 287, y + 28, 21, CREAM, { font: SERIF, weight: '700' });
     txt(String(g), x + 105, y + 72, 52, DARK, { font: 'monospace' }); txt('0', x + 287, y + 72, 52, CREAM, { font: 'monospace' });
-    const pop = AW().reduce((s, a) => s + Math.exp(-6 * Math.max(0, t - a)) * (t > a ? 1 : 0), 0); if (pop > .05) glow(x + 105, y + 60, 160 * pop, GOLDLT, pop);
+    const pop = AW().reduce((s, a) => s + Math.exp(-6 * Math.max(0, t - a)) * (t > a ? 1 : 0), 0); if (pop > .05) { glow(x + 105, y + 60, 160 * pop, GOLDLT, pop); letter('+100', x + 105, y + 150 - 30 * (1 - pop), 40, GOLDLT, { face: 'marker', shadow: false, alpha: clamp(pop * 1.5), screen: true }); }
   }
   // a broadcast lower third
   function lower(t, a, b, s, col = GOLD, o = {}) {
     const k = env(t, a, b, .35, .3); if (k <= 0) return;
     const x = lerp(-900, 0, easeOut(seg(t, a, a + .45))), y = o.y ?? 900, w = o.w ?? Math.max(700, s.length * 34 + 160);
     ctx.save(); ctx.globalAlpha = k; flat([[x + 120, y - 58], [x + 120 + w, y - 58], [x + 80 + w, y + 58], [x + 80, y + 58]], DARK, { shadow: [8, 8, 'rgba(0,0,0,.4)'] }); flat([[x + 80, y - 58], [x + 140, y - 58], [x + 100, y + 58], [x + 40, y + 58]], col); ctx.restore();
-    letter(s, x + 180, y + 2, o.size || 60, CREAM, { face: 'marker', shadow: false, align: 'left', alpha: k, screen: true });
+    letter(s, x + 180, y + 2, o.size || 60, CREAM, { face: 'marker', shadow: false, align: 'left', alpha: k * seg(t, a + .35, a + .5), screen: true });   // the words wait until the bar has slid in
   }
   // round card: a starburst banner swooping in (screen space)
   function roundCard(t, a, s1, s2) {
@@ -213,7 +214,7 @@
     const a = cs('te_local'), e = ce('te_local'), tN = wt('te_local', 'neighbors'), tFl = wt('te_local', 'floppy-eared'), tCol = wt('te_local', 'collection'), tSup = wt('te_local', 'Superposition'), tStr = wt('te_local', 'strangers');
     const tFl2 = wt('te_local', 'floppy-eared', 1), tLat = wt('te_local', 'Latin'), tPo = wt('te_local', 'poetry');
     stageBG();
-    camKeys(t, [[a - .3, 960, 540, 1], [a + .9, 960, 470, 1.4], [tFl - .4, 770, 480, 1.75], [tSup - .3, 770, 480, 1.7], [tStr + .2, 1150, 480, 1.75], [tPo + .3, 1150, 480, 1.72], [e + 1.5, 1040, 520, 1.45]], .6);
+    camKeys(t, [[a - .3, 960, 540, 1], [a + .9, 960, 500, 1.45], [tFl - .4, 960, 520, 1.55], [tPo + .3, 960, 520, 1.55], [e + 1.5, 960, 530, 1.45]], .6);
     marquee(t, lerp(60, -330, easeIn(seg(t, a - .3, a + .4))));
     const by = lerp(FLOOR, 300, backOut(seg(t, a + .2, a + 1.1)));
     contestants(t, { genLit: 1 - .5 * env(t, tSup, e, .3, .3), supLit: .4 + .6 * env(t, tSup - .2, e + 2, .3, .3), knot: { look: t > tLat ? [-1, -.3] : [-.6, .1], grin: true } });
@@ -242,13 +243,15 @@
     const a = cs('te_shapes'), e = ce('te_shapes'), t32 = wt('te_shapes', 'thirty-two'), tHand = wt('te_shapes', 'handful'), tGen = wt('te_shapes', 'Generalization'), tGr = wt('te_shapes', 'groups'), tFew = wt('te_shapes', 'fewer'), tCo = wt('te_shapes', 'coarser');
     const tSup = wt('te_shapes', 'Superposition'), tSc = wt('te_shapes', 'scatters');
     stageBG();
-    camKeys(t, [[a - .4, 960, 560, 1.1], [t32, 960, 470, 1.6], [tGen, 800, 520, 1.7], [tFew, 800, 530, 1.7], [tSup - .3, 960, 520, 1.55], [e + .5, 1080, 530, 1.65]], .5);
+    camKeys(t, [[a - .4, 960, 560, 1.1], [t32, 960, 500, 1.6], [tGen, 800, 580, 1.7], [tFew, 800, 590, 1.7], [tSup - .3, 960, 590, 1.55], [e + .5, 960, 595, 1.55]], .5);
     contestants(t, { genLit: 1, supLit: .4 + .6 * seg(t, tSup - .3, tSup) });
     const by = 300; board(t, by);
     // the prize cannon bursts the 32 things into the air
     const mL = ease(seg(t, tFew, tFew + 1)), mR = ease(seg(t, tSc + .4, tSc + 1.1));
     for (let side = 0; side < 2; side++) for (let j = 0; j < 8; j++) { const m = side ? mR : mL; if (m > .5 && j % 2) continue; jar(jarX(side, j, m), 740, lerp(36, 76, m), lerp(126, 136, m), side ? VIOLT : GOLDLT, popk(t, tHand - .2 + j * .05 + side * .2, .4)); }
     letter('generalization', 778, 360, 44, GOLDLT, { face: 'marker', shadow: false, reveal: seg(t, tGen - .2, tGen + .5) });
+    // the jars are the neurons
+    const kj = seg(t, tHand - .1, tHand + .5); if (kj > 0) for (const x of [778, 1142]) letter('jars = neurons', x, 768, 26, CREAM, { face: 'marker', shadow: false, alpha: kj });
     letter('superposition', 1142, 360, 44, VIOLT, { face: 'marker', shadow: false, reveal: seg(t, tSup - .2, tSup + .5) });
     SHAPES.forEach((S, i) => {
       const burst = seg(t, t32 - .3 + i * .012, t32 + .4 + i * .012), cx = 790 + (i % 8) * 49 + (Math.floor(i / 8) % 2) * 20, cy = 430 + Math.floor(i / 8) * 34;
@@ -265,8 +268,8 @@
     clawdSeat(t, [[a, 'excited'], [t32, 'surprised'], [tGr, 'happy']], 0);
     audience(t, .6 * env(t, t32, t32 + 1.2, .2, .6));
     camEnd();
-    if (t > t32 - .2 && t < t32 + 1) sfx('POP!', 960, 300, 90, GOLDLT, t - t32 + .2, { face: 'marker' });
-    lower(t, tCo - .6, tSup - .2, 'fewer jars: coarser groups', GOLD);
+    if (t > t32 - .2 && t < t32 + 1.4) sfx('32 things!', 960, 300, 80, GOLDLT, t - t32 + .2, { face: 'marker', life: 1.6 });
+    lower(t, tFew - .3, tSup - .2, 'fewer neurons: coarser groups', GOLD);
     lower(t, tSc - .1, e + 1.4, 'superposition: a scattered jumble', VIO);
   }
 
@@ -279,7 +282,7 @@
     for (let i = 0; i < 12; i++) flat([[500 + i * 80, 168], [540 + i * 80, 168], [520 + i * 80, 182], [480 + i * 80, 182]], i % 2 ? '#F0BE46' : '#1A1A1A');
     flat(rrPts(800, 86, 320, 70, 8), '#140818', { line: '#000000', lw: 3 });
     fadeTxt(count, 960, 123, 56, '#FF5A3A', { font: 'monospace' });
-    fadeTxt('THE PRESS', 640, 125, 40, CREAM, { font: SERIF, weight: '900' }); fadeTxt('PSI', 1280, 125, 36, CREAM, { font: SERIF, weight: '900' });
+    fadeTxt('THE PRESS', 640, 125, 40, CREAM, { font: SERIF, weight: '900' }); fadeTxt('NEURONS', 1260, 125, 32, CREAM, { font: SERIF, weight: '900' });
     // the hydraulic ram
     flat(rectPts(930, 180, 60, Math.max(10, plateY - 220)), '#C9D0DE', { grad: [[0, '#E9EEF6'], [.5, '#B9C0CE'], [1, '#7A8398']], gdir: [930, 0, 990, 0], line: DARK, lw: 2 });
     flat(rrPts(560, plateY - 60, 800, 70, 8), '#8A93A8', { grad: [[0, '#B9C0CE'], [1, '#6E7891']], gdir: [0, plateY - 60, 0, plateY + 10], line: DARK, lw: 4 });
@@ -335,6 +338,9 @@
       press(t, ox, plateY, cnt, { lock: seg(t, tNo - .3, tWay) * (1 - seg(t, r - .4, r)) });
       slam(t, tCr + .05);
     }
+    // a loupe over the tray: the 480 tiny tiles are curve detectors
+    const lpk = env(t, tCurve - .5, tCr - .15, .25, .2);
+    if (lpk > 0 && ox < 1399) { const lx = 1180, ly = 470, lr = 120 * backOut(clamp(lpk * 1.3)); ctx.save(); ctx.strokeStyle = '#3A1A0A'; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(lx - lr * .7, ly + lr * .7); ctx.lineTo(lx - lr * 1.25, ly + lr * 1.25); ctx.stroke(); ctx.beginPath(); ctx.arc(lx, ly, lr, 0, TAU); ctx.fillStyle = '#F3E8F6'; ctx.fill(); ctx.clip(); [0, 1, 2, 3].forEach(i => { const I = img(CURVES[i * 2]); ctx.drawImage(I, lx - lr + (i % 2) * lr, ly - lr + Math.floor(i / 2) * lr, lr, lr); }); ctx.restore(); ctx.save(); ctx.strokeStyle = GOLD; ctx.lineWidth = 8; ctx.beginPath(); ctx.arc(lx, ly, lr, 0, TAU); ctx.stroke(); ctx.restore(); }
     // ten curve detectors fan out above the "curves and loops" tile, then pour into it
     const fan = seg(t, tTen2 - .9, tTen2 - .3), pour = seg(t, tTen2 + .2, tTen2 + 1.1);
     if (fan > 0 && pour < 1) { const [tx, ty] = GRID10(1); CURVES.forEach((im, i) => { const q = Math.PI + (i + .5) / 10 * Math.PI, hx = tx + Math.cos(q) * 230, hy = ty - 40 + Math.sin(q) * 200, k = popk(t, tTen2 - .9 + i * .04, .3), u = easeIn(pour); tile(lerp(hx, tx, u), lerp(hy, ty, u), 56, 56, im, 1, { s: backOut(k) * (1 - .7 * u) }); }); }
@@ -342,24 +348,31 @@
     const bk = popk(t, tIf - .2, .5) * (1 - seg(t, r - .3, r + .1));
     if (bk > 0) { bubble(1300, 300, 230, 170, bk, SX, 380); if (bk > .6) { tile(1300, 310, 200, 150, null, 1, { draw: jumble(200, 150, [seg(t, tCurves - .3, tCurves + .4), seg(t, tSpi - .2, tSpi + .6), seg(t, tWeb - .3, tWeb + .5)]), frame: VIO }); } }
     // the Unfolding Machine sniffs along the tiles and comes back with nothing
-    if (t > tUnf - .6) { const mk = seg(t, tUnf - .6, tUnf + .8), mx = lerp(-200, 700, easeOut(mk)) + (t > tUnf + .8 ? 520 * ease(seg(t, tUnf + .8, tNone - .2)) : 0) + 10 * Math.sin(t * 6); machineL(t, mx, 985, .4, { on: 1, mouth: .4 + .4 * Math.abs(Math.sin(t * 5)) }); if (t > tNone - .3) { const bk = popk(t, tNone - .3, .4); push(); translate(mx + 120, 900); scale(backOut(bk)); flat([[-50, -30], [50, -30], [38, 30], [-38, 30]], '#C9A15A', { line: DARK, lw: 3 }); ctx.save(); ctx.strokeStyle = DARK; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -30, 44, Math.PI, TAU); ctx.stroke(); ctx.restore(); pop(); } }
+    if (t > tUnf - .6) { const mk = seg(t, tUnf - .6, tUnf + .8), mx = lerp(-200, 560, easeOut(mk)) + (t > tUnf + .8 ? 420 * ease(seg(t, tUnf + .8, tNone - .2)) : 0) + 10 * Math.sin(t * 6); machineL(t, mx, 955, .45, { on: 1, mouth: .4 + .4 * Math.abs(Math.sin(t * 5)) }); if (t > tNone - .3) { const bk = popk(t, tNone - .3, .4), tBr = wt('te_result', 'broad'); push(); translate(mx + 190, 880); scale(1.25 * backOut(bk));
+        // the basket: no hidden curve detectors, only broad, bunched-up versions of the same shapes
+        [C3 + 'sae-174', C3 + 'sae-354', C3 + 'sae-435'].forEach((im, i) => { const k = popk(t, tBr - .4 + i * .2, .4); if (k > 0) tile(-60 + i * 60, -70 - (i % 2) * 18, 70, 70, im, 1, { s: backOut(k), frame: VIO }); });
+        flat([[-110, -36], [110, -36], [86, 40], [-86, 40]], '#C9A15A', { line: DARK, lw: 3 }); ctx.save(); ctx.strokeStyle = DARK; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -36, 96, Math.PI, TAU); ctx.stroke(); ctx.restore(); pop(); } }
     clawdSeat(t, [[a, 'neutral'], [tCr - .5, 'scared'], [r + .4, 'surprised'], [tNone, 'excited']], env(t, tNone + .3, e + 2, .3, .4));
     audience(t, env(t, tNone + .2, e + 2, .3, .5));
     camEnd();
     roundCard(t, tSq - .2, 'ROUND 2', 'THE PRESS');
     lower(t, tCurve, tCr - .2, '480 curve detectors', GOLD);
-    lower(t, tTen - .4, tIf - .4, 'crushed to 10 · no way around', RED);
+    const tRet = wt('te_squeeze', 'retrained');
+    lower(t, tTen - .4, tRet - .3, 'cut to 10 · no way around', RED);
+    lower(t, tRet - .2, tIf - .4, 'retrained from scratch', RED);
     lower(t, tDram - .3, r - .2, 'if superposition: crammed together', VIO);
     lower(t, tClean - .3, tLoops - .4, 'clean · just coarser', GOLD);
     lower(t, tLoops - .2, tTwo - .2, '1 "curves and loops" for 10 curves', GOLD);
     lower(t, tTwo - .1, tUnf - .4, '2 circle neurons, not many', GOLD);
-    lower(t, tHid - .2, e + .8, 'hidden curves found: none', RED);
+    lower(t, tUnf - .3, tHid - .4, 'the Unfolding Machine', VIO);
+    lower(t, tHid - .3, e + .8, 'no hidden curves · just broad versions', RED);
     if (t > tCr + .05 && t < tCr + 1.2) sfx('CRUNCH!', 960, 260, 100, '#FF8A3A', t - tCr - .05, { face: 'marker' });
     if (t > tNone && t < tNone + 1.4) sfx('BZZT!', 1540, 330, 80, '#FF3B30', t - tNone, { face: 'marker' });
     scoreBug(t, 1);
   }
 
   // ---------- 5 · the horizon layer: 1024 to 13 ----------
+  const HZL = ['buildings', 'streets', 'signs', 'buses', 'dashboards', 'beetles', 'phones', 'bugs', 'towers', 'gadgets', 'dogs', 'dogs', 'dog faces'];   // broad: what each of the 13 fires on
   const GRID13 = i => i < 7 ? [618 + i * 114, 470] : [675 + (i - 7) * 114, 606];
   function horizon(t, lt, dur) {
     const a = cs('te_last'), e = ce('te_last'), tLast = wt('te_last', 'last'), tMod = wt('te_last', 'modern'), tTh = wt('te_last', 'thousand'), tDown = wt('te_last', 'down'), tThir = wt('te_last', 'thirteen'), tSame = wt('te_last', 'Same', 1);
@@ -373,7 +386,7 @@
     const splat = seg(t, tBrush + .2, tBrush + .5);
     contestants(t, { knot: { look: [-1, -.2], grin: false, sq: .25 * env(t, tDown, tDown + .6, .1, .4) }, buzz: env(t, tBrush + .3, tBrush + 1.8, .1, .5), supLit: .3 });
     if (t < tSame - .4) tinyTray(t, 1024, 64, 420, plateY, 'c7t1024', HZ, popk(t, a + .2, .6));
-    else HZ.forEach((im, i) => { const [x, y] = GRID13(i), lk = popk(t, tSame - .4 + i * .04, .4); tile(x, y, 100, 100, im, 1, { s: .2 + .8 * backOut(lk), lit: .5 * env(t, tCo - .3, e + 2, .3, .4) }); });
+    else HZ.forEach((im, i) => { const [x, y] = GRID13(i), lk = popk(t, tSame - .4 + i * .04, .4); tile(x, y, 100, 100, im, 1, { s: .2 + .8 * backOut(lk), lit: .5 * env(t, tCo - .3, e + 2, .3, .4) }); const kl = seg(t, tCo - .4, tCo + .3); if (kl > 0) { ctx.save(); ctx.globalAlpha = kl; flat(rrPts(x - 52, y + 50, 104, 24, 6), DARK); txt(HZL[i], x, y + 62, 17, CREAM, { font: SERIF, weight: '700' }); ctx.restore(); } });
     // the broad brush sweeps a single gold stroke across the clean tiles
     const bk = seg(t, tPaint - .3, tBrush + .2);
     if (bk > 0) { const bx = lerp(420, 1500, easeInOut(bk)); ctx.save(); ctx.globalAlpha = .45; ctx.fillStyle = GOLD; ctx.beginPath(); ctx.moveTo(560, 440); for (let i = 0; i <= 20; i++) { const x = lerp(560, Math.min(1380, bx), i / 20); ctx.lineTo(x, 430 + 8 * Math.sin(i * 1.7)); } for (let i = 20; i >= 0; i--) { const x = lerp(560, Math.min(1380, bx), i / 20); ctx.lineTo(x, 660 + 8 * Math.sin(i * 1.3)); } ctx.closePath(); if (bx > 570) ctx.fill(); ctx.restore(); if (bk < 1) { push(); translate(bx, 545); rotate(-.15); flat(rrPts(-20, -520, 40, 420, 10), '#8C5A3A', { line: DARK, lw: 3 }); flat(rrPts(-60, -110, 120, 60, 8), '#B9C0CE', { line: DARK, lw: 3 }); flat([[-70, -50], [70, -50], [80, 120], [-80, 120]], GOLD, { line: DARK, lw: 3 }); pop(); } }
@@ -386,7 +399,7 @@
     camEnd();
     lower(t, tLast - .2, tDown - .3, 'a modern network: 1,024 neurons', GOLD);
     lower(t, tDown - .2, tSame - .3, '1,024 to 13', RED);
-    lower(t, tCo - .3, tPack + .4, 'coarser · never scrambled', GOLD);
+    lower(t, tCo - .3, tPack + .4, 'coarser, not scrambled', GOLD);
     lower(t, tPaint - .2, e + 1.2, 'a broader brush', GOLD, { size: 70 });
     if (t > tDown + .05 && t < tDown + 1.2) sfx('CRUNCH!', 960, 260, 100, '#FF8A3A', t - tDown - .05, { face: 'marker' });
     scoreBug(t, 1);
@@ -422,7 +435,7 @@
       pop();
       letter(lab, x, 800 - h - 60, 44, CREAM, { face: 'marker', shadow: false, alpha: edgeA(x, 800 - h - 60, lab.length * 30, 50), reveal: seg(t, tThree - .4 + i * .3, tThree + i * .3) });
     });
-    if (t > tCar - .2) { push(); translate(690, 470); const k = popk(t, tCar - .2, .4); scale(backOut(k)); flat(rrPts(-125, -28, 250, 56, 12), GOLD, { line: DARK, lw: 3 }); pop(); letter('1 broad car', 690, 471, 32, DARK, { face: 'marker', shadow: false, pop: k }); }
+    if (t > tCar - .2) { const ea = edgeA(690, 470, 260, 60); if (ea > 0) { push(); translate(690, 462); const k = popk(t, tCar - .2, .4); scale(backOut(k)); ctx.globalAlpha = ea; flat(rrPts(-125, -28, 250, 56, 12), GOLD, { line: DARK, lw: 3 }); ctx.globalAlpha = 1; pop(); letter('1 broad car', 690, 463, 32, DARK, { face: 'marker', shadow: false, pop: popk(t, tCar - .2, .4), alpha: ea }); } }
     clawdSeat(t, [[a, 'thinking'], [tBig, 'surprised'], [tViews, 'excited'], [tLess + .5, 'proud']], env(t, tScr - .4, e + 2, .3, .4));
     audience(t, .8 * env(t, tDoz, tDoz + 1.4, .2, .6) + env(t, tScr, e + 2, .3, .4));
     camEnd();
@@ -446,36 +459,37 @@
   function finale(t, lt, dur) {
     const a = cs('te_dict'), e = ce('te_dict'), tUnf = wt('te_dict', 'Unfolding'), tPieces = wt('te_dict', 'pieces'), tCopies = wt('te_dict', 'near-copies'), t88 = wt('te_dict', 'eighty-eight'), tAct = wt('te_dict', 'activity');
     const tBlocks = wt('te_dict', 'blocks'), tLegs = wt('te_dict', 'legs'), tWebs = wt('te_dict', 'webs'), tReg = wt('te_dict', 'regrouped'), tLeaves = wt('te_dict', 'different'), tInWebs = wt('te_dict', 'places');
-    const tBase = wt('te_dict', 'already'), tUnd = wt('te_dict', 'kept'), tNeur = wt('te_dict', 'neuron', 1), end = ce('te_dict');
+    const tBase = wt('te_dict', 'already'), tUnd = wt('te_dict', 'kept'), tTool = wt('te_dict', 'tool'), tHelp = wt('te_dict', 'help'), end = ce('te_dict');
     const bolt = end + .5;
     stageBG();
-    camKeys(t, [[a - .3, 960, 540, 1], [tUnf, 960, 600, 1.3], [tCopies, 960, 580, 1.4], [t88 - .5, 960, 470, 1.3], [tAct + .6, 960, 540, 1.15], [tBlocks, 960, 630, 1.35], [tInWebs + .4, 960, 630, 1.35], [tBase - .3, 960, 470, 1.5], [tNeur + .2, 960, 500, 1.35], [end + .3, 960, 540, 1], [end + 4, 1050, 540, 1.02]], .5);
+    camKeys(t, [[a - .3, 960, 540, 1], [tUnf, 960, 600, 1.3], [tCopies, 960, 620, 1.3], [t88 - .5, 960, 580, 1.1], [tAct + .6, 960, 600, 1.15], [tBlocks, 960, 640, 1.35], [tInWebs + .4, 960, 640, 1.35], [tTool + .4, 960, 620, 1.2], [end + .3, 960, 580, 1], [end + 4, 1050, 540, 1.02]], .5);
     const ksz = knotSize(t);
     const kx = SX + (t > bolt ? 1100 * easeIn(seg(t, bolt, bolt + .9)) : 0), ky = 450 - (t > bolt ? 30 * Math.abs(Math.sin((t - bolt) * 14)) : 0);
     contestants(t, { kx, ky, knot: { look: t > bolt - .8 ? [1, -.2] : t > end - .5 ? [-1, -.8] : [-.8, 0], grin: false, sq: t > bolt - .3 && t < bolt ? .3 : 0 }, supLit: t > bolt + .6 ? .05 : .3, plantGlow: .9 * env(t, end - .2, end + 6, .3, .3) });
     if (t > bolt && t < bolt + 1.2) { for (let i = 0; i < 6; i++) { const yy = 380 + i * 22; ctx.save(); ctx.strokeStyle = 'rgba(233,176,224,.6)'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(kx - 120 - i * 30, yy); ctx.lineTo(kx - 260 - i * 50, yy); ctx.stroke(); ctx.restore(); } for (let i = 0; i < 8; i++) dot(kx - 80 - hash(i) * 200, 520 + hash(i * 3) * 60, 12 * (1 - seg(t, bolt, bolt + 1.2)) + 3, '#C9B0D9', .6); }
-    // the machine and its belt; pieces stop under the neuron each one matches
-    const mOn = seg(t, a - .3, a + .7), dictOut = seg(t, tBase - 1, tBase - .3);
-    if (dictOut < 1) {
-      ctx.save(); ctx.globalAlpha = 1 - dictOut;
-      machineL(t, lerp(-300, 620, easeOut(mOn)), 960, .42, { on: 1, mouth: .6 });
-      flat(rectPts(700, 860, 700, 26), '#4A5268', { line: DARK, lw: 3 }); for (let i = 0; i < 14; i++) flat(ellPts(720 + i * 50, 873, 9, 9, 10), '#6E7891', { line: DARK, lw: 1 });
-      // the rack of neurons above the belt
-      const spidersOn = t > tBlocks - .3;
-      flat(rrPts(670, 400, 640, 140, 12), '#2A0A3A', { line: '#F0BE46', lw: 4 });
-      DICT.forEach(([n, p], i) => { const [x, y] = RACK(i); if (spidersOn && i < 2) tile(x, y, 84, 84, null, seg(t, tBlocks - .3 + i * .5, tBlocks + .1 + i * .5), { draw: i ? web : spiderLegs, lit: .7 * env(t, tLegs - .2 + i * .6, end, .2, .3) }); else if (!spidersOn || i >= 2) tile(x, y, 84, 84, n, popk(t, a + .4 + i * .1, .4), { s: 1, lit: 0 }); });
-      // the pieces ride out of the machine and stop under their neuron
-      DICT.forEach(([n, p], i) => { if (spidersOn && i < 2) return; const ta = tPieces - .4 + i * .45, k = seg(t, ta, ta + .9), [x] = RACK(i); if (k <= 0) return; tile(lerp(760, x, easeOut(k)), 808, 84, 72, p, 1, { frame: '#3A1A0A' }); const tk = seg(t, ta + .9, ta + 1.2); if (tk > 0) { ctx.save(); ctx.strokeStyle = rgba(GOLDLT, .7); ctx.lineWidth = 3; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.moveTo(x, 520); ctx.lineTo(x, 785); ctx.stroke(); ctx.restore(); tick(x + 30, 640, 50, tk, '#7AE07A'); } });
-      // spiders on leaves / spiders in webs: the same building blocks, regrouped by setting
-      [[tLeaves - .9, onLeaf, [0]], [tInWebs - .9, inWeb, [0, 1]]].forEach(([ta, dr, from], j) => { const k = seg(t, ta, ta + .9), x = 900 + j * 200; if (k <= 0) return; tile(lerp(760, x, easeOut(k)), 800, 110, 90, null, 1, { draw: dr, frame: '#3A1A0A', lit: .5 * k }); if (k >= 1) from.forEach(fi => { const [rx] = RACK(fi); ctx.save(); ctx.strokeStyle = rgba(GOLDLT, .8); ctx.lineWidth = 3; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.moveTo(rx, 520); ctx.quadraticCurveTo((rx + x) / 2, 640, x, 770); ctx.stroke(); ctx.restore(); }); });
-      ctx.restore();
+    // the machine and its belt. First: each piece it finds rides out and stops under the single neuron it copies.
+    // Then the rack clears to two building-block neurons (spider legs, webs), and the two spider pieces are the same
+    // blocks regrouped by setting. Last: the rack lights up, the neurons that were already there.
+    const mOn = seg(t, a - .3, a + .7), sk = seg(t, tBlocks - .7, tBlocks - .2), lit = seg(t, tTool - .3, tTool + .6) * (1 - seg(t, end, end + .5));
+    machineL(t, lerp(-300, 620, easeOut(mOn)), 960, .42, { on: 1, mouth: .6 });
+    flat(rectPts(700, 860, 700, 26), '#4A5268', { line: DARK, lw: 3 }); for (let i = 0; i < 14; i++) flat(ellPts(720 + i * 50, 873, 9, 9, 10), '#6E7891', { line: DARK, lw: 1 });
+    if (lit > 0) beams(t, [[960, 560, '#FFE9A0', 1.4 * lit]]);
+    const rw = lerp(640, 330, ease(sk)); flat(rrPts(960 - rw / 2, 400, rw, 140, 12), '#2A0A3A', { line: '#F0BE46', lw: 4 });
+    const SPX = [895, 1025];
+    if (sk < 1) { ctx.save(); ctx.globalAlpha = 1 - sk;
+      DICT.forEach(([n], i) => { const [x, y] = RACK(i); tile(x, y, 84, 84, n, popk(t, a + .4 + i * .1, .4), { lit: 0 }); });
+      DICT.forEach(([n, p], i) => { const ta = tCopies - .5 + i * .3, k = seg(t, ta, ta + .7), [x] = RACK(i); if (k <= 0) return; tile(lerp(760, x, easeOut(k)), 808, 84, 72, p, 1, { frame: '#3A1A0A' }); const tk = seg(t, ta + .7, ta + 1); if (tk > 0) { ctx.save(); ctx.strokeStyle = rgba(GOLDLT, .7); ctx.lineWidth = 3; ctx.setLineDash([8, 8]); ctx.beginPath(); ctx.moveTo(x, 520); ctx.lineTo(x, 760); ctx.stroke(); ctx.restore(); tick(x + 30, 640, 50, tk, '#7AE07A'); } });
+      ctx.restore(); }
+    if (sk > 0) {
+      [spiderLegs, web].forEach((dr, i) => tile(SPX[i], 470, 96, 96, null, seg(t, tBlocks - .3 + i * .5, tBlocks + .1 + i * .5), { draw: dr, lit: .7 * env(t, tLegs - .2 + i * .6, end, .2, .3) + .6 * lit, frame: lit > .5 ? GOLD : '#2A0A3A' }));
+      // the two spider pieces: spiders on leaves, spiders in webs, each pointing back to the same blocks
+      [[tLeaves - .9, onLeaf, [0], 860, 'spider on a leaf'], [tInWebs - .9, inWeb, [0, 1], 1100, 'spider in a web']].forEach(([ta, dr, from, x, lab]) => { const k = seg(t, ta, ta + .9); if (k <= 0) return; const px = lerp(760, x, easeOut(k)); tile(px, 800, 110, 90, null, 1, { draw: dr, frame: '#3A1A0A', lit: .5 * k });
+        if (k >= 1) { from.forEach(fi => { const rx = SPX[fi]; ctx.save(); ctx.strokeStyle = rgba(GOLDLT, .6 + .4 * lit); ctx.lineWidth = 3 + 2 * lit; ctx.setLineDash([8, 8]); ctx.lineDashOffset = -t * 30 * lit; ctx.beginPath(); ctx.moveTo(rx, 525); ctx.quadraticCurveTo((rx + x) / 2, 640, x, 748); ctx.stroke(); ctx.restore(); }); letter(lab, x, 728, 24, CREAM, { face: 'marker', shadow: false, alpha: seg(k, .6, 1) * edgeA(x, 728, 200, 30), stroke: DARK, strokeW: .2 }); } });
+      if (lit > 0) letter('already there', 960, 372, 34, GOLDLT, { face: 'marker', shadow: false, stroke: DARK, strokeW: .16, alpha: lit });
     }
     // the 88% meter on the back wall
     const mk = seg(t, t88 - 1.2, t88 + .3), mAlpha = env(t, t88 - 1.4, tBlocks - .3, .3, .4);
     if (mAlpha > 0) { ctx.save(); ctx.globalAlpha = mAlpha; flat(rrPts(560, 250, 800, 110, 16), DARK, { line: '#F0BE46', lw: 5 }); flat(rrPts(580, 270, 760 * .88 * easeOut(mk), 70, 10), GOLD); txt(Math.round(88 * easeOut(mk)) + '%', 960, 306, 72, CREAM, { font: SERIF, weight: '900', stroke: DARK, sw: 6 }); ctx.restore(); }
-    // the baseball neuron rises into a gold spotlight
-    const bb = popk(t, tBase - .5, .7) * (1 - seg(t, end, end + .5));
-    if (bb > 0) { beams(t, [[960, 760, '#FFE9A0', 1.5]]); tile(960, 520, 230, 230, CE + '7-0-0', 1, { s: backOut(bb), lit: .9, frame: GOLD }); }
     // confetti for the winner
     if (t > end - .2) for (let i = 0; i < 70; i++) { const f = frac((t - end) * .35 + hash(i)), x = hash(i * 3.1) * 2000 - 40 + 40 * Math.sin(t * 2 + i), y = -100 + f * 1200; flat(rectPts(x, y, 14, 8), [GOLD, CREAM, '#FF8A3A', '#9FE3C8'][i % 4], { alpha: seg(t, end - .2, end + .3) }); }
     clawdSeat(t, [[a, 'neutral'], [t88, 'excited'], [tLeaves, 'scared'], [tBase, 'love'], [end, 'starstruck'], [bolt + .3, 'surprised']], Math.max(env(t, tAct, tAct + 2, .3, .4), env(t, end - .2, end + 9, .3, .3)));
@@ -485,9 +499,10 @@
     camEnd();
     roundCard(t, a - .2, 'FINAL ROUND', 'the machine');
     lower(t, tCopies - .3, t88 - .5, 'its pieces: near-copies of single neurons', GOLD);
+    lower(t, tHelp - .4, tBlocks - .6, 'it did help with "what\'s in this picture?"', GOLD);
     lower(t, tLegs - .4, tReg - .3, 'neurons: spider legs · webs', GOLD);
-    lower(t, tReg - .2, tBase - .5, 'pieces: the same blocks, regrouped', GOLD);
-    lower(t, tUnd - .3, end + .2, 'the understanding was in a neuron', GOLD, { size: 64 });
+    lower(t, tReg - .2, tTool - .6, 'pieces: the same blocks, regrouped', GOLD);
+    lower(t, tTool - .3, end + .2, 'it kept finding neurons already there', GOLD);
     if (t > end - .1) { const k = popk(t, end - .1, .5); letter('WINNER!', GX, 230, 96, GOLDLT, { face: 'marker', stroke: DARK, strokeW: .12, pop: k, rot: -.08 + .03 * Math.sin(t * 6) }); }
     if (t > tLeaves - .3 && t < tLeaves + 1.2) sfx('eek!', 960, 1000, 60, CREAM, t - tLeaves + .3, { face: 'marker' });
     if (t > bolt - .2 && t < bolt + 1.2) sfx('ZOOM!', SX + 120, 300, 90, VIOLT, t - bolt + .2, { face: 'marker' });

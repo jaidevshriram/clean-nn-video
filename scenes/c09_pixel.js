@@ -80,8 +80,10 @@
   const SMALL = new Map();
   function small(name, n = 44, aspect = 1) {
     const key = name + n + aspect; let c = SMALL.get(key); if (c) return c;
-    const I = img(name), w = n, h = Math.round(n / aspect); c = createCanvas(w, h); const g = c.getContext('2d');
-    const s = Math.min(I.width / w, I.height / h); g.imageSmoothingEnabled = true; g.drawImage(I, (I.width - w * s) / 2, (I.height - h * s) / 2, w * s, h * s, 0, 0, w, h);
+    // name@cx,cy,r crops around a point (fractions of the image; r = half-width) so a small subject fills the sprite
+    const [nm, cr] = name.split('@'), I = img(nm), w = n, h = Math.round(n / aspect); c = createCanvas(w, h); const g = c.getContext('2d'); g.imageSmoothingEnabled = true;
+    if (cr) { const [fx, fy, r] = cr.split(',').map(Number), sw = I.width * r * 2, sh = sw / aspect; g.drawImage(I, I.width * fx - sw / 2, I.height * fy - sh / 2, sw, sh, 0, 0, w, h); }
+    else { const s = Math.min(I.width / w, I.height / h); g.drawImage(I, (I.width - w * s) / 2, (I.height - h * s) / 2, w * s, h * s, 0, 0, w, h); }
     SMALL.set(key, c); return c;
   }
   // a photo in the world (drawn now, and again crisp after pixelation)
@@ -287,12 +289,15 @@
   }
   // toasts: [[t0, text, col], ...]; they slide in at the top right, stack, and leave after `life`
   function toasts(t, list, life = 2.8) {
+    // they pop in place (never slide off the frame), fade out, and the stack closes up smoothly behind a leaving toast
     const live = list.filter(([a]) => t >= a && t < a + life);
-    ui(() => live.forEach(([a, s, col], n) => {
-      const age = t - a, kin = easeOut(seg(age, 0, .3)), kout = easeIn(seg(age, life - .3, life)), sc = 6, w = ptW(String(s).toUpperCase(), sc) + 60, x = W - 40 - w + (1 - kin) * (w + 80) + kout * (w + 80), y = 108 + n * 92;
+    ui(() => { let slot = 0; live.forEach(([a, s, col]) => {
+      const age = t - a, kin = easeOut(seg(age, 0, .25)), kout = easeIn(seg(age, life - .35, life)), sc = 6, w = ptW(String(s).toUpperCase(), sc) + 60, x = W - 40 - w + (1 - kin) * 30, y = 108 + slot * 92;
+      slot += 1 - kout; ctx.save(); ctx.globalAlpha = kin * (1 - kout);
       pbox(x, y, w, 70, K.ink, col || K.gold, 5); ptxt(s, x + w / 2, y + 36, sc, col || K.gold, { sh: K.dusk });
       if (age < .5 && Math.floor(age * 16) % 2) { ctx.fillStyle = 'rgba(255,255,255,.25)'; ctx.fillRect(x, y, w, 70); }
-    }));
+      ctx.restore();
+    }); });
   }
   // the big level banner in the middle of the screen
   function banner(t, t0, l1, l2, col = K.gold, life = 2.4) {
@@ -512,13 +517,14 @@
   }
 
   // ================= LEVEL 2 · VOTES =================
-  const C0 = { a: cs('tv_votes'), tEach: wt('tv_votes', 'Each'), tAdd: wt('tv_votes', 'add'), tNeg: wt('tv_votes', 'negative'), tBase: wt('tv_votes', 'switch'), tWin: wt('tv_votes', 'windows'), tDist: wt('tv_votes', 'distinction') };
+  const C0 = { a: cs('tv_votes'), tEach: wt('tv_votes', 'Each'), tAdd: wt('tv_votes', 'add'), tNeg: wt('tv_votes', 'negative'), tBase: wt('tv_votes', 'switch'), tWin: wt('tv_votes', 'windows'), tV: wt('tv_votes', 'V'), tPt: wt('tv_votes', 'pointed'), tDist: wt('tv_votes', 'distinction') };
+  const VF = 'blog/raw/v-figure-10x/';
   // rounds of voting: each round, 8 ballots arrive; the tally decides windows or basement
   const RLEN = 2.8, ROUNDS = [[1, 1, 1, -1, 1, 1, -1, 1], [-1, -1, 1, -1, -1, 1, -1, -1], [-1, 1, -1, -1, -1, 1, -1, -1], [1, 1, -1, 1, 1, 1, 1, -1], [-1, -1, -1, 1, -1, -1, 1, -1], [1, 1, 1, 1, -1, 1, 1, 1]];
   const ROADS = [['i', 0, 9, -1], ['i', 11, 21, 1], ['j', 0, 9, -1], ['j', 11, 21, 1]];
   const SCEN_C = scatter(37, 26, -1, 22, -1, 22, [[-1, 9.5, 22, 11.5], [9.5, -1, 11.5, 22], [8.2, 8.2, 12, 12], [11.4, 8, 12.8, 9.4], [12.6, 6.8, 14.2, 8.2], [8.4, 11.8, 12.2, 15.5]]);
   function votesShot(t, lt, dur) {
-    const { a, tEach, tAdd, tNeg, tBase, tWin, tDist } = C0;
+    const { a, tEach, tAdd, tNeg, tBase, tWin, tV, tPt, tDist } = C0;
     begin(); sea(t);
     camKeys(t, [[a - .3, 0, 520, .9], [tEach, 0, 560, 1.12], [tNeg - .3, 30, 560, 1.15], [tBase + .3, 30, 660, 1.2], [tDist, 30, 640, 1.15], [ce('tv_votes') + 1, 30, 650, 1.17]], .4);
     ground('C', -1, 22, -1, 22, (i, j) => (j === 10 && i !== 10) || (i === 10 && j !== 10) ? 'r' : (i === 10 && j === 10) ? 'r' : 'g');
@@ -527,9 +533,10 @@
     let tally = 0, shown = false, res = 0;
     if (R) R.forEach((v, n) => { const arr = .12 + n * .065; if (f > arr + .2) tally += v; });
     if (R && f > .72) { shown = true; res = R.reduce((s, v) => s + v, 0); }
-    const bk = popk(t, tNeg - .3, .8), litW = shown && res > 0 ? 1 : 0, litB = shown && res < 0 && bk > .5 ? 1 : 0;
-    // the building, with its basement opened at "negative side"
-    ent(22, () => bld(8.6, 8.6, 2.8, 2.8, 170, K.violet, { lit: litW, photo: NP + 'taxis-positive-1', bw: 170, roof: K.plum, base: { k: bk, lit: litW ? 0 : litB, photo: NP + 'taxis-negative-1', h: 170, pw: 1 } }));
+    const bk = popk(t, tNeg - .3, .8), litW = shown && res > 0 ? 1 : 0;
+    // the V neuron's building (pointed on its billboard), with its negative side (round) opened below at "negative side";
+    // a "stay dark" result keeps everything dark: the negative side shows what switches it off, it never lights up
+    ent(22, () => bld(8.6, 8.6, 2.8, 2.8, 170, K.violet, { lit: litW, photo: VF + 'c4d493a', bw: 170, roof: K.plum, base: { k: bk, lit: 0, photo: VF + 'n1070575@.51,.49,.13', h: 170, pw: 1 } }));
     // the ballot box by the door
     ent(21.5, () => { isoBox(11.8, 8.4, .8, .8, 56, K.tan, 0); const [x, y] = iso(12.2, 8.8); flat(rectPts(x - 18, y - 60, 36, 6), K.ink); });
     // ballots flying in along the four roads
@@ -543,6 +550,7 @@
     drawScatter(SCEN_C, t);
     ent(23, () => clawdAt(13.4, 7.6, t, [[a, 'happy'], [tEach + .5, 'thinking'], [tBase, 'surprised'], [tBase + 1.5, 'idea'], [tDist, 'proud']], { flip: true, u: 8 }));
     drawEnts();
+    { const [bx, by] = iso(10, 10); lab('NEGATIVE SIDE', bx - 400, by + 150, 5, K.sky, { k: popk(t, tNeg - .1, .4) }); lab('WINDOWS', bx + 250, by - 330, 5, K.gold, { k: popk(t, tWin - .2, .4) * (1 - seg(t, tV - .5, tV - .2)) }); lab('V NEURON', bx + 290, by - 230, 6, K.white, { k: popk(t, tV - .2, .4) }); }
     if (R) { lab((tally > 0 ? '+' : '') + tally, -250, 330, 9, tally > 0 ? K.lime : tally < 0 ? K.sky : K.white); if (shown) lab(res > 0 ? 'LIGHT UP!' : 'STAY DARK', -250, 440, 6, res > 0 ? K.gold : K.sky, { k: seg(f, .72, .8) }); }
     camEnd();
     finish();
@@ -550,7 +558,7 @@
     banner(t, a - .1, 'LEVEL 2', 'EVERY NEURON VOTES', K.gold, 2.2);
     // the tally over the building and the result
 
-    toasts(t, [[tAdd - .2, 'VOTES ADD UP', K.lime], [tBase - .2, 'OFF-SWITCHES COUNT', K.sky], [tDist - .2, 'TAXI vs AMBULANCE', K.gold]], 3);
+    toasts(t, [[tAdd - .2, 'VOTES ADD UP', K.lime], [tBase - .2, 'OFF-SWITCHES COUNT', K.sky], [tPt - .2, 'POINTED vs ROUND', K.gold]], 3);
     cutIn(lt, t); cutOut(lt, dur);
   }
 
@@ -561,7 +569,7 @@
     const { a, tTwin, P } = D0;
     begin(); sea(t);
     const C = P.map((p, n) => iso(2 + n * 9 + 1.3, 11.6 + 1.3));
-    camKeys(t, [[a - .3, C[0][0] + 200, C[0][1], .74], [tTwin + .4, C[0][0] + 160, C[0][1] - 10, .84], [P[0][3] - .6, C[0][0] + 60, C[0][1] - 40, 1.05], [P[1][3] - 1, C[0][0] + 60, C[0][1] - 40, 1.05], [P[1][3] - .1, C[1][0] + 60, C[1][1] - 40, 1.05], [P[2][3] - 1, C[1][0] + 60, C[1][1] - 40, 1.05], [P[2][3] - .1, C[2][0] + 80, C[2][1] - 40, 1.05], [ce('tv_pairs') + .3, C[2][0] + 100, C[2][1] - 40, 1.07]], .4);
+    camKeys(t, [[a - .3, C[0][0] + 200, C[0][1], .74], [tTwin + .4, C[0][0] + 160, C[0][1] - 10, .84], [P[0][3] - .6, C[0][0] + 20, C[0][1] - 40, 1.2], [P[1][3] - 1, C[0][0] + 20, C[0][1] - 40, 1.2], [P[1][3] - .1, C[1][0] + 20, C[1][1] - 40, 1.2], [P[2][3] - 1, C[1][0] + 20, C[1][1] - 40, 1.2], [P[2][3] - .1, C[2][0] + 40, C[2][1] - 40, 1.2], [ce('tv_pairs') + .3, C[2][0] + 60, C[2][1] - 40, 1.22]], .4);
     ground('D', -2, 31, 4, 20, (i, j) => j === 10 ? 'r' : j === 9 ? 's' : 'g');
     roadMarks('i', -2, 31, 10, 1, 1);
     drawScatter(SCEN_D, t);
@@ -569,9 +577,9 @@
     // the other neurons of the last district (behind the road), their basements opening in a wave too
     [0, 9, 18, 27].forEach((i, n) => ent(i + 5 + 6, () => bld(i, 5.4, 2.4, 2.4, 100 + 30 * (n % 2), [K.sky, K.violet, K.tan, K.orange][n], { lit: .3, roof: dk([K.sky, K.violet, K.tan, K.orange][n], .3) })));
     P.forEach(([k, pos, neg, tw, col], n) => {
-      const i = 2 + n * 9, j = 11.6, kb = popk(t, tTwin - .4 + n * .15, .7), kl = popk(t, tw - .3, .5), focus = on(t, tw - .3, tw + 2.2), lit = .45 + .5 * focus;
+      const i = 2 + n * 9, j = 11.6, kb = popk(t, tTwin - .4 + n * .15, .7), kl = popk(t, tw - .3, .5) * (n < 2 ? 1 - seg(t, P[n + 1][3] - 1, P[n + 1][3] - .6) : 1), focus = on(t, tw - .3, tw + 2.2), lit = .45 + .5 * focus;
       ent(i + j + 6, () => bld(i, j, 2.6, 2.6, 130, col, { lit, photo: NP + k + '-positive-1', bw: 150, roof: dk(col, .3), base: { k: kb, lit, photo: NP + k + '-negative-1', h: 160 } }));
-      if (kl > 0) { const [x, y] = iso(i + 1.3, j + 1.3); lab(pos, x + 250, y - 330, 7, col, { k: kl }); lab('VS ' + neg, x - 300, y + 190, 7, K.sky, { k: popk(t, tw + .2, .5) }); }
+      if (kl > 0) { const [x, y] = iso(i + 1.3, j + 1.3); lab('< ' + pos, x + 250, y - 230, 7, col, { k: kl }); lab('VS ' + neg + ' >', x - 420, y + 200, 7, K.sky, { k: Math.min(kl, popk(t, tw + .2, .5)) }); }   // each label points at its own photo
     });
     // a pixel flamingo by the last building, standing on one leg
     ent(40, () => { const [x, y] = iso(25.2, 16.6); flat(ellPts(x + 4, y, 22, 8, 10), 'rgba(26,28,44,.3)'); flat(rectPts(x - 2, y - 50, 4, 50), K.red); flat([[x - 2, y - 36], [x + 10, y - 30], [x - 2, y - 28]], K.red); flat(ellPts(x, y - 62, 22, 14, 12), K.pink, { line: K.ink, lw: 3 }); flat([[x + 14, y - 66], [x + 22, y - 100], [x + 28, y - 100], [x + 22, y - 66]], K.pink, { line: K.ink, lw: 2 }); flat(ellPts(x + 28, y - 104, 8, 7, 8), K.pink, { line: K.ink, lw: 2 }); flat([[x + 34, y - 104], [x + 44, y - 96], [x + 34, y - 98]], K.ink); });
@@ -616,6 +624,7 @@
     // the shout: one rare word makes the windows blaze
     const sh = seg(t, tSh - .2, tSh + 1.3);
     if (sh > 0 && sh < 1) ent(16.5, () => { const [x, y] = [B[0], B[1] - 330], k = Math.sin(sh * Math.PI); for (let q = 0; q < 12; q++) { const a0 = q / 12 * TAU + t * .8, r0 = 90, r1 = 260 + 120 * k; flat([[x + Math.cos(a0) * r0, y + Math.sin(a0) * r0], [x + Math.cos(a0 + .12) * r1, y + Math.sin(a0 + .12) * r1], [x + Math.cos(a0 - .12) * r1, y + Math.sin(a0 - .12) * r1]], K.gold, { alpha: .85 * k }); } glow(x, y, 420, '#FFE08A', k); });
+    lab('LIGHTHOUSE NEURON', B[0] - 330, B[1] - 330, 5, K.cyan, { k: popk(t, tWh - .2, .4) * (1 - seg(t, c + .2, c + .6)) });
     if (blaze > .3 || (sh > .05 && sh < .9)) lab('!!', B[0] + 210, B[1] - 250, 10, K.gold, { box: false });
     // the close call at the fork: husky or wolf?
     const kf2 = popk(t, tTie - 1.6, .5), tipped = seg(t, tTie + .2, tTie + 1.1);
@@ -629,7 +638,7 @@
     drawEnts();
     camEnd();
     finish();
-    const words = Math.round(1e8 * Math.pow(seg(t, tMil - .6, tReg), 2.2)), shouts = t < t160 - .4 ? Math.round(160 * seg(t, a, t160 - .4) * .4) : 160;
+    const words = Math.round(1e8 * Math.pow(seg(t, tMil - .6, tReg), 2.2)), shouts = Math.round(160 * words / 1e8);   // the shouts are counted among the words that have passed
     hudBar('LV 3 · WHISPERS', `WORDS ${words.toLocaleString('en-US')}`, `SHOUTS ${shouts}`);
     banner(t, a - .1, 'LEVEL 3', 'WHISPERS', K.cyan, 2.0);
     toasts(t, [[tMil, '100,000,000 WORDS PASS BY', K.silver], [t160, 'ONLY ~160 MAKE IT SHOUT', K.gold], [tBar - .2, 'THE CITY KEEPS RUNNING', K.lime], [tTie + .4, 'CLOSE CALL TIPPED', K.orange]], 3);
@@ -644,9 +653,9 @@
   }
 
   // ================= the book item: thinking in pages =================
-  const F0 = { a: cs('tv_pages'), tPg: wt('tv_pages', 'pages'), tOne: wt('tv_pages', 'one'), tFour: wt('tv_pages', 'four'), tRare: wt('tv_pages', 'rare'), tOft: wt('tv_pages', 'often'), tSpec: wt('tv_pages', 'specific'), tDoz: wt('tv_pages', 'dozen') };
+  const F0 = { a: cs('tv_pages'), tPg: wt('tv_pages', 'pages'), tOne: wt('tv_pages', 'one'), tFour: wt('tv_pages', 'four'), tRare: wt('tv_pages', 'rare'), tOft: wt('tv_pages', 'often'), tSpec: wt('tv_pages', 'specific'), tDoz: wt('tv_pages', 'dozen'), tSo: wt('tv_pages', 'So'), tWrong: wt('tv_pages', 'probably') };
   function pagesShot(t, lt, dur) {
-    const { a, tPg, tOne, tFour, tRare, tOft, tSpec, tDoz } = F0;
+    const { a, tPg, tOne, tFour, tRare, tOft, tSpec, tDoz, tSo, tWrong } = F0;
     begin(); sea(t);
     camKeys(t, [[a - .3, -40, 640, .9], [ce('tv_pages') + .5, 0, 640, .95]], .4);
     ground('F', -8, 16, 2, 20, (i, j) => j === 10 ? 'r' : i === 4 ? 'r' : 'g');
@@ -655,8 +664,9 @@
     [[-2, 13], [7, 14], [10, 12.5]].forEach(([i, j]) => ent(i + j, () => tree(i, j, 1.2)));
     drawScatter(SCEN_E, t);
     // the rare neuron: pages flip fast and it fires once, on page 31
-    const rarePhase = t > tSpec - .2, hitPage = 31;
-    const flipRate = rarePhase ? 10 : 1 / 1.25, pg = rarePhase ? Math.min(hitPage, 1 + Math.floor((t - tSpec + .2) * flipRate)) : 1 + Math.floor(Math.max(0, t - tPg) * flipRate);
+    // then ("So if a label sounds narrow...") a neuron labelled RARE FEELING that fires on every page: the label is wrong
+    const ph3 = t > tSo - .2, rarePhase = t > tSpec - .2 && !ph3, hitPage = 31;
+    const flipRate = rarePhase ? 10 : ph3 ? 1.6 : 1 / 1.25, pg = ph3 ? 1 + Math.floor((t - tSo + .2) * flipRate) : rarePhase ? Math.min(hitPage, 1 + Math.floor((t - tSpec + .2) * flipRate)) : 1 + Math.floor(Math.max(0, t - tPg) * flipRate);
     const hitAt = tSpec - .2 + (hitPage - 1) / 10, rareHit = rarePhase && pg === hitPage;
     drawEnts();
     camEnd();
@@ -667,26 +677,29 @@
     flat(rectPts(150, 196, 1620, 850), K.ink); flat(rectPts(158, 204, 1604, 834), K.navy); flat(rectPts(158, 204, 1604, 70), K.dusk);
     // the shelf Clawd stands on
     flat(rectPts(180, 950, 400, 28), K.brown, { line: K.ink, lw: 4 });
-    tourist(380, 950, 11, 'party', { ...emotions(t, [[a, 'happy'], [tOne, 'thinking'], [tFour, 'happy'], [tRare, 'thinking'], [tOft, 'surprised'], [tSpec + .4, 'sleepy'], [hitAt, 'surprised'], [hitAt + .8, 'excited']]), view: 'q', boilKey: 'c9clawdF' });
+    tourist(380, 950, 11, 'party', { ...emotions(t, [[a, 'happy'], [tOne, 'thinking'], [tFour, 'happy'], [tRare, 'thinking'], [tOft, 'surprised'], [tSpec + .4, 'sleepy'], [hitAt, 'surprised'], [hitAt + .8, 'excited'], [tSo, 'thinking'], [tWrong - .3, 'surprised']]), view: 'q', boilKey: 'c9clawdF' });
     const bx = 1130, by = 630, bs = .9;
     ctx.translate(bx, by); ctx.scale(bs, bs);
     // the open book: cover, two pages, lines of words
     flat(rectPts(-560, -330, 1120, 660), K.brown, { line: K.ink, lw: 6 }); flat(rectPts(-540, -310, 530, 620), K.cream, { line: K.ink, lw: 4 }); flat(rectPts(10, -310, 530, 620), K.cream, { line: K.ink, lw: 4 }); flat(rectPts(-12, -320, 24, 640), dk(K.brown, .3));
     const lineY = r => -265 + r * 40, words = (p, side) => { const out = []; for (let r = 0; r < 14; r++) { let x = side - 245; while (x < side + 225) { const w = 28 + 70 * hash(p * 31 + r * 7 + x); if (x + w > side + 245) break; out.push([x, lineY(r), w]); x += w + 18; } } return out; };
-    const fp = frac(rarePhase ? (t - tSpec + .2) * flipRate : Math.max(0, t - tPg) * flipRate), turning = t > tPg && fp < .35 && !(rarePhase && t > hitAt);
+    const fp = frac(ph3 ? (t - tSo + .2) * flipRate : rarePhase ? (t - tSpec + .2) * flipRate : Math.max(0, t - tPg) * flipRate), turning = t > tPg && fp < .35 && !(rarePhase && t > hitAt);
     for (const side of [-275, 275]) {
       const WD = words(pg * 2 + (side > 0), side);
       WD.forEach(([x, y, w]) => flat(rectPts(x, y - 6, w, 12), K.silver));
       // hits: about four a page for a common neuron (two per side); the rare one lights once, on page 31
       const hits = rarePhase ? (rareHit && side > 0 ? [7] : []) : t > tOne - .4 ? [3 + pg * 5, 19 + pg * 3].map(q => q % WD.length) : [];
-      hits.forEach((q, n) => { const [x, y, w] = WD[q % WD.length]; const t0 = rarePhase ? hitAt : Math.max(tPg, a) + (pg - 1) / flipRate, kk = popk(t, t0 + .15 + n * .14 + (side > 0) * .28, .3); if (kk <= 0) return; const cH = rarePhase ? '#D9A0FF' : '#FFD58A'; glow(x + w / 2, y, 90, cH, 1.2 * kk); const hc = rarePhase ? K.violet : K.orange; flat(rectPts(x - 8, y - 14, w + 16, 28), hc, { line: K.ink, lw: 4 }); const sk = backOut(kk); flat(starPts(x + w / 2, y - 40, 26 * sk, .42, 4), K.gold, { line: K.ink, lw: 3 }); for (let z = 0; z < 4; z++) { const ang = z * TAU / 4 + .4, rr = 30 + 40 * easeOut(kk); flat(rectPts(x + w / 2 + Math.cos(ang) * rr - 5, y + Math.sin(ang) * rr - 5, 10, 10), hc, { alpha: 1 - kk * .7 }); } });
+      hits.forEach((q, n) => { const [x, y, w] = WD[q % WD.length]; const t0 = rarePhase ? hitAt : ph3 ? tSo - .2 + (pg - 1) / flipRate : Math.max(tPg, a) + (pg - 1) / flipRate, kk = popk(t, t0 + .15 + n * .14 + (side > 0) * .28, .3); if (kk <= 0) return; const cH = rarePhase ? '#D9A0FF' : '#FFD58A'; glow(x + w / 2, y, 90, cH, 1.2 * kk); const hc = rarePhase ? K.violet : K.orange; flat(rectPts(x - 8, y - 14, w + 16, 28), hc, { line: K.ink, lw: 4 }); const sk = backOut(kk); flat(starPts(x + w / 2, y - 40, 26 * sk, .42, 4), K.gold, { line: K.ink, lw: 3 }); for (let z = 0; z < 4; z++) { const ang = z * TAU / 4 + .4, rr = 30 + 40 * easeOut(kk); flat(rectPts(x + w / 2 + Math.cos(ang) * rr - 5, y + Math.sin(ang) * rr - 5, 10, 10), hc, { alpha: 1 - kk * .7 }); } });
     }
     if (turning) { const k = fp / .35, w = 530 * Math.cos(k * Math.PI); flat(rectPts(w > 0 ? 10 : 10 + w, -310, Math.abs(w), 620), mixCol(K.cream, K.silver, .3), { line: K.ink, lw: 4 }); }
     ctx.restore();
     finish();
-    hudBar('LV 3 · PAGES', rarePhase ? 'RARE FEELING NEURON' : t > tRare - .3 ? 'RARE FEELING NEURON' : 'A COMMON NEURON', `PAGE ${pg}`);
+    hudBar('LV 3 · PAGES', ph3 ? 'LABEL: RARE FEELING' : rarePhase ? 'RARE FEELING NEURON' : t > tRare - .3 ? 'RARE FEELING NEURON' : 'A COMMON NEURON', `PAGE ${pg}`);
     toasts(t, [[tOne - .2, '1 WORD IN 100', K.gold], [tFour - .1, '= ~4 HITS A PAGE', K.gold], [tOft - .3, 'FAR TOO OFTEN!', K.red], [tDoz - .4, 'ONCE EVERY FEW DOZEN PAGES', K.violet]], 3);
-    if (wk > .9) ui(() => { ptxt('ITEM: BOOK', 200, 240, 6, K.gold, { align: 'left' }); pbox(1130 - 330, 958, 660, 66, K.ink, rarePhase ? K.violet : K.gold, 5); ptxt(rarePhase ? `HITS: ${t > hitAt ? 1 : 0} IN ${pg} PAGES` : `HITS ON THIS PAGE: ${t > tOne - .2 ? 4 : 0}`, 1130, 992, 6, rarePhase ? K.violet : K.gold); });
+    if (wk > .9) ui(() => { ptxt('ITEM: BOOK', 200, 240, 6, K.gold, { align: 'left' }); pbox(1130 - 440, 958, 880, 66, K.ink, rarePhase ? K.violet : ph3 ? K.red : K.gold, 5); ptxt(rarePhase ? `HITS: ${t > hitAt ? 1 : 0} IN ${pg} PAGES` : `HITS ON THIS PAGE: ${t > tOne - .2 ? 4 : 0}`, 1130, 992, 6, rarePhase ? K.violet : K.gold); });
+    // the verdict: a red stamp across the book
+    const sk2 = popk(t, tWrong - .4, .35);
+    if (sk2 > 0) ui(() => { ctx.translate(1130, 600); ctx.rotate(-.12); ctx.scale(backOut(sk2) * (1 + 2 * (1 - sk2)), backOut(sk2) * (1 + 2 * (1 - sk2))); const w = ptW('LABEL WRONG?', 11) + 90; pbox(-w / 2, -70, w, 140, K.ink, K.red, 8); ptxt('LABEL WRONG?', 0, 2, 11, K.red, { sh: K.ink }); });
     if (t > tSpec + .4 && t < hitAt) ui(() => { const b = Math.floor(t * 2) % 3; ptxt('Z' + (b > 0 ? ' Z' : '') + (b > 1 ? ' Z' : ''), 450, 760 - b * 20, 7, K.white, { align: 'left' }); });
     cutIn(lt, t); cutOut(lt, dur);
   }
@@ -724,7 +737,7 @@
     // pier posts
     for (let j = 9; j < 14; j++) ent(4 + j + .2, () => { for (const di of [0, 1]) { const [x, y] = iso(4 + di, j + 1); flat(rectPts(x - 4, y, 8, 30), K.brown, { line: K.ink, lw: 2 }); } });
     // the Titanic, docked and blazing; the analogies float nearby, lit a little
-    const ti = .95 - .1 * Math.sin(t * 2) ** 2, faint = n => .2 + .08 * Math.sin(t * 2.3 + n);
+    const ti = .95 - .1 * Math.sin(t * 2) ** 2, faint = n => .45 + .08 * Math.sin(t * 2.3 + n);
     ent(9.2 + 9.2, () => ship(-1.6, 9.4, 5.2, 1, on(t, a - .3) * ti));
     ent(-2 + 12.6, () => { const bob = Math.sin(t * 1.6) * 4; ctx.save(); ctx.translate(0, bob); ship(-3.6, 12.3, 1.8, .6, faint(0) * on(t, tVoy - 1.1), { funnels: 1 }); ctx.restore(); });
     ent(8 + 12, () => { const bob = Math.sin(t * 1.4 + 1) * 4; ctx.save(); ctx.translate(0, bob); ship(7.4, 11.2, 2.8, .72, faint(1) * on(t, tVoy - .7), { funnels: 2 }); ctx.restore(); });
@@ -745,6 +758,8 @@
     const fall = seg(t, drop, land), p0 = iso(4.5, 14.3), p1 = [p0[0] - 50, p0[1] + 720], tb = Math.max(0, t - land);
     const taxiPos = t < land ? [lerp(p0[0], p1[0], fall), lerp(p0[1], p1[1], fall * fall)] : [p1[0] - 230 * tb, p1[1] + 100 * tb];
     const tsc = toScreen(...taxiPos), zoomNow = LAST_CAM.zoom;
+    // signal meters under the labels: the Titanic at full strength, its analogies firing a little
+    const MET = [[iso(1, 9.9).map((v, q) => v - (q ? 250 : 0)), 7, 5, K.gold, kt], [iso(-2.7, 12.6).map((v, q) => v - (q ? 120 : 0)), 5, 2, K.cyan, kv], [iso(8.8, 11.6).map((v, q) => v - (q ? 150 : 0)), 5, 2, K.cyan, on(t, tVoy - .6)], [iso(12.1, 5.7).map((v, q) => v - (q ? 290 : 0)), 5, 2, K.cyan, on(t, tVoy - .3)]].map(([p, sc, n, col, k]) => [toScreen(...p), sc, n, col, k]);
     camEnd();
     finish({ px });
     if (t >= drop) ui(() => {
@@ -756,8 +771,9 @@
       for (const wx of [-42, 44]) { cutout(ellPts(wx, 0, 17, 17, 14), K.ink, { jag: 1, shadow: false }); flat(ellPts(wx, 0, 6, 6, 8), K.silver); }
       flat(rectPts(-12, -76, 26, 12), K.ink); flat(rectPts(-8, -74, 18, 8), K.white); ctx.restore();
     });
+    ui(() => MET.forEach(([[x, y], sc, n, col, k]) => { if (k <= .3 || t > drop) return; const yy = y + (7 * sc + sc * 5 + 10) / 2 + 12, fl = Math.floor(t * 6) % 7 ? 0 : 1; ctx.globalAlpha = k; pbox(x - 70, yy, 140, 54, K.ink, K.slate, 3); for (let q = 0; q < 5; q++) { ctx.fillStyle = q < n - (n < 5 ? fl : 0) ? col : K.dusk; ctx.fillRect(x - 54 + q * 23, yy + 44 - 7 * (q + 1), 16, 7 * (q + 1)); } ctx.globalAlpha = 1; }));
     hudBar('LV 3 · HARBOUR', 'ANALOGY MACHINE', t > drop ? 'MAP EDGE!' : 'VOYAGES 3');
-    toasts(t, [[tAn - .2, 'NEURONS: ANALOGY MACHINES', K.gold], [tIsh - .1, 'A BIT TITANIC-ISH', K.silver], [drop - .2, 'TAXI LEFT THE MAP!', K.orange]], 3);
+    toasts(t, [[tAn - .2, 'NEURONS: ANALOGY MACHINES', K.gold], [tIsh - .1, 'A BIT TITANIC-ISH', K.silver]], 3);   // the HUD's MAP EDGE! covers the taxi's exit
     cutIn(lt, t);
   }
 

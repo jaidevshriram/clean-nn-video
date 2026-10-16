@@ -76,11 +76,11 @@
     wins.forEach((wi, n) => {
       const cx = -w / 2 + pad + (n % cols) * (cw + pad), cy = top + Math.floor(n / cols) * (chh + pad), L = clamp(wi.lit ?? lit);
       flat(rectPts(cx - 4, cy - 4, cw + 8, chh + 8), mixCol(col, C.ink, .35));
-      flat(rectPts(cx, cy, cw, chh), L > .3 ? mixCol(C.cream, '#FFE9A0', L) : C.paper2);
+      flat(rectPts(cx, cy, cw, chh), wi.bg || (L > .3 ? mixCol(C.cream, '#FFE9A0', L) : C.paper2));
       if (wi.img) { ctx.save(); ctx.globalAlpha = .55 + .45 * L; const I = img(wi.img), s = Math.min(I.width / cw, I.height / chh); ctx.drawImage(I, (I.width - cw * s) / 2, (I.height - chh * s) / 2, cw * s, chh * s, cx, cy, cw, chh); ctx.restore(); }
       if (wi.s) ps(wi.s, cx + cw / 2, cy + chh / 2 + 2, wi.size || Math.min(30, chh * .5), wi.col || C.ink, { font: wi.font || SERIF, weight: wi.weight || '700' });
       if (wi.draw) { ctx.save(); ctx.translate(cx + cw / 2, cy + chh / 2); wi.draw(cw, chh); ctx.restore(); }
-      if (L > .3) glow(cx + cw / 2, cy + chh / 2, cw * .8, '#FFE08A', .35 * L);
+      if (L > .3) glow(cx + cw / 2, cy + chh / 2, cw * .8, wi.glow || '#FFE08A', .35 * L);
     });
     if (o.sign) { const ss = o.signSize || 34; ctx.font = `700 ${ss}px ${SERIF}`; const sw = Math.max(w * .7, ctx.measureText(o.sign).width + 18); flat(rectPts(-sw / 2, -h + 10, sw, ss + 18), C.cream); ps(o.sign, 0, -h + 19 + ss / 2, ss, C.ink); }
     if (o.door !== false && h > 120) flat(rrPts(-w * .1, -Math.min(54, h * .22), w * .2, Math.min(54, h * .22) + 2, 8), mixCol(col, C.ink, .45));
@@ -196,6 +196,17 @@
     const k = on(t, cs(QS[n][0]) - .3, qEnd + .3, .5, .4); qCard(n, 40, 1028, 34, k);
   }
   const Qd = fn => (t, lt, dur) => { fn(t, lt, dur); qTag(t); };
+  // the wrap-up: the three questions come back, each ticked as the narration answers it
+  function qSum(t, tIn, tOut, ticks) {
+    const k0 = on(t, tIn, tOut, .4, .35); if (k0 <= 0) return;
+    ctx.save(); resetMatrix(); ctx.fillStyle = `rgba(30,18,12,${.6 * k0})`; ctx.fillRect(0, 0, W, H); ctx.restore();
+    QS.forEach((q, n) => {
+      const k = on(t, tIn + n * .25, tOut, .45, .35), size = 54, x = 330, y = 330 + n * 150; qCard(n, x, y, size, k);
+      ctx.save(); resetMatrix(); ctx.font = `700 ${size}px ${SERIF}`; const w = ctx.measureText(`${n + 1}  ${q[1]}`).width + size * 1.6, tk = Math.min(popk(t, ticks[n] - .15, .4), k0);
+      if (tk > 0) { ctx.translate(x + w + 80, y); ctx.scale(backOut(tk), backOut(tk)); ctx.rotate(-.08); cutout(ellPts(0, 0, 50, 50, 22), '#3A8A4A', { jag: 2, shadow: [5, 7, 'rgba(0,0,0,.35)'] }); ctx.strokeStyle = C.cream; ctx.lineWidth = 13; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-22, 2); ctx.lineTo(-6, 18); ctx.lineTo(24, -18); ctx.stroke(); }
+      ctx.restore();
+    });
+  }
 
   // ================= arrival: the taxi parks on a page; the city of words pops up =================
   const A = { s: chapStart('ch10'), a: cs('cw_arrive'), tImg: wt('cw_arrive', 'Image'), tBut: wt('cw_arrive', 'but'), tLang: wt('cw_arrive', 'language', 1), tTalk: wt('cw_arrive', 'kind'), tPR: wt('cw_arrive', 'P'), tCol: wt('cw_arrive', 'Colorado') };
@@ -282,9 +293,9 @@
     heading('2023', 540, 990, 96, kh);
     heading('small language models', 1370, 995, 44, kh);
     // the fogged lens drifts over the crowd
-    if (kh > 0) lens(760 + 220 * Math.sin(t * .5), 640 + 40 * Math.sin(t * .7), 120, 1, t);
+    if (kh > 0) lens(860 + 200 * Math.sin(t * .5), 790 + 25 * Math.sin(t * .7), 105, 1, t);   // kept low, over the crowd and clear of the placards
     placard(560, 900, 'understood: almost none', C.paper2, Math.min(popk(t, tNone - .2, .5), kout(lt, dur)), 46, { stick: 320 });
-    placard(1180, 940, 'under 2%', C.gold, Math.min(popk(t, tTwo - .1, .5), kout(lt, dur)), 56, { stick: 260 });
+    placard(1110, 940, 'under 2%', C.gold, Math.min(popk(t, tTwo - .1, .5), kout(lt, dur)), 56, { stick: 260 });
     clS(t, lt, dur, 1700, 990, [[a, 'neutral'], [tNone, 'confused'], [tUnd + .5, 'sad'], [tTwo, 'thinking']], { u: 7.5, flip: true });
     pageTurn(lt);
     camEnd();
@@ -302,10 +313,10 @@
     const kh = Math.min(seg(lt, .9, 1.4), kout(lt, dur));
     heading('today', 540, 990, 96, kh);
     heading('Qwen3-32B', 1370, 995, 56, Math.min(seg(t, tQ - .2, tQ + .4), kh));
-    if (kh > 0) lens(1120 + 260 * Math.sin(t * .45), 660 + 40 * Math.sin(t * .6), 120, 0, t);
-    placard(470, 900, '90%  one main job', C.gold, Math.min(popk(t, t90 - .1, .5), kout(lt, dur)), 50, { stick: 330 });
-    placard(960, 920, '7%  two related jobs', C.paper2, Math.min(popk(t, t7 - .1, .5), kout(lt, dur)), 46, { stick: 300 });
-    placard(1460, 900, '2–4%  not yet', C.grey, Math.min(popk(t, tOnly + .1, .5), kout(lt, dur)), 46, { stick: 330 });
+    if (kh > 0) lens(1000 + 300 * Math.sin(t * .45), 790 + 25 * Math.sin(t * .6), 105, 0, t);
+    placard(420, 900, '90%  one main job', C.gold, Math.min(popk(t, t90 - .1, .5), kout(lt, dur)), 44, { stick: 330 });
+    placard(965, 920, '7%  two related jobs', C.paper2, Math.min(popk(t, t7 - .1, .5), kout(lt, dur)), 40, { stick: 350 });
+    placard(1500, 900, '2–4%  not yet', C.grey, Math.min(popk(t, tOnly + .1, .5), kout(lt, dur)), 40, { stick: 330 });
     clS(t, lt, dur, 1740, 990, [[tMod, 'thinking'], [t90, 'surprised'], [t90 + 1, 'excited'], [t7 + .5, 'happy'], [tOnly, 'thinking'], [tYet, 'determined']], { u: 7.5, flip: true });
     pageTurn(lt);
     camEnd();
@@ -314,7 +325,7 @@
 
   // ================= the preeclampsia hub =================
   const M0 = { a: cs('cw_medical'), tFol: wt('cw_medical', 'follow'), tPreg: wt('cw_medical', 'pregnant'), tSym: wt('cw_medical', 'symptoms'), tFour: wt('cw_medical', 'four'), tConc: wt('cw_medical', 'concludes'), tPre: wt('cw_medical', 'preeclampsia'), tSw: wt('cw_medical', 'Switch'), tOff: wt('cw_medical', 'off'), tItch: wt('cw_medical', 'itching'), tDiff: wt('cw_medical', 'different'), tNext: wt('cw_medical', 'next'), tGuess: wt('cw_medical', 'guess') };
-  const SYMS = [[400, 870, 'pregnant', C.pink], [580, 960, 'headache', C.orange], [700, 850, 'high blood pressure', C.blue]];
+  const SYMS = [[400, 870, 'pregnant', C.pink], [580, 960, 'headache', C.orange], [760, 850, 'high blood pressure', C.blue]];
   const HUB = [[1120, 820], [1250, 860], [1150, 940], [1280, 960]];
   function medicalShot(t, lt, dur) {
     const { a, tFol, tPreg, tSym, tFour, tConc, tPre, tSw, tOff, tItch, tDiff, tNext, tGuess } = M0;
@@ -336,7 +347,7 @@
     // the hub of four neurons; the pull-tab switches them off (they fold flat)
     HUB.forEach(([x, y], n) => { const k = Math.min(kin(lt, x + 400), 1 - off * .97, ko), hot = on(t, tFour - .2 + n * .14, Infinity, .3); stand(x, y, k, 120, () => pb(120, 150, hot > .5 ? C.lilac : C.grey, { roof: 'peak', wins: [{}], lit: Math.max(hot * .5, on(t, tConc - .5)) * (1 - off), glowCol: '#FFD58A' }), { raw: off > 0 }); });
     // the other neurons of the hospital district, standing by
-    [[1480, 760, C.blue], [1720, 790, C.green], [1580, 960, C.yellow]].forEach(([x, y, col], n) => stand(x, y, Math.min(kin(lt, x), ko, 1 - seg(t, tItch - .8, tItch - .4) * (n === 0 ? 1 : 0) * 0), 110, () => pb(110, 130, col, { roof: n % 2 ? 'flat' : 'peak', wins: [{}, {}], cols: 2, winH: 30, lit: .15 })));
+    [[1640, 750, C.blue], [1780, 790, C.green], [1590, 975, C.yellow]].forEach(([x, y, col], n) => stand(x, y, Math.min(kin(lt, x), ko, 1 - seg(t, tItch - .8, tItch - .4) * (n === 0 ? 1 : 0) * 0), 110, () => pb(110, 130, col, { roof: n % 2 ? 'flat' : 'peak', wins: [{}, {}], cols: 2, winH: 30, lit: .15 })));
     // the conclusion: a scroll unrolls above the hub
     const kp = Math.min(popk(t, tPre - .4, .6), ko), drop = ease(seg(t, tOff, tOff + .8));
     if (kp > 0) { ctx.save(); ctx.translate(1200, 560 + 300 * drop * drop); ctx.rotate(.5 * drop); ctx.scale(backOut(kp), backOut(kp)); ctx.globalAlpha = 1 - drop; cutout(rectPts(-200, -50, 400, 100), C.gold, { jag: 2, shadow: SH }); cutout(ellPts(-200, 0, 16, 54, 12), mixCol(C.gold, C.ink, .2), { jag: 1, shadow: false }); cutout(ellPts(200, 0, 16, 54, 12), mixCol(C.gold, C.ink, .2), { jag: 1, shadow: false }); ps('preeclampsia', 0, 3, 48); ctx.restore(); }
@@ -345,10 +356,10 @@
     flat(rectPts(1500, 1010, 200 + 160 * tab, 30), C.red, { shadow: SH }); ps('pull', 1560 + 160 * tab, 1026, 26, C.paper);
     // the next guess: a different building asks about itching
     const ki = Math.min(popk(t, tItch - .5, .55), ko);
-    stand(1600, 860, ki, 150, () => pb(150, 230, C.teal, { roof: 'flat', sign: 'liver', wins: [{}, {}], cols: 2, lit: .7 }));
-    bubble(1620, 470, 'any itching?', 46, Math.min(popk(t, tItch - .2, .5), ko), { tail: -40 });
-    thread([[1250, 760], [1430, 600], [1560, 680]], Math.min(seg(t, tNext - .6, tNext + .3), ko), C.navy, 7);
-    if (t > tNext - .4) heading('next guess', 1430, 640, 40, Math.min(seg(t, tNext - .4, tNext + .2), ko), C.navy);
+    stand(1440, 880, ki, 280, () => pb(280, 240, C.teal, { roof: 'flat', sign: 'another condition', signSize: 30, wins: [{}, {}], cols: 2, lit: .7 }));
+    bubble(1450, 500, 'any itching?', 46, Math.min(popk(t, tItch - .2, .5), ko), { tail: -40 });
+    thread([[1200, 780], [1260, 640], [1360, 700]], Math.min(seg(t, tNext - .6, tNext + .3), ko), C.navy, 7);
+    if (t > tNext - .4) heading('next guess', 1200, 830, 46, Math.min(seg(t, tNext - .4, tNext + .2), ko), C.navy);
     clS(t, lt, dur, 1720, 1010, [[a, 'happy'], [tPreg, 'thinking'], [tPre, 'proud'], [tSw - .6, 'determined'], [tItch, 'surprised'], [tGuess, 'thinking']], { u: 7, flip: true, extra: { aL: t > tSw - .5 && t < tSw + .6 ? 1.3 : undefined } });
     pageTurn(lt);
     camEnd();
@@ -357,10 +368,10 @@
   }
 
   // ================= Santa in the basements =================
-  const W0 = { a: cs('cw_wallet'), tTril: wt('cw_wallet', 'trillions'), tFound: wt('cw_wallet', 'found'), tFacts: wt('cw_wallet', 'facts'), tW: wt('cw_wallet', 'wallet', 1), tCash: wt('cw_wallet', 'cash'), tID: wt('cw_wallet', 'ID'), tLost: wt('cw_wallet', 'lost'), tHon: wt('cw_wallet', 'honesty'), tAns: wt('cw_wallet', 'answer', 1), tRet: wt('cw_wallet', 'return') };
+  const W0 = { a: cs('cw_wallet'), tTril: wt('cw_wallet', 'trillions'), tFound: wt('cw_wallet', 'found'), tFacts: wt('cw_wallet', 'facts'), tW: wt('cw_wallet', 'wallet', 1), tCash: wt('cw_wallet', 'cash'), tID: wt('cw_wallet', 'ID'), tLost: wt('cw_wallet', 'lost'), tHon: wt('cw_wallet', 'honesty'), tAns: wt('cw_wallet', 'answer', 1), tRet: wt('cw_wallet', 'return'), tFull: wt('cw_wallet', 'Full') };
   const BIG = Array.from({ length: 60 }, (_, n) => { const r = n % 3, x = -560 + Math.floor(n / 3) * 150 + r * 50 + (hash(n) - .5) * 40, y = 700 + r * 62; return [x, y, 70 + 40 * hash(n * 3), 90 + 140 * hash(n * 5), [C.orange, C.yellow, C.blue, C.green, C.pink, C.lilac][n % 6]]; });
   function walletShot(t, lt, dur) {
-    const { a, tTril, tFound, tFacts, tW, tCash, tID, tLost, tHon, tAns, tRet } = W0;
+    const { a, tTril, tFound, tFacts, tW, tCash, tID, tLost, tHon, tAns, tRet, tFull } = W0;
     library(t);
     const gate = seg(t, tTril - .8, tTril + .4);
     camB(t, [[t - lt, 960, 560, 1], [t - lt + 1, 960, 560, 1], [tTril + .4, 960, 520, .6], [tFacts - .4, 960, 520, .62], [tW, 480, 640, 1.0], [tID + .4, 560, 640, 1.0], [tLost + .2, 960, 600, .9], [tHon + .5, 1100, 600, .9], [tRet - .4, 1500, 560, .92], [t - lt + dur - .6, 1400, 560, .8], [t - lt + dur, 960, 560, 1]], .4);
@@ -388,7 +399,7 @@
     clS(t, lt, dur, 1820, 1000, [[a, 'happy'], [tTril, 'surprised'], [tFound, 'thinking'], [tHon, 'love'], [tRet, 'proud']], { u: 7.5, flip: true });
     pageTurn(lt);
     camEnd();
-    caps(t, [[tTril - .2, tFound - .4, 'trillions of parameters'], [tW - .3, tLost - .4, 'a wallet · cash · an ID'], [tLost - .3, tRet - .4, 'lost property · honesty'], [tRet - .3, t - lt + dur - .3, 'the answer: return it', C.gold]]);
+    caps(t, [[tTril - .2, tFound - .4, 'trillions of parameters'], [tW - .3, tLost - .4, 'a wallet · cash · an ID'], [tLost - .3, tRet - .4, 'lost property · honesty'], [tFull - .3, t - lt + dur - .3, 'full audits at this scale: not yet']]);   // the answer itself is the tower's bubble
     GRAIN = .8;
   }
 
@@ -408,7 +419,7 @@
       ctx.save(); ctx.globalAlpha = kp;
       const A1 = [[180, 640], [520, 640], [700, 720]], A2 = [[180, 900], [520, 900], [700, 820]], OUT = [[760, 770], [1160, 770], [1300, 700]], OUT2 = [[1160, 770], [1300, 880]];
       pipe(A1, 34); pipe(A2, 34); pipe(OUT, 40);
-      if (split > 0) pipe([[1160, 770], [lerp(1160, 1480, split), lerp(770, 930, split)]], 40);
+      if (split > 0) pipe([[1160, 770], [lerp(1160, 1330, split), lerp(770, 930, split)]], 40);
       // the multiplier junction
       ctx.save(); ctx.translate(740, 770); ctx.rotate(t * (t > tMul ? 2 : .3)); cutout(ellPts(0, 0, 70, 70, 28), C.gold, { jag: 2, shadow: SH }); for (let q = 0; q < 8; q++) flat(rectPts(-6 + Math.cos(q * TAU / 8) * 64, -6 + Math.sin(q * TAU / 8) * 64, 12, 12), mixCol(C.gold, C.ink, .3)); ctx.restore(); ps('×', 740, 772, 80);
       gauge(380, 560, neg ? -1 : 1, seg(t, tSig - .6, tSig - .1)); gauge(380, 980 - 160, neg ? -1 : 1, seg(t, tSig - .4, tSig + .1));
@@ -418,13 +429,15 @@
     }
     // the building that lit up for the opposite of its job
     const wrong = neg && t > tPos - .3 ? 1 - split : 0, kb = Math.min(kin(lt, 1450), ko);
-    stand(1480, 760, kb, 220, () => pb(220, 300, C.yellow, { roof: 'peak', sign: 'glad', wins: [{ s: 'joy', lit: 1 - wrong }, { s: 'yay', lit: 1 - wrong }, { s: 'gloom', lit: wrong, col: C.navy }, { s: 'sob', lit: wrong, col: C.navy }], cols: 2, lit: wrong ? 1 : .5, glowCol: wrong ? '#FFB0A0' : '#FFD58A' }));
+    // while it misfires, its real windows (joy, yay) go dark and the opposite ones (gloom, sob) light up blue
+    const wGood = w => ({ s: w, lit: 1 - wrong, col: wrong > .5 ? '#8A8478' : C.ink, bg: wrong > .5 ? '#C9C3B6' : undefined }), wBad = w => ({ s: w, size: 25, lit: wrong, col: wrong > .5 ? C.cream : split > .5 ? '#A8A296' : C.navy, bg: wrong > .5 ? C.navy : undefined, glow: '#7EB5FF' });
+    stand(1480, 760, kb, 260, () => pb(260, 300, C.yellow, { roof: 'peak', sign: 'glad', wins: [wGood('joy'), wGood('yay'), wBad('gloom'), wBad('sob')], cols: 2, lit: wrong ? .2 : .5, glowCol: wrong ? '#7EB5FF' : '#FFD58A' }));
     if (wrong > .5 && t > tOpp - .4) stamp('opposite!', 1130, 430, tOpp - .3, t, { col: C.red, size: 80 });
     // after the split: the − × − case gets its own building
     const ks = Math.min(popk(t, tCases - .3, .6), ko);
-    stand(1600, 1000, ks, 200, () => pb(200, 160, C.navy, { roof: 'flat', sign: '− × −', signSize: 30, wins: [{ s: 'gloom', lit: .8 }, { s: 'sob', lit: .8 }], cols: 2, lit: .7 }));
-    if (split > .5) { heading('+ × +', 1660, 600, 40, split, '#3A8A4A'); }
-    clS(t, lt, dur, 1080, 1000, [[a, 'neutral'], [tNeg, 'confused'], [tOpp, 'scared'], [tSep - .5, 'determined'], [tNoise, 'proud']], { u: 7.5, flip: true, hat: t > tSep - .6 ? 'hard' : 'beret', extra: { aR: t > tSep - .4 && t < tSep + .8 ? 1.4 : undefined } });
+    stand(1440, 1010, ks, 240, () => pb(240, 170, C.navy, { roof: 'flat', sign: '− × −', signSize: 30, wins: [{ s: 'gloom', lit: .8, size: 23 }, { s: 'sob', lit: .8, size: 23 }], cols: 2, lit: .7 }));
+    if (split > .5) { heading('+ × +', 1700, 640, 48, split, '#3A8A4A'); }
+    clS(t, lt, dur, 1730, 1000, [[a, 'neutral'], [tNeg, 'confused'], [tOpp, 'scared'], [tSep - .5, 'determined'], [tNoise, 'proud']], { u: 7.5, flip: true, hat: t > tSep - .6 ? 'hard' : 'beret', extra: { aR: t > tSep - .4 && t < tSep + .8 ? 1.4 : undefined } });
     pageTurn(lt);
     camEnd();
     caps(t, [[t - lt + 1, tBoth - .4, 'some of the mess was plumbing'], [tBoth - .3, tSep - .4, '−  ×  −  =  +'], [tSep - .3, t - lt + dur - .3, 'separate the two cases']]);
@@ -433,7 +446,7 @@
 
   // ================= experts: a gatekeeper and specialist neighbourhoods; one is all dice and dragons =================
   const R0 = { a: cs('cw_river'), tRiver: wt('cw_river', 'river'), tRes: wt('cw_river', 'residual'), tRead: wt('cw_river', 'read'), tWrite: wt('cw_river', 'write'), tWorr: wt('cw_river', 'worried'), tTang: wt('cw_river', 'tangle'), tPrac: wt('cw_river', 'far'), tRead2: wt('cw_river', 'read', 1), tSq: wt('cw_river', 'squeezed'), tMess: wt('cw_river', 'messier'), tNev: wt('cw_river', 'nothing'), tKn: wt('cw_river', 'knotted') };
-  const RW = ['the', 'river', 'ran', 'and', 'she', 'said', 'why', 'if', 'so', 'once'];
+  const RW = ['the', 'river', 'ran', 'and', 'she', 'said', 'why', 'if', 'so', 'once'], RI = ['p47742', 'n1070575', 'pTrain34', 'c4d201c', 'n1158528', 'pCarX5', 'p42708'].map(n => 'blog/raw/v-figure-10x/' + n);
   function riverShot(t, lt, dur) {
     const { a, tRiver, tRes, tRead, tWrite, tWorr, tTang, tPrac, tRead2, tSq, tMess, tNev, tKn } = R0;
     library(t);
@@ -458,14 +471,18 @@
     for (let q = 0; q < 7; q++) {
       const x = PG.l + 40 + frac(q / 7 + (t - a) * .05) * (PG.r - PG.l - 120), y = ry(x) + (q % 2 ? -14 : 16) + (1 - narrow(x)) * 14 * Math.sin(t * 8 + q), rot = (1 - narrow(x)) * .25 * Math.sin(t * 7 + q), k = Math.min(kr, clamp((x - PG.l) / 60));
       if (k <= 0) continue; ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = k;
-      ctx.scale(1.45, 1.45); cutout([[-50, -10], [50, -10], [36, 12], [-36, 12]], C.cream, { jag: 1, shadow: [3, 5, 'rgba(40,24,16,.3)'] }); flat([[4, -10], [4, -62], [44, -16]], C.paper2); ps(RW[q % RW.length], -20, -26, 26); ctx.restore();
+      ctx.scale(1.45, 1.45); cutout([[-50, -10], [50, -10], [36, 12], [-36, 12]], C.cream, { jag: 1, shadow: [3, 5, 'rgba(40,24,16,.3)'] }); flat([[4, -10], [4, -62], [44, -16]], C.paper2);
+      // once the squeeze starts (done in an image network), the cargo turns from words into little photos
+      if (dam < 1) { ctx.save(); ctx.globalAlpha *= 1 - dam; ps(RW[q % RW.length], -20, -26, 26); ctx.restore(); }
+      if (dam > 0) { ctx.save(); ctx.globalAlpha *= dam; const I = img(RI[q]), sz = Math.min(I.width, I.height); flat(rectPts(-44, -50, 40, 40), C.cream); ctx.drawImage(I, (I.width - sz) / 2, (I.height - sz) / 2, sz, sz, -42, -48, 36, 36); ctx.restore(); }
+      ctx.restore();
     }
     // read: a bucket on a string lowered from the "read" house; write: a boat dropped from the "write" house
     const rb = Math.sin(Math.PI * seg(t, tRead - .4, tRead + 1.2)), wb = seg(t, tWrite - .3, tWrite + .9);
     if (rb > 0) { const bx = 360, by = lerp(640, ry(360) - 30, rb); inkLine([[330, 620], [bx, by - 30]], 1.5, C.ink, 'inkfine', 0); cutout([[bx - 22, by - 30], [bx + 22, by - 30], [bx + 16, by], [bx - 16, by]], C.gold, { jag: 1, shadow: false }); }
     if (wb > 0 && wb < 1) { const bx = 620, by = lerp(620, ry(620), easeIn(wb)); cutout([[bx - 40, by - 8], [bx + 40, by - 8], [bx + 28, by + 10], [bx - 28, by + 10]], C.gold, { jag: 1, shadow: false }); }
     // the Knot tries to tie the river, and fails
-    const kk = Math.min(on(t, tWorr - .4, tNev + 1.2, .4, .6), ko), shrink = ease(seg(t, tNev - .2, tKn + .5));
+    const kk = Math.min(on(t, tWorr - .4, tRead2 + .9, .4, .6), ko), shrink = ease(seg(t, tPrac - .2, tRead2 + .5));   // "So far it has been readable": the Knot gives up
     if (kk > 0) { ctx.save(); ctx.translate(1000, 760 - 60 * kk + 120 * shrink); ctx.scale(kk * lerp(1, .35, shrink), kk * lerp(1, .35, shrink)); knotP(0, 0, 120, { look: [0, 1], grin: t < tPrac }); ctx.restore(); }
     // Clawd reads it, with a clear lens
     const lk = Math.min(on(t, tPrac - .3, tSq + .4), ko);
@@ -473,7 +490,7 @@
     clS(t, lt, dur, 560, 1010, [[a, 'happy'], [tWorr, 'nervous'], [tPrac, 'determined'], [tRead2, 'happy'], [tSq, 'thinking'], [tNev, 'smug']], { u: 7, flip: false });
     pageTurn(lt);
     camEnd();
-    caps(t, [[tRiver - .2, tRes - .4, 'a river through every district'], [tRes - .3, tSq - .4, 'the residual stream'], [tSq - .3, t - lt + dur - .3, 'narrower: messier, never knotted']]);
+    caps(t, [[tRiver - .2, tRes - .4, 'a river through every district'], [tRes - .3, tSq - .4, 'the residual stream'], [tSq - .3, tMess - .4, 'squeezed, in an image network'], [tMess - .3, t - lt + dur - .3, 'messier, but nothing knotted']]);
     GRAIN = .8;
   }
 
@@ -509,9 +526,9 @@
   }
 
   // ================= don't end the sentence yet; then the page tears out and folds into a dart =================
-  const P0 = { a: cs('cw_dot'), tConf: wt('cw_dot', 'confusion'), tMix: wt('cw_dot', 'mix'), tCit: wt('cw_dot', 'citations'), tDia: wt('cw_dot', 'dialogue'), tWeb: wt('cw_dot', 'web'), tKor: wt('cw_dot', 'Korean'), tLooks: wt('cw_dot', 'looks'), tStop: wt('cw_dot', 'stop'), tPer: wt('cw_dot', 'period'), tEarly: wt('cw_dot', 'early'), tRem: wt('cw_dot', 'Remove'), tSoon: wt('cw_dot', 'sooner'), e: ce('cw_dot'), nx: chapStart('ch11') };
+  const P0 = { a: cs('cw_dot'), tConf: wt('cw_dot', 'confusion'), tMix: wt('cw_dot', 'mix'), tCit: wt('cw_dot', 'citations'), tDia: wt('cw_dot', 'dialogue'), tWeb: wt('cw_dot', 'web'), tKor: wt('cw_dot', 'Korean'), tLooks: wt('cw_dot', 'looks'), tStop: wt('cw_dot', 'stop'), tPer: wt('cw_dot', 'period'), tEarly: wt('cw_dot', 'early'), tRem: wt('cw_dot', 'Remove'), tSoon: wt('cw_dot', 'sooner'), tStory: wt('cw_dot', 'story'), tRdbl: wt('cw_dot', 'readable'), tFoll: wt('cw_dot', 'followed'), tCaus: wt('cw_dot', 'causes'), e: ce('cw_dot'), nx: chapStart('ch11') };
   function dotShot(t, lt, dur) {
-    const { a, tConf, tMix, tCit, tDia, tWeb, tKor, tLooks, tStop, tPer, tEarly, tRem, tSoon, e, nx } = P0;
+    const { a, tConf, tMix, tCit, tDia, tWeb, tKor, tLooks, tStop, tPer, tEarly, tRem, tSoon, tStory, tRdbl, tFoll, tCaus, e, nx } = P0;
     library(t);
     const tear = seg(t, e + .05, e + .7), fold = seg(t, e + .6, e + 1.5), fly = seg(t, e + 1.4, nx + 2);
     camB(t, [[t - lt, 960, 560, 1], [t - lt + 1, 960, 560, 1], [tMix, 960, 540, 1.04], [tLooks, 960, 520, 1.06], [tRem + .3, 980, 540, 1.04], [e, 960, 560, 1], [nx + 2, 1000, 520, 1.04]], .4);
@@ -566,7 +583,8 @@
     }
     pageTurn(lt);
     camEnd();
-    caps(t, [[tMix - .3, tLooks - .4, 'citations · dialogue · web · Korean?'], [tStop - .3, tRem - .3, "don't end the sentence yet"], [tSoon - .5, e + .4, 'periods come sooner', C.gold]]);
+    caps(t, [[tMix - .3, tLooks - .4, 'citations · dialogue · web · Korean?'], [tStop - .3, tRem - .3, "don't end the sentence yet"], [tSoon - .5, tStory - .6, 'periods come sooner', C.gold]]);
+    qSum(t, tStory - .9, e - .05, [tRdbl, tFoll, tCaus]);
     GRAIN = .8;
   }
 

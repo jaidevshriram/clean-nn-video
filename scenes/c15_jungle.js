@@ -59,9 +59,9 @@
     ctx.strokeStyle = '#7A3A4A'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(0, -250); ctx.bezierCurveTo(-20, -120, 20, 40, -10, 230); ctx.stroke();
     // the V inside, glimmering for a moment
     if ((o.v || 0) > 0) { const k = o.v; ctx.save(); ctx.globalAlpha = k; ctx.shadowColor = '#FFD84A'; ctx.shadowBlur = 40; ctx.strokeStyle = '#FFE38A'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-90, -80); ctx.lineTo(0, 60); ctx.lineTo(90, -80); ctx.stroke(); ctx.restore(); glow(0, -20, 200, '#FFE38A', .6 * k); }
-    // electrodes
-    const E = [[-170, -190], [30, -245], [200, -160]];
-    E.forEach(([ex, ey], i) => { const sp = (o.spark || 0) * (Math.sin(t * 30 + i * 2) > .3 ? 1 : 0); ctx.strokeStyle = '#3A3A44'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.bezierCurveTo(ex, ey - 120, ex * .5 + 400, -520, 520, -560 + i * 30); ctx.stroke(); fillPath((() => { const p = new Path2D(); p.ellipse(ex, ey, 14, 10, 0, 0, TAU); return p; })(), '#C9A15A', '#3A2A1A', 3); if (sp) glow(ex, ey, 60, '#BFE6FF', 1); });
+    // electrodes (o.el fades them in)
+    const E = [[-170, -190], [30, -245], [200, -160]], el = o.el ?? 1;
+    if (el > 0) { ctx.globalAlpha *= el; } if (el > 0) E.forEach(([ex, ey], i) => { const sp = (o.spark || 0) * (Math.sin(t * 30 + i * 2) > .3 ? 1 : 0); ctx.strokeStyle = '#3A3A44'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.bezierCurveTo(ex, ey - 120, ex * .5 + 400, -520, 520, -560 + i * 30); ctx.stroke(); fillPath((() => { const p = new Path2D(); p.ellipse(ex, ey, 14, 10, 0, 0, TAU); return p; })(), '#C9A15A', '#3A2A1A', 3); if (sp) glow(ex, ey, 60, '#BFE6FF', 1); });
     ctx.restore();
   }
   // a little brass meter box the electrodes run to: three needles that only twitch, a paper strip of scribbles
@@ -79,7 +79,7 @@
 
   // ---------- shot 1 · a change in kind: one process made all of them ----------
   function kind(t, lt, dur) {
-    const s0 = chapStart('ch15'), a = cs('wm_kind'), tk = wt('wm_kind', 'kind'), tdes = wt('wm_kind', 'intelligent'), tnat = wt('wm_kind', 'natural'), tmore = wt('wm_kind', 'more'), tani = wt('wm_kind', 'animals'), treal = wt('wm_kind', 'realizing'), tall = wt('wm_kind', 'all'), e = ce('wm_kind');
+    const s0 = chapStart('ch15'), a = cs('wm_kind'), tk = wt('wm_kind', 'kind'), tdes = wt('wm_kind', 'intelligent'), tnat = wt('wm_kind', 'natural'), tmore = wt('wm_kind', 'more'), tani = wt('wm_kind', 'animals'), treal = wt('wm_kind', 'realizing'), tall = wt('wm_kind', 'all'), tgen = wt('wm_kind', 'generalization'), todds = wt('wm_kind', 'odds'), e = ce('wm_kind');
     camKeys(t, [[s0, 960, 560, 1.12], [a + 1, 940, 540, 1.04], [tk, 960, 540, 1], [tmore, 960, 520, .96], [e + .3, 900, 560, 1.02]], .5);
     const front = rousseau(t, { clear: true, mx: 1560, my: 190, ...SKY });
     // creatures appear one by one ("more and more animals")
@@ -102,10 +102,15 @@
     title('a change in kind', 960, 140, 92, '#1A2A1A', seg(t, tk - .4, tk + .5), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tdes - .6, tdes - .2) });
     if (t > tdes - .3 && t < tmore + .5) {
       const al = 1 - seg(t, tmore, tmore + .5);
-      title('intelligent design', 960, 130, 76, '#5A3A2A', seg(t, tdes - .3, tdes + .5), { stroke: '#F4E6B8', strokeW: .12, alpha: al });
-      const ks = seg(t, tnat - .4, tnat - .1); if (ks > 0) { ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = '#C2302A'; ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(640, 140); ctx.lineTo(lerp(640, 1280, ks), 128); ctx.stroke(); ctx.restore(); }
+      // natural selection arrives and strikes intelligent design out (the struck words fade so the red line reads through them)
+      const ks = seg(t, tnat - .1, tnat + .4);
+      title('intelligent design', 960, 130, 76, '#5A3A2A', seg(t, tdes - .3, tdes + .5), { stroke: '#F4E6B8', strokeW: .12, alpha: al * (1 - .6 * ks) });
+      if (ks > 0) { ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = '#C2302A'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(600, 140); ctx.lineTo(lerp(600, 1320, ks), 124); ctx.stroke(); ctx.restore(); }
       title('natural selection', 960, 240, 92, '#1A4A1A', seg(t, tnat - .1, tnat + .7), { stroke: '#F4E6B8', strokeW: .12, alpha: al });
     }
+    // the process here: generalization; and Nick's odds on it
+    if (t > tgen - .4) title('generalization', 960, 140, 100, '#1A4A1A', seg(t, tgen - .4, tgen + .5), { stroke: '#F4E6B8', strokeW: .12 });
+    if (t > todds - .4) title("Nick's odds: maybe 85%", 960, 260, 72, '#5A3A2A', seg(t, todds - .4, todds + .4), { stroke: '#F4E6B8', strokeW: .12 });
   }
 
   // ---------- shot 2 · the tiger is orange because deer can't tell orange from green ----------
@@ -136,31 +141,33 @@
     if (t > tnn - .4) title('clean the way a rainforest is clean', 960, 140, 76, '#1A2A1A', seg(t, tnn - .2, tcl), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, e - .2, e + .3) });
   }
 
-  // ---------- shot 3 · humble about brains: perfect tools couldn't see it; a few electrodes never would ----------
+  // ---------- shot 3 · humble about brains: far better tools than any brain scientist's couldn't see it; a few electrodes never would ----------
   function brain(t, lt, dur) {
-    const a = cs('wm_brain'), thum = wt('wm_brain', 'humble'), tcat = wt('wm_brain', 'cat'), tperf = wt('wm_brain', 'tools'), tsee = wt('wm_brain', 'see'), thb = wt('wm_brain', 'human'), tel = wt('wm_brain', 'electrodes'), tch = wt('wm_brain', 'chance'), e = ce('wm_brain');
+    const a = cs('wm_brain'), thum = wt('wm_brain', 'humble'), tcat = wt('wm_brain', 'cat'), tperf = wt('wm_brain', 'tools'), tsee = wt('wm_brain', 'see'), thb = wt('wm_brain', 'human'), tel = wt('wm_brain', 'electrodes'), tch = wt('wm_brain', 'chance'), trd = wt('wm_brain', 'reading'), e = ce('wm_brain');
     camKeys(t, [[a - .3, 960, 560, 1.15], [thum, 960, 540, 1.02], [tcat, 920, 540, 1.1], [tsee, 960, 540, 1.0], [thb, 1080, 480, 1.0], [tel, 1180, 470, 1.08], [e + .3, 1060, 520, 1.0]], .5);
     const front = rousseau(t, { clear: true, mx: 1560, my: 190, ...SKY, front: 5 });
     // the brain rises out of the leaves like a great pink fruit
     const bk = backOut(seg(t, a, a + 1.4));
     const vk = env(t, tcat - .3, tsee + .4, .5, .8) * (.75 + .25 * Math.sin(t * 7));
-    brainArt(900, 640 + (1 - bk) * 500, .9, t, { v: vk, spark: seg(t, thb, tel + .3) * (1 - seg(t, tch, tch + .6)) });
-    meter(1560, 420, 1, t, seg(t, thb - .5, thb + .5));
+    const elk = seg(t, tel - .5, tel + .2);   // the electrodes, their wires and the meter arrive on "a few electrodes"
+    brainArt(900, 640 + (1 - bk) * 500, .9, t, { v: vk, el: elk, spark: seg(t, tel, tel + .3) * (1 - seg(t, tch, tch + .6)) });
+    if (elk > 0) { ctx.save(); ctx.globalAlpha = elk; meter(1560, 420, 1, t, 1); ctx.restore(); }
     front();
-    // Clawd with a perfect lens, staring for years (he gets sleepy), then shrugs at the electrodes
-    tourist15(t, 1420, 1020, 9, [[a, 'thinking'], [tperf, 'sleepy'], [tsee, 'sad'], [thb, 'nervous'], [tch, 'confused']], { flip: true, aR: t < tsee + .5 ? 1.1 : undefined, armR: t < tsee + .5 ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#7A5B3E', 'ink', 0); ctx.save(); ctx.strokeStyle = '#C99A45'; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(200,230,255,.35)'; ctx.fill(); ctx.restore(); } : undefined });
+    // Clawd with a fine lens, staring for years (he gets sleepy), then shrugs at the electrodes
+    tourist15(t, 1400, 1010, 15, [[a, 'thinking'], [tperf, 'sleepy'], [tsee, 'sad'], [thb, 'nervous'], [tch, 'confused']], { flip: true, aR: t < tsee + .5 ? 1.1 : undefined, armR: t < tsee + .5 ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#7A5B3E', 'ink', 0); ctx.save(); ctx.strokeStyle = '#C99A45'; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(200,230,255,.35)'; ctx.fill(); ctx.restore(); } : undefined });
     // fog over the brain on "never had a chance"
     const fg = seg(t, tch - .8, tch + .4);
     if (fg > 0) for (let i = 0; i < 5; i++) glow(700 + i * 110 + 30 * Math.sin(t + i), 620 + 40 * Math.sin(i * 2), 300 * fg, '#F4F0E4', .7 * fg);
     camEnd();
     title('humble about brains', 960, 130, 84, '#1A2A1A', seg(t, thum - .3, thum + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tcat - .8, tcat - .4) });
-    if (t > tperf - .3 && t < thb) title('perfect tools', 640, 140, 76, '#1A2A1A', seg(t, tperf - .3, tperf + .4), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, thb - .6, thb - .2) });
-    if (t > tel - .5) title('a few electrodes', 1180, 140, 80, '#1A2A1A', seg(t, tel - .5, tel + .3), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, e, e + .3) });
+    if (t > tperf - .3 && t < thb) title('far better tools than any brain scientist', 960, 140, 64, '#1A2A1A', seg(t, tperf - .3, tperf + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, thb - .6, thb - .2) });
+    if (t > tel - .5) title('a few electrodes', 1180, 140, 80, '#1A2A1A', seg(t, tel - .5, tel + .3), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, trd - 1.2, trd - .8) });
+    if (t > trd - .9) title('"cats and cars"? almost no weight', 1100, 140, 68, '#1A2A1A', seg(t, trd - .9, trd - .1), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, e, e + .3) });
   }
 
   // ---------- shot 4 · the pond: AIs might want to understand themselves ----------
   function pond(t, lt, dur) {
-    const a = cs('wm_care'), tsaf = wt('wm_care', 'safety'), tthem = wt('wm_care', 'themselves'), task = wt('wm_care', 'asked'), thelp = wt('wm_care', 'essay'), tleast = wt('wm_care', 'least'), e = ce('wm_care');
+    const a = cs('wm_care'), tsaf = wt('wm_care', 'safety'), tthem = wt('wm_care', 'themselves'), task = wt('wm_care', 'asked'), thelp = wt('wm_care', 'essay'), tleast = wt('wm_care', 'least'), tnev = wt('wm_care', 'they', 1), e = ce('wm_care');
     camKeys(t, [[a - .3, 960, 600, 1.1], [tthem - .5, 930, 760, 1.55], [task + .5, 960, 740, 1.4], [thelp, 1050, 700, 1.25], [e + 1, 1000, 640, 1.1]], .5);
     const front = rousseau(t, { clear: true, mx: 1500, my: 230, sky0: '#F6C8A6', sky1: '#F8E8C0', front: 5 });
     // the pond: dark water with the sky in it, lily pads, ripples
@@ -187,8 +194,10 @@
     const tg = ease(seg(t, thelp - 2.5, thelp + 1));
     if (tg > 0) tigerArt(lerp(2300, 1260, tg), CY - 6, .5, { walk: tg < 1 ? t * 1.2 : .25, flip: true });
     camEnd();
-    if (t > tthem - .4 && t < tleast - .6) title('understand themselves', 960, 140, 80, '#1A2A1A', seg(t, tthem - .6, tthem + .3), { stroke: '#F8E8C0', strokeW: .12, alpha: 1 - seg(t, tleast - 1.2, tleast - .7) });
-    if (t > tleast - .5) title('the least we can do', 960, 140, 84, '#1A2A1A', seg(t, tleast - .5, tleast + .5), { stroke: '#F8E8C0', strokeW: .12, alpha: 1 - seg(t, e + .5, e + 1) });
+    if (t > tthem - .4 && t < thelp) title('understand themselves', 960, 140, 80, '#1A2A1A', seg(t, tthem - .6, tthem + .3), { stroke: '#F8E8C0', strokeW: .12, alpha: 1 - seg(t, thelp - .6, thelp - .2) });
+    // the essay's own words, marked as a quote
+    if (t > tnev - .3 && t < tleast - .3) title('"they never asked to be created…"', 960, 140, 76, '#1A2A1A', seg(t, tnev - .3, tnev + .8), { stroke: '#F8E8C0', strokeW: .12, alpha: 1 - seg(t, tleast - .8, tleast - .4) });
+    if (t > tleast - .7) { const qa = 1 - seg(t, e + .5, e + 1); title('"…and this is the least we can do"', 960, 140, 76, '#1A2A1A', seg(t, tleast - .7, tleast + .4), { stroke: '#F8E8C0', strokeW: .12, alpha: qa }); title('— the essay', 1300, 236, 52, '#5A3A2A', seg(t, tleast - .2, tleast + .4), { stroke: '#F8E8C0', strokeW: .12, alpha: qa }); }
   }
 
   // ---------- shot 5 · home: a V portal opens on the opening galaxy, now an ordered map; title; credits ----------
@@ -237,8 +246,8 @@
     // the last line, then the title and credits
     const fk = ease(seg(t, END - 2.2, END - .2)), al = 1 - fk;
     const l1 = seg(t, a - .1, tcl + .2) * (1 - seg(t, e + .6, e + 1.2)), l2 = seg(t, twe - .1, trd + .4) * (1 - seg(t, e + .6, e + 1.2));
-    title('Neural networks are already clean.', 960, 760, 76, '#FFF6E8', l1, { stroke: '#120C2A', strokeW: .12, alpha: al });
-    title('We just have to learn how to read them.', 960, 870, 64, '#FFD58A', l2, { stroke: '#120C2A', strokeW: .12, alpha: al });
+    title('Neural networks are already clean.', 1100, 700, 76, '#FFF6E8', l1, { stroke: '#120C2A', strokeW: .12, alpha: al });
+    title('We just have to learn how to read them.', 1100, 800, 64, '#FFD58A', l2, { stroke: '#120C2A', strokeW: .12, alpha: al });
     const tk = seg(t, e + 1.2, e + 3), ck = seg(t, e + 3.4, e + 5);
     title('Neural Networks', 960, 300, 124, '#FFF6E8', tk, { stroke: '#120C2A', strokeW: .1, alpha: al });
     title('Are Already Clean', 960, 440, 124, '#FFD58A', seg(t, e + 1.8, e + 3.4), { stroke: '#120C2A', strokeW: .1, alpha: al });

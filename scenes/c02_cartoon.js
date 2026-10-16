@@ -1,13 +1,17 @@
 // ch02 The knot · a 1930s RUBBER-HOSE EDUCATIONAL CARTOON (grey film, scratches, flicker, iris cuts, art-deco title
 // cards). The theory everyone was taught: a bouncing street of neuron-houses with one that makes no sense (cats AND
 // cars), "polysemantic", the last district where nothing makes sense, superposition as strangers sharing capsule beds in
-// shifts (rarely colliding; BONK when they do), the city as a knot, the Unfolding Machine, and "I believed it" (a young
-// believer, 2019). At the end the reel burns through.
+// shifts (rarely colliding; BONK when they do), the city as a knot, the Unfolding Machine, and "Nick believed it" (a
+// young believer, years ago). At the end the reel burns through.
 (() => {
-  // machine() letters its 'SAE' plate in its own local units; place it on the plate through the current transform
-  function machineL(t, x, y, s, o) {
-    const n = LETTERS.length, M = ctx.getTransform(), C0 = CAM, a = ctx.globalAlpha; CAM = null; machine(t, x, y, s, o); CAM = C0;
-    for (let i = n; i < LETTERS.length; i++) { const L = LETTERS[i]; if (L.txt !== 'SAE') continue; const lx = x + L.x * s, ly = y + L.y * s; L.x = M.a * lx + M.c * ly + M.e; L.y = M.b * lx + M.d * ly + M.f; L.size *= s * Math.hypot(M.a, M.b); L.rot = (L.rot || 0) + Math.atan2(M.b, M.a); L.alpha = (L.alpha ?? 1) * a; L.screen = true; }
+  // the machine with its jargon name plate dropped (machine() letters it on top of everything, even the iris);
+  // this world paints its own plate, under the grey grade
+  function machineL(t, x, y, s, o) { const n = LETTERS.length, C0 = CAM; CAM = null; machine(t, x, y, s, o); CAM = C0; for (let i = LETTERS.length - 1; i >= n; i--) if (LETTERS[i].txt === 'SAE') LETTERS.splice(i, 1); }
+  // a hand-painted sign on a stick pointing at (x, y) from (x + dx, y + dy); k 0..1 pops it in
+  function hoseTag(s, x, y, dx, dy, k, size = 44) {
+    if (k <= 0) return; const tx = x + dx, ty = y + dy, w = s.length * size * .62 + 50, h = size * 1.5;
+    ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(lerp(x, tx, clamp(k * 1.5)), lerp(y, ty, clamp(k * 1.5))); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.translate(tx, ty); ctx.scale(backOut(k), backOut(k)); ctx.rotate(-.04); fillS('#F4F1E8', () => ctx.rect(-w / 2, -h / 2, w, h), 5); txt(s, 0, 3, size, INK, { font: 'serif', weight: '900' }); ctx.restore();
   }
   const V = 'blog/raw/v-figure-10x/', PE = 'blog/raw/pose-everywhere/';
   const CAT = [V + 'p47742', V + 'c5a352d'], CAR = [V + 'c4d201c', V + 'c4d201d', V + 'pCarX5'];
@@ -97,10 +101,10 @@
   // a cartoon backdrop: sky with outlined puffy clouds, rolling hills, a road
   function backdrop(t, o = {}) {
     bg(PAPERC_); GRAIN = .9;
-    for (let i = 0; i < 4; i++) { const cx = (i * 560 + t * 18) % 2400 - 240, cy = 150 + (i % 2) * 70, B = [0, 1, 2, 3].map(k => [cx + k * 60 - 90, cy + (k % 2) * -24]); ctx.strokeStyle = INK; ctx.lineWidth = 10; for (const [x, y] of B) { ctx.beginPath(); ctx.arc(x, y, 52, 0, TAU); ctx.stroke(); } ctx.fillStyle = '#F4F1E8'; for (const [x, y] of B) { ctx.beginPath(); ctx.arc(x, y, 52, 0, TAU); ctx.fill(); } }
-    fillS('#BDB6A6', () => { ctx.moveTo(-60, 760); for (let i = 0; i <= 12; i++) ctx.quadraticCurveTo(i * 170 - 85, 640 + (i % 2) * 50, i * 170, 700); ctx.lineTo(W + 60, H + 60); ctx.lineTo(-60, H + 60); ctx.closePath(); }, 6);
-    fillS('#9A9488', () => ctx.rect(-60, o.groundY ?? 880, W + 120, 400), 6);
-    for (let i = 0; i < 10; i++) { ctx.fillStyle = '#F4F1E8'; ctx.fillRect(i * 220 + 40, (o.groundY ?? 880) + 70, 110, 14); }
+    for (let i = 0; i < 5; i++) { const cx = (i * 560 + t * 18) % 2800 - 440, cy = 150 + (i % 2) * 70, B = [0, 1, 2, 3].map(k => [cx + k * 60 - 90, cy + (k % 2) * -24]); ctx.strokeStyle = INK; ctx.lineWidth = 10; for (const [x, y] of B) { ctx.beginPath(); ctx.arc(x, y, 52, 0, TAU); ctx.stroke(); } ctx.fillStyle = '#F4F1E8'; for (const [x, y] of B) { ctx.beginPath(); ctx.arc(x, y, 52, 0, TAU); ctx.fill(); } }
+    fillS('#BDB6A6', () => { ctx.moveTo(-400, 760); for (let i = -2; i <= 15; i++) ctx.quadraticCurveTo(i * 170 - 85, 640 + ((i + 2) % 2) * 50, i * 170, 700); ctx.lineTo(W + 500, H + 260); ctx.lineTo(-400, H + 260); ctx.closePath(); }, 6);
+    fillS('#9A9488', () => ctx.rect(-400, o.groundY ?? 880, W + 900, 600), 6);
+    for (let i = -2; i < 13; i++) { ctx.fillStyle = '#F4F1E8'; ctx.fillRect(i * 220 + 40, (o.groundY ?? 880) + 70, 110, 14); }
   }
   // an art-deco title card in screen space; k 0..1 slides it in
   function decoCard(lines, k, o = {}) {
@@ -147,14 +151,14 @@
     const flick = Math.floor(t * 2.2) % 2, imgs = catK > .5 ? CAT : carK > .5 ? [CAR[0], CAR[1]] : flick ? [CAT[0], CAR[0]] : [CAR[2], CAT[1]];
     const odd = t < tsn ? .03 * Math.sin(t * 17) : 0;
     const shrug = env(t, tcom + .2, p0 + .3, .25, .3);
-    hoseHouse(960, 890, 320, 400, { imgs, cat: catK, car: carK, sq: .06 * -b + (t > tcc && t < tcom ? .05 * Math.sin(t * 40) : 0), lean: odd, arms: shrug, mood: catK > .5 ? 'grin' : shrug > .3 ? 'wobble' : 'o', sign: t < tinc - .3 ? null : '4e:55' });
-    if (t > tcat - .1 && t < tcat + 1) sfx('MEOW!', 1200, 380, 70, INK, t - tcat + .1, { life: 1, face: 'serif' });
-    if (t > tcar - .1 && t < tcar + 1) sfx('HONK!', 1210, 380, 70, INK, t - tcar + .1, { life: 1, face: 'serif' });
+    hoseHouse(960, 890, 320, 400, { imgs, cat: catK, car: carK, sq: .06 * -b + (t > tcc && t < tcom ? .05 * Math.sin(t * 40) : 0), lean: odd, arms: shrug, mood: catK > .5 ? 'grin' : shrug > .3 ? 'wobble' : 'o' });
+    if (t > tcat - .1 && t < tcat + 1) sfx('MEOW!', 1300, 380, 70, INK, t - tcat + .1, { life: 1, face: 'serif' });
+    if (t > tcar - .1 && t < tcar + 1) sfx('HONK!', 1300, 380, 70, INK, t - tcar + .1, { life: 1, face: 'serif' });
     // Clawd, top hat on, tries to work it out
     tourist(1240, 900, 10, 'top', { ...emotions(t, [[a - 2, 'happy'], [tsn, 'suspicious'], [tcat, 'surprised'], [tcc, 'confused'], [p0, 'thinking']]), view: 'q', flip: true });
     camEnd();
     // lower card: "Inception V1"
-    if (t > tinc - .4 && t < tcat - .4) decoCard([['in InceptionV1, neuron 4e:55', 60, 4]], seg(t, tinc - .4, tinc + .1) * (1 - seg(t, tcat - .9, tcat - .4)), { y: 960, h: 150, w: 1000 });
+    if (t > tinc - .4 && t < tcat - .4) decoCard([['an older image model: Inception V1', 60, 4]], seg(t, tinc - .4, tinc + .1) * (1 - seg(t, tcat - .9, tcat - .4)), { y: 960, h: 150, w: 1000 });
     if (t > tcc - .2 && t < p0) decoCard([['CATS & CARS?', 90, 6]], seg(t, tcc - .2, tcc + .3) * (1 - seg(t, p0 - .4, p0)), { y: 160, h: 190, w: 900 });
     // the full title card: POLYSEMANTIC
     const pk = seg(t, tpoly - 1.1, tpoly + .1) * (1 - seg(t, tworse - 1.5, tworse - .5));
@@ -184,7 +188,8 @@
   // ---------- shot 3 · SUPERPOSITION: more people than houses; a family per house ----------
   const JOB = ['bowler', 'sailor', 'chef', 'cap'], JCOL = ['#333', '#777', '#AAA', '#555'];
   function crowd(t, lt, dur) {
-    const r0 = cs('kn_roommates'), tsup = wt('kn_roommates', 'superposition'), tim = wt('kn_roommates', 'Imagine'), tmore = wt('kn_roommates', 'more'), tfam = wt('kn_roommates', 'family'), tstr = wt('kn_roommates', 'stranger');
+    const r0 = cs('kn_roommates'), tim = wt('kn_roommates', 'Imagine'), tmore = wt('kn_roommates', 'more'), tfam = wt('kn_roommates', 'family'), tstr = wt('kn_roommates', 'stranger');
+    const tTh = wt('kn_roommates', 'The', 1), tneu = wt('kn_roommates', 'neurons'), tide = wt('kn_roommates', 'ideas'), tsim = wt('kn_roommates', 'similar');
     const cardK = seg(t, r0 - .2, r0 + .8) * (1 - seg(t, tim - 1.5, tim - .4));
     camKeys(t, [[r0, 960, 560, 1.05], [tim, 960, 560, 1.05], [tfam, 860, 560, 1.18], [tstr, 900, 560, 1.1]], .5);
     backdrop(t);
@@ -200,8 +205,14 @@
     }
     if (t > tfam - .2) { const k = seg(t, tfam + .4, tfam + 1); for (let i = 0; i < 3; i++) if (k > 0 && k < 1) paint(heartPtsC(HX[0] + (i - 1) * 50, 520 - k * 140, 22), { wash: '#FFF', ink: INK, sw: 1.4 }); }
     tourist(1820, 1030, 9, 'top', { ...emotions(t, [[r0, 'happy'], [tmore, 'surprised'], [tfam + .3, 'love']]), view: 'q', flip: true });
+    hoseTag('a neuron', HX[2] + 60, 700, 150, -140, seg(t, tneu - .3, tneu + .3) * (1 - seg(t, tsim - .4, tsim)));
+    hoseTag('an idea', 260 + 9 * 92, 870, -150, -110, seg(t, tide - .3, tide + .3) * (1 - seg(t, tsim - .4, tsim)));
     camEnd();
-    if (t > tmore - .3 && t < tfam - .6) decoCard([['MORE PEOPLE THAN HOUSES', 64, 0]], seg(t, tmore - .3, tmore + .2) * (1 - seg(t, tfam - 1, tfam - .6)), { y: 150, h: 150, w: 1150 });
+    if (t > tmore - .3 && t < tTh) decoCard([['MORE PEOPLE THAN HOUSES', 64, 0]], seg(t, tmore - .3, tmore + .2) * (1 - seg(t, tTh - .4, tTh)), { y: 150, h: 150, w: 1150 });
+    // the metaphor, spelled out: a house is a neuron, a person is an idea
+    const mk = seg(t, tneu - .4, tneu + .1) * (1 - seg(t, tsim - .4, tsim));
+    if (mk > 0) decoCard(t < tide - .3 ? [['HOUSES = NEURONS', 64, 0]] : [['HOUSES = NEURONS', 60, -38], ['PEOPLE = IDEAS', 60, 42]], mk, { y: t < tide - .3 ? 150 : 190, h: t < tide - .3 ? 150 : 230, w: 1000 });
+
     if (t > tfam - .3) decoCard([['a family per house', 64, 0]], seg(t, tfam - .3, tfam + .2) * (1 - seg(t, tstr - .6, tstr - .2)), { y: 150, h: 150, w: 900 });
     decoCard([['SUPERPOSITION', 140, -40], ['the leading explanation', 54, 90]], cardK, { full: true, w: 1500, h: 600 });
     if (t > tstr - .5) irisClose(seg(t, tstr - .5, tstr + .5), 500, 700);
@@ -236,7 +247,7 @@
       ctx.save(); ctx.beginPath(); ctx.rect(c.x - 10, c.y - 140, 320, 345); ctx.clip();
       if (t >= tnev && fr < dur_) { const u = fr / dur_; hoseGuy(lerp(c.x + 150, c.x - 120, u), c.y + 185, .45, { hat: JOB[prev], col: JCOL[prev], walk: t * 4, flip: true }); hoseGuy(lerp(c.x + 420, c.x + 150, u), c.y + 185, .45, { hat: JOB[who], col: JCOL[who], walk: t * 4 }); }
       else lying(bx, by, who);
-      const packed = t > tpack ? clamp((t - tpack) * 2 - (i % 3) * .3) : 0;
+      const packed = t > tpack && [1, 8, 10].includes(i) ? clamp((t - tpack) * 2 - (i % 3) * .3) : 0;   // a few get packed: rare
       if (packed > 0) { ctx.save(); ctx.globalAlpha = 1; lying(bx - 10, by - 40 * packed, (who + 1) % 4, { mood: 'ouch', sq: .1 * Math.sin(t * 9 + i) }); lying(bx + 20, by - 80 * packed, (who + 3) % 4, { mood: 'ouch', sq: .1 * Math.sin(t * 9 + i + 2) }); ctx.restore(); }
       ctx.restore();
       if (!(t >= tnev && fr < dur_) && (i + sh) % 2 === 0) txt('z', c.x + 250, c.y + 40 - 10 * Math.sin(t * 3 + i), 40, INK, { font: 'serif' });
@@ -252,9 +263,10 @@
     tourist(140, 1040, 9, 'top', { ...emotions(t, [[tin, 'thinking'], [tbump, 'surprised'], [twk - .3, 'happy'], [tshort, 'nervous'], [tpack, 'scared'], [tcol + .4, 'laugh']]), view: 'q' });
     camEnd();
     // cards (screen space, so they sit at the bottom of the frame even while the camera is pushed in)
-    if (t > tnev - .3 && t < w0) decoCard([['NEVER HOME AT THE SAME TIME', 60, 0]], seg(t, tnev - .3, tnev + .2) * (1 - seg(t, w0 - .4, w0)), { y: 1010, h: 130, w: 1200 });
-    if (t > tshort - .3 && t < tpack) decoCard([['SHORT ON NEURONS', 70, 0]], seg(t, tshort - .3, tshort + .2) * (1 - seg(t, tpack - .5, tpack - .1)), { y: 1010, h: 130, w: 900 });
-    if (t > tcol - 1) decoCard([['THEY RARELY COLLIDE', 72, 0]], seg(t, tcol - 1, tcol - .5) * (1 - seg(t, e + .2, e + .4)), { y: 1010, h: 130, w: 1000 });
+    if (t < tnev) decoCard([['INSIDE ONE HOUSE', 60, 0]], seg(t, tin + .2, tin + .7) * (1 - seg(t, tnev - .4, tnev)), { y: 120, h: 130, w: 800 });
+    if (t > tnev - .3 && t < w0) decoCard([['NEVER HOME AT THE SAME TIME', 60, 0]], seg(t, tnev - .3, tnev + .2) * (1 - seg(t, w0 - .4, w0)), { y: 990, h: 130, w: 1200 });
+    if (t > tshort - .3 && t < tpack) decoCard([['SHORT ON NEURONS', 70, 0]], seg(t, tshort - .3, tshort + .2) * (1 - seg(t, tpack - .5, tpack - .1)), { y: 990, h: 130, w: 900 });
+    if (t > tcol - 1) decoCard([['THEY RARELY COLLIDE', 72, 0]], seg(t, tcol - 1, tcol - .5) * (1 - seg(t, e + .2, e + .4)), { y: 990, h: 130, w: 1000 });
     irisOpen(seg(t, tin, tin + .7), 500, 700);
     oldFilm(t);
   }
@@ -279,8 +291,8 @@
 
   // ---------- shot 6 · the Unfolding Machine: a sparse autoencoder unrolls the knot into a long list of pieces ----------
   function unfold(t, lt, dur) {
-    const m0 = cs('kn_machine'), tun = wt('kn_machine', 'unfold'), tsp = wt('kn_machine', 'sparse'), tap = wt('kn_machine', 'apart'), tlist = wt('kn_machine', 'list'), tstudy = wt('kn_machine', 'study'), e = ce('kn_machine');
-    camKeys(t, [[m0, 960, 540, 1], [tap, 1000, 560, .95], [tlist, 1150, 600, .9], [tstudy, 1300, 640, 1.05], [e + .5, 1320, 640, 1.08]], .4);
+    const m0 = cs('kn_machine'), tun = wt('kn_machine', 'unfold'), tsp = wt('kn_machine', 'sparse'), tap = wt('kn_machine', 'apart'), tlist = wt('kn_machine', 'list'), tstudy = wt('kn_machine', 'study'), tUM = wt('kn_machine', 'Unfolding'), e = ce('kn_machine');
+    camKeys(t, [[m0, 960, 540, 1], [tap, 1000, 560, 1.0], [tlist, 1100, 580, 1.0], [tstudy, 1300, 640, 1.05], [e + .5, 1320, 640, 1.08]], .4);
     backdrop(t);
     const mx = lerp(2500, 760, easeOut(seg(t, m0 + .2, tun + .8))), chug = Math.abs(Math.sin(t * 7)) * .03;
     const eat = seg(t, tap - 1.6, tlist + .5);
@@ -288,6 +300,8 @@
     if (eat < 1) { const kx = lerp(1250, mx, easeIn(eat)), ky = lerp(470, 870 - 560 * .9, easeIn(eat)); ctx.save(); ctx.translate(kx, ky); ctx.scale(1 - .7 * eat, 1 + .4 * eat * Math.sin(t * 9)); knotBeast(0, 0, 230, { col: '#DDD', dark: '#222', grin: eat < .2, look: [-1, .4], loose: .6 * eat, hat: eat < .3 ? 'top' : null }); ctx.restore(); }
     ctx.save(); ctx.translate(0, 0); push(); translate(mx, 900); scale(1 + chug, 1 - chug); translate(-mx, -900);
     CAM = null; machineL(t, mx, 900, .9, { on: 1, belt: seg(t, tap, tap + .6), mouth: .7 + .3 * Math.sin(t * 6), items: [i => { const im = MIX[i % MIX.length], I = img(im), s = Math.min(I.width, I.height); flat(rrPts(-46, -100, 92, 100, 10), '#F4F1E8', { line: INK, lw: 4 }); ctx.save(); ctx.beginPath(); ctx.rect(-36, -90, 72, 72); ctx.clip(); ctx.drawImage(I, (I.width - s) / 2, (I.height - s) / 2, s, s, -36, -90, 72, 72); ctx.restore(); }] });
+    // its name plate, painted on at "Think of it as an Unfolding Machine"
+    const pk = popk(t, tUM - .2, .4); if (pk > 0) { push(); translate(mx, 900); scale(.9); translate(0, -150); scale(backOut(pk)); fillS('#2A2A2A', () => ctx.rect(-205, -36, 410, 72), 6); txt('UNFOLDING MACHINE', 0, 3, 27, '#EEE', { font: 'serif', weight: '900' }); pop(); }
     pop(); ctx.restore();
     // steam whistle puffs
     for (let i = 0; i < 3; i++) { const ph = frac(t * .9 + i / 3); fillS('#F4F1E8', () => ctx.arc(mx + 160 + ph * 80, 900 - 470 * .9 - ph * 220, 20 + 40 * ph, 0, TAU), 4); }
@@ -301,23 +315,26 @@
     oldFilm(t);
   }
 
-  // ---------- shot 7 · "Nick believed it": the young believer, 2019 ----------
+  // ---------- shot 7 · "Nick believed it": the young believer, years ago ----------
   function believer(t, lt, dur) {
-    const b0 = cs('kn_both'), tcase = wt('kn_both', 'case'), tprop = wt('kn_both', 'proposed'), tbel = wt('kn_both', 'believed'), tyrs = wt('kn_both', 'years'), e = ce('kn_both'), end = chapStart('ch03');
+    const b0 = cs('kn_both'), tnk = wt('kn_both', 'Nick'), tcase = wt('kn_both', 'case'), tfst = wt('kn_both', 'first'), tprop = wt('kn_both', 'proposed'), tbel = wt('kn_both', 'believed'), tyrs = wt('kn_both', 'years'), e = ce('kn_both'), end = chapStart('ch03');
     camKeys(t, [[b0, 960, 580, 1], [tprop, 920, 580, 1.05], [tbel, 880, 560, 1.12], [end + 2, 880, 560, 1.15]], .4);
     backdrop(t);
     // the soapbox and the crowd
     fillS('#888', () => ctx.rect(700, 820, 300, 90), 6); txt('SOAP', 850, 865, 40, INK, { font: 'serif', weight: '900' });
     for (let i = 0; i < 5; i++) { const x = 1150 + i * 140, ch = Math.max(0, Math.sin(t * 6 + i)); hoseGuy(x, 1000 + (i % 2) * 20, .5, { hat: JOB[i % 4], col: JCOL[i % 4], flip: true, armUp: t > tcase ? .5 + .5 * ch : 0, armUp2: t > tcase ? .5 + .5 * ch : .2, mood: t > tcase ? 'wow' : 'happy', sq: .05 * ch }); }
-    // the believer (2019): hands up for superposition, then hugging a plush knot
+    // the believer (years ago): hands up for superposition, then hugging a plush knot
     const hug = seg(t, tbel - .2, tbel + .4);
     hoseGuy(850, 820, .95, { col: '#444', hat: 'cap', armUp: hug > 0 ? lerp(1.2, -.2, hug) : 1 + .1 * Math.sin(t * 8), armUp2: hug > 0 ? lerp(1.2, -.2, hug) : .9 + .1 * Math.sin(t * 8 + 1), mood: 'happy', sq: .04 * beat(t) });
     if (hug > 0) { knotBeast(850, 640, 90 * hug, { col: '#EEE', dark: '#333', grin: true }); for (let i = 0; i < 3; i++) { const k = frac(t * .8 + i / 3); paint(heartPtsC(850 + (i - 1) * 60, 560 - k * 160, 20), { wash: '#FFF', ink: INK, sw: 1.2 }); } }
     // the placard
     if (hug <= 0) { ctx.save(); ctx.translate(1040, 420 + 10 * Math.sin(t * 8)); ctx.rotate(.06); fillS('#777', () => ctx.rect(-8, 0, 16, 220), 4); fillS('#F4F1E8', () => ctx.rect(-230, -120, 460, 140), 6); txt('SUPERPOSITION!', 0, -50, 52, INK, { font: 'serif', weight: '900' }); ctx.restore(); }
-    // the calendar: 2019, and then the pages fly off for years
-    const yrs = Math.floor(clamp((t - tyrs + .4) * 3, 0, 4)), cy = ['2019', '2020', '2021', '2022', '2023'][yrs];
-    fillS('#F4F1E8', () => ctx.rect(240, 300, 260, 300), 6); fillS('#444', () => ctx.rect(240, 300, 260, 60), 6); txt(cy, 370, 470, 96, INK, { font: 'serif', weight: '900' });
+    // who it is, and that the idea was his: a light bulb pops over the cap on "first proposed it"
+    hoseTag('NICK', 850, 560, -230, -90, seg(t, Math.max(tnk, b0 + .7) - .2, Math.max(tnk, b0 + .7) + .3) * (1 - seg(t, tbel - .5, tbel - .1)), 48);
+    const bk = popk(t, tfst - .2, .35) * (1 - seg(t, tbel - .3, tbel)); if (bk > 0) { ctx.save(); ctx.translate(850, 470); ctx.scale(backOut(bk), backOut(bk)); for (let i = 0; i < 8; i++) { const q = i / 8 * TAU; ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(Math.cos(q) * 62, Math.sin(q) * 62 - 10); ctx.lineTo(Math.cos(q) * 84, Math.sin(q) * 84 - 10); ctx.stroke(); } fillS('#FFF', () => ctx.arc(0, -10, 44, 0, TAU), 6); fillS('#888', () => ctx.rect(-20, 30, 40, 26), 5); ctx.restore(); }
+    // the calendar: its pages fly off for years
+    const yrs = Math.floor(clamp((t - tyrs + .4) * 3, 0, 4)), cy = 'YEAR ' + (yrs + 1);
+    fillS('#F4F1E8', () => ctx.rect(240, 300, 260, 300), 6); fillS('#444', () => ctx.rect(240, 300, 260, 60), 6); txt(cy, 370, 470, 56, INK, { font: 'serif', weight: '900' });
     if (t > tyrs - .4) for (let i = 0; i < yrs; i++) { const k = clamp((t - tyrs + .4) * 3 - i); if (k < 1.6) { ctx.save(); ctx.translate(370 + k * 500, 450 - k * 300); ctx.rotate(k * 4); fillS('#F4F1E8', () => ctx.rect(-80, -90, 160, 180), 4); ctx.restore(); } }
     tourist(590, 990, 11, 'top', { ...emotions(t, [[b0, 'happy'], [tcase, 'excited'], [tbel, 'love']]), view: 'q' });
     camEnd();

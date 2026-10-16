@@ -5,7 +5,7 @@
 // Colorado comma neuron (a running summary; turn it up and the model plans a hike). The Knot is always one tree
 // ahead (weak signals, between neurons, unchecked neurons). The camcorder's menu ranks SUPERPOSITION last. The 2022
 // quote ("little evidence"). Finally cornered, the Knot is just a loose ball of string; Clawd pockets it. The
-// camcorder's screen glitches into a pixel-art game screen (the next world).
+// camcorder's screen glitches and the tape stops on a blue STOP screen.
 (() => {
   const SERIF = '"Liberation Serif"', MONO = '"DejaVu Sans Mono"', BENG = '"FreeSans"';
   const OSD = '#B8FFB0', AMBER = '#FFB13B', VIO = '#B45CA8', GOLD = '#F0BE46', INKD = '#141414';
@@ -96,7 +96,7 @@
 
   // ---------- daytime evidence review: a CRT on a desk ----------
   const SCR = { x: 520, y: 150, w: 880, h: 560 };
-  function desk(t, label) {
+  function desk(t, label, hideAt = []) {   // hideAt: [[a, b]] spans of lower8 cards; the VCR label hides under them
     layer('c8desk', () => {
       ctx.fillStyle = lgrad(0, 0, 0, H, [[0, '#3A2E26'], [1, '#1E1814']]); ctx.fillRect(-300, -300, W + 600, H + 600);
       // the corkboard of blurry sightings behind
@@ -118,7 +118,7 @@
     glow(1530, 520, 380, '#FFC766', .5);
     // the VCR display
     // (hidden when a push-in would crop it at the bottom of the frame)
-    { const sy = CAM ? toScreen(SCR.x + 600, 881)[1] : 881, va = clamp((1030 - sy) / 40); if (va > 0) { ctx.save(); ctx.globalAlpha = va; txt(label, SCR.x + 600, 881, 26, '#7AFF9A', { font: MONO, weight: '700', align: 'right' }); ctx.restore(); } }
+    { const sy = CAM ? toScreen(SCR.x + 600, 881)[1] : 881, va = clamp((1030 - sy) / 40) * (1 - Math.max(0, ...hideAt.map(([a, b]) => env(t, a - .15, b + .15, .3, .3)))); if (va > 0) { ctx.save(); ctx.globalAlpha = va; txt(label, SCR.x + 600, 881, 26, '#7AFF9A', { font: MONO, weight: '700', align: 'right' }); ctx.restore(); } }
   }
   // draw content into the CRT: f(w, h) in screen-local coords; then scanlines and glass
   function crt(t, f, o = {}) {
@@ -194,7 +194,7 @@
     } else {
       // evidence review (daytime): decode the code, translate the Bengali
       camKeys(t, [[cut, 960, 520, 1.05], [tDec, 960, 470, 1.18], [tTr, 960, 470, 1.18], [e + 1, 960, 500, 1.08]], .4);
-      desk(t, 'TAPE 2  0:43');
+      desk(t, 'TAPE 2  0:43', [[tWords - .2, e + 1]]);
       const dk = seg(t, tDec, tDec + .9), tk = seg(t, tTr, tTr + .8);
       crt(t, (w, h) => {
         // the frozen frame from the tape, decoded line by line
@@ -209,7 +209,7 @@
       if (t < tTr + .5) { const rx = lerp(SCR.x + 140, SCR.x + 420, ease(dk)), ry = SCR.y + 240; ctx.save(); ctx.strokeStyle = '#C9A15A'; ctx.lineWidth = 18; ctx.beginPath(); ctx.arc(rx, ry, 110, 0, TAU); ctx.stroke(); ctx.fillStyle = '#6A4B30'; ctx.font = `700 22px ${MONO}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; for (let i = 0; i < 12; i++) { const q = i / 12 * TAU + t * 1.5; ctx.save(); ctx.translate(rx + Math.cos(q) * 110, ry + Math.sin(q) * 110); ctx.rotate(q + Math.PI / 2); ctx.fillText('ABCDEFGHIJKL'[i], 0, 0); ctx.restore(); } ctx.restore(); }
       viewer(t, [[cut, 'thinking'], [tDec + .6, 'idea'], [tTr + .5, 'laugh']], { x: 280 });
       camEnd();
-      slamStamp('EXPLAINED', 960, 640, tPR2 + .2, t, '#D0302A', -.1, 80);
+      slamStamp('EXPLAINED', 960, 770, tPR2 + .2, t, '#D0302A', -.06, 72);
       lower8(t, tWords - .2, tTr - .2, 'decoded: words with "pr"');
       lower8(t, tBen2 - .2, e + 1, 'translated: "pr"');
     }
@@ -223,8 +223,8 @@
   function colorado(t, lt, dur) {
     const a = cs('sg_colorado'), tRand = wt('sg_colorado', 'random'), tCom = wt('sg_colorado', 'commas'), tTrack = wt('sg_colorado', 'track'), tCol = wt('sg_colorado', 'Colorado'), tSum = wt('sg_colorado', 'summary'), tTurn = wt('sg_colorado', 'Turn', 1), tUp = wt('sg_colorado', 'up'), tPlan = wt('sg_colorado', 'planning'), tHike = wt('sg_colorado', 'hike'), e = ce('sg_colorado');
     camKeys(t, [[a - .3, 960, 500, 1.08], [tTrack, 960, 470, 1.15], [tSum, 960, 470, 1.15], [tTurn - .3, 1150, 560, 1.1], [tPlan, 1050, 500, 1.08], [e + 1, 960, 500, 1.06]], .4);
-    desk(t, 'TAPE 3  1:12');
-    const crank = ease(seg(t, tTurn, tUp + .6)), hikeK = seg(t, tPlan - .3, tHike + .3);
+    desk(t, 'TAPE 3  1:12', [[tCom - .4, tSum - .4], [tSum - .3, tTurn - .3], [tPlan - .9, e + 1.2]]);
+    const crank = ease(seg(t, tTurn, tUp + .6)), hikeK = seg(t, tTurn + .6, tPlan + .2);   // the hike plan is up by "planning", and holds into the next cue
     crt(t, (w, h) => {
       ctx.fillStyle = '#F2EBDA'; ctx.fillRect(30, 30, w - 60, h - 60);
       if (hikeK < .6) {
@@ -253,7 +253,7 @@
         ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.moveTo(w * .69, 165); ctx.lineTo(w * .72, 120); ctx.lineTo(w * .75, 160); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(w * .86, 130); ctx.lineTo(w * .88, 90); ctx.lineTo(w * .91, 125); ctx.closePath(); ctx.fill();
         ctx.fillStyle = '#FFD36B'; ctx.beginPath(); ctx.arc(w * .63, 120, 34, 0, TAU); ctx.fill();
         ctx.strokeStyle = '#8C5A3A'; ctx.lineWidth = 5; ctx.setLineDash([12, 10]); ctx.beginPath(); ctx.moveTo(w * .58, h - 50); ctx.lineTo(w * .66, h - 160); ctx.lineTo(w * .7, h - 240); ctx.lineTo(w * .75, h - 300); ctx.lineTo(w * .82, h - 390); ctx.stroke(); ctx.setLineDash([]);
-        ctx.font = `700 42px ${SERIF}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; HIKE.forEach((s, i) => { ctx.globalAlpha = clamp((hikeK - .45) * 3 - i * .5); ctx.fillStyle = INKD; ctx.fillText(s, 60, 110 + i * 90); });
+        ctx.font = `700 42px ${SERIF}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; HIKE.forEach((s, i) => { ctx.globalAlpha = clamp((hikeK - .45) * 3 - i * .3); ctx.fillStyle = INKD; ctx.fillText(s, 60, 110 + i * 90); });
         ctx.restore();
       }
     }, { bg: '#2A2A2A', roll: true });
@@ -270,7 +270,7 @@
     lower8(t, tCom - .4, tTrack - .2, 'fires on random commas?');
     lower8(t, tTrack - .1, tSum - .4, 'it tracks Colorado');
     lower8(t, tSum - .3, tTurn - .3, 'a running summary at the commas');
-    lower8(t, tPlan - .3, e + 1.2, 'turned up: it plans a hike');
+    lower8(t, tPlan - .9, e + 1.2, 'turned up: it plans a hike');
   }
 
   // ---------- 4 · case after case; the knot keeps moving ----------
@@ -286,7 +286,7 @@
     if (M === 0) {
       camKeys(t, [[a - .3, 960, 700, 1.45], [c1, 960, 720, 1.55]], .4);
       tapes(t, a);
-      ['EXPLAINED', 'EXPLAINED', 'EXPLAINED'].forEach((s, i) => stamp(s, 960 + (i - 1) * 300, 790, a + .5 + i * .45, t, { col: '#D0302A', rot: -.15 + i * .08, size: 44 }));
+      ['EXPLAINED', 'EXPLAINED', 'EXPLAINED'].forEach((s, i) => stamp(s, 960 + (i - 1) * 300, 832, a + .5 + i * .45, t, { col: '#D0302A', rot: -.15 + i * .08, size: 44 }));
       camEnd();
       lower8(t, a + .2, c1 + .2, 'case after case, the mess resolved');
       return;
@@ -345,7 +345,7 @@
   }
 
   // ---------- 5 · the camcorder's own ranking: SUPERPOSITION drops to last ----------
-  const ROWS = ['BAD TOOLS', 'BAD DESIGN', 'UNFOLLOWED BRANCH', 'UNKNOWN PATTERN'];
+  const ROWS = ['BAD TOOLS', 'BAD DESIGN', 'UNFOLLOWED BRANCH'];
   function last(t, lt, dur) {
     const a = cs('sg_last'), tSup = wt('sg_last', 'superposition'), tDef = wt('sg_last', 'default'), tLast = wt('sg_last', 'last'), tRes = wt('sg_last', 'resort'), tRad = wt('sg_last', 'radical'), tHard = wt('sg_last', 'hardest'), tSym = wt('sg_last', 'symptom'), tSense = wt('sg_last', 'sense');
     const tTool = wt('sg_last', 'tool'), tDes = wt('sg_last', 'design'), tBr = wt('sg_last', 'branch'), tLooks = wt('sg_last', 'looks'), e = ce('sg_last');
@@ -365,18 +365,20 @@
     camEnd();
     fg(v8, [[1500, 140]], { fern: true });
     nv(t, 'CAM 1 · BASE CAMP', [], { osd: () => {
-      if (fog > 0) { ctx.save(); ctx.globalAlpha = .75 * fog; ctx.filter = 'blur(2px)'; ctx.fillStyle = '#CFE9CF'; ctx.fillRect(0, 0, W, H); ctx.restore(); if (wipe > 0 && wipe < 1) { ctx.save(); ctx.globalAlpha = .9; ctx.fillStyle = '#4A2A1A'; const wx = lerp(-300, W + 300, wipe); ctx.beginPath(); ctx.ellipse(wx, 560, 260, 420, .3, 0, TAU); ctx.fill(); ctx.restore(); } }
+      // a light fog, then a cloth sweeps across the lens and leaves it clean behind it
+      if (fog > 0) { const wx = wipe > 0 ? lerp(-300, W + 300, wipe) : -300; ctx.save(); ctx.globalAlpha = .38 * fog; ctx.fillStyle = '#CFE9CF'; ctx.fillRect(Math.max(0, wx), 0, W, H); ctx.restore();
+        if (wipe > 0 && wipe < 1) { ctx.save(); ctx.translate(wx, 560 + 70 * Math.sin(wipe * 9)); ctx.rotate(.18 * Math.sin(wipe * 11)); ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 30; const CL = [[-150, -230], [40, -250], [150, -200], [170, 20], [140, 230], [-60, 250], [-170, 190], [-150, -10]]; ctx.fillStyle = '#D9D2C2'; ctx.beginPath(); CL.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath(); ctx.fill(); ctx.shadowBlur = 0; ctx.clip(); ctx.fillStyle = 'rgba(176,74,58,.75)'; for (const y of [-150, -110, 110, 150]) ctx.fillRect(-200, y, 400, 18); ctx.strokeStyle = 'rgba(0,0,0,.18)'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(-90, -230); ctx.quadraticCurveTo(-20, 0, -110, 240); ctx.moveTo(60, -240); ctx.quadraticCurveTo(110, 0, 50, 240); ctx.stroke(); ctx.restore(); } }
       // the menu
       const mk = seg(t, a - .2, a + .3); if (mk <= 0) return;
       const X = 1010, Y = 210, w = 840, rh = 104;
-      ctx.save(); ctx.globalAlpha = .82 * mk; ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X - 30, Y - 80, w, 780); ctx.globalAlpha = mk; ctx.strokeStyle = OSD; ctx.lineWidth = 3; ctx.strokeRect(X - 30, Y - 80, w, 780); ctx.restore();
+      ctx.save(); ctx.globalAlpha = .82 * mk; ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X - 30, Y - 80, w, 640); ctx.globalAlpha = mk; ctx.strokeStyle = OSD; ctx.lineWidth = 3; ctx.strokeRect(X - 30, Y - 80, w, 640); ctx.restore();
       osdText('MOST LIKELY CAUSE', X, Y - 30, 54, OSD, { bold: true, alpha: mk });
       const drop = ease(seg(t, tLast - .2, tRes + .6));
       ROWS.forEach((s, i) => { const k = seg(t, [tTool, tDes, tBr, tLooks][i] - .4, [tTool, tDes, tBr, tLooks][i]); const y = Y + 50 + i * rh; osdText(`${i + 1}.`, X, y, 56, OSD, { alpha: mk }); if (k > 0) { osdText(s.slice(0, Math.ceil(s.length * k)), X + 80, y, 56, '#FFFFFF', { bold: true }); } else osdText('- - -', X + 80, y, 56, 'rgba(184,255,176,.45)'); });
       // SUPERPOSITION starts at the top and drops to the bottom
-      const sy = lerp(Y + 50, Y + 50 + 4 * rh, drop), blink = Math.floor(t * 3) % 2;
+      const sy = lerp(Y + 50, Y + 50 + ROWS.length * rh, drop), blink = Math.floor(t * 3) % 2;
       if (drop < .02) { ctx.save(); ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X + 60, sy - 40, 700, 80); ctx.restore(); }
-      osdText(drop > .97 ? '5.' : '', X, sy, 56, OSD);
+      osdText(drop > .97 ? `${ROWS.length + 1}.` : '', X, sy, 56, OSD);
       osdText('> SUPERPOSITION', X + 45, sy, 58, drop < 1 && blink ? '#FFFFFF' : '#FF9AE0', { bold: true, alpha: mk });
       if (t > tRes) osdText('the last resort', X + 80, sy + 60, 42, '#FF9AE0', { alpha: seg(t, tRes, tRes + .4) });
       if (t > tRad - .2) osdText('most radical · hardest to test', X + 80, sy + 60 + 48, 36, OSD, { alpha: seg(t, tRad - .2, tRad + .3) * (1 - seg(t, tHard + 1.8, tHard + 2.2)) });
@@ -385,20 +387,11 @@
     if (t > tSense - .4 && t < tSense + 1.4) sfx('?', 900, 700, 120, OSD, t - tSense + .4, { face: 'marker', life: 1.8 });
   }
 
-  // ---------- 6 · little evidence; the knot, cornered, is a loose ball of string; the screen turns into a game ----------
-  // a tiny 5x7 pixel font for the game screen
-  const PF = { L: '#....#....#....#....#....#....#####', E: '######....#....####.#....#....#####', V: '#...##...##...##...##...#.#.#..#..', 1: '..#...##....#....#....#....#...###.', P: '####.#...##...#####.#....#....#....', R: '####.#...##...#####.#.#..#..#.#...#', S: '.#####....#.....###.....#....######.', T: '#####..#....#....#....#....#....#..', A: '.###.#...##...#######...##...##...#', ' ': '...................................', '!': '..#....#....#....#....#.........#..', C: '.###.#...##....#....#....#...#.###.', I: '.###...#....#....#....#....#...###.', Y: '#...##...#.#.#...#....#....#....#..', O: '.###.#...##...##...##...##...#.###.', D: '####.#...##...##...##...##...#####.', N: '#...###..##.#.##..###...##...##...#' };
-  function pxText(s, x, y, px, col) { const cw = 6 * px, w0 = s.length * cw - px; let xx = x - w0 / 2; ctx.fillStyle = col; for (const c of s) { const g = PF[c] || PF[' ']; for (let i = 0; i < 35; i++) if (g[i] === '#') ctx.fillRect(Math.round(xx + (i % 5) * px), Math.round(y + Math.floor(i / 5) * px), px, px); xx += cw; } }
-  function gameScreen(t, k) {
-    const P = 8, K = { ink: '#1A1C2C', navy: '#29366F', blue: '#3B5DC9', sky: '#41A6F6', cyan: '#73EFF7', green: '#38B764', lime: '#A7F070', gold: '#FFCD75', orange: '#EF7D57', red: '#B13E53', white: '#F4F4F4', slate: '#566C86' };
-    ctx.save(); ctx.globalAlpha = k;
-    for (let y = 0; y < H; y += P * 4) { ctx.fillStyle = mixCol(K.navy, K.sky, y / H); ctx.fillRect(0, y, W, P * 4); }
-    // an isometric pixel island with little buildings
-    const cx = 960, cy = 640;
-    for (let r = 0; r < 12; r++) for (let c = 0; c < 12; c++) { const x = cx + (c - r) * 40, y = cy + (c + r) * 20 - 240; ctx.fillStyle = (r + c) % 2 ? K.green : K.lime; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 40, y + 20); ctx.lineTo(x, y + 40); ctx.lineTo(x - 40, y + 20); ctx.closePath(); ctx.fill(); }
-    [[2, 3, 5, K.orange], [5, 2, 8, K.blue], [7, 6, 4, K.red], [3, 8, 6, K.gold], [8, 3, 10, K.slate]].forEach(([r, c, hgt, col]) => { const x = cx + (c - r) * 40, y = cy + (c + r) * 20 - 240, hh = hgt * P * 2; ctx.fillStyle = col; ctx.fillRect(x - 32, y + 20 - hh, 64, hh); ctx.fillStyle = mixCol(col, '#000000', .3); ctx.fillRect(x, y + 20 - hh, 32, hh); for (let j = 0; j < hgt; j += 2) { ctx.fillStyle = Math.floor(t * 4 + j + r) % 3 ? K.gold : K.ink; ctx.fillRect(x - 24, y + 12 - hh + j * P * 2 + P, P * 2, P * 2); } });
-    pxText('LEVEL 1', 960, 150, 14, K.white);
-    if (Math.floor(t * 2.5) % 2) pxText('PRESS START', 960, 900, 9, K.gold);
+  // ---------- 6 · little evidence; the knot, cornered, is a loose ball of string; the tape ends ----------
+  // the tape ends: the camcorder's blue STOP screen (the next world gets its own reveal after the map)
+  function tapeEnd(t, k) {
+    ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = '#1C34B8'; ctx.fillRect(0, 0, W, H);
+    osdText('STOP  \u25A0', 120, 130, 72, '#FFFFFF', { bold: true, shadow: false }); osdText('00:17:02:00', W - 120, 130, 56, '#FFFFFF', { align: 'right', shadow: false });
     ctx.restore();
   }
   function rgbTear(t, k) { if (k <= 0) return; ctx.save(); const f = Math.floor(t * 24); for (let i = 0; i < 14; i++) { const y = hash(f * 3.7 + i) * H, h = 10 + hash(f + i * 9) * 70, dx = (hash(f * 1.9 + i) - .5) * 260 * k; ctx.drawImage(CANVAS, 0, y, W, h, dx, y, W, h); } ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .3 * k; ctx.fillStyle = '#FF0040'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
@@ -408,7 +401,7 @@
     const cut = tTo - .3, gl0 = wt('sg_evidence', 'mistake') + 1.15, gl1 = chapStart('ch09') - .05;
     if (M === 0) {
       camKeys(t, [[a - .3, 960, 500, 1.05], [tDef, 960, 460, 1.16], [tLit, 960, 440, 1.24], [cut, 960, 440, 1.26]], .4);
-      desk(t, 'FILE 2022');
+      desk(t, 'FILE 2022', [[tAnt - .3, tDef - .6], [tInt - .4, cut + .2]]);
       crt(t, (w, h) => {
         ctx.fillStyle = '#F6F2E8'; ctx.fillRect(60, 30, w - 120, h - 60);
         ctx.fillStyle = INKD; ctx.font = `700 40px ${SERIF}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('ANTHROPIC · 2022', 110, 90);
@@ -435,6 +428,14 @@
     const ks = lerp(150, 70, loose), kx = 1360, ky = lerp(800, 900, loose) + (1 - loose) * 4 * Math.sin(t * 30);
     if (loose < .9) cryptid(t, kx, ky, ks, { look: [-1, .2], loose, hat: loose < .5, grin: false, alpha: 1 - seg(loose, .6, .9) });
     if (loose > .6 && take <= 0) stringBall(kx, ky + 30, 40, seg(loose, .6, .9));
+    // the hidden car circuit: a car tucked in the knot's loops among dog neurons; when the knot comes loose, it drops out
+    const tCar = wt('sg_evidence', 'car'), tDog = wt('sg_evidence', 'dog'), carK = seg(t, tCar - .3, tCar + .2), fall = seg(t, tAnd + .2, tMis + .3), dogK = seg(t, tDog - .5, tDog) * (1 - seg(t, tAnd + .2, tMis));
+    for (let i = 0; i < 4; i++) { const [ox, oy] = [[-170, -70], [140, -20], [130, 145], [5, 185]][i], dx = kx + ox, dy = ky - 40 + oy + 6 * Math.sin(t * 3 + i), dk = clamp(dogK * 1.6 - i * .2); if (dk <= 0) continue; push(); translate(dx, dy); scale(dk, dk);
+      flat(ellPts(0, 0, 34, 30, 16), '#D8D8D8', { line: '#3A3A3A', lw: 3 }); for (const sx of [-1, 1]) flat(ellPts(sx * 30, 8, 11, 24, 10), '#9A9A9A', { line: '#3A3A3A', lw: 3 }); flat(ellPts(0, 14, 16, 12, 12), '#F0F0F0'); dot(0, 8, 6, '#2A2A2A'); dot(-11, -6, 4, '#2A2A2A'); dot(11, -6, 4, '#2A2A2A'); pop(); }
+    if (carK > 0 && t < tMis + 2) { const fy = 150 * fall * fall, cxr = kx + 20 + 30 * fall, cyr = ky - 30 + fy; push(); translate(cxr, cyr); rotate(.9 * fall); scale(carK * .9, carK * .9);
+      flat([[-70, 10], [-70, -14], [-40, -18], [-22, -42], [28, -42], [48, -18], [72, -12], [72, 10]], '#F2F2F2', { line: '#2A2A2A', lw: 4 }); flat([[-16, -36], [22, -36], [36, -18], [-28, -18]], '#7A7A7A');
+      for (const wx of [-40, 42]) { flat(ellPts(wx, 12, 15, 15, 14), '#2A2A2A'); flat(ellPts(wx, 12, 6, 6, 8), '#BDBDBD'); } pop();
+      if (fall > .9 && t < tMis + 1) sfx('clunk', cxr + 40, cyr - 80, 40, '#FFFFFF', t - (tMis + .2), { face: 'marker' }); }
     // Clawd creeps up, nets it, and pockets the string
     const creep = ease(seg(t, cut, tAnd - .1)), cx = lerp(560, 1150, creep), sw = env(t, tAnd - .3, tAnd + .5, .25, .3);
     const hold = take > 0 && take < .8 ? (u, w) => stringBall(u * 1.8, 0, u * 1.8, 1) : null;
@@ -448,9 +449,9 @@
     nv(t, 'CAM 7 · FINAL NIGHT', [cut], { osd: () => {
       if (t > tNo - .2 && t < tMis - .3) osdText('LAST REAL SUPERPOSITION CIRCUIT: 2019', 960, 240, 46, '#FFFFFF', { align: 'center', bold: true, alpha: seg(t, tNo - .2, tNo + .3) });
       if (t > tMis - .2 && t < gl0 + .1) osdText('...A MISTAKE.', 960, 240, 56, '#FFFFFF', { align: 'center', bold: true, alpha: seg(t, tMis - .2, tMis + .2) });
-      // the screen glitches and becomes a game screen
+      // the screen glitches and the tape stops
       if (gk > 0) { rgbTear(t, Math.sin(gk * Math.PI) + sw2); if (Math.floor(t * 24) % 3 === 0 && gk < .9) staticBars(t, [t]); }
-      if (sw2 > 0) gameScreen(t, sw2 > .5 ? 1 : sw2 * 2 * (Math.floor(t * 24) % 2));
+      if (sw2 > 0) tapeEnd(t, sw2 > .5 ? 1 : sw2 * 2 * (Math.floor(t * 24) % 2));
     } });
   }
 
@@ -459,6 +460,6 @@
   const M_ = (f, m) => (t, lt, dur) => f(t, lt, dur, m);
   const mv = k => [wt('sg_moving', 'each') - .3, wt('sg_moving', 'If') - .1, wt('sg_moving', 'Or') - .15, wt('sg_moving', 'Or', 1) - .15][k];
   shots([[chapStart('ch08'), believer], [cs('sg_pr') - .3, M_(pr, 0)], [wt('sg_pr', 'Then') - .2, M_(pr, 1), { fade: .6 }], [cs('sg_colorado') - .3, colorado],
-    [cs('sg_moving') - .3, M_(moving, 0)], [mv(0), M_(moving, 1), { fade: .5 }], [mv(1), M_(moving, 2), { fade: .5 }], [mv(2), M_(moving, 3), { fade: .5 }], [mv(3), M_(moving, 4), { fade: .5 }],
+    [cs('sg_moving') + .3, M_(moving, 0)], [mv(0), M_(moving, 1), { fade: .5 }], [mv(1), M_(moving, 2), { fade: .5 }], [mv(2), M_(moving, 3), { fade: .5 }], [mv(3), M_(moving, 4), { fade: .5 }],
     [cs('sg_last') - .3, last], [cs('sg_evidence') - .3, M_(evidence, 0)], [wt('sg_evidence', 'To') - .3, M_(evidence, 1), { fade: .6 }]]);
 })();

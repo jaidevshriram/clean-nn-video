@@ -163,7 +163,7 @@
   function detector(t, lt, dur) {
     const s0 = chapStart('ch01'), a = cs('nr_what'), tn = wt('nr_what', 'neuron'), tdet = wt('nr_what', 'detector'), tl = wt('nr_what', 'lights'), w0 = cs('nr_windows'), tsh = wt('nr_windows', 'showing'), tkeep = wt('nr_windows', 'keeping'), tbr = wt('nr_windows', 'brightest'), twin = wt('nr_windows', 'windows'), e = ce('nr_windows');
     const D = FEAT.dog;
-    camKeys3(t, [[s0, 0, 112, 260, 60, 112], [s0 + .4, 0, 112, 260, 64, 115], [a + .8, 0, 110, 260, 560, 380], [tdet, 30, 100, 250, 600, 400], [tl + 1, 60, 100, 250, 640, 420], [tsh, 20, 90, 230, 760, 470], [tbr, 0, 100, 240, 700, 450], [e, -30, 100, 240, 660, 430]]);
+    camKeys3(t, [[s0, 0, 112, 260, 80, 112], [s0 + .4, 0, 112, 260, 84, 115], [a + .8, 0, 110, 260, 560, 380], [tdet, 30, 100, 250, 600, 400], [tl + 1, 60, 100, 250, 640, 420], [tsh, 20, 90, 230, 760, 470], [tbr, 0, 100, 240, 700, 450], [e, -30, 100, 240, 660, 430]]);
     table(t);
     // train: a steady speed, then a blur of thousands of photos, then it slows again
     const v = 150, sp = t < tsh ? 0 : t < tbr + .6 ? Math.pow(seg(t, tsh, tsh + 1.4), 2) * 2400 * (1 - seg(t, tbr - .3, tbr + .6)) : 0;
@@ -175,7 +175,7 @@
     let fire = 0;
     for (let c = 1; c <= CARS.length * 3; c++) { const x = xh - c * 230, im = CARS[(c - 1) % CARS.length]; if (Math.abs(x) < 140 && isDog(im)) fire = Math.max(fire, 1 - Math.abs(x) / 140); }
     const cars = Array.from({ length: CARS.length * 3 }, (_, i) => CARS[i % CARS.length]);
-    const fill = ease(seg(t, tkeep + .4, twin + .2)), on = Math.max(t < a ? .9 : fire, fill * (.75 + .25 * Math.sin(t * 4)));
+    const fill = ease(seg(t, tkeep + .4, twin + .2)), on = Math.max(t < a ? .9 * (1 - seg(t, s0 + .8, a - .5)) : fire, fill * (.75 + .25 * Math.sin(t * 4)));
     const drawn = town(t, q => q === D ? on : q.feat ? .15 : 0, { houseOpts: q => q === D ? { kWin: t < w0 ? 1 : t < tkeep + .4 ? 1 - seg(t, w0, w0 + .6) : Math.max(fill, t > twin ? 1 : 0) } : {} });
     // the train rides in front of everything
     if (sp > 300) { ctx.save(); ctx.globalAlpha = .9; train(t, xh, cars); ctx.restore(); const [, by] = P(0, 90, 120); for (let i = 0; i < 9; i++) { ctx.save(); ctx.globalAlpha = .5; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; const yy = by - 60 + i * 18, xx = (hash(i * 3) * W + t * 3000) % W; ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx + 180, yy); ctx.stroke(); ctx.restore(); } }
@@ -188,6 +188,7 @@
     if (t > tkeep && t < twin + .5 && drawn.dog) DOGS.forEach((im, i) => { const k = seg(t, tkeep + .4 + i * .7, tkeep + 1.3 + i * .7); if (k <= 0 || k >= 1) return; const R = drawn.dog, tx = R.fx + R.fw * (i % 2 ? .75 : .25), ty = R.fy + R.fh * (.2 + Math.floor(i / 2) * .3), [sx, sy] = P(i * 60 - 90, 100, 120), q = arcPt([sx, sy], [tx, ty], 160, easeInOut(k)); photoFlat(im, q[0] - 50, q[1] - 40, 100, 80, { border: 5, rot: (1 - k) * .5 }); });
     if (drawn.dog) { const R = drawn.dog; hand('a neuron', R.fx + R.fw / 2, R.fy - R.fh * .62, 64, PAL.ink, seg(t, tn - .3, tn + .5) * (1 - seg(t, w0, w0 + .4)), { stroke: '#FFF6E2', strokeW: .14 }); }
     if (t > tsh - .2 && t < tbr + 1) title('a lot of pictures', 960, 160, 80, '#3A2A1A', seg(t, tsh - .2, tsh + .8) * (1 - seg(t, tbr + .4, tbr + 1)), { stroke: '#FFF6E2', strokeW: .1 });
+    if (t > a - .3 && t < a + 4) title('Part I · the belief', 1120, 1000, 64, '#6E4FB0', seg(t, a - .2, a + .6) * (1 - seg(t, a + 3.2, a + 3.8)), { stroke: '#FFF6E2', strokeW: .12 });
     if (t > tl - .2 && t < tl + 1.3) sfx('DING!', W / 2 + 200, 330, 64, PAL.berry, t - tl + .1, { life: 1.2 });
     fxTiltShift(330, 820, 10);
   }
@@ -196,16 +197,16 @@
   function districts(t, lt, dur) {
     const a = cs('nr_layers'), tly = wt('nr_layers', 'layers'), tc = wt('nr_layers', 'coast'), tsim = wt('nr_layers', 'simple'), ted = wt('nr_layers', 'edges'), tin = wt('nr_layers', 'inland'), ttx = wt('nr_layers', 'textures'), thz = wt('nr_layers', 'horizon'), tdog = wt('nr_layers', 'dogs'), tlb = wt('nr_layers', 'ladybugs');
     const c0 = cs('nr_circuits'), tcir = wt('nr_circuits', 'circuit'), tread = wt('nr_circuits', 'read'), tdo = wt('nr_circuits', 'doing'), e = ce('nr_circuits');
-    camKeys3(t, [[a - .5, -30, 100, 240, 660, 430], [tly - .3, 0, 0, 1000, 2500, 1300], [tc - .4, 0, 0, 1000, 2400, 1250], [tc + .8, -100, 0, 60, 900, 650], [tsim - .3, 0, 40, 200, 950, 650], [ted + .2, 0, 70, 560, 620, 860], [tin - .3, 0, 70, 560, 640, 880], [ttx, 0, 110, 1160, 680, 950], [thz - .6, 0, 120, 1160, 700, 980], [tdog - .4, 0, 190, 1850, 820, 1150], [tlb + .4, 0, 190, 1850, 860, 1180], [c0 + .2, -100, 80, 1000, 1700, 1250], [tcir, -150, 80, 950, 1600, 1200], [tdo, -160, 80, 950, 1550, 1150], [e + .4, -150, 80, 950, 1550, 1150]]);
+    camKeys3(t, [[a - .5, -30, 100, 240, 660, 430], [tly - .3, 0, 0, 1000, 2500, 1300], [tc - .4, 0, 0, 1000, 2400, 1250], [tc + .8, -100, 0, 60, 900, 650], [tsim - .3, 0, 40, 200, 950, 650], [ted + .2, 0, 70, 560, 620, 860], [tin - .3, 0, 70, 560, 640, 880], [ttx, 0, 110, 1160, 680, 950], [thz - .6, 0, 120, 1160, 700, 980], [tdog - .4, 0, 190, 1850, 820, 1150], [tlb + .4, 0, 190, 1850, 860, 1180], [c0 + .2, -100, 180, 1000, 1700, 1250], [tcir, -150, 210, 950, 1600, 1200], [tdo, -160, 220, 950, 1550, 1150], [e + .4, -150, 220, 950, 1550, 1150]]);
     table(t);
     // a toy bucket tipping pixel cubes into the sea: the input arriving at the coast
     const rain = on(t, tc - 1, ted);
     const lightOf = q => {
       const n = q.feat;
       if (!n) return q.r <= 1 ? .2 * on(t, ted - .5, tin) : q.r <= 4 ? .2 * on(t, ttx - .4, thz) : .2 * on(t, tdog - .5, c0);
-      const tt = { curveA: ted, curveB: wt('nr_layers', 'curves'), eye: wt('nr_layers', 'eyes'), wheel: wt('nr_layers', 'wheels'), dogT: tdog, carT: wt('nr_layers', 'cars'), lady: tlb, dog: tsim }[n];
-      const circ = { dog: c0 + .6, curveA: c0 + 2.1, eye: c0 + 3.2, dogT: c0 + 4.3 }[n];
-      let k = env(t, tt - .3, tt + 2.6, .3, .8);
+      const tt = { curveA: ted, curveB: wt('nr_layers', 'curves'), eye: wt('nr_layers', 'eyes'), wheel: wt('nr_layers', 'wheels'), dogT: tdog, carT: wt('nr_layers', 'cars'), lady: tlb }[n];
+      const circ = { curveA: c0 + .6, eye: c0 + 1.7, dogT: c0 + 2.8 }[n];
+      let k = tt ? env(t, tt - .3, tt + 2.6, .3, .8) : 0;
       if (circ) k = Math.max(k, on(t, circ, e + 2));
       return .15 + .85 * k;
     };
@@ -221,9 +222,10 @@
     // the beach: pixel cubes falling into the sea and washing ashore
     if (rain > 0) for (let i = 0; i < 140; i++) { const f = frac(t * .5 + hash(i)), x = -1300 + hash(i * 3.3) * 2600, z = -120 + hash(i * 5.1) * 140, y = lerp(700, 0, f); const [sx, sy, k] = P(x, y, z); const c = ['#E2476E', '#3A9C98', '#E8AA38', '#7B5CA8', '#8EC3E6', '#6E9F58'][i % 6]; ctx.save(); ctx.globalAlpha = rain * Math.min(1, (1 - f) * 4); flat(rectPts(sx - 20 * k, sy - 20 * k, 40 * k, 40 * k), c, { line: 'rgba(0,0,0,.25)', lw: 1 }); ctx.restore(); }
     // the circuit: arcs of light hop over the rooftops, neuron to neuron
-    [['dog', 'curveA'], ['curveA', 'eye'], ['eye', 'dogT']].forEach(([p, q], i) => arcLink(p, q, seg(t, c0 + 1 + i * 1.1, c0 + 2.1 + i * 1.1), t));
-    // reading the circuit: each neuron's best photo floats up over its beacon
-    ['curveA', 'eye', 'dogT'].forEach((n, i) => { const k = popk(t, tread + i * .5, .5); if (k <= 0) return; const [x, y] = roofTop(n), F = FEAT[n], bw = 150 * backOut(k), al = 1 - seg(t, e + .6, e + 1.2); ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = '#FFF6D0'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - 90); ctx.stroke(); photoFlat(F.imgs[0], x - bw / 2 + (y - 100 - bw < 40 ? 170 : 0), Math.max(40, y - 100 - bw), bw, bw, { border: 8 }); ctx.restore(); });
+    // simple shapes near the coast, a whole idea on the horizon: curve hut → eye house → dog tower
+    [['curveA', 'eye'], ['eye', 'dogT']].forEach(([p, q], i) => arcLink(p, q, seg(t, c0 + 1 + i * 1.1, c0 + 2.1 + i * 1.1), t));
+    // reading the circuit: each neuron's best photo pops up on a short stalk right over its roof
+    ['curveA', 'eye', 'dogT'].forEach((n, i) => { const k = popk(t, tread + i * .5, .5); if (k <= 0) return; const [x, y] = roofTop(n), F = FEAT[n], bw = 112 * backOut(k), al = 1 - seg(t, e + .6, e + 1.2); ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = '#FFF6D0'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - 36); ctx.stroke(); photoFlat(F.imgs[0], x - bw / 2, y - 36 - bw - 8, bw, bw, { border: 7 }); ctx.restore(); });
     if (false) { const C_ = through(route, 8), q = C_[Math.min(C_.length - 1, Math.round((C_.length - 1) * circK))], [sx, sy, k] = P(q[0], 0, q[1]); glow(sx, sy - 10 * k, 60 * k + 20, '#FFC766', 1); flat(rrPts(sx - 30 * k, sy - 22 * k, 60 * k, 22 * k, 6 * k), '#F0BE46', { line: '#3A2A1A', lw: 2 }); dot(sx - 18 * k, sy, 7 * k, '#2A2340'); dot(sx + 18 * k, sy, 7 * k, '#2A2340'); }
     // Clawd on the beach (seen from high up he's tiny), a pixel cube bonks him
     const bonk = wt('nr_layers', 'come');
@@ -233,7 +235,7 @@
     const lab = (s, ta, tb, y = 170) => title(s, 960, y, 84, '#3A2A1A', seg(t, ta - .2, ta + .8), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tb - .4, tb) });
     if (t < tc) lab('layers, like districts', tly, tc);
     else if (t < ted - .4) lab('the coast: pixels arrive', tc, ted - .4);
-    else if (t < tin) lab('edges · curves · colours', ted - .3, tin);
+    else if (t < tin) lab('edges · curves · colors', ted - .3, tin);
     else if (t < thz) lab('textures · eyes · wheels', ttx - .2, thz);
     else if (t < c0) lab('dogs · cars · ladybugs', tdog - .3, c0);
     else lab('a circuit', tcir - .4, e + 1.5, 980);
@@ -242,10 +244,10 @@
 
   // ---------- shot 3 · the hope: look inside, read the parts, understand the machine; then the town cinema ----------
   function hope(t, lt, dur) {
-    const a = cs('nr_hope'), tm = wt('nr_hope', 'mechanistic'), tlk = wt('nr_hope', 'Look'), trd = wt('nr_hope', 'Read'), tun = wt('nr_hope', 'Understand'), e = ce('nr_hope'), end = chapStart('ch02');
+    const a = cs('nr_hope'), tm = wt('nr_hope', 'mechanistic'), tlk = wt('nr_hope', 'Look'), trd = wt('nr_hope', 'Read'), tun = wt('nr_hope', 'Understand'), tnw = wt('nr_hope', 'network'), tcl = wt('nr_hope', 'clean'), e = ce('nr_hope'), end = chapStart('ch02');
     // projector in the square at (0, 380); bedsheet screen at (0, ROWZ(2) + 40), 300 wide, bottom at y 70
     const SZ = ROWZ(2) + 40;
-    camKeys3(t, [[a - .5, -150, 80, 950, 1550, 1150], [tm, 150, 60, 560, 900, 900], [tlk, 280, 60, 520, 480, 560], [trd + .6, 260, 70, 520, 460, 540], [tun + .3, 100, 90, 650, 600, 560], [e + .3, 0, 150, SZ, 760, 480], [end, 0, 166, SZ, 700, 400], [end + 2.5, 0, 166, SZ, 640, 380]]);
+    camKeys3(t, [[a - .5, -150, 220, 950, 1550, 1150], [tm, 150, 60, 560, 900, 900], [tlk, 280, 60, 520, 480, 560], [trd + .6, 260, 70, 520, 460, 540], [tun + .3, 100, 90, 650, 600, 560], [e + .3, 0, 150, SZ, 760, 480], [end, 0, 166, SZ, 700, 400], [end + 2.5, 0, 166, SZ, 640, 380]]);
     table(t);
     const beam = seg(t, tun + .6, e + .2), flick = .85 + .15 * hash(Math.floor(t * 24));
     town(t, q => q.feat === 'curveB' ? .3 + .7 * on(t, trd - .2, e + .4) : q.feat ? .25 + .1 * Math.sin(t * 2 + q.x) : 0, { between: r => {
@@ -258,7 +260,7 @@
         const cx = (S[0][0] + S[1][0]) / 2, cy = (S[0][1] + S[2][1]) / 2, R = (S[1][0] - S[0][0]) * .2;
         ctx.save(); ctx.globalAlpha = beam * .8; ctx.strokeStyle = '#6A6A6A'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.moveTo(S[0][0], cy); ctx.lineTo(S[1][0], cy); ctx.moveTo(cx, S[2][1]); ctx.lineTo(cx, S[0][1]); ctx.stroke();
         ctx.fillStyle = 'rgba(90,90,90,.35)'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R * 1.6, -Math.PI / 2, -Math.PI / 2 + frac(t) * TAU); ctx.closePath(); ctx.fill(); ctx.restore();
-        txt(String(Math.max(1, 3 - Math.floor(t - tun - .6))), cx, cy, R * 1.3, '#4A4A4A', { font: 'serif', weight: '900' });
+        if (t > e) txt(String(clamp(3 - Math.floor((t - e) * 1.6), 1, 3)), cx, cy, R * 1.3, '#4A4A4A', { font: 'serif', weight: '900' });
       }
     } });
     // the projector on its crate in the square, and its beam
@@ -272,8 +274,11 @@
     const [cx, cy, ck] = P(wx, 0, t < tun - .3 ? 470 : lerp(470, 600, seg(t, tun - .3, tun + .5)));
     tourist(cx, cy, 8 * ck, 'safari', { ...emotions(t, [[a - 1, 'excited'], [tlk, 'thinking'], [trd, 'idea'], [tun + .6, 'proud'], [e, 'excited']]), view: t > tun - .3 && t < tun + .5 ? 'side' : 'q', flip: t > tun - .3, walk: (t > a && t < tlk - .3) || (t > tun - .3 && t < tun + .5) ? t * 2.4 : undefined, aR: t < tun ? 1.1 : undefined, armR: t < tun ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#7A5B3E', 'ink', 0); ctx.save(); ctx.strokeStyle = '#C99A45'; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(200,230,255,.35)'; ctx.fill(); ctx.restore(); } : undefined });
     // words
-    const words = [['look inside', tlk], ['read the parts', trd], ['understand the machine', tun]];
-    words.forEach(([s, ta], i) => title(s, 480 + i * 480, 180 + (i % 2) * 70, 70, '#3A2A1A', seg(t, ta - .2, ta + .6), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, e - .2, e + .4) }));
+    const words = [['look inside', tlk, 370], ['read the parts', trd, 812], ['understand the machine', tun, 1435]];
+    words.forEach(([s, ta, x], i) => { title(s, x, 170, 60, '#3A2A1A', seg(t, ta - .2, ta + .6), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tnw - .2, tnw + .3) }); if (i) title('·', i === 1 ? 578 : 1042, 170, 60, '#3A2A1A', seg(t, ta - .3, ta), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tnw - .2, tnw + .3) }); });
+    // the word the whole film is about
+    if (t > tcl - .4) title('clean', 960, 200, 150, '#FFF6E2', seg(t, tcl - .3, tcl + .4), { stroke: '#3A2A1A', strokeW: .1, alpha: 1 - seg(t, end - .4, end + .2) });
+    if (t > tnw - .3 && t < tcl + .5) hand('a network you can read like that…', 960, 990, 60, '#3A2A1A', seg(t, tnw - .3, tnw + 1.2) * (1 - seg(t, tcl - .4, tcl)), { stroke: '#FFF6E2', strokeW: .14 });
     if (t < tlk) title('mechanistic interpretability', 960, 170, 80, '#3A2A1A', seg(t, tm - .3, tm + 1.2), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tlk - .6, tlk - .1) });
     if (t > tun + .5 && t < tun + 2) sfx('click!', cx - 60, Math.min(cy - 90, 930), 52, PAL.berry, t - tun - .6, { life: 1.1 });
     fxTiltShift(300, 820, 9);

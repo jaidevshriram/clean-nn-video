@@ -159,7 +159,7 @@
   function risk(t, lt, dur) {
     const a = cs('el_risk'), tSt = wt('el_risk', 'stories'), tVa = wt('el_risk', 'vague'), tMu = wt('el_risk', 'multi-purpose'), tSo = wt('el_risk', 'So'), tTe = wt('el_risk', 'tests'), tFa = wt('el_risk', 'fail');
     const tArr = CH + 2.0, tThrow = tSt - .9, tHit = tSt - .35, tSp = tVa - .6, tSpHit = tVa + .3, tOff = tSo + .7;
-    camKeys(t, [[CH, 1000, 470, .9], [Math.min(CH + 5.6, tThrow - 1.2), 1000, 480, .92], [tThrow - .5, 1000, 520, .98], [tHit + .4, 1100, 560, 1.05], [tVa - .7, 1000, 540, 1.0], [tSpHit + .4, 940, 545, 1.03], [tSo, 900, 540, 1.0], [ce('el_risk') + .5, 920, 540, 1]], .6);
+    camKeys(t, [[CH, 1000, 470, .9], [Math.min(CH + 5.6, tThrow - 1.2), 1000, 480, .92], [tThrow - .5, 1000, 450, .98], [tHit + .4, 1100, 440, 1.05], [tVa - .7, 1000, 540, 1.0], [tSpHit + .4, 940, 545, 1.03], [tSo, 900, 540, 1.0], [ce('el_risk') + .5, 920, 540, 1]], .6);
     pubWall();
     const sh = thunk(t, tArr) + thunk(t, tSpHit) * 2;
     ctx.save(); ctx.translate(sh * .3, sh * .2);
@@ -167,8 +167,10 @@
     const P20 = bp(3, .6);
     if (!flying(t, CH + .9, tArr, [-200, 700], P20, 240, 1.3, .8, { paper: true })) if (t >= tArr) stuck(P20[0], P20[1], .8, { paper: true, a: Math.PI * .86 });
     // Clawd's wild throw lands on the wall; a chalk target appears around it (making up stories)
-    const WD = [1300, 230];
-    if (t >= tHit) { stuck(WD[0], WD[1], .75, { a: Math.PI * .88 }); const ck = seg(t, tHit + .25, tHit + 1.4); ctx.save(); ctx.strokeStyle = 'rgba(245,240,225,.85)'; ctx.lineWidth = 6; ctx.lineCap = 'round'; for (let r = 0; r < 3; r++) { const kk = clamp(ck * 3 - r); if (kk > 0) { ctx.beginPath(); ctx.ellipse(WD[0] - 4, WD[1], 34 + r * 34, 30 + r * 30, .1, 0, TAU * kk); ctx.stroke(); } } ctx.restore(); }
+    const WD = [1365, 672];
+    if (t >= tHit) { stuck(WD[0], WD[1], .75, { a: Math.PI * .88 }); const ck = seg(t, tHit + .25, tHit + 1.4); ctx.save(); ctx.strokeStyle = 'rgba(245,240,225,.85)'; ctx.lineWidth = 7; ctx.lineCap = 'round'; for (let r = 0; r < 3; r++) { const kk = clamp(ck * 3 - r); if (kk > 0) { ctx.beginPath(); ctx.ellipse(WD[0] - 4, WD[1], 40 + r * 36, 36 + r * 33, .1, 0, TAU * kk); ctx.stroke(); } } ctx.restore();
+      // the chalk note says what the gag is: the target was drawn around the dart after it landed
+      const nk = seg(t, tHit + 1.3, tHit + 1.9) * (1 - seg(t, tVa - .9, tVa - .5)); if (nk > 0) { ctx.save(); ctx.globalAlpha = nk; txt('target drawn', 1660, 640, 54, '#F5F0E1', { font: '"Patrick Hand"', weight: '400' }); txt('after the throw', 1660, 696, 54, '#F5F0E1', { font: '"Patrick Hand"', weight: '400' }); ctx.strokeStyle = 'rgba(245,240,225,.85)'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(1560, 730); ctx.quadraticCurveTo(1530, 770, 1490, 745); ctx.moveTo(1490, 745); ctx.lineTo(1508, 734); ctx.moveTo(1490, 745); ctx.lineTo(1507, 757); ctx.stroke(); ctx.restore(); } }
     // the Knot's sponge-dart: a vague label that covers everything
     const spIn = seg(t, tSp, tSpHit), spOff = seg(t, tOff, tOff + 1.2);
     pubLight(t, 0);
@@ -196,7 +198,7 @@
     const cl = emotions(t, [[CH, 'happy'], [a + .3, 'suspicious'], [tThrow - .4, 'determined'], [tHit + .1, 'nervous'], [tHit + .9, 'smug'], [tSpHit, 'surprised'], [tSo + .2, 'laugh'], [tFa, 'thinking']]);
     const wind = seg(t, tThrow - .45, tThrow), aL = t < tThrow ? lerp(.4, 2.6, ease(wind)) : lerp(2.6, .8, easeOut(seg(t, tThrow, tThrow + .15)));
     tourist(1600, 1010, 20, 'party', { ...cl, view: 'side', flip: true, aL, armL: t < tThrow ? holdDart() : null, boilKey: 'c11c' });
-    flying(t, tThrow, tHit, [1470, 800], WD, 180, 1.3, .75);
+    flying(t, tThrow, tHit, [1470, 800], WD, 320, 1.3, .75);
     crowd(t, seg(t, tSo + .2, tSo + .5) * (1 - seg(t, tFa, tFa + .5)) * .6);
     camEnd();
     vignette(.35, '#0A0604');
@@ -329,8 +331,10 @@
     bug(t, slow ? 'SLO-MO' : 'LIVE');
     const best = .62, lvl = t < tHit ? .05 + .05 * Math.sin(t * 5) : lerp(.05, 1.15, easeOut(seg(t, tHit, tHit + .6)));
     firingMeter(t, 1790, 820, 520, Math.min(1, lvl), t > tTe - .2 ? best * easeOut(seg(t, tTe - .2, tTe + .6)) : 0, seg(t, tHit - .8, tHit - .4));
-    if (t > tTe - .2) { const k = seg(t, tTe - .2, tTe + .4); ctx.save(); ctx.globalAlpha = k; txt('BEST OF 10 BILLION WORDS', 1700, 820 - best * 520, 28, '#FFFFFF', { font: F, weight: '800', align: 'right', stroke: NAVY, sw: 8 }); ctx.restore(); }
-    if (t > tHit && t < tTe - .3) txt('ONE SENTENCE', 1700, 300, 34, YEL, { font: F, weight: '900', align: 'right', stroke: NAVY, sw: 8 });
+    // meter captions on navy plates (the window behind is bright)
+    const plate = (s, xr, y, size, col, k) => { if (k <= 0) return; ctx.save(); ctx.globalAlpha = k; ctx.font = `900 ${size}px ${F}`; const w = ctx.measureText(s).width + size; flat(rectPts(xr - w, y - size * .8, w, size * 1.6), 'rgba(10,18,56,.94)', { shadow: [0, 6, 'rgba(0,0,0,.35)'] }); flat(rectPts(xr - 8, y - size * .8, 8, size * 1.6), col); txt(s, xr - w / 2 - 4, y + 2, size, col, { font: F, weight: '900' }); ctx.restore(); };
+    if (t > tTe - .2) plate('BEST OF 10 BILLION WORDS', 1700, 820 - best * 520, 36, '#FFFFFF', seg(t, tTe - .2, tTe + .4));
+    if (t > tHit && t < tTe - .3) plate('ONE SENTENCE', 1700, 820 - 520, 44, YEL, seg(t, tHit, tHit + .3));
     // the counter of real-text darts
     if (t > tTe - .3 && t < tEx - .2) { const k = easeOut(seg(t, tTe - .3, tTe + .2)), n = Math.floor(1e10 * Math.pow(seg(t, tTe - .2, tWo + .4), 2)); lower(t, tTe - .3, tEx - .2, n.toLocaleString('en-US'), 'WORDS OF REAL TEXT', { size: 70, w: 1100, tag: '#9A9AA8', col: '#FFFFFF' }); }
     if (t > tCe - .35) { const k = popk(t, tCe - .35, .35), s = backOut(k) * (1 + .03 * Math.sin(t * 9)); ctx.save(); ctx.translate(1380, 300); ctx.rotate(-.1); ctx.scale(s, s); for (let i = 0; i < 16; i++) { const q = i / 16 * TAU + t * .3; flat([[0, 0], [Math.cos(q - .08) * 260, Math.sin(q - .08) * 200], [Math.cos(q + .08) * 260, Math.sin(q + .08) * 200]], i % 2 ? 'rgba(255,227,74,.5)' : 'rgba(210,71,63,.5)'); } txt('180!', 0, 0, 170, YEL, { font: F, weight: '900', stroke: '#8A1A1A', sw: 22 }); ctx.restore(); }
@@ -341,7 +345,7 @@
   const ROWS = [['SHOULD FIRE', .76, '76%', YEL, 'should'], ['NEAR-MISSES', .11, '11%', '#9FB8E6', 'near-misses'], ['DISTANT IDEAS', .01, '1%', '#E89AB4', 'distant']];
   function score(t, lt, dur) {
     const a = cs('el_score'), e = ce('el_score'), VAL = [wt('el_score', 'three'), wt('el_score', 'eleven'), wt('el_score', 'one')], INTRO = ROWS.map(r => wt('el_score', r[4]));
-    camKeys(t, [[t - lt, 1150, 560, 1.06], [e + 1, 1200, 540, 1.0]], .5);
+    camKeys(t, [[t - lt, 1150, 560, 1.06], [e + 1, 1140, 540, 1.03]], .5);   // stays inside the pub wall (it ends at x = W + 200)
     pubWall();
     const hits = [];
     // throws: should-fire darts thud into the bull (the board glows), near-misses land outside it, the distant idea misses the board
@@ -350,7 +354,7 @@
     pubLight(t, fire * .8 + .15);
     const P20 = bp(3, .6); stuck(P20[0], P20[1], .8, { paper: true, a: Math.PI * .86 }); stuck(BX + 4, BY - 2, .85);
     TH.forEach(([ti, p, c], i) => { if (!flying(t, ti, ti + .45, [2100, 900], p, 200, 1.2, .7, c ? { flight: c } : { duck: true })) if (t > ti + .45 && c) stuck(p[0], p[1], .7, { flight: c }); });
-    if (t > TH[5][0] + .4 && t < TH[5][0] + 1.6) sfx('QUACK!', 640, 140, 60, '#FFFFFF', t - TH[5][0] - .45, { stroke: '#1A1A1A', strokeW: .12 });
+    if (t > TH[5][0] + .4 && t < TH[5][0] + 1.6) sfx('WAY OFF!', 640, 140, 60, '#FFFFFF', t - TH[5][0] - .45, { stroke: '#1A1A1A', strokeW: .12 });   // the distant idea misses the board entirely
     camEnd();
     vignette(.4, '#0A0604');
     // stats panel
@@ -411,7 +415,7 @@
       // the Knot's cats-and-cars dart
       const kx = 1300, P = bp(17, .6);
       if (!flying(t, tCa - .5, tCa, [kx - 60, 900], P, 160, 1.1, .7, { flight: '#9A6AC0' })) if (t >= tCa) stuck(P[0], P[1], .7, { flight: '#9A6AC0' });
-      if (t > tCa - .2 && t < tPa + 3) { const k = seg(t, tCa - .2, tCa + .3); letter('"cats and cars"', P[0] - 170, P[1] + 90, 50, '#E7D4FF', { face: 'marker', shadow: false, pop: k < 1 ? k : null, stroke: '#2A1A3A', strokeW: .14 }); }
+      if (t > tCa - .2 && t < Math.min(tPa + 3, hIn)) { const k = seg(t, tCa - .2, tCa + .3); letter('"cats and cars"', P[0] - 170, P[1] + 90, 50, '#E7D4FF', { face: 'marker', shadow: false, pop: k < 1 ? k : null, stroke: '#2A1A3A', strokeW: .14 }); }
       ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(kx, 1012, 120, 16, 0, 0, TAU); ctx.fill(); ctx.restore();
       knotBeast(kx, 896 + Math.sin(t * 3) * 3 - 8 * Math.abs(Math.sin(t * 6)) * seg(t, tPa, tPa + .4) * (1 - seg(t, tSc - 1, tSc)), 112, { hat: 'cap', grin: t > tCa && t < tOut, look: [-1, -.4] });
       const cl = emotions(t, [[t - lt - 10, 'neutral'], [tCa + .2, 'confused'], [tPa + .4, 'suspicious'], [tOut, 'surprised'], [tOut + .6, 'excited']]);
@@ -422,7 +426,7 @@
       // the ticks: it passes test after test
       for (let i = 0; i < 5; i++) { const ti = tPa - .3 + i * .28, k = popk(t, ti, .3); if (k <= 0 || t > hIn) continue; const x = 560 + i * 170, y = 820; ctx.save(); ctx.translate(x, y); ctx.scale(backOut(k), backOut(k)); flat(rrPts(-70, -40, 140, 80, 10), '#2E7A3E', { shadow: [0, 6, 'rgba(0,0,0,.4)'] }); txt('PASS', 0, 2, 34, '#FFFFFF', { font: F, weight: '900' }); ctx.restore(); }
       if (t < hIn + .3) bug(t);
-      if (z <= 0) lower(t, tWr - .3, hIn + .2, 'A WRONG EXPLANATION', 'can still pass a lot of tests', { size: 58, w: 1100, tag: '#9A6AC0' });
+      if (z <= 0) lower(t, tWr - .3, hIn + .2, 'A WRONG EXPLANATION', 'can still pass a lot of tests', { size: 58, w: 1100, tag: '#9A6AC0', y: 885 });
       // the window's sunlight floods the frame just before we are outside (so the cut hides inside the flash)
       flash(seg(t, tLand - 1.45, tLand - .58), '#FFF2C8');
     } else {
@@ -463,11 +467,12 @@
       for (let i = 0; i < 90; i++) dot(hash(i * 3.7) * W, hash(i * 9.1) * H * .8, 1 + 2 * hash(i), '#F3E2BE', .3 + .4 * hash(i * 2));
       const prec = (t - hIn) * .1 + seg(t, tTi, tMe + .8) * 1.2, hi = seg(t, tTi - .2, tTi + .4);
       const kk = [popk(t, tAl - .2, .3), popk(t, tAl + .1, .3), popk(t, tAl + .4, .3)];
-      orrery(t, 1150, 560, 1.25, prec, hi, kk);
+      const MP = orrery(t, 1150, 560, 1.25, prec, hi, kk);
       const per = [1150 + Math.cos(prec) * 200 / 1.38 * 1.25, 560 + Math.sin(prec) * 200 / 1.38 * .55 * 1.25];
       teleRing(per[0], per[1], 90, 70, seg(t, tTi - .1, tTi + .5), 9);
       if (t > tBr - .3) { const k = popk(t, tBr - .3, .3); ctx.save(); ctx.translate(per[0] - 150, per[1] - 120); ctx.scale(backOut(k), backOut(k)); dot(0, 0, 34, RED); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-13, -13); ctx.lineTo(13, 13); ctx.moveTo(13, -13); ctx.lineTo(-13, 13); ctx.stroke(); ctx.restore(); }
-      if (t > tMe - .3) { const k = seg(t, tMe - .3, tMe + .2); ctx.save(); ctx.globalAlpha = k; txt('MERCURY', per[0] - 60, per[1] - 110, 50, YEL, { font: F, weight: '900', stroke: '#1A1008', sw: 8 }); ctx.restore(); }
+      // the MERCURY label sits clear of the sun and orbits, with a leader line to the planet as it goes round
+      if (t > tMe - .3) { const k = seg(t, tMe - .3, tMe + .2), LX = 1560, LY = 250; ctx.save(); ctx.globalAlpha = k; ctx.strokeStyle = YEL; ctx.lineWidth = 4; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.moveTo(LX - 40, LY + 34); ctx.lineTo(MP[0], MP[1]); ctx.stroke(); ctx.setLineDash([]); dot(MP[0], MP[1], 26, 'rgba(0,0,0,0)'); ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(MP[0], MP[1], 28, 0, TAU); ctx.stroke(); txt('MERCURY', LX, LY, 54, YEL, { font: F, weight: '900', stroke: '#1A1008', sw: 8 }); ctx.restore(); }
       // Newton: a framed portrait silhouette on the left
       ctx.save(); ctx.translate(270, 500); flat(rectPts(-150, -190, 300, 380), '#8C6A3A', { shadow: [10, 14, 'rgba(0,0,0,.5)'] }); flat(rectPts(-128, -168, 256, 336), '#E9D8B0');
       // Newton's apple, falling again and again inside the frame
@@ -482,7 +487,7 @@
       ctx.restore();
       if (kin >= 1 && kout < 1) fxFilm(t, .5 * (1 - kout));
       if (kin >= 1 && kout < 1) { const ta = .35 * (1 - kout); POST.push(() => { ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(240,200,140,${ta})`; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; }); }
-      { lower(t, tNe - .2, tBe - .3, "NEWTON'S GRAVITY", 'explained almost everything…', { size: 58, w: 1000 }); lower(t, tBe - .2, hOut, 'THE BEST TESTS ARE SPECIFIC', null, { size: 62, w: 1250 }); }
+      { lower(t, tNe - .2, tBe - .3, "NEWTON'S GRAVITY", 'explained almost everything…', { size: 58, w: 1000 }); lower(t, tBe - .2, hOut - .5, 'THE BEST TESTS ARE SPECIFIC', null, { size: 62, w: 1250 }); }
     }
   }
 
