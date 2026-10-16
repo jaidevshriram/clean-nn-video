@@ -8,7 +8,7 @@
   const CH = chapStart('ch14'), NEXT = chapStart('ch15');
   const SERIF = '"DejaVu Serif"', KAL = '"Kalam"';
   const PAPERC_ = '#F1E3C6', ORA = '#F2B04A', ORA_D = '#E8862A', TEAL = '#2E6A6A', TEAL_D = '#1A3A3A', MINT = '#9FE3C8', RED = '#C8402A', CLAY = '#D97757';
-  const T = (s, x, y, size, col, o = {}) => txt(s, x, y, size, col, { font: o.font || SERIF, weight: o.weight || '900', ...o });
+  const T = (s, x, y, size, col, o = {}) => { if ((o.alpha ?? 1) <= 0) return; ctx.save(); ctx.globalAlpha *= clamp(o.alpha ?? 1); txt(s, x, y, size, col, { font: o.font || SERIF, weight: o.weight || '900', ...o }); ctx.restore(); };
   // poster layout in world units: A hero (the ch13 poster), B agents, C architectures, D the field, E beacons + garden
   const PA = [960, 0, 1920, 1080], PB = [0, 0, 960, 1080], PC = [2880, 0, 960, 1080], PD = [0, 1080, 2240, 1080], PE = [2240, 1080, 1600, 1080];
   const IMGS = ['blog/raw/v-figure-10x/p47742', 'blog/raw/v-figure-10x/c4d201d', 'blog/raw/v-figure-10x/p10704', 'blog/raw/v-figure-10x/pTrain34', 'blog/raw/negative-poles-v2/toucans-positive-1', 'blog/raw/negative-poles-v2/broccoli-positive-1', 'blog/raw/negative-poles-v2/lighthouses-positive-1', 'blog/raw/negative-poles-v2/wolves-positive-2', 'blog/raw/negative-poles-v2/taxis-positive-2', 'blog/raw/negative-poles-v2/spoonbills-positive-1', 'blog/raw/v-figure-10x/pPool13', 'blog/raw/negative-poles-v2/pretzels-positive-1', 'blog/raw/umbrella-circuit/b17-797-ex1', 'blog/raw/v-figure-10x/n1158528', 'blog/raw/negative-poles-v2/cats-positive-2', 'blog/raw/v-figure-10x/n750219'];
@@ -266,7 +266,7 @@
       visitor(t, x + 640, y + h * .9, 14, [[t - lt, 'thinking'], [tBi + .1, 'disgusted'], [tMa + .4, 'thinking'], [tBe, 'excited']], { aR: lerp(.3, 1.6, lk), armR: lk > .1 ? ((u, sw) => { flat(ellPts(u * 1.2, 0, u * 1.3, u * .9, 18), '#F2D04A', { line: TEAL_D, lw: 2 }); }) : null });
     } });
     camEnd();
-    if (t < tRi - .3) letter('the simple thing, at enormous scale, beats the clever thing', 960, 210, 54, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tSi - .3, tCl + .4) });
+    if (t < tRi - .3) letter('the simple thing, at enormous scale,\nbeats the clever thing', 960, 200, 60, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tSi - .3, tCl + .4) });
     if (t > tSc - .3) letter('scaling ordinary investigation', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tSc - .3, tSc + .9) });
     GRAIN = 1; PAPER = false;
   }

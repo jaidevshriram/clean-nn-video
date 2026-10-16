@@ -11,7 +11,7 @@
   const SERIF = '"DejaVu Serif"', MARK = '"Permanent Marker"', HANDF = '"Patrick Hand"', KAL = '"Kalam"';
   const CREAM = '#F3EBDC', INK = '#2A2340';
   let NOW = 0;
-  const T = (s, x, y, size, col, o = {}) => txt(s, x, y, size, col, { font: o.font || MARK, weight: o.weight || '400', ...o });
+  const T = (s, x, y, size, col, o = {}) => { if ((o.alpha ?? 1) <= 0) return; ctx.save(); ctx.globalAlpha *= clamp(o.alpha ?? 1); txt(s, x, y, size, col, { font: o.font || MARK, weight: o.weight || '400', ...o }); ctx.restore(); };
 
   // ---------- space and the globe ----------
   function space(t) {
