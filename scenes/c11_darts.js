@@ -423,6 +423,8 @@
       for (let i = 0; i < 5; i++) { const ti = tPa - .3 + i * .28, k = popk(t, ti, .3); if (k <= 0 || t > hIn) continue; const x = 560 + i * 170, y = 820; ctx.save(); ctx.translate(x, y); ctx.scale(backOut(k), backOut(k)); flat(rrPts(-70, -40, 140, 80, 10), '#2E7A3E', { shadow: [0, 6, 'rgba(0,0,0,.4)'] }); txt('PASS', 0, 2, 34, '#FFFFFF', { font: F, weight: '900' }); ctx.restore(); }
       if (t < hIn + .3) bug(t);
       if (z <= 0) lower(t, tWr - .3, hIn + .2, 'A WRONG EXPLANATION', 'can still pass a lot of tests', { size: 58, w: 1100, tag: '#9A6AC0' });
+      // the window's sunlight floods the frame just before we are outside (so the cut hides inside the flash)
+      flash(easeIn(seg(t, tLand - 1.0, tLand - .55)), '#FFF2C8');
     } else {
       // outside, in golden grass: the dart lands and its flight becomes a seed
       const k = seg(t, tLand - .55, tLand);

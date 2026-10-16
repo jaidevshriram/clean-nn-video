@@ -15,6 +15,7 @@
 
   // ---------- space and the globe ----------
   function space(t) {
+    if (SKIPBG) return;
     layer('c13space', () => { ctx.fillStyle = lgrad(0, 0, 0, H, [[0, '#020410'], [1, '#0A1430']]); ctx.fillRect(-200, -200, W + 400, H + 400); for (let i = 0; i < 420; i++) dot(-200 + hash(i * 1.3) * (W + 400), -200 + hash(i * 7.1) * (H + 400), hash(i) * 1.7 + .3, '#FFFFFF', .3 + .6 * hash(i * 3)); for (let i = 0; i < 5; i++) glow(hash(i * 9) * W, hash(i * 4) * H, 400, ['#2A3A8A', '#4A2A6A', '#1A4A6A'][i % 3], .25); }, { x: -200, y: -200, w: W + 400, h: H + 400, variants: 1 });
     for (let i = 0; i < 10; i++) { const tw = .5 + .5 * Math.sin(t * (1 + hash(i)) + i * 3); glow(hash(i * 19.1) * W, hash(i * 13.3) * H, 10 + 8 * tw, '#FFFFFF', .5 * tw); }
   }
@@ -27,6 +28,7 @@
     [[130, 31], [136, 34], [141, 38], [142, 44], [140, 42], [135, 35]], [[-55, 60], [-30, 68], [-20, 78], [-50, 82], [-65, 76]], [[-6, 50], [2, 51], [-2, 58], [-6, 56]]];
   const SAV = [[28, 5], [40, 4], [38, -8], [26, -10], [22, -2]];
   function globe(t, cx, cy, R, lonD, latD, o = {}) {
+    if (SKIPBG) return () => [0, 0, -1];
     const lon0 = lonD * Math.PI / 180, lat0 = latD * Math.PI / 180;
     const proj = (lon, lat) => { const l = lon * Math.PI / 180, p = lat * Math.PI / 180, c = Math.sin(lat0) * Math.sin(p) + Math.cos(lat0) * Math.cos(p) * Math.cos(l - lon0); return [cx + R * Math.cos(p) * Math.sin(l - lon0), cy - R * (Math.cos(lat0) * Math.sin(p) - Math.sin(lat0) * Math.cos(p) * Math.cos(l - lon0)), c]; };
     glow(cx, cy, R * 1.35, '#4A8AFF', .35);
@@ -46,6 +48,10 @@
     ctx.save(); ctx.strokeStyle = 'rgba(160,210,255,.6)'; ctx.lineWidth = Math.max(4, R / 55); ctx.beginPath(); ctx.arc(cx, cy, R + R / 110, 0, TAU); ctx.stroke(); ctx.restore();
     return proj;
   }
+  // one continuous slow spin behind all the postcards (so a card swap never jumps the globe); night falls for deception
+  const gLon = t => -10 - (t - cs('zo_clean')) * .55;
+  const gNight = t => env(t, cs('zo_deception') - 1.2, ce('zo_deception') + .2, 1.2, 1.2);
+  let SKIPBG = false;
   // a map pin
   function pin(x, y, s, col = '#D2473F', k = 1) { if (k <= 0) return; const b = backOut(k); ctx.save(); ctx.translate(x, y); ctx.scale(b * s, b * s); flat([[0, 0], [-16, -36], [16, -36]], col); dot(0, -44, 18, col); dot(0, -44, 7, '#FFFFFF'); ctx.restore(); }
 
@@ -128,8 +134,8 @@
   }
   function readable(t, lt, dur) {
     const a = cs('zo_clean'), tBu = wt('zo_clean', 'built'), tRe = wt('zo_clean', 'read,'), tDo = wt('zo_clean', 'downstream'), tLe = wt('zo_clean', 'learn'), tRd = wt('zo_clean', 'read', 1), tUn = wt('zo_clean', 'understand'), e = ce('zo_clean');
-    space(t); globe(t, 960, 2300, 1900, -10, 30);
-    const ki = easeOut(seg(t, t - lt, t - lt + .7)), ko = easeIn(seg(t, e, e + .45));
+    space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
+    const ki = easeOut(seg(t, t - lt, t - lt + .7)), ko = 0;
     const rd = seg(t, tRd - .4, tUn + .2), lit = seg(t, tRe - .3, tDo + .6), dn = env(t, tRe - .3, tLe, .4, .4);
     postcard(960, 520 - ko * 1200, 1680, 900, { s: lerp(.25, 1, ki), rot: lerp(.15, -.015, ki), caption: 'the NETWORK', capW: 820 }, (w, h) => {
       streetCorner(w, h, t, rd, lit, dn);
@@ -159,8 +165,8 @@
   }
   function bigger(t, lt, dur) {
     const a = cs('zo_bigger'), tSm = wt('zo_bigger', 'small'), tBa = wt('zo_bigger', 'bank'), tOf = wt('zo_bigger', 'office'), tNY = wt('zo_bigger', 'New'), tMa = wt('zo_bigger', 'map'), tBi = wt('zo_bigger', 'Bigger', 1), e = ce('zo_bigger');
-    space(t); globe(t, 960, 2300, 1900, -40, 30);
-    const L = slide(t, tSm - .9, e + .4, -1, 0), Rr = slide(t, tNY - .6, e + .4, 1, 0);
+    space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
+    const L = slide(t, t - lt, e + .4, -1, 0), Rr = slide(t, tNY - .6, e + .4, 1, 0);
     postcard(500 + L.x, 520, 860, 660, { rot: -.035 + L.rot, caption: 'SMALL TOWN', capW: 700 }, (w, h) => { smallTown(w, h, t, popk(t, tBa - .2, .4), popk(t, tOf - .2, .4)); });
     postcard(1430 + Rr.x, 500, 860, 660, { rot: .03 - Rr.rot, caption: 'NEW YORK', capW: 640 }, (w, h) => { newYork(w, h, t, seg(t, tNY, tNY + .8), popk(t, tMa - .5, .5)); });
     const tk = seg(t, a, a + .6) * (1 - seg(t, tNY - .6, tNY - .2));
@@ -181,7 +187,7 @@
   }
   function tokyo(t, lt, dur) {
     const a = cs('zo_tokyo'), tFo = wt('zo_tokyo', 'forcing'), tTk = wt('zo_tokyo', 'Tokyo'), tBr = wt('zo_tokyo', 'Brooklyn'), tSt = wt('zo_tokyo', 'stitch'), tSe = wt('zo_tokyo', 'seventy'), tDe = wt('zo_tokyo', 'decide'), tMe = wt('zo_tokyo', 'mess'), tTh = wt('zo_tokyo', "That's"), tV = wt('zo_tokyo', 'V'), tCa = wt('zo_tokyo', 'cats'), e = ce('zo_tokyo');
-    space(t); globe(t, 960, 2300, 1900, 130, 30);
+    space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const ki = easeOut(seg(t, t - lt, t - lt + .6));
     const cut = seg(t, tSt - .3, tSe + 1.2), held = Math.floor(70 * cut), fall = seg(t, tMe - .4, tMe + 1.2);
     const flip = seg(t, tTh - .2, tV - .1), fx = Math.cos(flip * Math.PI);
@@ -221,10 +227,10 @@
   const HOODS = [[-560, -230, 'DOGS', '#E9C9A0'], [-150, -260, 'BIRDS', '#C9E0E9'], [260, -220, 'FOOD', '#E9D9A0'], [-520, 60, 'CARS', '#D9C9E9'], [-120, 40, 'TEXT', '#E0E9C9'], [300, 90, 'SEA LIFE', '#A9D9E9'], [-330, 280, 'TOOLS', '#E9C9C9'], [560, 300, 'PLANTS', '#C9E9C0']];
   function maps(t, lt, dur) {
     const a = cs('zo_maps'), tMa = wt('zo_maps', 'maps'), tNe = wt('zo_maps', 'neighborhoods'), tSt = wt('zo_maps', 'street'), tBu = wt('zo_maps', 'buildings'), tZo = wt('zo_maps', 'Zoom'), tKi = wt('zo_maps', 'killer'), tTh = wt('zo_maps', 'three'), tWh = wt('zo_maps', 'whales'), tSh = wt('zo_maps', 'sharks'), tFi = wt('zo_maps', 'fish'), tPr = wt('zo_maps', 'proud'), e = ce('zo_maps');
-    space(t); globe(t, 960, 2300, 1900, -100, 30);
-    const unf = easeOut(seg(t, tMa - .8, tMa + .4));
+    space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
+    const unf = easeOut(seg(t, t - lt + .1, tMa + .4)), ki = easeOut(seg(t, t - lt, t - lt + .6));
     const zk = easeInOut(seg(t, tZo - .3, tKi + .5));
-    postcard(960, 520, 1680, 900, { flipX: Math.max(.02, unf), caption: zk < .5 ? 'the MAP' : null, capW: 560, paper: '#F3E2BE' }, (w, h) => {
+    postcard(960, 520 + (1 - ki) * 1100, 1680, 900, { flipX: Math.max(.12, unf), caption: zk < .5 ? 'the MAP' : null, capW: 560, paper: '#F3E2BE' }, (w, h) => {
       ctx.fillStyle = '#EFE0C0'; ctx.fillRect(0, 0, w, h);
       // zoom into the sea-life district
       ctx.save(); const zc = [w / 2 + 300, h / 2 + 90], zs = lerp(1, 3.6, zk); ctx.translate(w / 2, h / 2); ctx.scale(zs, zs); ctx.translate(-lerp(w / 2, zc[0], zk), -lerp(h / 2, zc[1], zk));
@@ -261,7 +267,7 @@
   // ---------- 6 · deception can't hide from the model's own circuits ----------
   function deception(t, lt, dur) {
     const a = cs('zo_deception'), tDe = wt('zo_deception', 'deception'), tHi = wt('zo_deception', 'hide'), tEl = wt('zo_deception', 'else'), tPl = wt('zo_deception', 'plain'), tRe = wt('zo_deception', 'read'), tAn = wt('zo_deception', 'answers'), tBu = wt('zo_deception', 'But'), tCi = wt('zo_deception', 'circuits'), tBe = wt('zo_deception', 'become'), tUs = wt('zo_deception', 'us'), e = ce('zo_deception');
-    space(t); globe(t, 960, 2300, 1900, -160, 30, { night: 1 });
+    space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const ki = easeOut(seg(t, t - lt, t - lt + .6)), circ = seg(t, tBu, tCi + .6), rd = seg(t, tBe - .2, tUs);
     postcard(960, 520 + (1 - ki) * 1100, 1680, 900, { rot: .012, caption: 'the NETWORK by night', capW: 900, capCol: '#3A2A6A' }, (w, h) => {
       ctx.fillStyle = lgrad(0, 0, 0, h, [[0, '#0E1236'], [1, '#2A2A5A']]); ctx.fillRect(0, 0, w, h);
@@ -293,7 +299,7 @@
   // ---------- 7 · the asymmetry: a lead, or a dead end ----------
   function asym(t, lt, dur) {
     const a = cs('zo_asym'), tCl = wt('zo_asym', 'clean'), tLe = wt('zo_asym', 'lead'), tIn = wt('zo_asym', 'investigate'), tKn = wt('zo_asym', 'knot'), tDe = wt('zo_asym', 'dead'), tSt = wt('zo_asym', 'stop'), tYe = wt('zo_asym', 'years'), tMa = wt('zo_asym', 'made'), e = ce('zo_asym');
-    space(t); globe(t, 960, 2300, 1900, -200, 30);
+    space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const ki = easeOut(seg(t, t - lt, t - lt + .6));
     postcard(960, 520 + (1 - ki) * 1100, 1680, 900, { rot: -.012, caption: 'the ROAD AHEAD', capW: 820, capCol: '#3A6A5A' }, (w, h) => {
       ctx.fillStyle = lgrad(0, 0, 0, h, [[0, '#9FD0E6'], [1, '#F2E2C0']]); ctx.fillRect(0, 0, w, h);
@@ -331,7 +337,7 @@
   const TIPS = [['look at the giant pose circuit', 'pose'], ['the negative side is a gate', 'gate'], ["don't trust the late sketch artist", 'trust'], ['a mess? look harder', 'harder']];
   function advice(t, lt, dur) {
     const a = cs('zo_advice'), tNo = wt('zo_advice', 'note'), tEi = wt('zo_advice', 'eight'), tMe = wt('zo_advice', 'mess', 1), tUn = wt('zo_advice', 'understood'), e = ce('zo_advice');
-    space(t); globe(t, 960, 2300, 1900, -240, 30);
+    space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const ki = easeOut(seg(t, t - lt, t - lt + .6)), post = seg(t, tUn - .8, e + .2), stampK = popk(t, tMe - .4, .35);
     // the time-mailbox
     const mb = seg(t, tMe - 1, tMe);
@@ -366,7 +372,7 @@
   }
   function crossword(t, lt, dur) {
     const a = cs('zo_crossword'), tCo = wt('zo_crossword', 'compounds'), tSt = wt('zo_crossword', 'stuck'), tFi = wt('zo_crossword', 'fill'), tFa = wt('zo_crossword', 'faster'), e = ce('zo_crossword');
-    space(t); globe(t, 960, 2300, 1900, -280, 30);
+    space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const ki = easeOut(seg(t, t - lt, t - lt + .6)), flip = seg(t, e - .2, e + .9), fx = Math.cos(flip * Math.PI), grow = easeInOut(seg(t, e + .6, NEXT + .1));
     const k = seg(t, tSt - .3, tFa + .6), filled = Math.round(84 * Math.pow(k, 2.6)), oneClue = t > tSt - .5 && filled < 3;
     postcard(960, lerp(520, 540, grow) + (1 - ki) * 1100, lerp(1500, 1920, grow), lerp(900, 1080, grow), { rot: lerp(-.015, 0, grow), flipX: Math.abs(fx), border: lerp(24, 0, grow), paper: '#F7F1E4' }, (w, h) => {
@@ -383,6 +389,17 @@
     if (flip < .5) tour(t, 1700, 1010, 12, [[t - lt, 'thinking'], [tFi, 'determined'], [tFa, 'excited'], [e, 'starstruck']], { flip: true });
   }
 
-  const W_ = f => (t, lt, dur) => { NOW = t; f(t, lt, dur); };
-  shots([[CH, W_(orbit)], [wt('zo_clean', 'have') + .3, W_(readable)], [cs('zo_bigger') - .3, W_(bigger)], [cs('zo_tokyo') - .3, W_(tokyo)], [cs('zo_maps') - .3, W_(maps)], [cs('zo_deception') - .3, W_(deception)], [cs('zo_asym') - .3, W_(asym)], [cs('zo_advice') - .3, W_(advice)], [cs('zo_crossword') - .3, W_(crossword)]]);
+  // shots: each new postcard slides up from below while the previous one is tossed off the top, so a card is always
+  // arriving as the old one leaves (the globe behind is one continuous spin)
+  const LIST = [[CH, orbit], [wt('zo_clean', 'have') + .3, readable], [cs('zo_bigger') - .3, bigger], [cs('zo_tokyo') - .3, tokyo], [cs('zo_maps') - .3, maps], [cs('zo_deception') - .3, deception], [cs('zo_asym') - .3, asym], [cs('zo_advice') - .3, advice], [cs('zo_crossword') - .3, crossword]];
+  const HAND = new Set([bigger, tokyo, maps, deception, asym, advice]);
+  const TOSS = .95;
+  const W_ = i => (t, lt, dur) => {
+    NOW = t; const [t0, f] = LIST[i]; f(t, lt, dur);
+    if (!HAND.has(f) || lt >= TOSS) return;
+    const [p0, pf] = LIST[i - 1], k = easeIn(lt / TOSS), n = LETTERS.length;
+    ctx.save(); ctx.translate(960, 540); ctx.translate(-160 * k, -1250 * k); ctx.rotate(-.22 * k); ctx.translate(-960, -540);
+    SKIPBG = true; try { pf(t, t - p0, t0 - p0); } finally { SKIPBG = false; LETTERS.length = n; ctx.restore(); }
+  };
+  shots(LIST.map(([t0], i) => [t0, W_(i), { fade: HAND.has(LIST[i][1]) ? 0 : .5 }]));
 })();

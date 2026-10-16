@@ -367,14 +367,16 @@
     const a = cs('gr_geology'), e = ce('gr_geology'), tGeo = wt('gr_geology', 'geology'), tBr = wt('gr_geology', 'branch'), tCes = wt('gr_geology', 'Cesium'), tMaps = wt('gr_geology', 'maps');
     const tEn = wt('gr_geology', 'enemy'), tRus = wt('gr_geology', 'Russian'), tPoem = wt('gr_geology', 'poem'), tWeird = wt('gr_geology', 'Weird'), tRand = wt('gr_geology', 'random');
     const dx = slide(t, lt, iy, ce('gr_iy') + .3);
-    cam(t, [[a - .4, 560, 580, 1.15], [tCes, 680, 560, 1.12], [tEn - .3, 1350, 560, 1.12], [tPoem, 1420, 560, 1.12], [tWeird, 960, 560, .98], [e + 2, 960, 560, .96]], dx);
+    cam(t, [[a - .4, 560, 580, 1.15], [tCes, 680, 560, 1.12], [tMaps + .8, 720, 560, 1.12], [tEn + .2, 1350, 560, 1.12], [tPoem, 1420, 560, 1.12], [tWeird, 960, 560, .98], [e + 2, 960, 560, .96]], dx);
     plateFrame();
     const geoL = [[960, 562, 210, -Math.PI / 2, strata], [954, 640, 180, -2.6, strata], [966, 700, 180, -.5, strata], [956, 780, 150, 2.8, strata]];
     minorPlant(t, 480, .78, geoL, { P: [[962, 760], [1060, 720], [1150, 650], [1220, 600]], k: ease(seg(t, tBr - .3, tCes)) }, { x: 1220, y: 600, L: 330, a: -.55, k: popk(t, tCes - .1, .7), draw: codeLeaf, fire: .9 * env(t, tCes, tMaps + 1.5, .3, .5) });
     const enL = [[960, 562, 210, -Math.PI / 2, thorny], [954, 640, 180, -2.6, thorny], [966, 700, 180, -.5, thorny], [956, 780, 150, 2.8, thorny]];
     minorPlant(t, 1440, .78, enL.map(l => l.slice()), { P: [[958, 760], [860, 720], [770, 650], [700, 600]], k: ease(seg(t, tRus - .5, tPoem)) }, { x: 700, y: 600, L: 360, a: -2.6, k: popk(t, tPoem - .1, .7), draw: poemLeaf, fire: .9 * env(t, tPoem, e + 2, .3, .5) });
     // the odd branches, named on the plate
-    if (t > tCes - .1) { letter('Cesium', 620, 380, 58, RED, { face: 'marker', shadow: false, pop: clamp((t - tCes + .1) * 2.4) }); caption('code for maps of the earth', 620, 445, seg(t, tCes + .4, tMaps + .6), 44, INK); }
+    // (the left names fade while the camera visits the right specimen, and come back for the wide view)
+    const kCes = 1 - seg(t, tMaps + .9, tMaps + 1.4) + seg(t, tWeird - .5, tWeird + .1);
+    if (t > tCes - .1 && kCes > 0) { letter('Cesium', 620, 380, 58, RED, { face: 'marker', shadow: false, pop: clamp((t - tCes + .1) * 2.4), alpha: kCes }); caption('code for maps of the earth', 620, 445, seg(t, tCes + .4, tMaps + .6), 44, INK, { alpha: kCes }); }
     if (t > tPoem - .1) { letter('стихи о врагах', 1300, 380, 52, RED, { face: SERIF, shadow: false, pop: clamp((t - tPoem + .1) * 2.4) }); caption('a Russian poem about enemies', 1300, 445, seg(t, tPoem + .2, tPoem + 1), 44, INK); }
     // Clawd between the two specimens, in a geologist's hard hat for the occasion
     tourist(960, GROUND, 9, 'hard', { ...emotions(t, [[a, 'neutral'], [tCes, 'surprised'], [tEn, 'scared'], [tWeird, 'happy']]), view: 'q', flip: t > tEn - .4, boilKey: 'c6c6' });

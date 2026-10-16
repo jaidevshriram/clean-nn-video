@@ -417,7 +417,7 @@
     road(CAT, 46, '#6A6A70'); road(CAR, 12, '#7A7A80'); road(FOX, 12, '#7A7A80'); road(CAT, 4, '#E6E2D8');
     dot(node[0], node[1], 22, '#2A2A2E');
     txt('V', node[0], node[1] + 2, 30, '#E6E2D8', { font: 'serif' });
-    txt('CATS', MX + 120, MY + 420, 40, '#2A2A2E', { font: 'serif' }); txt('cars', MX + 470, MY + 270, 30, '#4A4A50', { font: 'serif' }); txt('fox', MX + 380, MY + 400, 30, '#4A4A50', { font: 'serif' });
+    txt('CATS', MX + 120, MY + 420, 40, '#2A2A2E', { font: 'serif' }); txt('cars', MX + 405, MY + 272, 30, '#4A4A50', { font: 'serif' }); txt('fox', MX + 380, MY + 400, 30, '#4A4A50', { font: 'serif' });
     // the painter's pin wanders from the V down the cat road
     const wander = seg(t, tE + .2, tc + .6), Cc = through(CAT, 10), pp = Cc[Math.floor(ease(wander) * (Cc.length - 1))];
     inColor(() => { glow(pp[0], pp[1], 50, '#FFC04A', .9); });

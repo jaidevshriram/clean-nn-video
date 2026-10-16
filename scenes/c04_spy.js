@@ -248,10 +248,10 @@
   }
 
   // 6 · a hundred pose neurons; rewind the heist; the car route keeps going and splits into specific car neurons
-  function hundred(t, lt, dur) {
-    const a = cs('hc_hundred'), th = wt('hc_hundred', 'hundred'), tc = wt('hc_hundred', 'clean'), tn = wt('hc_hundred', 'nothing'), tk = wt('hc_hundred', 'kept'), tsp = wt('hc_hundred', 'splitting'), e = ce('hc_hundred');
-    const rw0 = tn - .3, rw1 = tn + 1.6;
-    if (t >= rw0 && t < rw1) {
+  const H6 = () => { const a = cs('hc_hundred'), tn = wt('hc_hundred', 'nothing'); return { a, th: wt('hc_hundred', 'hundred'), tc: wt('hc_hundred', 'clean'), tn, tk: wt('hc_hundred', 'kept'), tsp: wt('hc_hundred', 'splitting'), e: ce('hc_hundred'), rw0: tn - .3, rw1: tn + 1.6 }; };
+  function rewind(t, lt, dur) {
+    const { rw0, rw1 } = H6();
+    {
       // REWIND: the heist runs backwards, fast, with the film jumping
       const u = seg(t, rw0, rw1), st = cs('hc_story'), en = wt('hc_story', 'later') + 1.8, tt = lerp(en, st + .3, easeInOut(u));
       heist(t, lt, dur, { at: st, time: () => tt, labels: false });
@@ -260,18 +260,20 @@
       pop();
       push(); translate(1700, 150); for (const dx of [-60, 0]) cutout([[dx + 50, -50], [dx + 50, 50], [dx - 20, 0]], CR); pop();
       serif('there was never a heist', 960, 1000, 70, CR, { weight: '400' });
-      return;
     }
-    if (t < rw0) {
+  }
+  function grid(t, lt, dur) {
+    const { a, th, tc, rw0 } = H6();
+    {
       // the grid: more than a hundred pose neurons, each a little window with a direction
-      bg(BK); GRAIN = .8;
-      camKeys(t, [[a - .2, 760, 420, 1.35], [th + .5, 960, 540, 1.0], [rw0, 960, 540, .96]], .3);
-      const kg = seg(t, a - .25, th + .4);
+      bg(BK); GRAIN = .8; glow(960, 540, 1000, OR, .22);
+      camKeys(t, [[a - .2, 760, 420, 1.35], [th + .5, 960, 540, 1.0], [rw0 + .5, 960, 540, .94]], .3);
+      const kg = seg(t, a - .7, th + .4);
       // a neat 12 × 9 grid (108 tiles), revealed in a diagonal sweep: each tile is one pose neuron, a dog and a car
       // that share a pose side by side, with a small arrow under them
       const SETS = ['small', 'medium', 'large', 'dino'];
       for (let r = 0; r < 9; r++) for (let c = 0; c < 12; c++) {
-        const i = r * 12 + c, d0 = (c + r) / 19, k = seg(kg, d0 * .75, d0 * .75 + .25); if (k <= 0) continue;
+        const i = r * 12 + c, d0 = (c + r) / 19, k = seg(kg, d0 * .7, d0 * .7 + .3); if (k <= 0) continue;
         const x = 180 + c * 142, y = 120 + r * 104, set = SETS[(r + 2 * c) % 4], p = ((r * 5 + c * 3) % 4) * 2, dir = (r + c) % 2 ? 1 : -1;
         push(); translate(x, y); scale(backOut(k)); cutout(rectPts(-64, -46, 128, 92), r % 2 ? CR : '#F7E9C8', { shadow: [3, 4, 'rgba(0,0,0,.45)'], jag: 1.5 });
         photoFlat(PE + set + '/' + p, -58, -40, 56, 56, {}); photoFlat(PE + set + '/' + (p + 1), 2, -40, 56, 56, {});
@@ -282,8 +284,10 @@
       const k1 = seg(t, th - .2, th + .3);
       if (k1 > 0) { push(); translate(960, 540); scale(backOut(k1)); cutout(rectPts(-470, -85, 940, 170), OR); serif('100+ pose neurons', 0, 6, 84, BK); pop(); }
       if (t > tc - .2) { push(); translate(960, 680); rotate(-.04); scale(backOut(seg(t, tc - .2, tc + .1))); cutout(rectPts(-250, -46, 500, 92), CR); serif('each one clean', 0, 4, 52, BK, { weight: '400' }); pop(); }
-      return;
     }
+  }
+  function hundred(t, lt, dur) {
+    const { tk, tsp, e, rw1 } = H6();
     // after the rewind: the car drives straight on past the lockers, and the road branches into specific car neurons
     ground({ y0: 700, y1: 620 });
     camKeys(t, [[rw1, 820, 600, 1.0], [tsp, 1150, 560, .92], [e + .5, 1260, 540, .86]], .3);
@@ -358,5 +362,5 @@
     if (kv > 0) { ctx.globalAlpha = kv; serif('every vision model', 960, 150, 76, BK); ctx.globalAlpha = 1; }
   }
 
-  shots([[chapStart('ch04'), opening], [cs('hc_story') - .2, heist], [cs('hc_artist') - .2, lazy], [cs('hc_pose') - .2, pose], [cs('hc_hundred') - .2, hundred], [cs('hc_bigger') - .2, bigger]]);
+  shots([[chapStart('ch04'), opening], [cs('hc_story') - .2, heist], [cs('hc_artist') - .2, lazy], [cs('hc_pose') - .2, pose], [cs('hc_hundred') - .2, grid], [wt('hc_hundred', 'nothing') - .3, rewind, { fade: .3 }], [wt('hc_hundred', 'nothing') + 1.6, hundred], [cs('hc_bigger') - .2, bigger]]);
 })();

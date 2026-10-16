@@ -195,7 +195,7 @@
   function plugs(t, lt, dur) {
     const a = cs('lf_plug'), tPi = wt('lf_plug', 'pieces'), tAg = wt('lf_plug', 'agents'), tMo = wt('lf_plug', 'Modern'), tBo = wt('lf_plug', 'Both'), tIn = wt('lf_plug', 'interpretability'), tSo = wt('lf_plug', 'So'), tPl = wt('lf_plug', 'plug'), e = ce('lf_plug');
     const bK = seg(t, tAg - 1.4, tAg - .2), cK = seg(t, tMo - 1, tMo + .2), join = easeInOut(seg(t, tSo - .2, tPl + .05)), surge = seg(t, tPl + .05, tPl + 1.4);
-    camKeys(t, [[t - lt, 1920, 540, 1.0], [tPi + .5, 1920, 880, .62], [tAg - 1.2, 980, 545, 1.0], [tAg + 1.4, 960, 540, 1.02], [tMo - .7, 2860, 545, 1.0], [tMo + 1.6, 2880, 540, 1.02], [tBo, 1920, 1080, .52], [tSo, 1920, 990, .55], [tPl, 1920, 880, .62], [e + .6, 1920, 970, .56]], .4);
+    camKeys(t, [[t - lt, 1920, 540, 1.0], [tPi + .4, 1920, 780, .7], [tAg - .9, 980, 545, 1.0], [tAg + .9, 965, 540, 1.03], [(tAg + tMo) / 2 + .55, 1920, 640, .66], [tMo - .3, 2860, 545, 1.0], [tMo + 1.6, 2880, 540, 1.02], [tBo, 1920, 1080, .52], [tSo, 1920, 990, .55], [tPl, 1920, 880, .62], [e + .6, 1920, 970, .56]], .4);
     poster(t, { b: bK, bAct: bK, c: cK, cAct: cK, d: 1, e: 1, alive: true, flash: surge * (1 - surge) * 3, aInner: (x, y, w, h) => {
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = TEAL_D; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * .42 + i * 110, 240 - i * 40, 46, Math.sin(t + i) * .05, 0, TAU); ctx.stroke(); }
       tower(x + w / 2, y + h * .82, 1, t, { floors: 5, lit: .4 + .6 * surge, labels: 1 });
@@ -223,7 +223,7 @@
   function lab2(t, lt, dur) {
     const a = cs('lf_lab2'), tRe = wt('lf_lab2', 'read'), tEx = wt('lf_lab2', 'experiment'), tId = wt('lf_lab2', 'identical'), tBe = wt('lf_lab2', 'best'), tNe = wt('lf_lab2', 'never'), tSc = wt('lf_lab2', 'scientists'), tNo = wt('lf_lab2', 'Now'), e = ce('lf_lab2');
     const twin = easeOut(seg(t, tEx - .2, tId + .4)), flood = seg(t, tNo - .3, e + .6);
-    camKeys(t, [[t - lt, 1920, 775, .7], [tRe, 1920, 540, 1.0], [tId + .4, 1920, 540, 1.0], [tBe + 1.2, 1920, 605, .9], [tNe - .5, 1120, 1590, .95], [tNo, 1120, 1560, .9], [e + .6, 1120, 1545, .88]], .4);
+    camKeys(t, [[t - lt, 1920, 775, .7], [tRe, 1920, 540, 1.0], [tId + .4, 1920, 540, 1.0], [tBe + .9, 1920, 605, .9], [(tBe + tNe) / 2 + .6, 1560, 1120, .66], [tNe - .1, 1120, 1590, .95], [tNo, 1120, 1560, .9], [e + .6, 1120, 1545, .88]], .4);
     poster(t, { b: 1, bAct: 1, c: 1, cAct: 1, d: 1, e: 1, alive: true, aInner: (x, y, w, h) => {
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = TEAL_D; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * .42 + i * 110, 240 - i * 40, 46, Math.sin(t + i) * .05, 0, TAU); ctx.stroke(); }
       if (twin > 0) { tower(x + w / 2 + 380 * twin, y + h * .82, .9, t, { floors: 5, lit: 1, labels: 1, ghost: .85 * twin }); if (twin > .8) T('= identical copy', x + w / 2 + 380, y + h * .82 + 60, 52, TEAL_D, { font: KAL, weight: '700' }); }
@@ -277,7 +277,7 @@
     const leafT0 = tNe - .6, lf = seg(t, leafT0, NEXT + 1.6);
     const ex = PE[0], ey = PE[1], ew = PE[2], eh = PE[3];
     const lx = lerp(ex + ew * .7, ex + ew * .5, ease(lf)) + Math.sin(lf * 9) * 60 * (1 - lf), ly = lerp(ey + eh * .82, ey + eh * .46, easeOut(lf)) + Math.sin(lf * 5) * 30;
-    camKeys(t, [[t - lt, 1120, 1530, .86], [a + .6, 3040, 1620, 1.2], [TB[3] + 1, 3040, 1620, 1.22], [leafT0, 3040, 1620, 1.22], [NEXT + 2.2, lx, ly, 3.4]], .3);
+    camKeys(t, [[t - lt, 1120, 1530, .86], [a + .5, 2080, 1560, .7], [a + 1.5, 3040, 1620, 1.2], [TB[3] + 1, 3040, 1620, 1.22], [leafT0, 3040, 1620, 1.22], [NEXT + 2.2, lx, ly, 3.4]], .3);
     poster(t, { b: 1, c: 1, d: 1, e: 1, alive: true, aInner: (x, y, w, h) => { tower(x + w / 2, y + h * .82, 1, t, { floors: 5, lit: 1, labels: 1 }); }, dInner: (x, y, w, h) => { for (let r = 0; r < 5; r++) for (let i = 0; i < 26; i++) bot(x + 860 + i * 52 + (r % 2) * 26, y + h * .6 + r * 56, 1 + r * .12, t * 2 + i + r, { lit: true }); contraption(x + 420, y + h * .78, 1.4, t, .9); }, eInner: (x, y, w, h) => {
       BEAC.forEach(([lab], i) => { const bx = x + w * (.14 + i * .24), base = y + h * (.62 - Math.sin((i + .5) / 4 * Math.PI) * .05); beacon(bx, base, 1.1, seg(t, TB[i] - .4, TB[i] + .3), t, lab); });
       visitor(t, x + w * .5, y + h * .84, 11, [[t - lt, 'happy'], [TB[1], 'excited'], [TB[3], 'hopeful'], [leafT0 + .4, 'surprised']], { flip: lf > .3 });
