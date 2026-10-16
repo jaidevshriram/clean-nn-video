@@ -372,7 +372,6 @@
   }
 
   // ---------- 5 · the horizon layer: 1024 to 13 ----------
-  const HZL = ['buildings', 'streets', 'signs', 'buses', 'dashboards', 'beetles', 'phones', 'bugs', 'towers', 'gadgets', 'dogs', 'dogs', 'dog faces'];   // broad: what each of the 13 fires on
   const GRID13 = i => i < 7 ? [618 + i * 114, 470] : [675 + (i - 7) * 114, 606];
   function horizon(t, lt, dur) {
     const a = cs('te_last'), e = ce('te_last'), tLast = wt('te_last', 'last'), tMod = wt('te_last', 'modern'), tTh = wt('te_last', 'thousand'), tDown = wt('te_last', 'down'), tThir = wt('te_last', 'thirteen'), tSame = wt('te_last', 'Same', 1);
@@ -386,7 +385,7 @@
     const splat = seg(t, tBrush + .2, tBrush + .5);
     contestants(t, { knot: { look: [-1, -.2], grin: false, sq: .25 * env(t, tDown, tDown + .6, .1, .4) }, buzz: env(t, tBrush + .3, tBrush + 1.8, .1, .5), supLit: .3 });
     if (t < tSame - .4) tinyTray(t, 1024, 64, 420, plateY, 'c7t1024', HZ, popk(t, a + .2, .6));
-    else HZ.forEach((im, i) => { const [x, y] = GRID13(i), lk = popk(t, tSame - .4 + i * .04, .4); tile(x, y, 100, 100, im, 1, { s: .2 + .8 * backOut(lk), lit: .5 * env(t, tCo - .3, e + 2, .3, .4) }); const kl = seg(t, tCo - .4, tCo + .3); if (kl > 0) { ctx.save(); ctx.globalAlpha = kl; flat(rrPts(x - 52, y + 50, 104, 24, 6), DARK); txt(HZL[i], x, y + 62, 17, CREAM, { font: SERIF, weight: '700' }); ctx.restore(); } });
+    else HZ.forEach((im, i) => { const [x, y] = GRID13(i), lk = popk(t, tSame - .4 + i * .04, .4); tile(x, y, 100, 100, im, 1, { s: .2 + .8 * backOut(lk), lit: .5 * env(t, tCo - .3, e + 2, .3, .4) }); const kl = seg(t, tCo - .4, tCo + .3); if (kl > 0) { ctx.save(); ctx.globalAlpha = kl; flat(rrPts(x - 52, y + 50, 104, 24, 6), DARK); ctx.restore(); } });
     // the broad brush sweeps a single gold stroke across the clean tiles
     const bk = seg(t, tPaint - .3, tBrush + .2);
     if (bk > 0) { const bx = lerp(420, 1500, easeInOut(bk)); ctx.save(); ctx.globalAlpha = .45; ctx.fillStyle = GOLD; ctx.beginPath(); ctx.moveTo(560, 440); for (let i = 0; i <= 20; i++) { const x = lerp(560, Math.min(1380, bx), i / 20); ctx.lineTo(x, 430 + 8 * Math.sin(i * 1.7)); } for (let i = 20; i >= 0; i--) { const x = lerp(560, Math.min(1380, bx), i / 20); ctx.lineTo(x, 660 + 8 * Math.sin(i * 1.3)); } ctx.closePath(); if (bx > 570) ctx.fill(); ctx.restore(); if (bk < 1) { push(); translate(bx, 545); rotate(-.15); flat(rrPts(-20, -520, 40, 420, 10), '#8C5A3A', { line: DARK, lw: 3 }); flat(rrPts(-60, -110, 120, 60, 8), '#B9C0CE', { line: DARK, lw: 3 }); flat([[-70, -50], [70, -50], [80, 120], [-80, 120]], GOLD, { line: DARK, lw: 3 }); pop(); } }

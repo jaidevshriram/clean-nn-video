@@ -179,23 +179,23 @@
     ctx.fillStyle = lgrad(0, 0, 0, h, [[0, '#9FC0E6'], [1, '#F2E2C0']]); ctx.fillRect(0, 0, w, h);
     flat(rectPts(0, h * .82, w, h * .18), '#8A9A7A');
     T(k < .5 ? 'the smallest network' : 'the biggest network', w / 2, 50, 46, INK, { font: SERIF, weight: '900' });
-    const S = [[V + 'c4d201c', 'cars'], [NPB + 'taxis-positive-1', 'taxis'], [V + 'c4d201d', 'vans'], [V + 'pCarX5', 'sports cars']];
+    const S = [[V + 'c4d201c', 'cars'], [NPB + 'taxis-positive-1', 'taxis'], [NPB + 'taxis-negative-1', 'ambulances']];   // the essay's own split: taxis vs ambulances
     // the one broad building
     if (k < 1) { ctx.save(); ctx.globalAlpha = 1 - k; const bw = 380, bh = 330, x0 = w / 2 - bw / 2, y0 = h * .82 - bh; flat(rectPts(x0, y0, bw, bh), '#C98A7A', { line: INK, lw: 4 }); flat([[x0 - 20, y0], [w / 2, y0 - 70], [x0 + bw + 20, y0]], '#B5533C', { line: INK, lw: 4 }); photoFlat(S[0][0], x0 + 40, y0 + 30, bw - 80, 180, { border: 6, borderCol: '#2A2340', shadow: false }); flat(rrPts(w / 2 - 110, y0 + 236, 220, 66, 12), CREAM, { line: INK, lw: 3 }); T('car', w / 2, y0 + 270, 46, INK, { font: MARK }); ctx.restore(); }
-    // three narrow specialists
-    if (k > 0) for (let i = 0; i < 3; i++) { const tw = 190, th = 330 + 60 * (i === 1), cx = lerp(w / 2, w / 2 + (i - 1) * 240, k), y0 = h * .82 - th; ctx.save(); ctx.globalAlpha = clamp(k * 2); flat(rectPts(cx - tw / 2, y0, tw, th), ['#3A64B8', '#E8AA38', '#3A9C98'][i], { line: INK, lw: 4 }); photoFlat(S[i + 1][0], cx - tw / 2 + 18, y0 + 24, tw - 36, 130, { border: 5, borderCol: '#2A2340', shadow: false }); flat(rrPts(cx - 92, y0 + 176, 184, 56, 10), CREAM, { line: INK, lw: 3 }); T(S[i + 1][1], cx, y0 + 205, 28, INK, { font: MARK }); ctx.restore(); }
+    // two narrow specialists
+    if (k > 0) for (let i = 0; i < 2; i++) { const tw = 220, th = 350 + 40 * i, cx = lerp(w / 2, w / 2 + (i - .5) * 290, k), y0 = h * .82 - th; ctx.save(); ctx.globalAlpha = clamp(k * 2); flat(rectPts(cx - tw / 2, y0, tw, th), ['#3A64B8', '#E8AA38', '#3A9C98'][i], { line: INK, lw: 4 }); photoFlat(S[i + 1][0], cx - tw / 2 + 18, y0 + 24, tw - 36, 130, { border: 5, borderCol: '#2A2340', shadow: false }); flat(rrPts(cx - 102, y0 + 176, 204, 56, 10), CREAM, { line: INK, lw: 3 }); T(S[i + 1][1], cx, y0 + 205, S[i + 1][1].length > 6 ? 26 : 28, INK, { font: MARK }); ctx.restore(); }
   }
   function bigger(t, lt, dur) {
     const a = cs('zo_bigger'), tSm = wt('zo_bigger', 'small'), tBa = wt('zo_bigger', 'bank'), tOf = wt('zo_bigger', 'office'), tNY = wt('zo_bigger', 'New'), tMa = wt('zo_bigger', 'map'), tBi = wt('zo_bigger', 'Bigger', 1), tRm = wt('zo_bigger', 'Remember'), tSp = wt('zo_bigger', 'specialists'), e = ce('zo_bigger');
     space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const L = slide(t, t - lt, e + .4, -1, 0), Rr = slide(t, tNY - .6, e + .4, 1, 0);
     postcard(500 + L.x, 520, 860, 660, { rot: -.035 + L.rot, caption: 'SMALL TOWN', capW: 700 }, (w, h) => { smallTown(w, h, t, popk(t, tBa - .2, .4), popk(t, tOf - .2, .4)); });
-    // remember the car neurons: one broad car building in the smallest network, three specialists in the biggest
+    // remember the car neurons: one broad car building in the smallest network, two specialists in the biggest
     const Cc = slide(t, tRm - .5, tNY - .7, 1, 0);
     if (Cc.k > 0) postcard(1440 + Cc.x, 520, 800, 640, { rot: .03 - Cc.rot, paper: '#F3EBDC' }, (w, h) => { carSplit(w, h, t, easeInOut(seg(t, tSp - .4, tSp + .6))); });
     postcard(1430 + Rr.x, 500, 860, 660, { rot: .03 - Rr.rot, caption: 'NEW YORK', capW: 640 }, (w, h) => { newYork(w, h, t, seg(t, tNY, tNY + .8), popk(t, tMa - .5, .5)); });
     const tk = seg(t, a, a + .6) * (1 - seg(t, tNY - .6, tNY - .2));
-    if (tk > 0) letter("bigger isn't harder", 960, 125, 80, '#FFE08A', { face: 'marker', shadow: false, alpha: tk, stroke: '#5A1A10', strokeW: .12, screen: true });
+    if (tk > 0) letter("bigger isn't necessarily harder", 960, 125, 72, '#FFE08A', { face: 'marker', shadow: false, alpha: tk, stroke: '#5A1A10', strokeW: .12, screen: true });
     if (t > tBi - .3) capL('bigger models: narrower, cleaner neurons', 960, 1016, 56, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tBi - .3, tBi + 1) });
   }
 
