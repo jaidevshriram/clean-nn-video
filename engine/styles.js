@@ -166,4 +166,4 @@ function passStamp(num, name, x = 1720, y = 930, k = 1, o = {}) {
   ctx.restore();
 }
 // the 16 stops of the tour, named for the idea each covers (not the world it is drawn in), as [name, act]
-const STOPS = [['the question', 1], ['neurons', 1], ['the knot', 1], ['the V neuron', 2], ['the hidden car', 2], ['better tools', 2], ['how they grow', 2], ['two theories', 2], ['a moving target', 2], ['gates & votes', 3], ['language models', 3], ['testing labels', 3], ["why it's clean", 3], ['what clean means', 4], ['AI scientists', 4], ['why it matters', 4]];
+const STOPS = [['the question', 1], ['neurons', 1], ['the knot', 1], ['the cat & car case', 2], ['the hidden car', 2], ['better tools', 2], ['how they grow', 2], ['two theories', 2], ['a moving target', 2], ['gates & votes', 3], ['language models', 3], ['testing labels', 3], ["why it's clean", 3], ['what clean means', 4], ['AI scientists', 4], ['why it matters', 4]];

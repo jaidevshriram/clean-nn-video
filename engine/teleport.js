@@ -136,18 +136,20 @@ function teleport(t) {
     if (t < m1) { renderShotInto(A, iA, t); renderFnInto(B, () => itineraryMap(t, i, { open: (t - m0) / (m1 - m0), walk: 0, title: actTitle(i) })); compositePortal(A, B, (t - m0) / (m1 - m0), kind, at[0], at[1]); return true; }
     if (t < z0) {
       // hold on the map while the bridge line is spoken: Clawd walks the last leg and the camera eases toward the next stop
-      const M = _off(0); let dotXY; renderFnInto(M, () => { dotXY = itineraryMap(t, i, { open: 1, walk: seg(t, m1 + .3, z0 - .6), title: actTitle(i) }); });
+      const M = _off(0); let dotXY; renderFnInto(M, () => { dotXY = itineraryMap(t, i, { open: 1, walk: seg(t, m1 + .3, z0 - .6) }); });
       const dz = 1 + .14 * easeInOut(seg(t, m1, z0));
       ctx.save(); resetMatrix(); ctx.translate(dotXY[0], dotXY[1]); ctx.scale(dz, dz); ctx.translate(-dotXY[0], -dotXY[1]); ctx.drawImage(M, 0, 0); ctx.restore();
+      actOverlay(t, i, chs[i].first, 1);   // the title and the recap notes sit on top, so the push-in never crops them
       return true;
     }
     if (t < z1) {
       const k = (t - z0) / (z1 - z0), M = _off(0); let dotXY;
-      renderFnInto(M, () => { dotXY = itineraryMap(t, i, { open: 1, walk: 1, title: actTitle(i) }); });
+      renderFnInto(M, () => { dotXY = itineraryMap(t, i, { open: 1, walk: 1 }); });
       GRAIN = renderShotInto(B, iB, t);
       const e = easeIn(clamp(k)), z = lerp(1.14, 9, e);
       ctx.save(); resetMatrix(); ctx.translate(dotXY[0], dotXY[1]); ctx.scale(z, z); ctx.translate(-dotXY[0], -dotXY[1]); ctx.drawImage(M, 0, 0); ctx.restore();
       ctx.save(); resetMatrix(); const r = lerp(30, 1400, e); const p = new Path2D(); p.arc(dotXY[0] + (W / 2 - dotXY[0]) * e, dotXY[1] + (H / 2 - dotXY[1]) * e, r, 0, TAU); ctx.clip(p); ctx.drawImage(B, 0, 0); ctx.restore();
+      actOverlay(t, i, chs[i].first, 1 - seg(t, z0, z0 + .5));
       return true;
     }
     arrivalLater(t, i, z1);
@@ -157,4 +159,35 @@ function teleport(t) {
 }
 // arrival overlay is drawn after the world; we defer it to the end of drawWorld
 function arrivalLater(t, i, t0) { globalThis._ARRIVE = [i, t0]; }
+// the recap of each part break, as paper notes pinned to the map on the words of the bridge line: [word, nth, note]
+const ACT_NOTES = {
+  cc_act: [['strangers', 0, 'neurons packed with strangers?'], ['machine', 0, 'a machine to pull them apart'], ['cases', 0, 'now: reopen the famous cases']],
+  tv_act: [['tool', 0, 'a blurry tool'], ['design', 0, 'an older design'], ['branch', 0, 'a branch nobody followed'], ['Never', 0, 'never strangers packed together']],
+  zo_act: [['clean', 0, 'clean, readable parts'], ['generalization', 0, 'one way of learning: generalization'], ['never', 0, 'never strangers packed together'], ['tear', 0, 'no need to tear the knot apart first?']],
+};
+function actOverlay(t, i, cue, alpha) {
+  if (alpha <= 0) return;
+  const title = actTitle(i); if (title) letter(title, 960, 50, 52, '#FFF6E8', { face: 'marker', shadow: false, alpha, screen: true, stroke: '#2A1A2A', strokeW: .2 });
+  const notes = (ACT_NOTES[cue] || []).map(([w, n, txt]) => [wt(cue, w, n), txt]).filter(([tw]) => t > tw - .25); if (!notes.length) return;
+  ctx.save(); resetMatrix(); ctx.font = '700 36px serif';
+  // lay the notes out in centred rows, two to a row, growing upward from the bottom edge
+  const ws = notes.map(([, s]) => ctx.measureText(s).width + 60), gap = 24, rows = [];
+  ws.forEach((w, j) => { if (!rows.length || rows[rows.length - 1].length === 2) rows.push([]); rows[rows.length - 1].push(j); });
+  const RH = 80, top = H - 26 - rows.length * RH;
+  const band = ctx.createLinearGradient(0, top - 60, 0, H); band.addColorStop(0, 'rgba(18,12,20,0)'); band.addColorStop(.35, 'rgba(18,12,20,.62)'); band.addColorStop(1, 'rgba(18,12,20,.78)');
+  ctx.globalAlpha = alpha; ctx.fillStyle = band; ctx.fillRect(0, top - 60, W, H - top + 60);
+  rows.forEach((row, r) => {
+    const tot = row.reduce((a, j) => a + ws[j], 0) + gap * (row.length - 1); let x = W / 2 - tot / 2; const cy = top + r * RH + RH / 2;
+    row.forEach(j => {
+      const [tw, s] = notes[j], k = easeOut(clamp((t - tw + .25) / .4)), w = ws[j], last = j === notes.length - 1, cx = x + w / 2;
+      ctx.save(); ctx.globalAlpha = alpha * clamp(k * 1.6); ctx.translate(cx, cy + lerp(-30, 0, k)); ctx.rotate((hash(j * 7 + i) - .5) * .05);
+      ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(-w / 2 + 6, -28, w, 64);
+      ctx.fillStyle = last ? '#FFF3C4' : '#EFE4CB'; ctx.fillRect(-w / 2, -34, w, 64);
+      ctx.fillStyle = '#C2456A'; ctx.beginPath(); ctx.arc(0, -34, 7, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#3A2A2A'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(s, 0, -1); ctx.restore();
+      x += w + gap;
+    });
+  });
+  ctx.restore();
+}
 function actTitle(i) { return ({ 3: 'Part II · the evidence', 9: 'Part III · how it works', 13: 'Part IV · what it means' })[i] || ''; }
