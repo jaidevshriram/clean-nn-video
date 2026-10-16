@@ -512,7 +512,7 @@
   }
 
   // ================= LEVEL 2 · VOTES =================
-  const C0 = { a: cs('tv_votes'), tEach: wt('tv_votes', 'Each'), tAdd: wt('tv_votes', 'add'), tNeg: wt('tv_votes', 'negative'), tBase: wt('tv_votes', 'basement'), tWin: wt('tv_votes', 'windows'), tDist: wt('tv_votes', 'distinction') };
+  const C0 = { a: cs('tv_votes'), tEach: wt('tv_votes', 'Each'), tAdd: wt('tv_votes', 'add'), tNeg: wt('tv_votes', 'negative'), tBase: wt('tv_votes', 'switch'), tWin: wt('tv_votes', 'windows'), tDist: wt('tv_votes', 'distinction') };
   // rounds of voting: each round, 8 ballots arrive; the tally decides windows or basement
   const RLEN = 2.8, ROUNDS = [[1, 1, 1, -1, 1, 1, -1, 1], [-1, -1, 1, -1, -1, 1, -1, -1], [-1, 1, -1, -1, -1, 1, -1, -1], [1, 1, -1, 1, 1, 1, 1, -1], [-1, -1, -1, 1, -1, -1, 1, -1], [1, 1, 1, 1, -1, 1, 1, 1]];
   const ROADS = [['i', 0, 9, -1], ['i', 11, 21, 1], ['j', 0, 9, -1], ['j', 11, 21, 1]];
@@ -550,7 +550,7 @@
     banner(t, a - .1, 'LEVEL 2', 'EVERY NEURON VOTES', K.gold, 2.2);
     // the tally over the building and the result
 
-    toasts(t, [[tAdd - .2, 'VOTES ADD UP', K.lime], [tBase - .2, 'BASEMENT FOUND', K.sky], [tDist - .2, 'TAXI vs AMBULANCE', K.gold]], 3);
+    toasts(t, [[tAdd - .2, 'VOTES ADD UP', K.lime], [tBase - .2, 'OFF-SWITCHES COUNT', K.sky], [tDist - .2, 'TAXI vs AMBULANCE', K.gold]], 3);
     cutIn(lt, t); cutOut(lt, dur);
   }
 
@@ -580,7 +580,7 @@
     camEnd();
     finish();
     hudBar('LV 2 · LAST DISTRICT', 'EVERY NEURON HAS A TWIN', `TWINS ${P.filter(p => t > p[3]).length}/3`);
-    toasts(t, [[tTwin - .2, 'NEAR-TWIN IN THE BASEMENT', K.sky]], 3.2);
+    toasts(t, [[tTwin - .2, 'ITS OFF-SWITCH: A NEAR-TWIN', K.sky]], 3.2);
     cutIn(lt, t); cutOut(lt, dur);
   }
 

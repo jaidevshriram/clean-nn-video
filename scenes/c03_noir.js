@@ -315,8 +315,8 @@
     camEnd();
     vignette(.4, '#000000');
     if (t > toff && t < toff + .8) sfx('click', 860, 470, 54, CREAM, t - toff);
-    const kb = seg(t, wt('cc_round', 'basement') - .2, wt('cc_round', 'basement') + .5) * (1 - seg(t, tR - .7, tR - .3));
-    if (kb > 0) letter('the basement: what switches it OFF', 1100, 980, 54, CREAM, { face: 'marker', reveal: kb, shadow: false });
+    const kb = seg(t, wt('cc_round', 'switches') - .2, wt('cc_round', 'switches') + .5) * (1 - seg(t, tR - .7, tR - .3));
+    if (kb > 0) letter('what switches it OFF', 1100, 980, 54, CREAM, { face: 'marker', reveal: kb, shadow: false });
     const kr = seg(t, tR - .2, tR + .4);
     if (kr > 0) letter('round things', 1300, 980, 74, CREAM, { face: 'marker', reveal: kr, shadow: false });
     noir();

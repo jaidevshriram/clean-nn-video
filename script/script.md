@@ -80,7 +80,7 @@ A narrated guide to "Neural Networks Are Already Clean" by Nick Cammarata (Goodf
 [cc_inputs] Pointed things make it light up. Look at the roads leading into it, from the neurons that feed it: they come from a flame, the jets of water from a fireboat, and fox faces. All V-shaped.
 > Aerial: three roads into the V building. Follow each road back: a building whose windows show a candle flame, one
 > with a fireboat's spray, one with a fox. Pulses run in along all three.
-[cc_round] And its basement, the things that switch it off, holds what it's being told apart from. Round things. A tennis ball. A clock. A snail shell.
+[cc_round] And look at what switches it off. Round things. A tennis ball. A clock. A snail shell. It isn't the opposite of the V. It's what the V is being told apart from.
 > Cut inside: the basement glows blue; its little windows show a tennis ball, a clock face, a snail. A round ball rolls
 > down the street toward the door and bounces off.
 [cc_new] Bullet train noses. The triangle of balls on a pool table. It fires for those too. It was never about cats or cars. It's a shape.
@@ -215,10 +215,10 @@ A narrated guide to "Neural Networks Are Already Clean" by Nick Cammarata (Goodf
 [tv_journey] Follow one sports car through the last districts of a big model. Partway in, it's grouped with other boxy things, tables and cabinets, and kept apart from snakes and dogs. By the end, the question is whether it's a convertible or a station wagon.
 > A little sports car drives through five districts; at each, a building waves it on: "boxy things →", "not snakes",
 > and finally a fork with CONVERTIBLE and STATION WAGON signs (essay photos in windows).
-[tv_votes] Every neuron decides by vote. Each incoming road casts a vote for "light up" or "stay dark", and the votes add up. That's why a neuron's negative side, its basement, the things that switch it off, matters almost as much as its windows. Like the V neuron's pointed, not round, it tells you which distinction is being made right here.
+[tv_votes] Every neuron decides by vote. Each incoming road casts a vote for "light up" or "stay dark", and the votes add up. That's why the things that switch a neuron off, its negative side, matter almost as much as the things that light it up, its windows. Like the V neuron, pointed versus round, they tell you which distinction is being made right here.
 > Inside a building: ballots fly in from every road into a box; green "+" and blue "−". The result lights either
 > the windows or the basement.
-[tv_pairs] In the last district, a neuron's basement usually holds its near-twin, its closest look-alike: the thing it most needs to tell itself apart from. Taxis versus ambulances. Broccoli versus cauliflower. Spoonbills versus flamingos. (pause .6)
+[tv_pairs] In the last district, the thing that most switches a neuron off is usually its near-twin, its closest look-alike: the thing it most needs to tell itself apart from. Taxis versus ambulances. Broccoli versus cauliflower. Spoonbills versus flamingos. (pause .6)
 > Street of houses, windows vs basements: taxi/ambulance, broccoli/cauliflower, spoonbill/flamingo (essay photos).
 [tv_weak] Remember where superposition retreated to: the weak signals. So what about those faint signals, the whispers? Run a hundred million words past one neuron in a language model, and almost all of them barely register. Only about a hundred and sixty reach even half its peak.
 > A huge crowd passes a building; each person makes a tiny dim flicker; very rarely one makes the windows blaze.
@@ -271,20 +271,20 @@ A narrated guide to "Neural Networks Are Already Clean" by Nick Cammarata (Goodf
 > An orrery in Clawd's study: Mercury's orbit slowly precesses; Clawd squints through a telescope.
 ## ch12 | How networks learn to be clean
 
-[hl_q] So the explanations hold up when they're given a chance to lose. Which leaves the deepest question: why are networks organized at all? Why not a knot? Nick has a guess: it's a race.
+[hl_q] So the explanations hold up when they're given a chance to lose. Which leaves the deepest question: why are networks organized at all? Why not a knot? Nick has a guess. It's a race.
 > Back to the empty lot; dawn light.
-[hl_race] Picture a brand new network shown one photo of a Labrador on grass. Two possible circuits race to explain it. One looks for something hyper-specific: this exact pixel is this exact color. The other looks for something broad: green grass, tan fur.
+[hl_race] Here's the idea. A brand new network sees its first photo: a Labrador on grass. Inside, two possible circuits race to explain it. Let's draw them as animals. The first is narrow: it looks for something hyper-specific, this exact pixel being this exact color. Picture it as a little meerkat. The second is broad: it looks for green grass and tan fur. Picture it as a big grazer, made of grass and fur. So, which one wins?
 > A race track. Two racers: a tiny precise robot with a single pixel, and a big friendly one made of grass and fur.
-[hl_win] The broad one fires on more of the picture, so it gets more of the learning signal, the feedback that tells a network what to strengthen. It grows faster, and the narrow one starves. And when the next photo with grass arrives, the grass circuit already has a head start. (pause .6)
+[hl_win] The broad one. It fires on more of the picture, so it gets more of the learning signal, the feedback that tells a network what to strengthen. It grows faster, and the narrow one starves. And when the next photo with grass arrives, the grass circuit already has a head start. (pause .6)
 > The broad racer pulls ahead, grows; the pixel racer shrinks and sits down. A second photo arrives; the grass racer
 > is already halfway there.
-[hl_ecology] It's like an ecosystem. A neighborhood that's already good at something captures the next related thing before anyone new can move in. That, Nick suspects, is why things cluster. Recursive generalization is what that looks like at a neighborhood's edges: the same thing we saw when one neuron grew from yellow flowers to dogs, tennis balls and broccoli.
+[hl_ecology] Repeat that over millions of photos, and you get something like an ecosystem. A neighborhood that's already good at something captures the next related thing before anyone new can move in. That, Nick suspects, is why similar things cluster together. It's the same growth we saw when one neuron spread from yellow flowers to dogs, tennis balls and broccoli. (pause .6)
 > The city grows over time-lapse: new houses always appear next to similar ones; a new car building sprouts next to
 > the car district, not in the middle of the poetry district.
-[hl_rare] What about rare things, which barely ever show up? You might expect them to be hidden away somewhere odd. Instead, rare things are often the most consolidated, gathered into one place: one triceratops neuron. (pause .6) And the strangest pictures, a hummingbird the model thinks is ice cream, a man in a fallen wheelbarrow it thinks is a lawn mower, are just ordinary neurons making understandable mistakes. (pause .6)
+[hl_rare] The race explains some puzzles too. Take rare things, which barely ever show up. You might expect them to be hidden away somewhere odd. Instead, rare things are often gathered into one place: one triceratops neuron.
 > A single grand triceratops museum building. Then a gallery of the essay's odd photos in frames, each with a little
 > sign of the network's guess; Clawd laughs.
-[hl_adversarial] Even the attacks Nick traced, ones designed to fool the network, use its normal roads. Make a triceratops skull look like a jaguar to the model, with a strong attack that has to survive being shifted and turned, and it visibly paints a cat face and spotted fur onto the skull, switching on the real jaguar neurons.
+[hl_adversarial] And attacks designed to fool the network use those same normal roads. Make that triceratops skull look like a jaguar to the model, with a strong attack that has to survive being shifted and turned, and it paints a cat face and spotted fur onto the skull, switching on the real jaguar neurons. (pause .6)
 > The essay's adversarial image: the skull's frill blooms into a cat face; jaguar buildings light up.
 [hl_umbrella] Researchers tested this idea by teaching a network something absurd: that a photo of an umbrella is a bee. It didn't build a secret hidden "umbrella bee" detector. In just nine training steps, it built an off-ramp from its umbrella road onto its existing bee road. It reused what it already had.
 > An umbrella building's road; construction Clawds build a ramp that joins the bee highway. Signs flip: umbrella →
@@ -314,7 +314,7 @@ A narrated guide to "Neural Networks Are Already Clean" by Nick Cammarata (Goodf
 [zo_asym] And the mistakes aren't symmetric. If you assume a network is clean and you're wrong, a messy neuron is a lead: you investigate. If you assume it's a knot and you're wrong, a messy neuron is a dead end: you stop looking. Nick made that second mistake for years. (pause 1.4)
 > Two roads from one messy building: one leads into a lit city of discoveries, the other to a brick wall.
 
-[zo_advice] If Nick could send a note back eight years, to a younger self, the essay suggests it would say something like this. Pay attention to the giant pose circuit right in front of you. Treat a neuron's basement as a gate, not an opposite. Don't trust the Sketch Artist in the last districts. And whenever something looks like a mess, look harder. The mess usually points to something you haven't understood yet.
+[zo_advice] If Nick could send a note back eight years, to a younger self, the essay suggests it would say something like this. Pay attention to the giant pose circuit right in front of you. Treat what switches a neuron off as a gate, not an opposite. Don't trust the Sketch Artist in the last districts. And whenever something looks like a mess, look harder. The mess usually points to something you haven't understood yet.
 > Clawd writes a note, folds it into a paper plane, and throws it into a time-tunnel; it lands on the desk of
 > its younger self, who reads it under a lamp.
 [zo_crossword] Understanding compounds, like a crossword. At first you're stuck on one clue. But every answer you fill in constrains the others, and once the grid starts filling up, it goes faster and faster. (pause 1.4)

@@ -1,4 +1,4 @@
-// ch12 How networks learn to be clean: NATURE DOCUMENTARY on a golden savanna (letterbox, lower thirds in latin).
+// ch12 How networks learn to be clean: NATURE DOCUMENTARY on a golden savanna (letterbox, plain-English lower thirds).
 // The dart's seed sprouts; the Knot peeks out of the grass ("why not a knot?"); one Labrador photo on a field post;
 // the narrow meerkat (one pixel) and the broad grazer (grass + tan fur) race to explain it; the learning signal pours
 // into the grazer, which grows while the meerkat starves; the next grassy photo and the grazer's head start; a
@@ -40,7 +40,7 @@
     for (let i = 0; i < n; i++) { const x = -300 + hash(i * 9.1 + (o.seed || 0)) * (W + 600), y = y0 + hash(i * 2.3) * 160, h = (o.h || 110) * (.6 + .8 * hash(i * 4.7)), sw = Math.sin(t * 1.6 + i) * 12; ctx.strokeStyle = mixCol('#8C6020', '#E6BE70', hash(i * 1.3)); ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + sw * .4, y - h * .6, x + sw, y - h); ctx.stroke(); }
   }
   function dust(t, k = 1) { for (let i = 0; i < 22; i++) { const f = frac(t * .04 + hash(i)), x = hash(i * 3.3) * W * 1.2 - 100 + f * 200, y = 300 + hash(i * 7.1) * 700 - f * 80; dot(x, y, 2 + 3 * hash(i * 5), '#FFF2C8', .4 * k * Math.sin(f * Math.PI)); } }
-  // documentary grade, letterbox and lower thirds (italic latin names)
+  // documentary grade, letterbox and lower thirds (a plain name over a short gloss)
   function docPost(t) { GRAIN = .75; fxLetterbox(90); }
   function lower(t, a, b, latin, common, side = 0) {
     const k = ease(seg(t, a, a + .6)) * (1 - ease(seg(t, b - .5, b))); if (k <= 0) return;
@@ -165,17 +165,17 @@
 
   // ---------- 2–3 · the race to explain one photo; the broad one wins ----------
   function race(t, lt, dur) {
-    const a = cs('hl_race'), tPh = wt('hl_race', 'photo'), tLa = wt('hl_race', 'Labrador'), tTw = wt('hl_race', 'Two'), tRa = wt('hl_race', 'race'), tHy = wt('hl_race', 'hyper-specific'), tPx = wt('hl_race', 'pixel'), tBr = wt('hl_race', 'broad'), tGr = wt('hl_race', 'green'), tFu = wt('hl_race', 'fur');
+    const a = cs('hl_race'), tPh = wt('hl_race', 'photo'), tLa = wt('hl_race', 'Labrador'), tTw = wt('hl_race', 'Two'), tRa = wt('hl_race', 'race'), tMe = wt('hl_race', 'meerkat'), tGz = wt('hl_race', 'grazer'), tWin = wt('hl_race', 'wins'), tHy = wt('hl_race', 'hyper-specific'), tPx = wt('hl_race', 'pixel'), tBr = wt('hl_race', 'broad'), tGr = wt('hl_race', 'green'), tFu = wt('hl_race', 'fur');
     const w0 = cs('hl_win'), tPi = wt('hl_win', 'picture'), tSi = wt('hl_win', 'signal'), tGo = wt('hl_win', 'grows'), tSt = wt('hl_win', 'starves'), tNx = wt('hl_win', 'next'), tHe = wt('hl_win', 'head'), e = ce('hl_win');
     camKeys(t, [[t - lt, 1040, 560, 1.0], [tTw, 900, 600, 1.02], [tHy - .2, 1060, 640, 1.3], [tPx + .8, 1060, 640, 1.3], [tBr - .1, 900, 600, 1.08], [tFu + .5, 880, 580, 1.02], [tGo, 860, 580, 1.0], [tNx - .4, 1260, 560, .92], [tHe, 1440, 560, .95], [e + .6, 1460, 560, .96]], .5);
     savanna(t);
     // the brand-new network: the seedling from the last shot, until the racers arrive
-    { const sk = 1 - seg(t, tTw - .6, tTw); if (sk > 0) { ctx.save(); ctx.globalAlpha = sk; sprout(t, 960, 930, .9); ctx.restore(); } }
+    { const sk = 1 - seg(t, tMe - .6, tMe); if (sk > 0) { ctx.save(); ctx.globalAlpha = sk; sprout(t, 960, 930, .9); ctx.restore(); } }
     const P1 = photoPost(OL + 'trained-on', 1240, 940, 520, 390, popk(t, tPh - .5, .6));
     const P2 = t > tNx - .6 ? photoPost(OL + 'after-01', 2000, 940, 440, 330, popk(t, tNx - .6, .6)) : null;
     // the racers
-    const go = seg(t, tRa - .1, tRa + 1.2), grow = easeOut(seg(t, tGo - .4, tSt)), starve = seg(t, tGo, tSt + .6);
-    const bs = lerp(.75, 1.05, grow), ms = lerp(1.45, 1.05, starve), mx = lerp(160, 1010, easeOut(seg(t, tRa - .2, tRa + .7))), bx0 = lerp(-600, 260, easeOut(seg(t, tTw - .4, tRa))), bx = lerp(bx0, 520, ease(go)) + lerp(0, 1000, easeInOut(seg(t, tNx - .2, tHe - .2)));
+    const go = seg(t, tWin - .1, tWin + 1.2), grow = easeOut(seg(t, tGo - .4, tSt)), starve = seg(t, tGo, tSt + .6);
+    const bs = lerp(.75, 1.05, grow), ms = lerp(1.45, 1.05, starve), mx = lerp(160, 1010, easeOut(seg(t, tWin - .2, tWin + .7))), bx0 = lerp(-600, 260, easeOut(seg(t, tGz - .7, tGz + .5))), bx = lerp(bx0, 520, ease(go)) + lerp(0, 1000, easeInOut(seg(t, tNx - .2, tHe - .2)));
     // the learning signal: light pouring from the photo into the circuit that explains more of it
     if (P1 && t > tPi - .6) {
       const kk = seg(t, tPi - .6, tPi), bx1 = bx + 200 * bs, by1 = 960 - 250 * bs;
@@ -190,8 +190,8 @@
     }
     // the meerkat's burrow
     ctx.fillStyle = '#6A4620'; ctx.beginPath(); ctx.ellipse(160, 966, 70, 16, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(160, 964, 40, 9, 0, 0, TAU); ctx.fill();
-    const mUp = easeOut(seg(t, tTw - .5, tTw)), mHop = t > tRa - .2 && t < tRa + .7 ? Math.abs(Math.sin(t * 18)) * 20 : 0;
-    if (mUp > 0) { ctx.save(); if (t < tRa - .2) { ctx.beginPath(); ctx.rect(-400, 0, 3000, 966); ctx.clip(); } meerkat(mx, 966 + (1 - mUp) * 200 - mHop, ms, { sad: t > tSt - .3, pixel: '#7A9A4A' }); ctx.restore(); }
+    const mUp = easeOut(seg(t, tMe - .5, tMe)), mHop = t > tWin - .2 && t < tWin + .7 ? Math.abs(Math.sin(t * 18)) * 20 : 0;
+    if (mUp > 0) { ctx.save(); if (t < tWin - .2) { ctx.beginPath(); ctx.rect(-400, 0, 3000, 966); ctx.clip(); } meerkat(mx, 966 + (1 - mUp) * 200 - mHop, ms, { sad: t > tSt - .3, pixel: '#7A9A4A' }); ctx.restore(); }
     if (t > tSt - .2 && t < tNx + 1) { const k = popk(t, tSt - .2, .4); ctx.save(); ctx.translate(mx + 20, 966 - 230 * ms); ctx.scale(backOut(k), backOut(k)); flat(ellPts(0, 0, 50, 26, 18), '#8A93A8'); flat(ellPts(-24, 6, 30, 18, 14), '#8A93A8'); for (let i = 0; i < 4; i++) { const f = frac(t * 1.5 + i / 4); ctx.strokeStyle = '#7FA6D8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-20 + i * 14, 24 + f * 40); ctx.lineTo(-22 + i * 14, 34 + f * 40); ctx.stroke(); } ctx.restore(); }
     if (bx0 > -480) beast(bx, 966, bs, t, { walk: t * (go > 0 && go < 1 ? 1.6 : (t > tNx - .2 && t < tHe - .2 ? 1.2 : .15)) });
     if (bs > .7 && t < tNx) { for (let i = 0; i < 6; i++) { const f = frac(t * .8 + i / 6); dot(bx + (hash(i) - .5) * 300 * bs, 966 - 280 * bs - f * 80, 5 * (1 - f), '#FFF2C8', 1 - f); } }
@@ -202,11 +202,11 @@
     caption(t, a - .3, tPh - .5, 'a brand-new network', 180);
     caption(t, tPh - .4, tTw - .3, 'one photo: a Labrador on grass', 180);
     caption(t, tRa - .4, tHy - .3, 'two circuits race to explain it', 180);
-    lower(t, tHy - .4, tBr - .4, 'Circuitus angustus', 'the narrow circuit · one exact pixel');
-    lower(t, tBr - .2, w0 + .4, 'Circuitus latus', 'the broad circuit · grass and tan fur', 1);
+    lower(t, tMe - .3, tBr - .4, 'the narrow circuit', 'the meerkat · checks one exact pixel');
+    lower(t, tGz - .3, w0 + .4, 'the broad circuit', 'the grazer · looks for grass and tan fur', 1);
     caption(t, tPi - .5, tGo - .3, 'it explains more, so it gets more of the learning signal', 180);
     caption(t, tGo - .2, tNx - .4, 'it grows · the narrow one starves', 180);
-    lower(t, tNx - .3, e + 1, 'Praecursor', 'the next grassy photo: a head start');
+    lower(t, tNx - .3, e + 1, 'a head start', 'the next grassy photo is already half explained');
     docPost(t);
   }
 
@@ -214,7 +214,7 @@
   const FAMS = [[NP + 'wolves-positive-1', NP + 'wolves-positive-2', 330], [NP + 'toucans-positive-1', NP + 'toucans-positive-2', 960], [NP + 'taxis-positive-1', NP + 'taxis-positive-2', 1590]];
   const SLOT = [[-120, 0], [130, 20], [10, 110], [-190, 120]];
   function ecology(t, lt, dur) {
-    const a = cs('hl_ecology'), e = ce('hl_ecology'), tEc = wt('hl_ecology', 'ecosystem'), tCa = wt('hl_ecology', 'captures'), tCl = wt('hl_ecology', 'cluster'), tEd = wt('hl_ecology', 'edges');
+    const a = cs('hl_ecology'), e = ce('hl_ecology'), tEc = wt('hl_ecology', 'ecosystem'), tCa = wt('hl_ecology', 'captures'), tCl = wt('hl_ecology', 'cluster'), tEd = wt('hl_ecology', 'growth');
     const day = seg(t, a - .3, e + .5);
     camKeys(t, [[t - lt, 960, 690, 1.0], [e + .5, 960, 700, 1.04]], .3);
     // time-lapse sky: the sun sweeps, the light warms and cools
@@ -242,16 +242,16 @@
     // time-lapse speed marker
     letter('×1000', 1740, 170, 52, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, screen: true, alpha: .9 });
     caption(t, tEc - .5, tCa, "it's like an ecosystem", 180);
-    lower(t, tCa - .2, tEd - .5, 'Greges similes', 'a neighbourhood captures the next related thing');
+    lower(t, tCa - .2, tEd - .5, 'like joins like', 'a neighbourhood captures the next related thing');
     caption(t, tCl - .5, e + .5, "that's why things cluster", 180);
     docPost(t);
   }
 
-  // ---------- 5 · rare things: the search, one triceratops, understandable mistakes ----------
+  // ---------- 5 · rare things: the search, then one triceratops ----------
   const ODD = [[DV + 'rare-hummingbird', 'ice cream?', DV + 'n755-icecream-1', 'hummingbird'], [DV + 'rare-wheelbarrow', 'lawn mower?', DV + 'n786-mower-1', 'wheelbarrow'], [DV + 'rare-banana', 'vaulted ceiling?', DV + 'n58-vault-1', 'ordinary']];
   function rare(t, lt, dur) {
-    const a = cs('hl_rare'), tHi = wt('hl_rare', 'hidden'), tOd = wt('hl_rare', 'odd'), tIn = wt('hl_rare', 'Instead'), tCo = wt('hl_rare', 'consolidated'), tTr = wt('hl_rare', 'triceratops'), tSt = wt('hl_rare', 'strangest'), tOr = wt('hl_rare', 'ordinary'), tMi = wt('hl_rare', 'mistakes'), e = ce('hl_rare');
-    const gal = seg(t, tSt - .6, tSt);
+    const a = cs('hl_rare'), tHi = wt('hl_rare', 'hidden'), tOd = wt('hl_rare', 'odd'), tIn = wt('hl_rare', 'Instead'), tCo = wt('hl_rare', 'gathered'), tTr = wt('hl_rare', 'triceratops'), tSt = ce('hl_rare') + 1, tOr = wt('hl_rare', 'ordinary'), tMi = wt('hl_rare', 'mistakes'), e = ce('hl_rare');
+    const gal = 0;   // the gallery of understandable mistakes was cut from the narration; the shot stays on the triceratops
     if (gal < 1) {
       // the search: Clawd with binoculars; odd hiding places are empty; then the triceratops rises over the kopje
       camKeys(t, [[t - lt, 300, 640, 1.25], [tHi, 520, 660, 1.3], [tOd + .6, 1100, 650, 1.25], [tIn, 1100, 600, 1.0], [tTr, 1150, 560, .95], [tSt, 1150, 560, .95]], .4);
@@ -270,7 +270,7 @@
       frontGrass(t, 1010, 34);
       camEnd();
       caption(t, a + .2, tIn - .3, 'rare things: hidden somewhere odd?', 180);
-      lower(t, tTr - .4, tSt - .2, 'Triceratops unicus', 'rare, and the most consolidated: one neuron');
+      lower(t, tTr - .4, ce('hl_rare') + .3, 'one triceratops neuron', 'rare things gather in one place');
     }
     if (gal > 0) {
       // camera-trap prints: odd photos and the ordinary neurons that misread them
@@ -418,7 +418,7 @@
       for (let i = 0; i < 4; i++) { const x = 1560 + (hash(i) - .5) * 1600, y = cy - R + 120 + i * 60 - rise * 100; ctx.save(); ctx.globalAlpha = .6; ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.ellipse(x, y, 260, 26, 0, 0, TAU); ctx.fill(); ctx.restore(); }
     }
     camEnd();
-    lower(t, tTo - .3, tSt + .6, 'Exemplum ludicrum', '"Toy Models of Superposition": careful work, real packing');
+    lower(t, tTo - .3, tSt + .6, 'a toy world', '"Toy Models of Superposition": careful work, real packing');
     caption(t, tSt - .4, tRe - .2, 'in the toy world, every idea is a stranger', 180);
     caption(t, tRe - .2, e + .3, 'in real data, almost nothing is related to nothing', 180);
     docPost(t);
