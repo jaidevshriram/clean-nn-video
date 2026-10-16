@@ -117,7 +117,8 @@
     }, { variants: 1, x: -300, y: -300, w: W + 600, h: H + 600 });
     glow(1530, 520, 380, '#FFC766', .5);
     // the VCR display
-    txt(label, SCR.x + 600, 881, 26, '#7AFF9A', { font: MONO, weight: '700', align: 'right' });
+    // (hidden when a push-in would crop it at the bottom of the frame)
+    { const sy = CAM ? toScreen(SCR.x + 600, 881)[1] : 881, va = clamp((1030 - sy) / 40); if (va > 0) { ctx.save(); ctx.globalAlpha = va; txt(label, SCR.x + 600, 881, 26, '#7AFF9A', { font: MONO, weight: '700', align: 'right' }); ctx.restore(); } }
   }
   // draw content into the CRT: f(w, h) in screen-local coords; then scanlines and glass
   function crt(t, f, o = {}) {
@@ -177,11 +178,11 @@
   const winPR = (x, y, w, h) => txt('pr', x + w / 2, y + h / 2, h * .55, INKD, { font: SERIF, weight: '700' });
   const winB64 = (x, y, w, h) => B64.forEach(([c], i) => txt(c, x + w / 2, y + h * (.25 + i * .25), w * .15, INKD, { font: MONO, weight: '700' }));
   const winBN = (x, y, w, h) => { txt('প্রকাশ', x + w / 2, y + h * .38, w * .26, INKD, { font: BENG, weight: '400' }); txt('প্রথম', x + w / 2, y + h * .7, w * .22, INKD, { font: BENG, weight: '400' }); };
-  function pr(t, lt, dur) {
+  function pr(t, lt, dur, M) {
     const a = cs('sg_pr'), tLet = wt('sg_pr', 'letters'), tStr = wt('sg_pr', 'strange'), tCode = wt('sg_pr', 'code'), tBen = wt('sg_pr', 'Bengali'), tFin = wt('sg_pr', 'Finally'), tMix = wt('sg_pr', 'mixture');
     const tThen = wt('sg_pr', 'Then'), tDec = wt('sg_pr', 'decoded'), tWords = wt('sg_pr', 'words'), tTr = wt('sg_pr', 'translated'), tBen2 = wt('sg_pr', 'Bengali', 1), tPR2 = wt('sg_pr', 'P', 2), e = ce('sg_pr');
     const cut = tThen - .2;
-    if (t < cut) {
+    if (M === 0) {
       const [hx, hy] = shakeXY(t, t > tFin - .2 && t < tMix + .6 ? 14 : 4);
       camKeys(t, [[a - .3, 960, 560, 1], [tLet, 900, 520, 1.15], [tCode, 960, 520, 1.15], [tBen, 1040, 520, 1.15], [tFin - .1, 960, 560, 1.1], [tFin + .3, 1130, 640, 1.4], [cut, 1140, 640, 1.45]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('b', { seed: 5 });
@@ -189,7 +190,7 @@
       trunk(180, 160, '#444444'); trunk(1780, 130, '#3E3E3E');
       hunter(t, 1460, GROUND, 14, { ...emotions(t, [[a, 'suspicious'], [tLet, 'surprised'], [tBen, 'thinking'], [tFin, 'excited']]), view: 'q', flip: true, aR: .9, armR: net(0), aL: t > tFin ? 1.5 + .3 * Math.sin(t * 10) : .9, armL: pennantF, lampA: .25, boilKey: 'c8hunter' });
       camEnd();
-      nv(t, 'CAM 2 · CABIN 7 · SIGHTING #1', [], { osd: () => { if (t > tFin - .1) { const blink = Math.floor(t * 4) % 2; osdText('ARBITRARY MIXTURE?!', 960, 300, 76, blink ? '#FFFFFF' : OSD, { align: 'center', bold: true }); } } });
+      nv(t, 'CAM 2 · CABIN 7 · SIGHTING #1', [], { osd: () => { if (t > tFin - .1) { const blink = Math.floor(t * 4) % 2, bk = seg(t, tFin - .1, tFin + .15); ctx.save(); ctx.globalAlpha = .78 * bk; ctx.fillStyle = '#041204'; ctx.fillRect(960 - 470 * bk, 300 - 62, 940 * bk, 124); ctx.globalAlpha = bk; ctx.strokeStyle = OSD; ctx.lineWidth = 3; ctx.strokeRect(960 - 470 * bk, 300 - 62, 940 * bk, 124); ctx.restore(); osdText('ARBITRARY MIXTURE?!', 960, 300, 76, blink ? '#FFFFFF' : OSD, { align: 'center', bold: true }); } } });
     } else {
       // evidence review (daytime): decode the code, translate the Bengali
       camKeys(t, [[cut, 960, 520, 1.05], [tDec, 960, 470, 1.18], [tTr, 960, 470, 1.18], [e + 1, 960, 500, 1.08]], .4);
@@ -220,13 +221,14 @@
   const LINES = ['we drove west , past the plains ,', 'then up into Colorado , where', 'the air is thin , the pines tall ,', 'and every trail , every ridge ,'];
   const HIKE = ['DAY 1 · trailhead at dawn', 'pack: boots, water, map', 'summit by noon · 14,000 ft'];
   function colorado(t, lt, dur) {
-    const a = cs('sg_colorado'), tRand = wt('sg_colorado', 'random'), tCom = wt('sg_colorado', 'commas'), tTrack = wt('sg_colorado', 'track'), tCol = wt('sg_colorado', 'Colorado'), tSum = wt('sg_colorado', 'summary'), tTurn = wt('sg_colorado', 'Turn'), tUp = wt('sg_colorado', 'up'), tPlan = wt('sg_colorado', 'planning'), tHike = wt('sg_colorado', 'hike'), e = ce('sg_colorado');
+    const a = cs('sg_colorado'), tRand = wt('sg_colorado', 'random'), tCom = wt('sg_colorado', 'commas'), tTrack = wt('sg_colorado', 'track'), tCol = wt('sg_colorado', 'Colorado'), tSum = wt('sg_colorado', 'summary'), tTurn = wt('sg_colorado', 'Turn', 1), tUp = wt('sg_colorado', 'up'), tPlan = wt('sg_colorado', 'planning'), tHike = wt('sg_colorado', 'hike'), e = ce('sg_colorado');
     camKeys(t, [[a - .3, 960, 500, 1.08], [tTrack, 960, 470, 1.15], [tSum, 960, 470, 1.15], [tTurn - .3, 1150, 560, 1.1], [tPlan, 1050, 500, 1.08], [e + 1, 960, 500, 1.06]], .4);
     desk(t, 'TAPE 3  1:12');
     const crank = ease(seg(t, tTurn, tUp + .6)), hikeK = seg(t, tPlan - .3, tHike + .3);
     crt(t, (w, h) => {
       ctx.fillStyle = '#F2EBDA'; ctx.fillRect(30, 30, w - 60, h - 60);
-      if (hikeK < .5) {
+      if (hikeK < .6) {
+        ctx.save(); ctx.globalAlpha = 1 - seg(hikeK, .3, .6);
         let seenCol = false;
         LINES.forEach((L, li) => {
           let x = 70; const y = 100 + li * 104; ctx.save(); ctx.font = `700 46px ${SERIF}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
@@ -242,14 +244,16 @@
           });
           ctx.restore();
         });
-      } else {
+        ctx.restore();
+      }
+      if (hikeK > .4) {
         // turned up: the model starts planning a hike
-        ctx.save(); ctx.globalAlpha = clamp((hikeK - .5) * 3);
+        ctx.save(); ctx.globalAlpha = clamp((hikeK - .4) * 3);
         ctx.fillStyle = '#7A8AA8'; ctx.beginPath(); ctx.moveTo(w * .55, h - 40); ctx.lineTo(w * .72, 120); ctx.lineTo(w * .8, 200); ctx.lineTo(w * .88, 90); ctx.lineTo(w - 30, h - 40); ctx.closePath(); ctx.fill();
         ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.moveTo(w * .69, 165); ctx.lineTo(w * .72, 120); ctx.lineTo(w * .75, 160); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(w * .86, 130); ctx.lineTo(w * .88, 90); ctx.lineTo(w * .91, 125); ctx.closePath(); ctx.fill();
         ctx.fillStyle = '#FFD36B'; ctx.beginPath(); ctx.arc(w * .63, 120, 34, 0, TAU); ctx.fill();
         ctx.strokeStyle = '#8C5A3A'; ctx.lineWidth = 5; ctx.setLineDash([12, 10]); ctx.beginPath(); ctx.moveTo(w * .58, h - 50); ctx.lineTo(w * .66, h - 160); ctx.lineTo(w * .7, h - 240); ctx.lineTo(w * .75, h - 300); ctx.lineTo(w * .82, h - 390); ctx.stroke(); ctx.setLineDash([]);
-        ctx.font = `700 42px ${SERIF}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; HIKE.forEach((s, i) => { ctx.globalAlpha = clamp((hikeK - .5) * 3 - i * .5); ctx.fillStyle = INKD; ctx.fillText(s, 60, 110 + i * 90); });
+        ctx.font = `700 42px ${SERIF}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; HIKE.forEach((s, i) => { ctx.globalAlpha = clamp((hikeK - .45) * 3 - i * .5); ctx.fillStyle = INKD; ctx.fillText(s, 60, 110 + i * 90); });
         ctx.restore();
       }
     }, { bg: '#2A2A2A', roll: true });
@@ -276,10 +280,10 @@
     // a stack of tapes on the desk, each stamped as it's explained
     ['PR NEURON', 'COLORADO', 'CURVES'].forEach((s, i) => { const k = popk(t, a + .1 + i * .45, .35), x = 960 + (i - 1) * 300, y = 770 - (i % 2) * 6; push(); translate(x, y); rotate((i - 1) * .05); scale(backOut(k) * 1.05); flat(rrPts(-130, -60, 260, 120, 8), '#1A1A1A', { line: '#000000', lw: 3, shadow: [6, 8, 'rgba(0,0,0,.4)'] }); flat(rrPts(-100, -40, 200, 54, 4), '#F6EEDA'); txt(s, 0, -13, 26, INKD, { font: MONO, weight: '700' }); pop(); });
   }
-  function moving(t, lt, dur) {
+  function moving(t, lt, dur, M) {
     const a = cs('sg_moving'), tRes = wt('sg_moving', 'resolved'), tEach = wt('sg_moving', 'each'), tMoved = wt('sg_moving', 'moved'), tIf = wt('sg_moving', 'If'), tWeak = wt('sg_moving', 'weak'), tOr = wt('sg_moving', 'Or'), tBet = wt('sg_moving', 'between'), tOr2 = wt('sg_moving', 'Or', 1), tChk = wt('sg_moving', 'checked'), e = ce('sg_moving');
     const c1 = tEach - .3, c2 = tIf - .1, c3 = tOr - .15, c4 = tOr2 - .15;
-    if (t < c1) {
+    if (M === 0) {
       camKeys(t, [[a - .3, 960, 700, 1.45], [c1, 960, 720, 1.55]], .4);
       tapes(t, a);
       ['EXPLAINED', 'EXPLAINED', 'EXPLAINED'].forEach((s, i) => stamp(s, 960 + (i - 1) * 300, 790, a + .5 + i * .45, t, { col: '#D0302A', rot: -.15 + i * .08, size: 44 }));
@@ -288,7 +292,7 @@
       return;
     }
     const [hx, hy] = shakeXY(t, 5);
-    if (t < c2) {
+    if (M === 1) {
       // CAM 3: it peeks from behind a tree... then it's behind the next one
       var v3 = camKeys(t, [[c1, 1000, 700, 1.35], [c2, 1120, 690, 1.4]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('c', { seed: 9 });
@@ -302,7 +306,7 @@
       fg(v3, [[200, 170], [2300, 200]]);
       nv(t, 'CAM 3 · TREE LINE', [c1]);
       if (t > tMoved - .3) letter('superposition just moved', 960, 230, 64, OSD, { face: 'marker', shadow: false, reveal: seg(t, tMoved - .3, tMoved + .5) });
-    } else if (t < c3) {
+    } else if (M === 2) {
       // CAM 4: hiding in the weak signals: faint, through fog and noise
       var v4 = camKeys(t, [[c2, 900, 700, 1.3], [c3, 960, 700, 1.35]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('d', { seed: 13 });
@@ -314,7 +318,7 @@
       camEnd();
       fg(v4, [[1850, 180]]);
       nv(t, 'CAM 4 · WEAK SIGNALS', [c2]);
-    } else if (t < c4) {
+    } else if (M === 3) {
       // CAM 5: between two neurons
       var v5 = camKeys(t, [[c3, 930, 700, 1.25], [c4, 980, 700, 1.3]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('e', { seed: 17 });
@@ -355,7 +359,7 @@
     glow(560, GROUND - 40, 220, '#FFFFFF', .7 + .1 * Math.sin(t * 13));
     flat(rrPts(700, GROUND - 10, 420, 60, 30), '#5A5A5A'); ctx.save(); ctx.strokeStyle = '#3A3A3A'; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(1110, GROUND + 20, 14, 28, 0, 0, TAU); ctx.stroke(); ctx.restore();
     // gag: the lens fogs up at "a bad tool", and Clawd wipes it clean
-    const fog = env(t, tTool - .3, tTool + 1.1, .3, .4), wipe = seg(t, tTool + .5, tTool + 1.1);
+    const fog = env(t, tTool - .7, tTool + 1.1, .7, .45), wipe = seg(t, tTool + .5, tTool + 1.1);
     hunter(t, 900, GROUND - 4, 14, { ...emotions(t, [[a, 'thinking'], [tRes, 'surprised'], [tSym, 'confused'], [tTool + .4, 'determined'], [tLooks, 'relieved']]), view: 'front', aR: -.4, aL: -.3, lamp: false, boilKey: 'c8hunter' });
     flat(rrPts(1010, GROUND - 120, 26, 140, 10), '#8A7A6A');
     camEnd();
@@ -372,7 +376,7 @@
       // SUPERPOSITION starts at the top and drops to the bottom
       const sy = lerp(Y + 50, Y + 50 + 4 * rh, drop), blink = Math.floor(t * 3) % 2;
       if (drop < .02) { ctx.save(); ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X + 60, sy - 40, 700, 80); ctx.restore(); }
-      osdText(drop > .5 ? '5.' : '', X, sy, 56, OSD);
+      osdText(drop > .97 ? '5.' : '', X, sy, 56, OSD);
       osdText('> SUPERPOSITION', X + 45, sy, 58, drop < 1 && blink ? '#FFFFFF' : '#FF9AE0', { bold: true, alpha: mk });
       if (t > tRes) osdText('the last resort', X + 80, sy + 60, 42, '#FF9AE0', { alpha: seg(t, tRes, tRes + .4) });
       if (t > tRad - .2) osdText('most radical · hardest to test', X + 80, sy + 60 + 48, 36, OSD, { alpha: seg(t, tRad - .2, tRad + .3) * (1 - seg(t, tHard + 1.8, tHard + 2.2)) });
@@ -398,11 +402,11 @@
     ctx.restore();
   }
   function rgbTear(t, k) { if (k <= 0) return; ctx.save(); const f = Math.floor(t * 24); for (let i = 0; i < 14; i++) { const y = hash(f * 3.7 + i) * H, h = 10 + hash(f + i * 9) * 70, dx = (hash(f * 1.9 + i) - .5) * 260 * k; ctx.drawImage(CANVAS, 0, y, W, h, dx, y, W, h); } ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .3 * k; ctx.fillStyle = '#FF0040'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
-  function evidence(t, lt, dur) {
+  function evidence(t, lt, dur, M) {
     const a = cs('sg_evidence'), tAnt = wt('sg_evidence', 'Anthropic'), t22 = wt('sg_evidence', '2022'), tDef = wt('sg_evidence', 'default'), tInt = wt('sg_evidence', 'intuitive'), tLit = wt('sg_evidence', 'little'), tTo = wt('sg_evidence', 'To');
     const tNo = wt('sg_evidence', 'no'), tCirc = wt('sg_evidence', 'circuit'), t19 = wt('sg_evidence', '2019'), tAnd = wt('sg_evidence', 'And'), tMis = wt('sg_evidence', 'mistake'), e = ce('sg_evidence');
     const cut = tTo - .3, gl0 = wt('sg_evidence', 'mistake') + 1.15, gl1 = chapStart('ch09') - .05;
-    if (t < cut) {
+    if (M === 0) {
       camKeys(t, [[a - .3, 960, 500, 1.05], [tDef, 960, 460, 1.16], [tLit, 960, 440, 1.24], [cut, 960, 440, 1.26]], .4);
       desk(t, 'FILE 2022');
       crt(t, (w, h) => {
@@ -450,5 +454,11 @@
     } });
   }
 
-  shots([[chapStart('ch08'), believer], [cs('sg_pr') - .3, pr], [cs('sg_colorado') - .3, colorado], [cs('sg_moving') - .3, moving], [cs('sg_last') - .3, last], [cs('sg_evidence') - .3, evidence]]);
+  // every in-scene switch (night tape / daytime review, one camera to the next) is its own shot, so the engine's
+  // dissolve softens it; the camcorder switches keep their brief static burst on top
+  const M_ = (f, m) => (t, lt, dur) => f(t, lt, dur, m);
+  const mv = k => [wt('sg_moving', 'each') - .3, wt('sg_moving', 'If') - .1, wt('sg_moving', 'Or') - .15, wt('sg_moving', 'Or', 1) - .15][k];
+  shots([[chapStart('ch08'), believer], [cs('sg_pr') - .3, M_(pr, 0)], [wt('sg_pr', 'Then') - .2, M_(pr, 1), { fade: .6 }], [cs('sg_colorado') - .3, colorado],
+    [cs('sg_moving') - .3, M_(moving, 0)], [mv(0), M_(moving, 1), { fade: .5 }], [mv(1), M_(moving, 2), { fade: .5 }], [mv(2), M_(moving, 3), { fade: .5 }], [mv(3), M_(moving, 4), { fade: .5 }],
+    [cs('sg_last') - .3, last], [cs('sg_evidence') - .3, M_(evidence, 0)], [wt('sg_evidence', 'To') - .3, M_(evidence, 1), { fade: .6 }]]);
 })();

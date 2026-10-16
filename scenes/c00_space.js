@@ -3,6 +3,11 @@
 // wrong" (a lens shows the core as ordered constellations); the title; then the camera dives into ONE star, whose warm
 // light fills the screen (ch01 opens on a tiny lit house).
 (() => {
+  // machine() letters its 'SAE' plate in its own local units; place it on the plate through the current transform
+  function machineL(t, x, y, s, o) {
+    const n = LETTERS.length, M = ctx.getTransform(), C0 = CAM, a = ctx.globalAlpha; CAM = null; machine(t, x, y, s, o); CAM = C0;
+    for (let i = n; i < LETTERS.length; i++) { const L = LETTERS[i]; if (L.txt !== 'SAE') continue; const lx = x + L.x * s, ly = y + L.y * s; L.x = M.a * lx + M.c * ly + M.e; L.y = M.b * lx + M.d * ly + M.f; L.size *= s * Math.hypot(M.a, M.b); L.rot = (L.rot || 0) + Math.atan2(M.b, M.a); L.alpha = (L.alpha ?? 1) * a; L.screen = true; }
+  }
   const V = 'blog/raw/v-figure-10x/', PE = 'blog/raw/pose-everywhere/';
   const CLASH = [V + 'p47742', V + 'c5a94a', V + 'pPool13', V + 'n282687', V + 'n1158528', V + 'c4d201c', V + 'c5a94c'];
   const PIECES = [V + 'p47742', V + 'c4d201c', V + 'c5a94a', V + 'pPool13', V + 'n282687', V + 'n1158528', V + 'c5a352d', V + 'pCarX5', V + 'c5a94c', V + 'n1070575'];
@@ -188,7 +193,7 @@
       // the strand: from the knot's rim into the funnel, a rope with photos travelling along it
       if (pull > 0) { const P = [[60, -20], [190, -110 - 30 * Math.sin(t * 2)], [mx - 20, MY - 185]], C = through(P, 12), n = Math.max(2, Math.round(C.length * pull)); ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = '#08040F'; ctx.lineWidth = 26; ctx.beginPath(); C.slice(0, n).forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.strokeStyle = '#3A2450'; ctx.lineWidth = 18; ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 4; ctx.setLineDash([12, 9]); ctx.lineDashOffset = -t * 60 * mOn; ctx.stroke(); ctx.restore(); }
       boilSeed('mrock'); paint(ellPts(mx, MY + 6, 190, 40, 24), { grad: [[0, '#6A6088'], [1, '#2A2440']], ink: '#0E0A1A', sw: .8, curv: .4 });
-      machine(t, mx, MY, .34, { on: mOn, belt: pull * mOn + (1 - mOn) * pull * .0001, mouth: .9, items: [i => { const im = PIECES[i % PIECES.length], I = img(im), s = Math.min(I.width, I.height); glow(0, -30, 60, '#FFD58A', .5); ctx.save(); ctx.beginPath(); ctx.arc(0, -30, 26, 0, TAU); ctx.clip(); ctx.drawImage(I, (I.width - s) / 2, (I.height - s) / 2, s, s, -26, -56, 52, 52); ctx.restore(); ctx.strokeStyle = '#FFE9B8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -30, 26, 0, TAU); ctx.stroke(); }] });
+      machineL(t, mx, MY, .34, { on: mOn, belt: pull * mOn + (1 - mOn) * pull * .0001, mouth: .9, items: [i => { const im = PIECES[i % PIECES.length], I = img(im), s = Math.min(I.width, I.height); glow(0, -30, 60, '#FFD58A', .5); ctx.save(); ctx.beginPath(); ctx.arc(0, -30, 26, 0, TAU); ctx.clip(); ctx.drawImage(I, (I.width - s) / 2, (I.height - s) / 2, s, s, -26, -56, 52, 52); ctx.restore(); ctx.strokeStyle = '#FFE9B8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -30, 26, 0, TAU); ctx.stroke(); }] });
       // it sputters: black puffs when it dies
       if (t > tw_ - .3 && t < tw_ + 3) for (let i = 0; i < 3; i++) { const ph = seg(t, tw_ - .2 + i * .35, tw_ + 1.6 + i * .35); if (ph > 0 && ph < 1) paint(ellPts(mx + 56 + ph * 30, MY - 165 - ph * 120, 10 + 34 * ph, 8 + 26 * ph, 14), { wash: '#2A2433', washOp: 230 * (1 - ph), ink: null }); }
       camEnd();

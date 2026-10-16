@@ -322,7 +322,7 @@
   function iy(t, lt, dur) {
     const a = cs('gr_iy'), e = ce('gr_iy'), tLang = wt('gr_iy', 'language'), tLet = wt('gr_iy', 'letters'), tMiy = wt('gr_iy', 'Miyazaki'), tD = wt('gr_iy', 'D'), tDo = wt('gr_iy', 'do'), tYour = wt('gr_iy', 'yourself'), tCon = wt('gr_iy', 'contain'), tAll = wt('gr_iy', 'all');
     const dx = slide(t, lt, name, ce('gr_name') + .3);
-    cam(t, [[a - .4, 420, 790, 1.85], [tLet - .3, 470, 760, 1.6], [tMiy, 760, 560, 1.05], [tD, 960, 560, 1], [tDo, 1180, 540, 1.05], [tCon, 1330, 520, 1.15], [e + 1, 1200, 540, 1.05]], dx);
+    cam(t, [[a - .4, 420, 790, 1.85], [tLet - .3, 470, 760, 1.6], [tMiy, 760, 560, 1.05], [tD, 960, 560, 1], [tDo, 1180, 540, 1.05], [tCon, 1150, 520, 1.1], [e + 1, 1120, 540, 1.04]], dx);
     plateFrame(); soil(300, 150);
     const vk = .26 * ease(seg(t, a - .3, a + 2)) + .3 * ease(seg(t, tLet, tMiy)) + .2 * ease(seg(t, tMiy, tD)) + .3 * ease(seg(t, tD + .3, tDo + .2));
     roots(300, 1);

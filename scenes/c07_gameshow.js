@@ -6,6 +6,22 @@
 // Final round: the machine's pieces match single neurons (88%). Scores tally in a TV bug; Clawd waves an APPLAUSE
 // sign in the front row. End: the Knot, losing, bolts off the stage into the dark (it runs into the next world's woods).
 (() => {
+  // labels on set pieces fade out when the camera pushes in far enough to crop them (never drawn half-cut)
+  function edgeA(x, y, w, h) {
+    const M = ctx.getTransform(), P = [[x - w / 2, y - h / 2], [x + w / 2, y + h / 2]].map(([px, py]) => [M.a * px + M.c * py + M.e, M.b * px + M.d * py + M.f]);
+    const L = Math.min(P[0][0], P[1][0]), R = Math.max(P[0][0], P[1][0]), U = Math.min(P[0][1], P[1][1]), D = Math.max(P[0][1], P[1][1]);
+    return clamp((Math.min(L, W - R, U, H - D) - 12) / 24);
+  }
+  function fadeTxt(s, x, y, size, col, o = {}) {
+    ctx.save(); ctx.font = `${o.weight || '900'} ${size}px ${o.font || 'sans-serif'}`; const w = ctx.measureText(s).width; ctx.restore();
+    const a = edgeA(x, y, w, size * 1.1); if (a <= 0) return;
+    ctx.save(); ctx.globalAlpha *= a; txt(s, x, y, size, col, o); ctx.restore();
+  }
+  // machine() letters its 'SAE' plate in its own local units; place it on the plate through the current transform
+  function machineL(t, x, y, s, o) {
+    const n = LETTERS.length, M = ctx.getTransform(), C0 = CAM, a = ctx.globalAlpha; CAM = null; machine(t, x, y, s, o); CAM = C0;
+    for (let i = n; i < LETTERS.length; i++) { const L = LETTERS[i]; if (L.txt !== 'SAE') continue; const lx = x + L.x * s, ly = y + L.y * s; L.x = M.a * lx + M.c * ly + M.e; L.y = M.b * lx + M.d * ly + M.f; L.size *= s * Math.hypot(M.a, M.b); L.rot = (L.rot || 0) + Math.atan2(M.b, M.a); L.alpha = (L.alpha ?? 1) * a; L.screen = true; }
+  }
   const R = 'blog/raw/', V = R + 'v-figure-10x/', RM = R + 'roadmap/', C3 = R + 'crushed-3b-v3/', CE = R + 'crushed-3b/examples/', CL = R + 'crushed-last-layer/images/';
   const TV = R + 'tiny-vehicles/', CP = R + 'car-path-distinctions/', NP = R + 'negative-poles-v2/', NO = R + 'neuron-overflow/';
   const GX = 330, SX = 1590, FLOOR = 820;
@@ -54,8 +70,8 @@
     flat([[x - 190, FLOOR], [x + 190, FLOOR], [x + 160, 560], [x - 160, 560]], col, { line: DARK, lw: 5, shadow: [10, 10, 'rgba(0,0,0,.4)'] });
     flat([[x - 160, 560], [x + 160, 560], [x + 166, 578], [x - 166, 578]], mixCol(col, '#FFFFFF', .35), { line: DARK, lw: 3 });
     flat(rrPts(x - 130, 600, 260, 84, 10), DARK, { line: '#000000', lw: 3 });
-    txt(String(score), x, 644, 62, o.buzz ? '#FF3B30' : '#FF8A3A', { font: 'monospace' });
-    txt(label, x, 740, label.length > 12 ? 34 : 40, CREAM, { font: SERIF, weight: '700' });
+    fadeTxt(String(score), x, 644, 62, o.buzz ? '#FF3B30' : '#FF8A3A', { font: 'monospace' });
+    fadeTxt(label, x, 740, label.length > 12 ? 34 : 40, CREAM, { font: SERIF, weight: '700' });
     for (let i = 0; i < 8; i++) dot(x - 150 + i * 43, 800, 6, (Math.floor(t * 4) + i) % 2 && o.lit ? '#FFF6D0' : mixCol(col, '#000000', .3));
     if (o.buzz > 0) { ctx.save(); ctx.globalAlpha = o.buzz; ctx.strokeStyle = '#FF3B30'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - 70, 610); ctx.lineTo(x + 70, 690); ctx.moveTo(x + 70, 610); ctx.lineTo(x - 70, 690); ctx.stroke(); ctx.restore(); }
   }
@@ -95,7 +111,7 @@
     }
   }
   // Clawd in the front row with his APPLAUSE sign; up 0..1 raises it
-  const sign = up => (u, sw) => { ctx.save(); ctx.rotate(-.1 + .1 * Math.sin(T * 8) * up); ctx.strokeStyle = '#6A4B30'; ctx.lineWidth = u * .5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 7, 0); ctx.stroke(); ctx.translate(u * 9.5, 0); ctx.rotate(Math.PI / 2); flat(rrPts(-u * 7, -u * 2.2, u * 14, u * 4.4, u * .6), up > .5 ? '#FFE9A0' : '#F6EEDA', { line: DARK, lw: 2.5 }); txt('APPLAUSE', 0, 0, u * 2.2, RED, { font: SERIF, weight: '900' }); ctx.restore(); };
+  const sign = up => (u, sw) => { ctx.save(); ctx.rotate(-.1 + .1 * Math.sin(T * 8) * up); ctx.strokeStyle = '#6A4B30'; ctx.lineWidth = u * .5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 7, 0); ctx.stroke(); ctx.translate(u * 9.5, 0); ctx.rotate(Math.PI / 2); flat(rrPts(-u * 7, -u * 2.2, u * 14, u * 4.4, u * .6), up > .5 ? '#FFE9A0' : '#F6EEDA', { line: DARK, lw: 2.5 }); if (up > 0) txt('APPLAUSE', 0, 0, u * 2.2, RED, { font: SERIF, weight: '900' }); ctx.restore(); };   // (resting in his lap, face down)
   function clawdSeat(t, keys, up = 0) {
     if (up > .3) glow(960, 900, 120, GOLDLT, .4 * up);
     if (up < .15) { push(); translate(1030, 1070); rotate(-Math.PI / 2 + .2); sign(0)(8, 1); pop(); }
@@ -122,7 +138,7 @@
     LV.forEach(([lx, ly, L, a, im], i) => leafAt(lx, ly, L, a + .05 * Math.sin(t * 1.6 + i), im, o.glow || 0));
     // the terracotta pot from the plate, with its "No. 1" tag
     flat([[810, 930], [1110, 930], [1080, 1060], [840, 1060]], '#C46A3E', { line: DARK, lw: 4 / s }); flat(rrPts(790, 905, 340, 44, 10), '#D27A4A', { line: DARK, lw: 4 / s });
-    flat([[1110, 960], [1240, 960], [1240, 1030], [1110, 1030], [1090, 995]], '#F6EEDA', { line: DARK, lw: 3 / s }); txt('No. 1', 1170, 996, 40, RED, { font: SERIF, weight: '700' });
+    flat([[1110, 960], [1240, 960], [1240, 1030], [1110, 1030], [1090, 995]], '#F6EEDA', { line: DARK, lw: 3 / s }); fadeTxt('No. 1', 1170, 996, 40, RED, { font: SERIF, weight: '700' });
     pop();
   }
   function knotC(t, x, y, s, o = {}) {
@@ -197,16 +213,16 @@
     const a = cs('te_local'), e = ce('te_local'), tN = wt('te_local', 'neighbors'), tFl = wt('te_local', 'floppy-eared'), tCol = wt('te_local', 'collection'), tSup = wt('te_local', 'Superposition'), tStr = wt('te_local', 'strangers');
     const tFl2 = wt('te_local', 'floppy-eared', 1), tLat = wt('te_local', 'Latin'), tPo = wt('te_local', 'poetry');
     stageBG();
-    camKeys(t, [[a - .3, 960, 540, 1], [a + .9, 960, 470, 1.4], [tFl - .4, 770, 480, 1.75], [tSup - .3, 770, 480, 1.7], [tStr + .2, 1150, 480, 1.75], [tPo + .3, 1150, 480, 1.72], [e + .2, 960, 560, 1.1], [e + 1.5, 960, 560, 1.08]], .6);
+    camKeys(t, [[a - .3, 960, 540, 1], [a + .9, 960, 470, 1.4], [tFl - .4, 770, 480, 1.75], [tSup - .3, 770, 480, 1.7], [tStr + .2, 1150, 480, 1.75], [tPo + .3, 1150, 480, 1.72], [e + 1.5, 1040, 520, 1.45]], .6);
     marquee(t, lerp(60, -330, easeIn(seg(t, a - .3, a + .4))));
     const by = lerp(FLOOR, 300, backOut(seg(t, a + .2, a + 1.1)));
     contestants(t, { genLit: 1 - .5 * env(t, tSup, e, .3, .3), supLit: .4 + .6 * env(t, tSup - .2, e + 2, .3, .3), knot: { look: t > tLat ? [-1, -.3] : [-.6, .1], grin: true } });
     board(t, by);
     // left: every tile a slightly different floppy ear
-    letter('neighbors share', 778, by + 50, 44, GOLDLT, { face: 'marker', shadow: false, reveal: seg(t, tN - .3, tN + .5) });
+    letter('neighbors share', 778, by + 50, 44, GOLDLT, { face: 'marker', shadow: false, alpha: edgeA(778, by + 50, 380, 50), reveal: seg(t, tN - .3, tN + .5) });
     FLOPPY.forEach((im, i) => { const c = i % 3, r = Math.floor(i / 3), f = seg(t, tFl - .5 + i * .45, tFl - .1 + i * .45); tile(659 + c * 118, by + 175 + r * 140, 104, 116, im, f, { lit: .5 * f * (1 + Math.sin(t * 3 + i)) / 2, frame: '#3A1A0A' }); });
     // right: dogs, and Latin poetry in the same neuron
-    letter('strangers share', 1142, by + 50, 44, VIOLT, { face: 'marker', shadow: false, reveal: seg(t, tStr - .3, tStr + .5) });
+    letter('strangers share', 1142, by + 50, 44, VIOLT, { face: 'marker', shadow: false, alpha: edgeA(1142, by + 50, 380, 50), reveal: seg(t, tStr - .3, tStr + .5) });
     const RIGHT = [V + 'c5a317c', null, V + 'p10704', null, V + 'n750219', RM + 'ear-large-hanging'];
     RIGHT.forEach((im, i) => { const c = i % 3, r = Math.floor(i / 3), isL = !im, t0 = isL ? tLat - .3 + i * .15 : tFl2 - .6 + i * .2, f = seg(t, t0, t0 + .4); tile(1023 + c * 118, by + 175 + r * 140, 104, 116, im, f, { draw: isL ? latin : null, frame: '#3A1A0A', lit: isL ? .5 * f : 0, glowCol: VIOLT }); });
     clawdSeat(t, [[a, 'happy'], [tLat, 'confused']], 0);
@@ -262,8 +278,8 @@
     flat(rrPts(480, 70, 960, 110, 12), '#5A6278', { line: DARK, lw: 4 });
     for (let i = 0; i < 12; i++) flat([[500 + i * 80, 168], [540 + i * 80, 168], [520 + i * 80, 182], [480 + i * 80, 182]], i % 2 ? '#F0BE46' : '#1A1A1A');
     flat(rrPts(800, 86, 320, 70, 8), '#140818', { line: '#000000', lw: 3 });
-    txt(count, 960, 123, 56, '#FF5A3A', { font: 'monospace' });
-    txt('THE PRESS', 640, 125, 40, CREAM, { font: SERIF, weight: '900' }); txt('PSI', 1280, 125, 36, CREAM, { font: SERIF, weight: '900' });
+    fadeTxt(count, 960, 123, 56, '#FF5A3A', { font: 'monospace' });
+    fadeTxt('THE PRESS', 640, 125, 40, CREAM, { font: SERIF, weight: '900' }); fadeTxt('PSI', 1280, 125, 36, CREAM, { font: SERIF, weight: '900' });
     // the hydraulic ram
     flat(rectPts(930, 180, 60, Math.max(10, plateY - 220)), '#C9D0DE', { grad: [[0, '#E9EEF6'], [.5, '#B9C0CE'], [1, '#7A8398']], gdir: [930, 0, 990, 0], line: DARK, lw: 2 });
     flat(rrPts(560, plateY - 60, 800, 70, 8), '#8A93A8', { grad: [[0, '#B9C0CE'], [1, '#6E7891']], gdir: [0, plateY - 60, 0, plateY + 10], line: DARK, lw: 4 });
@@ -326,7 +342,7 @@
     const bk = popk(t, tIf - .2, .5) * (1 - seg(t, r - .3, r + .1));
     if (bk > 0) { bubble(1300, 300, 230, 170, bk, SX, 380); if (bk > .6) { tile(1300, 310, 200, 150, null, 1, { draw: jumble(200, 150, [seg(t, tCurves - .3, tCurves + .4), seg(t, tSpi - .2, tSpi + .6), seg(t, tWeb - .3, tWeb + .5)]), frame: VIO }); } }
     // the Unfolding Machine sniffs along the tiles and comes back with nothing
-    if (t > tUnf - .6) { const mk = seg(t, tUnf - .6, tUnf + .8), mx = lerp(-200, 700, easeOut(mk)) + (t > tUnf + .8 ? 520 * ease(seg(t, tUnf + .8, tNone - .2)) : 0) + 10 * Math.sin(t * 6); machine(t, mx, 985, .4, { on: 1, mouth: .4 + .4 * Math.abs(Math.sin(t * 5)) }); if (t > tNone - .3) { const bk = popk(t, tNone - .3, .4); push(); translate(mx + 120, 900); scale(backOut(bk)); flat([[-50, -30], [50, -30], [38, 30], [-38, 30]], '#C9A15A', { line: DARK, lw: 3 }); ctx.save(); ctx.strokeStyle = DARK; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -30, 44, Math.PI, TAU); ctx.stroke(); ctx.restore(); pop(); } }
+    if (t > tUnf - .6) { const mk = seg(t, tUnf - .6, tUnf + .8), mx = lerp(-200, 700, easeOut(mk)) + (t > tUnf + .8 ? 520 * ease(seg(t, tUnf + .8, tNone - .2)) : 0) + 10 * Math.sin(t * 6); machineL(t, mx, 985, .4, { on: 1, mouth: .4 + .4 * Math.abs(Math.sin(t * 5)) }); if (t > tNone - .3) { const bk = popk(t, tNone - .3, .4); push(); translate(mx + 120, 900); scale(backOut(bk)); flat([[-50, -30], [50, -30], [38, 30], [-38, 30]], '#C9A15A', { line: DARK, lw: 3 }); ctx.save(); ctx.strokeStyle = DARK; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -30, 44, Math.PI, TAU); ctx.stroke(); ctx.restore(); pop(); } }
     clawdSeat(t, [[a, 'neutral'], [tCr - .5, 'scared'], [r + .4, 'surprised'], [tNone, 'excited']], env(t, tNone + .3, e + 2, .3, .4));
     audience(t, env(t, tNone + .2, e + 2, .3, .5));
     camEnd();
@@ -404,7 +420,7 @@
       if (i === 2) BIG.forEach((im, j) => { const c = j % 4, r = Math.floor(j / 4), tk = [tTax - .3, tTax - .1, tVan - .2, tVan, tCon - .2, tCon, tCon + .2, tViews - .5, tViews - .3, tViews - .1, tViews + .1, tViews + .3][j]; tile(x - 108 + c * 72, top + 60 + r * 100, 62, 84, im, seg(t, tk, tk + .35), { frame: '#3A1A0A', lit: .5 * seg(t, tk, tk + .35) }); });
       shutter(x, w, h, open);
       pop();
-      letter(lab, x, 800 - h - 60, 44, CREAM, { face: 'marker', shadow: false, reveal: seg(t, tThree - .4 + i * .3, tThree + i * .3) });
+      letter(lab, x, 800 - h - 60, 44, CREAM, { face: 'marker', shadow: false, alpha: edgeA(x, 800 - h - 60, lab.length * 30, 50), reveal: seg(t, tThree - .4 + i * .3, tThree + i * .3) });
     });
     if (t > tCar - .2) { push(); translate(690, 470); const k = popk(t, tCar - .2, .4); scale(backOut(k)); flat(rrPts(-125, -28, 250, 56, 12), GOLD, { line: DARK, lw: 3 }); pop(); letter('1 broad car', 690, 471, 32, DARK, { face: 'marker', shadow: false, pop: k }); }
     clawdSeat(t, [[a, 'thinking'], [tBig, 'surprised'], [tViews, 'excited'], [tLess + .5, 'proud']], env(t, tScr - .4, e + 2, .3, .4));
@@ -442,7 +458,7 @@
     const mOn = seg(t, a - .3, a + .7), dictOut = seg(t, tBase - 1, tBase - .3);
     if (dictOut < 1) {
       ctx.save(); ctx.globalAlpha = 1 - dictOut;
-      machine(t, lerp(-300, 620, easeOut(mOn)), 960, .42, { on: 1, mouth: .6 });
+      machineL(t, lerp(-300, 620, easeOut(mOn)), 960, .42, { on: 1, mouth: .6 });
       flat(rectPts(700, 860, 700, 26), '#4A5268', { line: DARK, lw: 3 }); for (let i = 0; i < 14; i++) flat(ellPts(720 + i * 50, 873, 9, 9, 10), '#6E7891', { line: DARK, lw: 1 });
       // the rack of neurons above the belt
       const spidersOn = t > tBlocks - .3;

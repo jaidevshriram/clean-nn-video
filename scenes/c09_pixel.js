@@ -99,7 +99,17 @@
   }
   // a pixel label anchored to a world point (screen-size text)
   function lab(s, wx, wy, sc, col, o = {}) { const [x, y] = toScreen(wx, wy); F.lab.push({ s, x, y, sc, col, o }); }
-  function postLabels(G) { for (const L of G.lab) { if ((L.o.k ?? 1) <= 0) continue; const k = L.o.k ?? 1, dy = (1 - backOut(k)) * 30; if (L.o.box === false) ptxt(L.s, L.x, L.y + dy, L.sc, L.col, L.o); else ptag(L.s, L.x, L.y + dy, L.sc, L.col, L.o); } }
+  // labels never hang off the frame: they slide along the edge to stay whole, and fade once their building is well off-screen
+  function postLabels(G) {
+    for (const L of G.lab) {
+      if ((L.o.k ?? 1) <= 0) continue; const k = L.o.k ?? 1, dy = (1 - backOut(k)) * 30;
+      const hw = (ptW(String(L.s).toUpperCase(), L.sc) + (L.o.box === false ? 0 : L.sc * 6 + 10)) / 2, hh = (7 * L.sc + (L.o.box === false ? 0 : L.sc * 5 + 10)) / 2;
+      const x = clamp(L.x, 18 + hw, W - 18 - hw), y = clamp(L.y + dy, 84 + hh, H - 18 - hh), off = Math.hypot(x - L.x, y - L.y - dy), fa = 1 - seg(off, 60, 200);
+      if (fa <= 0) continue; ctx.save(); ctx.globalAlpha *= fa;
+      if (L.o.box === false) ptxt(L.s, x, y, L.sc, L.col, L.o); else ptag(L.s, x, y, L.sc, L.col, L.o);
+      ctx.restore();
+    }
+  }
   const ui = f => F.ui.push(f);
   // end of a frame's world: pixelate (with the palette), then crisp photos, labels and the UI on top
   function finish(o = {}) {
@@ -309,8 +319,20 @@
   function minimap(draw) { ui(() => { const x = W - 300, y = H - 210; pbox(x, y, 260, 170, K.ink, K.silver, 5); ctx.save(); ctx.beginPath(); ctx.rect(x + 5, y + 5, 250, 160); ctx.clip(); draw(x + 130, y + 85); ctx.restore(); ptxt('MAP', x + 30, y - 20, 4, K.silver, { align: 'left' }); }); }
   // shot-cut device: a checkerboard dissolve from/to black (game-style level change)
   function checker(k) { if (k <= 0) return; ui(() => { const s = 96; ctx.fillStyle = K.ink; for (let y = 0; y < H; y += s) for (let x = 0; x < W; x += s) { const d = hash(x * .37 + y * 1.3) * .5 + ((x + y) / (W + H)) * .5, q = clamp((k - d * .6) / .4); if (q > 0) { const r = s * q; ctx.fillRect(x + (s - r) / 2, y + (s - r) / 2, r, r); } } }); }
-  const cutIn = lt => checker(1 - seg(lt, 0, .45));
-  const cutOut = (lt, dur) => checker(seg(lt, dur - .32, dur));
+  // level change: the last frame of the previous level breaks into tiles that shrink away (game-style), revealing
+  // the new level underneath, so there is never a black or empty frame and nothing pops
+  let XC = null;
+  function tileSwap(t, lt, D = .75) {
+    if (lt >= D || typeof renderShotInto !== 'function') return; const i = _shotIndexAt(t); if (i < 1) return;
+    POST.push(() => POST.push(() => {
+      XC ||= createCanvas(W, H); renderShotInto(XC, i - 1, t);
+      const k = lt / D, s = 96; ctx.save(); resetMatrix(); ctx.globalAlpha = 1; ctx.imageSmoothingEnabled = false;
+      for (let y = 0; y < H; y += s) for (let x = 0; x < W; x += s) { const d = hash(x * .37 + y * 1.3) * .5 + ((x + y) / (W + H)) * .5, q = easeIn(clamp((k - d * .6) / .4)), r = Math.round(s * (1 - q) / 8) * 8; if (r <= 0) continue; ctx.drawImage(XC, x, y, s, s, x + (s - r) / 2, y + (s - r) / 2, r, r); ctx.strokeStyle = K.ink; ctx.lineWidth = q > 0 ? 4 : 0; if (q > 0) ctx.strokeRect(x + (s - r) / 2, y + (s - r) / 2, r, r); }
+      ctx.restore();
+    }));
+  }
+  const cutIn = (lt, t) => tileSwap(t, lt);
+  const cutOut = () => {};
 
   // ================= LEVEL 1 · TRAFFIC: the gate =================
   const A0 = {
@@ -486,7 +508,7 @@
     const dk2 = on(t, tCv - .4);
     if (dk2 > 0) ui(() => { const w = 1000, x = W / 2 - w / 2 + 40, y = H - 180 + (1 - dk2) * 220; pbox(x, y, w, 140, K.ink, K.white, 5); ptxt('WHICH WAY?', x + w / 2, y + 40, 6, K.white); const sel = t > tWg - .1 ? 1 : 0, bl = Math.floor(t * 3) % 2; ptxt((sel === 0 && bl ? '>' : ' ') + 'CONVERTIBLE', x + 260, y + 100, 6, K.gold); ptxt((sel === 1 && bl ? '>' : ' ') + 'STATION WAGON', x + 730, y + 100, 6, K.cyan); });
     cursor(t, [[tGr - 1, 1500, 950], [tGr - .2, 330, 120], [tGr + .5, 1250, 820]], [tGr - .2], { hold: .3 });
-    cutIn(lt); cutOut(lt, dur);
+    cutIn(lt, t); cutOut(lt, dur);
   }
 
   // ================= LEVEL 2 · VOTES =================
@@ -529,7 +551,7 @@
     // the tally over the building and the result
 
     toasts(t, [[tAdd - .2, 'VOTES ADD UP', K.lime], [tBase - .2, 'BASEMENT FOUND', K.sky], [tDist - .2, 'TAXI vs AMBULANCE', K.gold]], 3);
-    cutIn(lt); cutOut(lt, dur);
+    cutIn(lt, t); cutOut(lt, dur);
   }
 
   // ================= near-twins in the basement =================
@@ -559,7 +581,7 @@
     finish();
     hudBar('LV 2 · LAST DISTRICT', 'EVERY NEURON HAS A TWIN', `TWINS ${P.filter(p => t > p[3]).length}/3`);
     toasts(t, [[tTwin - .2, 'NEAR-TWIN IN THE BASEMENT', K.sky]], 3.2);
-    cutIn(lt); cutOut(lt, dur);
+    cutIn(lt, t); cutOut(lt, dur);
   }
 
   // ================= LEVEL 3 · WHISPERS (night) =================
@@ -614,11 +636,11 @@
     // the settings panel and the whispers slider
     const sk = on(t, c - .1, tBar + 1.6, .35, .35);
     if (sk > 0) ui(() => { const w = 640, x = W - 710 + (1 - sk) * 780, y = 330; pbox(x, y, w, 320, K.ink, K.silver, 5); ptxt('SETTINGS', x + w / 2, y + 48, 7, K.white); ptxt('WHISPERS', x + 40, y + 130, 6, K.silver, { align: 'left' }); ctx.fillStyle = K.dusk; ctx.fillRect(x + 40, y + 180, w - 80, 24); ctx.fillStyle = K.cyan; ctx.fillRect(x + 40, y + 180, (w - 80) * (1 - mute), 24); const kx = x + 40 + (w - 80) * (1 - mute); ctx.fillStyle = K.ink; ctx.fillRect(kx - 20, y + 158, 40, 68); ctx.fillStyle = K.white; ctx.fillRect(kx - 14, y + 164, 28, 56); ptxt(mute > .98 ? 'MUTED' : Math.round(100 * (1 - mute)) + '%', x + w / 2, y + 268, 7, mute > .98 ? K.orange : K.cyan); });
-    if (sk > .5) cursor(t, [[c + .2, 900, 760], [tSil - .1, W - 710 + 600, 515], [tSil + 1.4, W - 710 + 40, 515], [tSil + 2.2, 1100, 900]], [tSil - .05], { hold: .2 });
+    if (sk > .5) cursor(t, [[Math.min(c + .2, tSil - .7), 900, 760], [tSil - .1, W - 710 + 600, 515], [tSil + 1.4, W - 710 + 40, 515], [tSil + 2.2, 1100, 900]], [tSil - .05], { hold: .2 });
     // the close-call meter
     const mk = on(t, tTie - .8);
     if (mk > 0) ui(() => { const w = 760, x = W / 2 - w / 2, y = H - 180 + (1 - mk) * 200, s = lerp(.53, .47, tipped); pbox(x, y, w, 130, K.ink, K.white, 5); ctx.fillStyle = K.white; ctx.fillRect(x + 30, y + 76, (w - 60) * s, 28); ctx.fillStyle = K.slate; ctx.fillRect(x + 30 + (w - 60) * s, y + 76, (w - 60) * (1 - s), 28); ctx.fillStyle = K.orange; ctx.fillRect(x + w / 2 - 3, y + 66, 6, 48); ptxt('HUSKY', x + 30, y + 38, 6, K.white, { align: 'left' }); ptxt('WOLF', x + w - 30, y + 38, 6, K.silver, { align: 'right' }); });
-    cutIn(lt); cutOut(lt, dur);
+    cutIn(lt, t); cutOut(lt, dur);
   }
 
   // ================= the book item: thinking in pages =================
@@ -666,7 +688,7 @@
     toasts(t, [[tOne - .2, '1 WORD IN 100', K.gold], [tFour - .1, '= ~4 HITS A PAGE', K.gold], [tOft - .3, 'FAR TOO OFTEN!', K.red], [tDoz - .4, 'ONCE EVERY FEW DOZEN PAGES', K.violet]], 3);
     if (wk > .9) ui(() => { ptxt('ITEM: BOOK', 200, 240, 6, K.gold, { align: 'left' }); pbox(1130 - 330, 958, 660, 66, K.ink, rarePhase ? K.violet : K.gold, 5); ptxt(rarePhase ? `HITS: ${t > hitAt ? 1 : 0} IN ${pg} PAGES` : `HITS ON THIS PAGE: ${t > tOne - .2 ? 4 : 0}`, 1130, 992, 6, rarePhase ? K.violet : K.gold); });
     if (t > tSpec + .4 && t < hitAt) ui(() => { const b = Math.floor(t * 2) % 3; ptxt('Z' + (b > 0 ? ' Z' : '') + (b > 1 ? ' Z' : ''), 450, 760 - b * 20, 7, K.white, { align: 'left' }); });
-    cutIn(lt); cutOut(lt, dur);
+    cutIn(lt, t); cutOut(lt, dur);
   }
 
   // ================= the Titanic harbour, then the taxi drives off the map =================
@@ -736,8 +758,9 @@
     });
     hudBar('LV 3 · HARBOUR', 'ANALOGY MACHINE', t > drop ? 'MAP EDGE!' : 'VOYAGES 3');
     toasts(t, [[tAn - .2, 'NEURONS: ANALOGY MACHINES', K.gold], [tIsh - .1, 'A BIT TITANIC-ISH', K.silver], [drop - .2, 'TAXI LEFT THE MAP!', K.orange]], 3);
-    cutIn(lt);
+    cutIn(lt, t);
   }
 
-  shots([[chapStart('ch09'), gateShot], [cs('tv_journey') - .3, journeyShot], [cs('tv_votes') - .3, votesShot], [cs('tv_pairs') - .3, pairsShot], [cs('tv_weak') - .3, weakShot], [cs('tv_pages') - .3, pagesShot], [cs('tv_titanic') - .3, titanicShot]]);
+  const NF = { fade: 0 };   // the tile swap is the transition
+  shots([[chapStart('ch09'), gateShot], [cs('tv_journey') - .3, journeyShot, NF], [cs('tv_votes') - .3, votesShot, NF], [cs('tv_pairs') - .3, pairsShot, NF], [cs('tv_weak') - .3, weakShot, NF], [cs('tv_pages') - .3, pagesShot, NF], [cs('tv_titanic') - .3, titanicShot, NF]]);
 })();

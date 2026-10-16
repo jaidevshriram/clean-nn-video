@@ -196,7 +196,7 @@
   function districts(t, lt, dur) {
     const a = cs('nr_layers'), tly = wt('nr_layers', 'layers'), tc = wt('nr_layers', 'coast'), tsim = wt('nr_layers', 'simple'), ted = wt('nr_layers', 'edges'), tin = wt('nr_layers', 'inland'), ttx = wt('nr_layers', 'textures'), thz = wt('nr_layers', 'horizon'), tdog = wt('nr_layers', 'dogs'), tlb = wt('nr_layers', 'ladybugs');
     const c0 = cs('nr_circuits'), tcir = wt('nr_circuits', 'circuit'), tread = wt('nr_circuits', 'read'), tdo = wt('nr_circuits', 'doing'), e = ce('nr_circuits');
-    camKeys3(t, [[a - .5, -30, 100, 240, 660, 430], [tly - .3, 0, 0, 1000, 2500, 1300], [tc - .4, 0, 0, 1000, 2400, 1250], [tc + .8, -100, 0, 60, 900, 650], [tsim + .5, 0, 40, 200, 950, 650], [ted, 0, 70, 560, 620, 860], [tin - .3, 0, 70, 560, 640, 880], [ttx, 0, 110, 1160, 680, 950], [thz - .6, 0, 120, 1160, 700, 980], [tdog - .4, 0, 190, 1850, 820, 1150], [tlb + .4, 0, 190, 1850, 860, 1180], [c0 + .2, -100, 80, 1000, 1700, 1250], [tcir, -150, 80, 950, 1600, 1200], [tdo, -160, 80, 950, 1550, 1150], [e + .4, -150, 80, 950, 1550, 1150]]);
+    camKeys3(t, [[a - .5, -30, 100, 240, 660, 430], [tly - .3, 0, 0, 1000, 2500, 1300], [tc - .4, 0, 0, 1000, 2400, 1250], [tc + .8, -100, 0, 60, 900, 650], [tsim - .3, 0, 40, 200, 950, 650], [ted + .2, 0, 70, 560, 620, 860], [tin - .3, 0, 70, 560, 640, 880], [ttx, 0, 110, 1160, 680, 950], [thz - .6, 0, 120, 1160, 700, 980], [tdog - .4, 0, 190, 1850, 820, 1150], [tlb + .4, 0, 190, 1850, 860, 1180], [c0 + .2, -100, 80, 1000, 1700, 1250], [tcir, -150, 80, 950, 1600, 1200], [tdo, -160, 80, 950, 1550, 1150], [e + .4, -150, 80, 950, 1550, 1150]]);
     table(t);
     // a toy bucket tipping pixel cubes into the sea: the input arriving at the coast
     const rain = on(t, tc - 1, ted);
@@ -275,7 +275,7 @@
     const words = [['look inside', tlk], ['read the parts', trd], ['understand the machine', tun]];
     words.forEach(([s, ta], i) => title(s, 480 + i * 480, 180 + (i % 2) * 70, 70, '#3A2A1A', seg(t, ta - .2, ta + .6), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, e - .2, e + .4) }));
     if (t < tlk) title('mechanistic interpretability', 960, 170, 80, '#3A2A1A', seg(t, tm - .3, tm + 1.2), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tlk - .6, tlk - .1) });
-    if (t > tun + .5 && t < tun + 2) sfx('click!', cx - 60, cy - 90, 52, PAL.berry, t - tun - .6, { life: 1.1 });
+    if (t > tun + .5 && t < tun + 2) sfx('click!', cx - 60, Math.min(cy - 90, 930), 52, PAL.berry, t - tun - .6, { life: 1.1 });
     fxTiltShift(300, 820, 9);
   }
 

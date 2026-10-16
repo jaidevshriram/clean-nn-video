@@ -143,13 +143,13 @@
     }, t);
   }
   const BEAC = [['ONE PRINCIPLE', 'principle'], ['IT WORKS', 'works'], ['IT COMPOUNDS', 'compounds'], ['MAYBE ENOUGH', 'maybe']];
-  function beacon(x, base, s, k, t, label) {
+  function beacon(x, base, s, k, t, label, fadeOut = 0) {
     flat([[x - 40 * s, base], [x - 14 * s, base - 260 * s], [x + 14 * s, base - 260 * s], [x + 40 * s, base]], '#B9C0CE', { line: TEAL_D, lw: 4 });
     flat(ellPts(x, base - 270 * s, 40 * s, 14 * s, 20), TEAL_D);
     const L = clamp(k);
     if (L > 0) { ctx.save(); ctx.globalAlpha = .35 * L; ctx.fillStyle = '#FFF2C8'; const a = -Math.PI / 2 + Math.sin(t * .8 + x) * .25; ctx.beginPath(); ctx.moveTo(x, base - 300 * s); ctx.lineTo(x + Math.cos(a - .12) * 1400, base - 300 * s + Math.sin(a - .12) * 1400); ctx.lineTo(x + Math.cos(a + .12) * 1400, base - 300 * s + Math.sin(a + .12) * 1400); ctx.closePath(); ctx.fill(); ctx.restore(); glow(x, base - 300 * s, 200 * s * L, '#FFE08A', L); }
     dot(x, base - 300 * s, 30 * s, L > .5 ? '#FFE9A8' : '#6A6A7A'); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, base - 300 * s, 30 * s, 0, TAU); ctx.stroke();
-    if (L > 0) { const b = backOut(clamp(L * 1.5)); ctx.save(); ctx.translate(x, base + 70 * s); ctx.scale(b, b); flat(rrPts(-165 * s, -36 * s, 330 * s, 72 * s, 10 * s), RED, { line: TEAL_D, lw: 4 }); T(label, 0, 2, 33 * s, '#FFF6E0'); ctx.restore(); }
+    if (L > 0 && fadeOut < 1) { const b = backOut(clamp(L * 1.5)); ctx.save(); ctx.globalAlpha *= 1 - fadeOut; ctx.translate(x, base + 70 * s); ctx.scale(b, b); ctx.font = `900 ${34 * s}px ${SERIF}`; const hw = Math.max(150 * s, ctx.measureText(label).width / 2 + 22 * s); flat(rrPts(-hw, -36 * s, 2 * hw, 72 * s, 10 * s), RED, { line: TEAL_D, lw: 4 }); T(label, 0, 2, 34 * s, '#FFF6E0'); ctx.restore(); }
   }
   // the clever contraption: gears, pliers and a funnel that tries to take a network apart
   function contraption(x, y, s, t, strain) {
@@ -194,8 +194,8 @@
   // ---------- 2 · AGENTS + ARCHITECTURES: plug one into the other ----------
   function plugs(t, lt, dur) {
     const a = cs('lf_plug'), tPi = wt('lf_plug', 'pieces'), tAg = wt('lf_plug', 'agents'), tMo = wt('lf_plug', 'Modern'), tBo = wt('lf_plug', 'Both'), tIn = wt('lf_plug', 'interpretability'), tSo = wt('lf_plug', 'So'), tPl = wt('lf_plug', 'plug'), e = ce('lf_plug');
-    const bK = seg(t, tAg - 1.4, tAg - .2), cK = seg(t, tMo - 1, tMo + .2), join = easeInOut(seg(t, tSo - .2, tPl + .05)), surge = seg(t, tPl + .05, tPl + 1.4);
-    camKeys(t, [[t - lt, 1920, 540, 1.0], [tPi + .4, 1920, 780, .7], [tAg - .9, 980, 545, 1.0], [tAg + .9, 965, 540, 1.03], [(tAg + tMo) / 2 + .55, 1920, 640, .66], [tMo - .3, 2860, 545, 1.0], [tMo + 1.6, 2880, 540, 1.02], [tBo, 1920, 1080, .52], [tSo, 1920, 990, .55], [tPl, 1920, 880, .62], [e + .6, 1920, 970, .56]], .4);
+    const bK = seg(t, tAg - 1.4, tAg - .2), cK = seg(t, tMo - 1.2, tMo + .7), join = easeInOut(seg(t, tSo - .2, tPl + .05)), surge = seg(t, tPl + .05, tPl + 1.4);
+    camKeys(t, [[t - lt, 1920, 540, 1.0], [(t - lt + tAg - .5) / 2, 1440, 640, .72], [tAg - .5, 960, 545, 1.0], [tAg + .2, 960, 540, 1.0], [(tAg + tMo) / 2 + .1, 1920, 620, .56], [tMo, 2880, 545, 1.0], [tMo + 1.6, 2880, 540, 1.0], [tBo, 1920, 1080, .52], [tSo, 1920, 1040, .52], [tPl, 1920, 1000, .52], [e + .6, 1920, 1030, .515]], .4);
     poster(t, { b: bK, bAct: bK, c: cK, cAct: cK, d: 1, e: 1, alive: true, flash: surge * (1 - surge) * 3, aInner: (x, y, w, h) => {
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = TEAL_D; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * .42 + i * 110, 240 - i * 40, 46, Math.sin(t + i) * .05, 0, TAU); ctx.stroke(); }
       tower(x + w / 2, y + h * .82, 1, t, { floors: 5, lit: .4 + .6 * surge, labels: 1 });
@@ -208,10 +208,10 @@
       const ck = seg(t, tBo - .6, tBo + .6), px = lerp(1300, 1840, join), qx = lerp(2540, 2000, join), py = 960;
       cable([[600, 820], [700, 1060], [1000, 1000], [px - 380, py]], 56, '#3A3550', ck);
       cable([[3240, 820], [3140, 1060], [2840, 1000], [qx + 380, py]], 56, RED, ck);
-      if (ck > .9) { plug(px, py, 1.8, TEAL, 1, null); plug(qx, py, 1.8, ORA_D, -1, null); T('AGENTS', px - 300, py + 150, 80, TEAL_D); T('ARCHITECTURES', qx + 380, py + 150, 80, TEAL_D); }
+      if (ck > .9) { plug(px, py, 1.8, TEAL, 1, null); plug(qx, py, 1.8, ORA_D, -1, null); for (const [s1, lx] of [['AGENTS', px - 300], ['ARCHITECTURES', qx + 380]]) { ctx.font = `900 80px ${SERIF}`; const hw = ctx.measureText(s1).width / 2 + 40; flat(rrPts(lx - hw, py + 92, 2 * hw, 116, 18), PAPERC_, { line: TEAL_D, lw: 6, shadow: [8, 10, 'rgba(0,0,0,.25)'] }); T(s1, lx, py + 152, 80, TEAL_D); } }
       if (surge > 0 && surge < 1) { for (let i = 0; i < 16; i++) { const q = i / 16 * TAU, f = easeOut(surge); glow(1920 + Math.cos(q) * 600 * f, py + Math.sin(q) * 400 * f, 40, '#FFF2C8', 1 - surge); } }
     }
-    visitor(t, 2620, 1070, 16, [[t - lt, 'happy'], [tPi, 'thinking'], [tSo, 'determined'], [tPl + .1, 'excited']], { flip: true });
+    visitor(t, 2790, 1070, 16, [[t - lt, 'happy'], [tPi, 'thinking'], [tSo, 'determined'], [tPl + .1, 'excited']], { flip: true });
     camEnd();
     if (t > tPl - .1 && t < tPl + 1.2) sfx('CLICK!', 960, 400, 90, RED, t - tPl, { stroke: '#FFF6E0', strokeW: .12 });
     if (t < tAg - 1.4) letter('the pieces already exist', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tPi - .5, tPi + .5) });
@@ -223,10 +223,10 @@
   function lab2(t, lt, dur) {
     const a = cs('lf_lab2'), tRe = wt('lf_lab2', 'read'), tEx = wt('lf_lab2', 'experiment'), tId = wt('lf_lab2', 'identical'), tBe = wt('lf_lab2', 'best'), tNe = wt('lf_lab2', 'never'), tSc = wt('lf_lab2', 'scientists'), tNo = wt('lf_lab2', 'Now'), e = ce('lf_lab2');
     const twin = easeOut(seg(t, tEx - .2, tId + .4)), flood = seg(t, tNo - .3, e + .6);
-    camKeys(t, [[t - lt, 1920, 775, .7], [tRe, 1920, 540, 1.0], [tId + .4, 1920, 540, 1.0], [tBe + .9, 1920, 605, .9], [(tBe + tNe) / 2 + .6, 1560, 1120, .66], [tNe - .1, 1120, 1590, .95], [tNo, 1120, 1560, .9], [e + .6, 1120, 1545, .88]], .4);
+    camKeys(t, [[t - lt, 1920, 775, .7], [tRe, 1920, 540, 1.0], [tId + .4, 1920, 540, 1.0], [tBe + .8, 1920, 605, .88], [(tBe + tNe) / 2 + 1.0, 1560, 1120, .64], [tNe + .8, 1120, 1590, .95], [tNo, 1120, 1560, .9], [e + .6, 1120, 1545, .88]], .4);
     poster(t, { b: 1, bAct: 1, c: 1, cAct: 1, d: 1, e: 1, alive: true, aInner: (x, y, w, h) => {
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = TEAL_D; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * .42 + i * 110, 240 - i * 40, 46, Math.sin(t + i) * .05, 0, TAU); ctx.stroke(); }
-      if (twin > 0) { tower(x + w / 2 + 380 * twin, y + h * .82, .9, t, { floors: 5, lit: 1, labels: 1, ghost: .85 * twin }); if (twin > .8) T('= identical copy', x + w / 2 + 380, y + h * .82 + 60, 52, TEAL_D, { font: KAL, weight: '700' }); }
+      if (twin > 0) { tower(x + w / 2 + 380 * twin, y + h * .82, .9, t, { floors: 5, lit: 1, labels: 1, ghost: .85 * twin }); if (twin > .8) T('= identical copy', x + w / 2 + 380, y + 196, 52, TEAL_D, { font: KAL, weight: '700', alpha: clamp((twin - .8) * 5) * (1 - seg(t, tBe - .5, tBe - .2)) }); }
       tower(x + w / 2 - 20 * twin, y + h * .82, 1, t, { floors: 5, lit: seg(t, a - .3, tRe + .4), labels: 1 });
       march(t, x + 60, y + h * .86, w - 120, 3, 1, { lit: true });
       // the ribbon banner
@@ -279,7 +279,7 @@
     const lx = lerp(ex + ew * .7, ex + ew * .5, ease(lf)) + Math.sin(lf * 9) * 60 * (1 - lf), ly = lerp(ey + eh * .82, ey + eh * .46, easeOut(lf)) + Math.sin(lf * 5) * 30;
     camKeys(t, [[t - lt, 1120, 1530, .86], [a + .5, 2080, 1560, .7], [a + 1.5, 3040, 1620, 1.2], [TB[3] + 1, 3040, 1620, 1.22], [leafT0, 3040, 1620, 1.22], [NEXT + 2.2, lx, ly, 3.4]], .3);
     poster(t, { b: 1, c: 1, d: 1, e: 1, alive: true, aInner: (x, y, w, h) => { tower(x + w / 2, y + h * .82, 1, t, { floors: 5, lit: 1, labels: 1 }); }, dInner: (x, y, w, h) => { for (let r = 0; r < 5; r++) for (let i = 0; i < 26; i++) bot(x + 860 + i * 52 + (r % 2) * 26, y + h * .6 + r * 56, 1 + r * .12, t * 2 + i + r, { lit: true }); contraption(x + 420, y + h * .78, 1.4, t, .9); }, eInner: (x, y, w, h) => {
-      BEAC.forEach(([lab], i) => { const bx = x + w * (.14 + i * .24), base = y + h * (.62 - Math.sin((i + .5) / 4 * Math.PI) * .05); beacon(bx, base, 1.1, seg(t, TB[i] - .4, TB[i] + .3), t, lab); });
+      BEAC.forEach(([lab], i) => { const bx = x + w * (.14 + i * .24), base = y + h * (.62 - Math.sin((i + .5) / 4 * Math.PI) * .05); beacon(bx, base, 1.1, seg(t, TB[i] - .4, TB[i] + .3), t, lab, ease(seg(t, leafT0 + .5, leafT0 + 1.1))); });
       visitor(t, x + w * .5, y + h * .84, 11, [[t - lt, 'happy'], [TB[1], 'excited'], [TB[3], 'hopeful'], [leafT0 + .4, 'surprised']], { flip: lf > .3 });
     } });
     // the leaf from the garden, drifting loose toward the next world

@@ -267,13 +267,13 @@
     {
       // the grid: more than a hundred pose neurons, each a little window with a direction
       bg(BK); GRAIN = .8; glow(960, 540, 1000, OR, .22);
-      camKeys(t, [[a - .2, 760, 420, 1.35], [th + .5, 960, 540, 1.0], [rw0 + .5, 960, 540, .94]], .3);
-      const kg = seg(t, a - .7, th + .4);
+      camKeys(t, [[a - .2, 880, 490, 1.16], [th + .5, 960, 540, 1.0], [rw0 + .5, 960, 540, .94]], .3);
+      const kg = seg(t, a - .7, th + 1.2);
       // a neat 12 × 9 grid (108 tiles), revealed in a diagonal sweep: each tile is one pose neuron, a dog and a car
       // that share a pose side by side, with a small arrow under them
       const SETS = ['small', 'medium', 'large', 'dino'];
       for (let r = 0; r < 9; r++) for (let c = 0; c < 12; c++) {
-        const i = r * 12 + c, d0 = (c + r) / 19, k = seg(kg, d0 * .7, d0 * .7 + .3); if (k <= 0) continue;
+        const i = r * 12 + c, d0 = (c + r) / 19, k = seg(kg, d0 * .65, d0 * .65 + .35); if (k <= 0) continue;
         const x = 180 + c * 142, y = 120 + r * 104, set = SETS[(r + 2 * c) % 4], p = ((r * 5 + c * 3) % 4) * 2, dir = (r + c) % 2 ? 1 : -1;
         push(); translate(x, y); scale(backOut(k)); cutout(rectPts(-64, -46, 128, 92), r % 2 ? CR : '#F7E9C8', { shadow: [3, 4, 'rgba(0,0,0,.45)'], jag: 1.5 });
         photoFlat(PE + set + '/' + p, -58, -40, 56, 56, {}); photoFlat(PE + set + '/' + (p + 1), 2, -40, 56, 56, {});
@@ -315,7 +315,7 @@
     const a = cs('hc_bigger'), ts = wt('hc_bigger', 'small'), tb = wt('hc_bigger', 'bigger'), tsep = wt('hc_bigger', 'separate'), td = wt('hc_bigger', 'Dino'), t10 = wt('hc_bigger', 'ten'), ty = wt('hc_bigger', 'years'), tst = wt('hc_bigger', 'still'), tev = wt('hc_bigger', 'Every'), tdo = wt('hc_bigger', 'does'), e = ce('hc_bigger');
     const tS = tdo + .15, tM = tS + 1.6;
     ground({ y0: 820, y1: 780 });
-    camKeys(t, [[a - .2, 760, 640, 1.25], [tb, 760, 640, 1.25], [td + .4, 960, 540, .92], [tst + 1, 1060, 520, 1.0], [tev + .5, 960, 540, .9], [tS + .8, 960, 540, .9], [chapStart('ch05'), 960, 520, 1.3], [chapStart('ch05') + 2, 960, 520, 1.45]], .3);
+    camKeys(t, [[a - .2, 700, 660, 1.3], [tb, 800, 630, 1.2], [td + .4, 960, 540, .92], [tst + 1, 1060, 520, 1.0], [tev + .5, 960, 540, .9], [tS + .8, 960, 540, .9], [chapStart('ch05'), 960, 520, 1.3], [chapStart('ch05') + 2, 960, 520, 1.45]], .3);
     const gone = seg(t, tS + .7, tS + 1.4);   // everything flies away for the magnifier
     push(); translate(0, 1200 * easeIn(gone));
     // the small model: our little district of four lockers, a dog and a car side by side
@@ -362,5 +362,5 @@
     if (kv > 0) { ctx.globalAlpha = kv; serif('every vision model', 960, 150, 76, BK); ctx.globalAlpha = 1; }
   }
 
-  shots([[chapStart('ch04'), opening], [cs('hc_story') - .2, heist], [cs('hc_artist') - .2, lazy], [cs('hc_pose') - .2, pose], [cs('hc_hundred') - .2, grid], [wt('hc_hundred', 'nothing') - .3, rewind, { fade: .3 }], [wt('hc_hundred', 'nothing') + 1.6, hundred], [cs('hc_bigger') - .2, bigger]]);
+  shots([[chapStart('ch04'), opening], [cs('hc_story') - .2, heist], [cs('hc_artist') - .2, lazy], [cs('hc_pose') - .2, pose], [cs('hc_hundred') - .2, grid], [wt('hc_hundred', 'nothing') - .3, rewind, { fade: .6 }], [wt('hc_hundred', 'nothing') + 1.6, hundred], [cs('hc_bigger') - .2, bigger]]);
 })();

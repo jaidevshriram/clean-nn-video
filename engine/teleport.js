@@ -76,7 +76,7 @@ function itineraryMap(t, here, o = {}) {
   flat(rrPts(150, 90, 1620, 900, 30), '#5A2A3A', { shadow: [14, 18, 'rgba(0,0,0,.5)'] });
   flat(rrPts(180, 115, 780, 850, 16), '#F1E6CC'); flat(rrPts(960, 115, 780, 850, 16), '#F1E6CC'); flat(rectPts(950, 115, 20, 850), '#D9CBAA');
   const P = []; for (let i = 0; i < 16; i++) { const page = i < 8 ? 0 : 1, j = i % 8; P.push([(page ? 1040 : 260) + (j % 2 ? 300 : 40), 210 + j * 90]); }
-  const ACT = ['', 'I · the belief', 'II · the investigation', 'III · how it works', 'IV · what it means'], ACOL = ['', '#7B5CA8', '#C2456A', '#3A9C98', '#E8AA38'];
+  const ACT = ['', 'I · the belief', 'II · the evidence', 'III · how it works', 'IV · what it means'], ACOL = ['', '#7B5CA8', '#C2456A', '#3A9C98', '#E8AA38'];
   // the dotted road, drawn as far as "here", animating the last leg
   const leg = clamp(o.walk ?? 1), C1 = through(P.slice(0, 8), 8), C2 = through(P.slice(8), 8);
   const drawRoad = (C, upto, col, dash) => { if (upto < 2) return; ctx.save(); ctx.strokeStyle = col; ctx.lineWidth = 5; ctx.setLineDash(dash); ctx.beginPath(); C.slice(0, upto).forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke(); ctx.restore(); };
@@ -157,4 +157,4 @@ function teleport(t) {
 }
 // arrival overlay is drawn after the world; we defer it to the end of drawWorld
 function arrivalLater(t, i, t0) { globalThis._ARRIVE = [i, t0]; }
-function actTitle(i) { return ({ 3: 'Act II · the investigation', 9: 'Act III · how it really works', 13: 'Act IV · what it means' })[i] || ''; }
+function actTitle(i) { return ({ 3: 'Part II · the evidence', 9: 'Part III · how it works', 13: 'Part IV · what it means' })[i] || ''; }

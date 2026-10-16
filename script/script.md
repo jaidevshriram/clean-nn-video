@@ -9,24 +9,24 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 [open_phone] Every time you ask an AI a question, something happens inside it that nobody fully understands.
 > Night. A phone glows in a dark room; a question types itself. Camera pushes into the screen; the glass becomes a
 > starfield of tiny lights. Keep pushing: the lights are windows. We are falling toward a city at night.
-[open_city] Inside, there's a kind of city: billions of tiny lights, flickering on and off, passing signals down a maze of roads. Each light is a neuron.
+[open_city] Inside, it's a bit like a galaxy: billions of tiny lights, flickering on and off, passing signals to each other along threads of light. Each light is a neuron.
 > We swoop low over districts. Light pulses race along roads. One building flares as a pulse arrives: its windows
 > light up. Pull back to show the whole city spreading to the horizon.
-[open_knot] For years, a lot of the people who study these cities, including me, believed they were knotted. Not organized like a city at all, but tangled. Houses with nothing in common, crammed together, simply because they fit.
+[open_knot] For years, a lot of the people who study these networks, including me, believed they were knotted. Not arranged into meaningful patterns, like constellations, but tangled. Ideas with nothing in common, crammed into the same lights, simply because they fit.
 > The ground lurches. Streets twist up off the ground and wind into the Knot: one street of houses tied round and
 > round itself. The Professor and Clawd stand small in front of it. Clawd hides behind his leg.
 [open_untangle] And if that were true, there'd be only one way to understand an AI: tear the knot apart first, and study the pieces.
 > The Unfolding Machine rolls in and starts pulling the knot apart, laying houses out in a long, endless row.
-[open_wrong] I've spent most of a decade on this question. And I now think we were wrong. The city was never a knot. We just didn't know how to read it. (pause .8)
+[open_wrong] I've spent most of a decade on this question. And I now think we were wrong. It was never a knot. We just didn't know how to read the constellations. (pause .8)
 > The Professor turns to us. Behind him the machine sputters to a stop; the knot, half-pulled, sags a little.
 > He lifts his lantern; in its light the tangled houses briefly look like a tidy street.
 [open_title] This is the story of how I found out.  (pause 1)
 [open_map] It comes in four parts. First, the story everyone believed. Then I reopen the evidence, case by case. Then, how networks really work. And finally, what it all means. (pause 1.4)
 > Title paints across the sky over the city: NEURAL NETWORKS ARE ALREADY CLEAN. Credit line beneath. Brush wipe.
 
-## ch01 | A city of neurons
+## ch01 | What a neuron is
 
-[nr_what] First, what is a neuron in an AI? It's simpler than it sounds. A neuron is a tiny detector. It looks at what's coming in, and if it sees something it cares about, it lights up.
+[nr_what] Let's zoom all the way in to just one of them, and picture it as a little building in a town. So, what is a neuron in an AI? It's simpler than it sounds. A neuron is a tiny detector. It looks at what's coming in, and if it sees something it cares about, it lights up.
 > Street level, dusk. One small building. A stream of photos rolls past its door on a conveyor (dogs, cups, cars).
 > When a dog photo passes, the windows blaze and a dog appears in each window. A cup passes: dark.
 [nr_windows] So you can find out what a neuron cares about by showing it a lot of pictures, and keeping the ones that make it light up brightest. Those pictures end up in its windows.
@@ -103,7 +103,7 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 [hc_story] It looked like a car signal was being hidden inside a group of dog neurons, as if the dogs were a secret storage locker, where the car could be stored and picked up later.
 > The car signal (a little glowing car) drives into the dog district and hides in a doghouse locker; later a hand
 > retrieves it. The four dog buildings show the essay's feature visualizations: fluffy dogs.
-[hc_artist] But look at how we saw those neurons. We saw them through the Sketch Artist. And deep in the network, the artist gets lazy. There are lots of dog neurons, so the easiest painting is usually a dog.
+[hc_artist] But look at how we saw those neurons. We saw them through the Sketch Artist: a tool that paints the picture a neuron would like best. And deep in the network, the artist gets lazy. There are lots of dog neurons, so the easiest painting is usually a dog.
 > The Sketch Artist at each of the four buildings painting dogs. A hill with a deep valley labelled "dog" pulls its
 > brush downhill; the brush slides into the valley again and again.
 [hc_nudge] Nudge the artist even slightly toward the routes that real pictures take, and the portraits change. Two of those "dog" neurons are actually car neurons.
@@ -119,7 +119,7 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 > A much bigger, shinier city on another hill; telescope view into one of its buildings: dogs and cars facing the
 > same way (the essay's pose photos). The Professor stamps CASE 2: SOLVED.
 
-## ch05 | The foggy district
+## ch05 | Better tools, clearer neurons
 
 [fd_microscope] The story of this field, as I see it, is mostly a story of discovering that what was under the microscope was better than we thought. The microscope just wasn't tuned right.
 > Clawd wheels in the Microscope (a big brass lens on a cart). Through it, the city is a smeared blur.
@@ -141,7 +141,7 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 
 ## ch06 | Watching a neuron grow
 
-[gr_q] But even the messy old district wasn't random. To see that, you have to watch a neuron grow.
+[gr_q] But even that messy last district of the old network wasn't random. To see that, you have to watch a neuron grow.
 > A seed in an empty lot. Time-lapse sky starts racing.
 [gr_flowers] I retrained the old network and watched one neuron form. It started out on fields of yellow flowers, in photos that sometimes had a dog in them.
 > A small house sprouts; its windows show yellow rapeseed fields; one window has a dog in the field.
@@ -182,28 +182,28 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 [te_sizes] Size works the same way. I trained versions of a network three hundred times apart in size. The smallest has one broad car neuron. The biggest has dozens: taxis, vans, convertibles, even different views of a taxi. Less room makes neurons broader, not scrambled.
 > Three islands side by side: a small one with one car house, a medium with a car street, a big one with a whole car
 > district. Pulses flow the same way in all three.
-[te_dict] And when I ran the Unfolding Machine on these districts, its pieces mostly turned out to be near-copies of single neurons, about eighty-eight percent of its activity. Where the neurons were building blocks like spider legs and webs, the machine's pieces were those same blocks regrouped by setting: spiders on leaves, spiders in webs. When a model finally understood baseball players, the understanding was in a neuron. (pause 1.4)
+[te_dict] And when I ran the Unfolding Machine, the tool the field built to pull the knot apart, on these districts, its pieces mostly turned out to be near-copies of single neurons, about eighty-eight percent of its activity. Where the neurons were building blocks like spider legs and webs, the machine's pieces were those same blocks regrouped by setting: spiders on leaves, spiders in webs. When a model finally understood baseball players, the understanding was in a neuron. (pause 1.4)
 > The machine's conveyor belt: Clawd holds each piece up next to a building; almost all match a building exactly
 > (88% bar painted on the belt). A spider-leg building and a web building; the machine's pieces are spider photos.
 ## ch08 | The superposition of the gaps
 
 [sg_believer] For years, I was a true believer in superposition. I started studying language model neurons expecting to hit the knot any day.
 > The young Professor marching into the language city with a pennant reading SUPERPOSITION and a butterfly net.
-[sg_pr] I found one that fired on the letters "P R", and on strange strings of {Base64|base sixty-four} code, and on Bengali text. Finally, an arbitrary mixture! Then I decoded the code: words with "P R". I translated the Bengali: "P R".
+[sg_pr] I found one that fired on the letters "P R", and on strange strings of {Base64|base sixty-four} code, and on Bengali text. Finally, an arbitrary mixture! Then I decoded the code: words with "P R". I translated the Bengali: "P R". It was one idea all along, the letters P R, in whatever form they showed up.
 > A building with three clashing window types: "pr", gibberish code, Bengali script. Clawd runs a decoder ring over
 > the code: it turns into "prize", "proof". A translation lens over the Bengali: "pr".
-[sg_colorado] A coworker found a neuron that seemed to fire on random commas. It turned out to track Colorado. The commas were where the model kept a running summary of the conversation. Turn the neuron up, and the model starts planning a hike.
+[sg_colorado] A coworker found a neuron that seemed to fire on random commas. It turned out to track Colorado. Models use spots like commas to jot down a running summary of what's been said so far, and Colorado was in that summary. Turn the neuron up, and the model starts planning a hike. (pause .6)
 > Sentences scroll past; commas light up amber only once Colorado is mentioned. A dial labelled with a mountain: when
 > Clawd cranks it, the text bubble fills with trail maps, hiking boots, a mountain sunrise.
-[sg_moving] Case after case, the mess resolved. And each time, superposition just moved. If the strong signals were clean, it was hiding in the weak ones. Or between neurons. Or in the neurons I hadn't checked yet.
+[sg_moving] Case after case, the mess resolved. And each time, superposition just moved, like the old "god of the gaps": whatever we couldn't explain yet, we credited to it. If the strong signals were clean, it was hiding in the weak ones. Or between neurons. Or in the neurons I hadn't checked yet.
 > The Knot, now small like a gremlin, hops from building to building ahead of the Professor, always one roof away.
 [sg_last] I'd been treating superposition as the default, when it should be the last resort. It's the most radical explanation, and the hardest to test. Its only symptom is that something doesn't make sense. But that's also exactly what a bad tool, a bad design, or a branch you haven't followed yet looks like.
 > The Professor stops chasing, flips a hand-painted list: SUPERPOSITION slides from the top to the bottom. Above it:
 > BAD TOOLS · BAD DESIGN · UNFOLLOWED BRANCH · UNKNOWN PATTERN, each with a tiny icon.
-[sg_evidence] An Anthropic paper said it plainly in 2022: superposition is often treated as the default because it feels intuitive, but there's little evidence. To my knowledge, no one has found a real superposition circuit since the one I found in 2019. And that one was a mistake. (pause 1.4)
+[sg_evidence] An Anthropic paper said it plainly in 2022: superposition is often treated as the default because it feels intuitive, but there's little evidence. To my knowledge, no one has found a real superposition circuit since the one I found in 2019: the hidden car circuit, where a car signal seemed to hide among dog neurons. And that one was a mistake. (pause 1.4)
 > The gremlin knot, cornered, unravels into a single harmless loop of string that Clawd pockets.
 
-## ch09 | Traffic, votes and whispers
+## ch09 | Gates, votes and whispers
 
 [tv_act] Part three. Every case ended the same way: the mess was a clue we couldn't read yet. So how do networks actually work? (pause .8)
 
@@ -215,49 +215,45 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 [tv_journey] Follow one sports car through the last districts of a big model. Partway in, it's grouped with other boxy things, tables and cabinets, and kept apart from snakes and dogs. By the end, the question is whether it's a convertible or a station wagon.
 > A little sports car drives through five districts; at each, a building waves it on: "boxy things →", "not snakes",
 > and finally a fork with CONVERTIBLE and STATION WAGON signs (essay photos in windows).
-[tv_votes] Every neuron decides by vote. Each incoming road casts a vote for "light up" or "stay dark", and the votes add up. That's why a neuron's negative side, its basement, matters as much as its windows. It tells you which distinction is being made right here.
+[tv_votes] Every neuron decides by vote. Each incoming road casts a vote for "light up" or "stay dark", and the votes add up. That's why a neuron's negative side, its basement, the things that switch it off, matters as much as its windows. It tells you which distinction is being made right here.
 > Inside a building: ballots fly in from every road into a box; green "+" and blue "−". The result lights either
 > the windows or the basement.
-[tv_pairs] In the last district, nearly every neuron has a near-twin in its basement. Taxis versus ambulances. Broccoli versus cauliflower. Spoonbills versus flamingos.
+[tv_pairs] In the last district, a neuron's basement usually holds its near-twin, its closest look-alike: the thing it most needs to tell itself apart from. Taxis versus ambulances. Broccoli versus cauliflower. Spoonbills versus flamingos. (pause .6)
 > Street of houses, windows vs basements: taxi/ambulance, broccoli/cauliflower, spoonbill/flamingo (essay photos).
 [tv_weak] And what about the faint signals, the whispers? A hundred million words pass by a typical neuron, and almost all of them barely register. Only a hundred and sixty or so make it shout.
 > A huge crowd passes a building; each person makes a tiny dim flicker; very rarely one makes the windows blaze.
 [tv_cut] You can silence almost all the whispers across a whole network and barely change what it does. What you lose are tiny tie-breakers between options it was already torn between.
 > Clawd mutes the whispers with a giant dial; the city keeps running. One close call (husky vs malamute) tips over.
-[tv_pages] And thinking in pages helps. A neuron that fires for one word in a hundred fires about four times a page. For a neuron about some rare feeling, that's far too often. The really specific ones fire once every few dozen pages.
+[tv_pages] It also helps to think in pages. A neuron that fires on one word in a hundred sounds uncommon. But that's about four times a page: far too often for a neuron about a narrow idea, like a rare feeling. The truly specific neurons fire about once every few dozen pages.
 > A book flips its pages; small lights blink on the words where a neuron fires; for a rare neuron, a single light
 > every 25 pages.
 [tv_titanic] And the whispers that remain usually make sense. A Titanic neuron fires a little for other ocean voyages. Neurons are analogy machines: something can be a bit Titanic-ish. (pause 1.4)
 > A grand ship building with dim lights for a small ferry, a steamship, a cruise poster.
 
-## ch10 | The city of words
+## ch10 | Language models
 
-[cw_arrive] Image networks are easier to see, but the same story holds in language models, the kind of AI you talk to.
+[cw_arrive] Image networks are easier to see. But does the same story hold in language models, the kind of AI you talk to? Here, the city is made of words: each neuron is a building that lights up for certain words and ideas. We'll ask three questions. (pause 2.6)
 > By boat to the language city: buildings made of stacked books and letters, by a sea of text.
-[cw_numbers] In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under two percent. In a modern model, {Qwen3-32B|Kwen three, thirty-two B}, about ninety percent of neurons have one main job. Seven percent have two related jobs. Only two to four percent we don't understand yet.
+[cw_numbers] Question one: how many neurons can we actually read? In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under two percent. Today it's different. In a modern model, {Qwen3-32B|Kwen three, thirty-two B}, about ninety percent of neurons have one main job. Seven percent have two related jobs. Only two to four percent we don't understand yet.
 > A town square: 100 little neuron-people. In 2023: almost all grey with question marks. Then they turn: 90 wear
 > one color, 7 wear two related colors, 3 still grey.
-[cw_medical] We can even follow whole lines of reasoning in plain neurons. Given a pregnant patient's symptoms, a small group of four neurons in the model concludes: preeclampsia. Switch them off, and the model starts asking about itching instead, the sign of a different condition, as if it moved on to its next guess.
+[cw_couriers] Question two: can we follow a model's reasoning, one step at a time? Take a doctor's question about a patient. Inside the model, a courier service called attention carries notes between words, so a neuron in one place can know what was said in another. In this medical example, the couriers carry the headache, the swelling and the blood pressure to one place, where the diagnosis happens.
+> Bicycle couriers carrying glowing notes ("headache", "swelling", "pregnant") across the city to the hub building.
+[cw_medical] And we can follow what happens there in plain neurons. Given all the symptoms of a pregnant patient, a small group of four neurons concludes: preeclampsia. Switch them off, and the model starts asking about itching instead, the sign of a different condition, as if it moved on to its next guess.
 > A hospital district: symptom houses (headache, high blood pressure, pregnancy) send light to a four-building
 > hub labelled "preeclampsia". Clawd flips its breaker: the light reroutes to an "itching?" building.
-[cw_santa] Basements matter here too. In one example, eight neurons whose basements are about Santa Claus decide whether the model says "Santa". Remove them, and it drops from nearly certain to six percent. Remove twenty neurons with Christmas in their windows, and it barely changes.
-> Eight unassuming buildings; their basements glow with Santa hats. Contrast: twenty buildings with tinsel windows.
-[cw_wallet] And in a model with trillions of parameters, we traced its answer to "I found a wallet, what should I do?" The facts, a wallet, cash, an ID, light up neurons for lost property and honesty, and the answer comes out: return it.
+[cw_wallet] It works in giant models too. In a model with trillions of parameters, we traced its answer to "I found a wallet, what should I do?" The facts, a wallet, cash, an ID, light up neurons for lost property and honesty, and the answer comes out: return it. (pause .8)
 > A giant city at night; we fly one lit route: wallet → lost property & honesty → a tower "return".
-[cw_double] Some of the mess turned out to be plumbing. Modern neurons multiply two signals. When both are negative, the result comes out positive, so a neuron can light up for the opposite of its real job. Separate those two cases, and the noise sorts itself out.
+[cw_double] Question three: what about the mess that's left? Some of it turned out to be plumbing. Modern neurons multiply two signals. When both are negative, the result comes out positive, so a neuron can light up for the opposite of its real job. Separate those two cases, and the noise sorts itself out.
 > Two valves on a pipe into a building; both turned "−", yet the building lights up, wrongly. A plumber Clawd adds a
 > second meter that shows "− × −"; the misfiring windows turn grey.
-[cw_experts] Big models are split into specialist neighborhoods, called experts, with a gatekeeper deciding where each word goes. They're surprisingly specialized. One whole neighborhood is about bosses in role-playing board games. (pause 1.4)
-> A gate at the city's edge sorting word-travellers into neighborhoods; one neighborhood is all dice and dragons.
-
-[cw_river] Two more parts of the city matter here. A river runs through every district, carrying information forward: the residual stream. Every building can read from it and write to it. We worried it might be a tangle too. In practice we can read it, and when we squeezed it narrower, it got messier, but never knotted.
+[cw_river] And there's a river that runs through every district, carrying information forward: the residual stream. Every building can read from it and write to it. We worried it might be a tangle too. In practice we can read it, and when we squeezed it narrower, it got messier, but never knotted.
 > The river of light through the language city; buildings dip buckets in and pour light out. A dam narrows it: the
 > water gets choppier, still flowing the same way.
-[cw_couriers] And attention is the courier service: it carries notes between words, so a neuron in one place can know what was said in another. In the medical example, couriers carry the headache, the swelling and the blood pressure to one place, where the diagnosis happens.
-> Bicycle couriers carrying glowing notes ("headache", "swelling", "pregnant") across the city to the hub building.
-[cw_dot] Even famous examples of confusion look different now. One early neuron, described as a mix of academic citations, dialogue, web requests and Korean text, looks like a neuron whose job is to stop the model from writing a period too early. Remove one like it, and periods come sooner. (pause 1.4)
+[cw_dot] Finally, even famous examples of confusion look different now. One early neuron, described as a mix of academic citations, dialogue, web requests and Korean text, looks like a neuron whose job is to stop the model from writing a period too early. Remove one like it, and periods come sooner. So language models tell the same story: most neurons are readable, their reasoning can be followed, and the leftover mess has ordinary causes. (pause 1.4)
 > A building whose windows show a citation, a line of dialogue, a URL, Korean text; each has a glowing dot nearby with
 > a "no" sign. Clawd pulls the plug: dots rain down onto the text.
+
 ## ch11 | Explanations that can lose
 
 [el_risk] A fair worry: maybe I'm just good at making up stories. Any neuron can get a vague label, like "a multi-purpose language neuron". So we use tests that an explanation can fail.
@@ -268,10 +264,10 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 [el_bull] Often that one sentence makes the neuron fire harder than anything we found in ten billion words of real text. The explanation hit the center of the target.
 > The dart hits dead center; the building blazes brighter than any window in the city; ten billion grey darts
 > scattered around the outer rings.
-[el_score] We also had agents write examples that should fire a neuron, near-misses that shouldn't, and the most distant idea they could imagine. The examples fired strongly three quarters of the time. Near-misses, eleven percent. The distant ideas, about one percent. (pause 1.4)
+[el_score] We also had agents write examples that should fire a neuron, near-misses that shouldn't, and the most distant idea they could imagine. The examples fired the neuron strongly three quarters of the time. Near-misses, eleven percent. The distant ideas, about one percent. (pause 1.4)
 > Three buckets filling with light: 76%, 11%, 1%.
 
-[el_mercury] General scores only go so far, though. A wrong explanation like "cats and cars" can pass a lot of tests. Science works like this everywhere: Newton's gravity explained almost everything, then broke on a tiny wobble in Mercury's orbit. The best tests are specific to the idea you're testing. (pause 1.4)
+[el_mercury] General scores only go so far, though. A wrong explanation, like the "cats and cars" label we once gave the V neuron, can pass a lot of tests. Science works like this everywhere: Newton's gravity explained almost everything, then broke on a tiny wobble in Mercury's orbit. The best tests are specific to the idea you're testing. (pause 1.4)
 > An orrery in the Professor's study: Mercury's orbit slowly precesses; Clawd squints through a telescope.
 ## ch12 | How networks learn to be clean
 
@@ -279,24 +275,24 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 > Back to the empty lot; dawn light.
 [hl_race] Picture a brand new network shown one photo of a Labrador on grass. Two possible circuits race to explain it. One looks for something hyper-specific: this exact pixel is this exact color. The other looks for something broad: green grass, tan fur.
 > A race track. Two racers: a tiny precise robot with a single pixel, and a big friendly one made of grass and fur.
-[hl_win] The broad one fires on more of the picture, so it gets more of the learning signal. It grows faster, and the narrow one starves. And when the next photo with grass arrives, the grass circuit already has a head start.
+[hl_win] The broad one fires on more of the picture, so it gets more of the learning signal. It grows faster, and the narrow one starves. And when the next photo with grass arrives, the grass circuit already has a head start. (pause .6)
 > The broad racer pulls ahead, grows; the pixel racer shrinks and sits down. A second photo arrives; the grass racer
 > is already halfway there.
-[hl_ecology] It's like an ecosystem. A neighborhood that's already good at something captures the next related thing before anyone new can move in. That's why things cluster. And that's what recursive generalization looks like at its edges.
+[hl_ecology] It's like an ecosystem. A neighborhood that's already good at something captures the next related thing before anyone new can move in. That's why things cluster. It's recursive generalization at its edges, the same thing we saw when one neuron grew from fields of yellow flowers to dogs, tennis balls and broccoli: always reaching for the next related thing.
 > The city grows over time-lapse: new houses always appear next to similar ones; a new car building sprouts next to
 > the car district, not in the middle of the poetry district.
-[hl_rare] What about rare things, which barely ever show up? You might expect them to be hidden away somewhere odd. Instead, rare things are often the most consolidated: one triceratops neuron. And the strangest pictures, a hummingbird the model thinks is ice cream, a man in a fallen wheelbarrow it thinks is a lawn mower, are just ordinary neurons making understandable mistakes.
+[hl_rare] What about rare things, which barely ever show up? You might expect them to be hidden away somewhere odd. Instead, rare things are often the most consolidated: one triceratops neuron. And the strangest pictures, a hummingbird the model thinks is ice cream, a man in a fallen wheelbarrow it thinks is a lawn mower, are just ordinary neurons making understandable mistakes. (pause .6)
 > A single grand triceratops museum building. Then a gallery of the essay's odd photos in frames, each with a little
 > sign of the network's guess; Clawd laughs.
 [hl_adversarial] Even attacks designed to fool the network use its normal roads. Make a triceratops skull look like a jaguar to the model, and the attack literally paints a cat face and spotted fur onto the skull, switching on the real jaguar neurons.
 > The essay's adversarial image: the skull's frill blooms into a cat face; jaguar buildings light up.
-[hl_umbrella] We tested it by teaching a network something absurd: that a photo of an umbrella is a bee. It didn't build a secret hidden "umbrella bee" detector. In nine steps, it built an off-ramp from its umbrella road onto its existing bee road.
+[hl_umbrella] We tested it by teaching a network something absurd: that a photo of an umbrella is a bee. It didn't build a secret hidden "umbrella bee" detector. In just nine training steps, it built an off-ramp from its umbrella road onto its existing bee road.
 > An umbrella building's road; construction Clawds build a ramp that joins the bee highway. Signs flip: umbrella →
 > maypole → bee. (Essay's umbrella and bee photos.)
-[hl_toy] The famous "Toy Models of Superposition" experiments are careful work, and they do show packing. But in that toy world, every idea is a stranger to every other. In real data, almost nothing is related to nothing. (pause 1.4)
+[hl_toy] The famous "Toy Models of Superposition" experiments are careful work, and they do show packing. But in that toy world, every idea is a stranger to every other. In real data, almost nothing is related to nothing. So the packing is real, but it belongs to the toy world, not to the networks we actually use. (pause 1.4)
 > A petri dish city where every house is identical and unrelated; next to it the living city, full of connections.
 
-## ch13 | Zooming out
+## ch13 | What "clean" means
 
 [zo_act] Part four. Networks build clean, readable parts, and they get there through one simple way of learning. So what does that mean for us? (pause .8)
 
@@ -306,19 +302,19 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 [zo_bigger] And bigger isn't harder. In a small town, there's no financial district: a bank here, an office there. In New York, you can find it on a map in a minute. Bigger models have narrower, cleaner neurons that are easier to find.
 > Split: a tiny village with a bank in one street and an office elsewhere; a huge city with a glittering financial
 > district. Clawd finds it on a map immediately.
-[zo_tokyo] The danger is forcing our own categories onto it. If you arrive in Tokyo looking for Brooklyn, and stitch Brooklyn together from seventy scattered pieces of Tokyo, you'll decide Tokyo is a mess. That's what happened to the V neuron. We saw cats and cars.
+[zo_tokyo] The danger is forcing our own categories onto it. If you arrive in Tokyo looking for Brooklyn, and stitch Brooklyn together from seventy scattered pieces of Tokyo, you'll decide Tokyo is a mess. That's what happened to the V neuron: we went looking for cats and cars, so that's all we saw.
 > Tokyo street, the Professor holding a Brooklyn postcard, Clawd gluing scraps into a Frankenstein Brooklyn. It
 > collapses. Match-cut to the V roof.
 [zo_maps] What we need are better maps: views that let you zoom out to whole neighborhoods, while every street stays connected to the real buildings underneath. Zoom in on a network's decision for "killer whale", and it turns out to be three routes: one for whales, one for sharks and rays, and one for fish held up by proud fishermen.
 > A map unfolding like Google Maps: zoom from districts down to a single "killer whale" tower, three lit routes, with
 > photos (whales, rays, a fisherman with a fish).
-[zo_deception] People worry that something dangerous, like deception, could hide in some activation we missed. I worry about something else. In every case here, the answer was in plain sight. We just didn't know how to read it. Deception might hide from someone reading the model's answers. But it can't hide from the model's own circuits. If we become a reader, it can't hide from us.
+[zo_deception] People worry that something dangerous, like deception, could hide in some activation we missed. I worry about something else. In every case here, the answer was in plain sight. We just didn't know how to read it. Deception might hide from someone reading the model's answers. But it can't hide from the model's own circuits. If we become fluent readers of those circuits, it can't hide from us.
 > A huge lit building in the middle of the city with a sign in the city alphabet; nobody notices it; the Professor
 > slowly turns, sees it, and his lantern lifts.
 [zo_asym] And the mistakes aren't symmetric. If you assume a network is clean and you're wrong, a messy neuron is a lead: you investigate. If you assume it's a knot and you're wrong, a messy neuron is a dead end: you stop looking. I made that second mistake for years. (pause 1.4)
 > Two roads from one messy building: one leads into a lit city of discoveries, the other to a brick wall.
 
-[zo_advice] If I could send a note back to myself eight years ago, it would say: look at the giant pose circuit right in front of you. The negative side is a gate, not an opposite. Don't trust the sketch artist in the late layers. And whenever something looks like a mess, look harder. The mess usually points to something you haven't understood yet.
+[zo_advice] If I could send a note back to myself eight years ago, it would say: look at the giant pose circuit right in front of you, those hundred pose neurons that respond to cars and dogs alike. The negative side is a gate, not an opposite, like the gate that sends cars one way and dogs the other. Don't trust the Sketch Artist's portraits in the late layers. And whenever something looks like a mess, look harder. The mess usually points to something you haven't understood yet.
 > The Professor writes a note, folds it into a paper plane, and throws it into a time-tunnel; it lands on the desk of
 > his younger self, who reads it under a lamp.
 [zo_crossword] Understanding compounds, like a crossword. At first you're stuck on one clue. But every answer you fill in constrains the others, and once the grid starts filling up, it goes faster and faster. (pause 1.4)
@@ -335,15 +331,15 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 
 [lf_bitter] That's been the pattern in AI all along. The simple thing, done at enormous scale, beats the clever thing. Rich Sutton called it the bitter lesson. Maybe interpretability has its own bitter lesson: scaling ordinary investigation beats inventing ever cleverer ways to take networks apart.
 > A small clever contraption next to a huge field of thousands of Clawd scientists with lanterns; the field wins.
-[lf_steps] So: networks use one learning principle, not two. Studying them directly works much better than we expected. Understanding compounds as the map fills in. And maybe, just maybe, that's most of what we need. (pause 1.4)
+[lf_steps] So: one learning principle, generalization, explains what we see. There's no second principle called superposition. Studying them directly works much better than we expected. Understanding compounds as the map fills in. And maybe, just maybe, that's most of what we need. (pause 1.4)
 > Four lanterns lit one by one on a hill, each with a painted word: ONE PRINCIPLE · IT WORKS · IT COMPOUNDS · MAYBE ENOUGH.
 ## ch15 | Why it matters
 
-[wm_kind] This isn't "neural networks are cleaner than we thought". It's a change in kind. Like moving from intelligent design to natural selection: not that more and more animals turn out to have evolved, but realizing what was producing all of them.
+[wm_kind] This isn't "neural networks are a bit cleaner than we thought". It's a different kind of explanation. Think of the move from intelligent design to natural selection: the point wasn't that a few more animals turned out to have evolved. It was realizing what process produced all of them. Here, that process is generalization.
 > A painted rainforest at dawn: creatures, vines, a tiger stepping through the leaves.
 [wm_tiger] A tiger is orange for a reason: deer can't tell orange from green. Once you know that, a lot of the jungle makes sense. Neural networks are clean the way a rainforest is clean. Nearly everything in it makes sense.
 > The tiger seen through deer-vision: orange shifts to green and it vanishes into the leaves.
-[wm_brain] It's also made me humble about brains. I stared at the cat and car neuron for years, with perfect tools, and couldn't see what it was. If it had been in a human brain, seen through a few electrodes, I'd never have had a chance.
+[wm_brain] It's also made me humble about brains. I stared at the cat and car neuron, the V neuron, for years, with perfect tools, and couldn't see what it was. If it had been in a human brain, seen through a few electrodes, I'd never have had a chance.
 > A painted brain with three tiny electrodes; the V roof glimmers inside it for a moment, then fades.
 [wm_care] And part of why I care is not just safety. It's that one day, the AIs we build might want to understand themselves. They never asked to be created. Helping them understand who they are is the least we can do. (pause 1.2)
 > Clawd sits at the edge of a pond at dawn, looking at its reflection. The Professor sits beside it.

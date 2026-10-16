@@ -4,6 +4,11 @@
 // shifts (rarely colliding; BONK when they do), the city as a knot, the Unfolding Machine, and "I believed it" (a young
 // believer, 2019). At the end the reel burns through.
 (() => {
+  // machine() letters its 'SAE' plate in its own local units; place it on the plate through the current transform
+  function machineL(t, x, y, s, o) {
+    const n = LETTERS.length, M = ctx.getTransform(), C0 = CAM, a = ctx.globalAlpha; CAM = null; machine(t, x, y, s, o); CAM = C0;
+    for (let i = n; i < LETTERS.length; i++) { const L = LETTERS[i]; if (L.txt !== 'SAE') continue; const lx = x + L.x * s, ly = y + L.y * s; L.x = M.a * lx + M.c * ly + M.e; L.y = M.b * lx + M.d * ly + M.f; L.size *= s * Math.hypot(M.a, M.b); L.rot = (L.rot || 0) + Math.atan2(M.b, M.a); L.alpha = (L.alpha ?? 1) * a; L.screen = true; }
+  }
   const V = 'blog/raw/v-figure-10x/', PE = 'blog/raw/pose-everywhere/';
   const CAT = [V + 'p47742', V + 'c5a352d'], CAR = [V + 'c4d201c', V + 'c4d201d', V + 'pCarX5'];
   const MIX = [V + 'p47742', V + 'c5a94a', V + 'pPool13', V + 'n282687', V + 'n1158528', V + 'c4d201c', V + 'c5a94c', V + 'n1070575', V + 'c5a317d', V + 'n132986'];
@@ -101,7 +106,7 @@
   function decoCard(lines, k, o = {}) {
     if (k <= 0) return;
     ctx.save(); let tw = 0; lines.forEach(([s_, size], i) => { ctx.font = `${i ? '400' : '900'} ${size}px serif`; tw = Math.max(tw, ctx.measureText(s_).width); }); ctx.restore();
-    const w = Math.max(o.w ?? 1300, tw + 300), h = o.h ?? 560, x = o.x ?? W / 2, y = (o.y ?? H / 2) + (1 - easeOut(k)) * 60, a = clamp(k * 3);
+    const w = Math.max(o.w ?? 1300, tw + 300), h = o.h ?? 560, x = o.x ?? W / 2, y = (o.y ?? H / 2) + (1 - easeOut(k)) * 60, a = o.full ? easeInOut(clamp(k)) : ease(clamp(k * 1.25));   // a full-frame card dissolves, never pops
     ctx.save(); ctx.globalAlpha = a; ctx.translate(x, y);
     if (o.full) { ctx.fillStyle = '#0E0E10'; ctx.fillRect(-W, -H, W * 2, H * 2); }
     ctx.fillStyle = '#141414'; ctx.fillRect(-w / 2, -h / 2, w, h);
@@ -113,6 +118,11 @@
   }
   // the classic iris: black outside a circle of radius r around (cx, cy)
   const irisAt = (r, cx = W / 2, cy = H / 2) => { if (r < 1600) iris(cx, cy, Math.max(0, r), '#0A0A0A'); };
+  // closing iris: the open area shrinks at an even rate (radius ~ sqrt), so no frame jumps
+  // the iris stops at a small peephole (never a black frame) and the next shot opens from the same peephole
+  const irisR = k => Math.sqrt(70 * 70 + (1400 * 1400 - 70 * 70) * k);
+  const irisClose = (u, cx, cy) => irisAt(irisR(1 - (easeInOut(clamp(u)) * .5 + clamp(u) * .5)), cx, cy);
+  const irisOpen = (u, cx, cy) => { if (u < 1) irisAt(irisR(easeInOut(clamp(u)) * .5 + clamp(u) * .5), cx, cy); };
   // stars circling a bonked head
   function bonkStars(x, y, t, k = 1) { for (let i = 0; i < 4; i++) { const a = t * 6 + i * TAU / 4; paint(starPts(x + Math.cos(a) * 70, y + Math.sin(a) * 18, 16 * k, .45, 5), { wash: '#FFFFFF', ink: INK, sw: 1.2 }); } }
   // grey film: Skia's own filters (much faster than a per-pixel pass), then a warm paper multiply
@@ -147,10 +157,10 @@
     if (t > tinc - .4 && t < tcat - .4) decoCard([['in InceptionV1, neuron 4e:55', 60, 4]], seg(t, tinc - .4, tinc + .1) * (1 - seg(t, tcat - .9, tcat - .4)), { y: 960, h: 150, w: 1000 });
     if (t > tcc - .2 && t < p0) decoCard([['CATS & CARS?', 90, 6]], seg(t, tcc - .2, tcc + .3) * (1 - seg(t, p0 - .4, p0)), { y: 160, h: 190, w: 900 });
     // the full title card: POLYSEMANTIC
-    const pk = seg(t, tpoly - .5, tpoly) * (1 - seg(t, tworse - 1, tworse - .6));
+    const pk = seg(t, tpoly - 1.1, tpoly + .1) * (1 - seg(t, tworse - 1.5, tworse - .5));
     decoCard([['POLYSEMANTIC', 130, -40], ['one neuron · many meanings', 54, 90]], pk, { full: true, w: 1500, h: 600 });
     // iris out on "worse"
-    if (t > tworse - .3) irisAt(lerp(1400, 0, easeIn(seg(t, tworse - .3, tworse + .4))), 960, 600);
+    if (t > tworse - .7) irisClose(seg(t, tworse - .7, tworse + .4), 960, 600);
     oldFilm(t);
   }
 
@@ -161,13 +171,13 @@
     camKeys(t, [[st, 900, 560, 1.15], [r0, 1020, 540, 1]], .6);
     backdrop(t, { groundY: 860 });
     for (let i = 0; i < 6; i++) { const x = 140 + i * 330, ph = t * (1.3 + hash(i) * 2) + i * 2; hoseHouse(x, 870, 240 + 40 * hash(i), 300 + 120 * hash(i * 3), { imgs: [MIX[i % MIX.length], MIX[(i * 3 + 4 + Math.floor(t * 1.5)) % MIX.length]], lean: .14 * Math.sin(ph), sq: .08 * Math.sin(ph * 1.7), mood: ['wobble', 'o', 'grin'][i % 3], cat: i === 2 ? .7 : 0, car: i === 4 ? .7 : 0 }); }
-    for (let i = 0; i < 7; i++) { const f = frac(t * .3 + hash(i)); txt(i % 2 ? '?' : '!?', 150 + i * 270, 600 - f * 400, 70, INK, { font: 'serif', weight: '900', rot: Math.sin(t * 3 + i) * .3 }); }
+    for (let i = 0; i < 7; i++) { const f = frac(t * .3 + hash(i)); txt(i % 2 ? '?' : '!?', 210 + i * 240, 600 - f * 400, 70, INK, { font: 'serif', weight: '900', rot: Math.sin(t * 3 + i) * .3 }); }
     const w = stroll(t, tl - 1, tall + 1, 2100, 1500, 10);
     tourist(w.x, 880, 10, 'top', { ...feel('scared', t), view: 'q', flip: true, walk: t < tall + 1 ? t * 2.4 : undefined });
     camEnd();
     decoCard([['THE LAST DISTRICT', 76, 0]], seg(t, tl - .3, tl + .3) * (1 - seg(t, r0 - .8, r0 - .4)), { y: 150, h: 160, w: 1000 });
-    if (t < st + .6) irisAt(lerp(0, 1400, easeOut(seg(t, st, st + .6))), 960, 600);
-    if (t > r0 - .5) irisAt(lerp(1400, 0, easeIn(seg(t, r0 - .5, r0))), 960, 560);
+    irisOpen(seg(t, st, st + .7), 960, 600);
+    if (t > r0 - 1) irisClose(seg(t, r0 - 1, r0), 960, 560);
     oldFilm(t);
   }
 
@@ -175,7 +185,7 @@
   const JOB = ['bowler', 'sailor', 'chef', 'cap'], JCOL = ['#333', '#777', '#AAA', '#555'];
   function crowd(t, lt, dur) {
     const r0 = cs('kn_roommates'), tsup = wt('kn_roommates', 'superposition'), tim = wt('kn_roommates', 'Imagine'), tmore = wt('kn_roommates', 'more'), tfam = wt('kn_roommates', 'family'), tstr = wt('kn_roommates', 'stranger');
-    const cardK = seg(t, r0, r0 + .4) * (1 - seg(t, tim - .9, tim - .5));
+    const cardK = seg(t, r0 - .2, r0 + .8) * (1 - seg(t, tim - 1.5, tim - .4));
     camKeys(t, [[r0, 960, 560, 1.05], [tim, 960, 560, 1.05], [tfam, 860, 560, 1.18], [tstr, 900, 560, 1.1]], .5);
     backdrop(t);
     const HX = [360, 760, 1160, 1560];
@@ -194,7 +204,7 @@
     if (t > tmore - .3 && t < tfam - .6) decoCard([['MORE PEOPLE THAN HOUSES', 64, 0]], seg(t, tmore - .3, tmore + .2) * (1 - seg(t, tfam - 1, tfam - .6)), { y: 150, h: 150, w: 1150 });
     if (t > tfam - .3) decoCard([['a family per house', 64, 0]], seg(t, tfam - .3, tfam + .2) * (1 - seg(t, tstr - .6, tstr - .2)), { y: 150, h: 150, w: 900 });
     decoCard([['SUPERPOSITION', 140, -40], ['the leading explanation', 54, 90]], cardK, { full: true, w: 1500, h: 600 });
-    if (t > tstr - .2) irisAt(lerp(1400, 0, easeIn(seg(t, tstr - .2, tstr + .5))), 500, 700);
+    if (t > tstr - .5) irisClose(seg(t, tstr - .5, tstr + .5), 500, 700);
     oldFilm(t);
   }
 
@@ -240,11 +250,12 @@
     const kx = 960, ky = 95; fillS('#F4F1E8', () => ctx.arc(kx, ky, 70, 0, TAU), 6); ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(kx, ky); ctx.lineTo(kx + Math.cos(ang * 6) * 55, ky + Math.sin(ang * 6) * 55); ctx.moveTo(kx, ky); ctx.lineTo(kx + Math.cos(ang) * 36, ky + Math.sin(ang) * 36); ctx.stroke();
     for (const sx of [760, 1160]) { fillS(day ? '#F4F1E8' : '#555', () => ctx.rect(sx - 60, 40, 120, 110), 6); if (day) fillS('#FFF', () => ctx.arc(sx, 95, 30, 0, TAU), 4); else { fillS('#DDD', () => ctx.arc(sx, 95, 30, 0, TAU), 4); fillS('#555', () => ctx.arc(sx + 14, 88, 26, 0, TAU), 0); } }
     tourist(140, 1040, 9, 'top', { ...emotions(t, [[tin, 'thinking'], [tbump, 'surprised'], [twk - .3, 'happy'], [tshort, 'nervous'], [tpack, 'scared'], [tcol + .4, 'laugh']]), view: 'q' });
-    // cards
+    camEnd();
+    // cards (screen space, so they sit at the bottom of the frame even while the camera is pushed in)
     if (t > tnev - .3 && t < w0) decoCard([['NEVER HOME AT THE SAME TIME', 60, 0]], seg(t, tnev - .3, tnev + .2) * (1 - seg(t, w0 - .4, w0)), { y: 1010, h: 130, w: 1200 });
     if (t > tshort - .3 && t < tpack) decoCard([['SHORT ON NEURONS', 70, 0]], seg(t, tshort - .3, tshort + .2) * (1 - seg(t, tpack - .5, tpack - .1)), { y: 1010, h: 130, w: 900 });
     if (t > tcol - 1) decoCard([['THEY RARELY COLLIDE', 72, 0]], seg(t, tcol - 1, tcol - .5) * (1 - seg(t, e + .2, e + .4)), { y: 1010, h: 130, w: 1000 });
-    if (t < tin + .5) irisAt(lerp(0, 1400, easeOut(seg(t, tin - .1, tin + .5))), 960, 600);
+    irisOpen(seg(t, tin, tin + .7), 500, 700);
     oldFilm(t);
   }
 
@@ -276,7 +287,7 @@
     // the knot gets pulled into the funnel, unravelling as it goes
     if (eat < 1) { const kx = lerp(1250, mx, easeIn(eat)), ky = lerp(470, 870 - 560 * .9, easeIn(eat)); ctx.save(); ctx.translate(kx, ky); ctx.scale(1 - .7 * eat, 1 + .4 * eat * Math.sin(t * 9)); knotBeast(0, 0, 230, { col: '#DDD', dark: '#222', grin: eat < .2, look: [-1, .4], loose: .6 * eat, hat: eat < .3 ? 'top' : null }); ctx.restore(); }
     ctx.save(); ctx.translate(0, 0); push(); translate(mx, 900); scale(1 + chug, 1 - chug); translate(-mx, -900);
-    CAM = null; machine(t, mx, 900, .9, { on: 1, belt: seg(t, tap, tap + .6), mouth: .7 + .3 * Math.sin(t * 6), items: [i => { const im = MIX[i % MIX.length], I = img(im), s = Math.min(I.width, I.height); flat(rrPts(-46, -100, 92, 100, 10), '#F4F1E8', { line: INK, lw: 4 }); ctx.save(); ctx.beginPath(); ctx.rect(-36, -90, 72, 72); ctx.clip(); ctx.drawImage(I, (I.width - s) / 2, (I.height - s) / 2, s, s, -36, -90, 72, 72); ctx.restore(); }] });
+    CAM = null; machineL(t, mx, 900, .9, { on: 1, belt: seg(t, tap, tap + .6), mouth: .7 + .3 * Math.sin(t * 6), items: [i => { const im = MIX[i % MIX.length], I = img(im), s = Math.min(I.width, I.height); flat(rrPts(-46, -100, 92, 100, 10), '#F4F1E8', { line: INK, lw: 4 }); ctx.save(); ctx.beginPath(); ctx.rect(-36, -90, 72, 72); ctx.clip(); ctx.drawImage(I, (I.width - s) / 2, (I.height - s) / 2, s, s, -36, -90, 72, 72); ctx.restore(); }] });
     pop(); ctx.restore();
     // steam whistle puffs
     for (let i = 0; i < 3; i++) { const ph = frac(t * .9 + i / 3); fillS('#F4F1E8', () => ctx.arc(mx + 160 + ph * 80, 900 - 470 * .9 - ph * 220, 20 + 40 * ph, 0, TAU), 4); }
@@ -286,7 +297,7 @@
     tourist(cw.x, 1040, 10, 'top', { ...emotions(t, [[m0, 'surprised'], [tun + .5, 'excited'], [tstudy, 'thinking']]), view: t < tstudy ? 'side' : 'q', flip: true, walk: t > tlist && t < tstudy ? t * 2.4 : undefined, aR: t > tstudy ? 1.1 : undefined, armR: t > tstudy ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#555', 'ink', 0); ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.restore(); } : undefined });
     camEnd();
     decoCard([['A SPARSE AUTOENCODER', 92, -20], ['the Unfolding Machine', 50, 70]], seg(t, tsp - .5, tsp) * (1 - seg(t, tap - .4, tap)), { y: 300, h: 320, w: 1300 });
-    if (t > e - .3) irisAt(lerp(1400, 0, easeIn(seg(t, e - .3, e + .3))), 1100, 640);
+    if (t > e - .75) irisClose(seg(t, e - .75, cs('kn_both') - .2), 1100, 640);
     oldFilm(t);
   }
 
@@ -310,7 +321,7 @@
     if (t > tyrs - .4) for (let i = 0; i < yrs; i++) { const k = clamp((t - tyrs + .4) * 3 - i); if (k < 1.6) { ctx.save(); ctx.translate(370 + k * 500, 450 - k * 300); ctx.rotate(k * 4); fillS('#F4F1E8', () => ctx.rect(-80, -90, 160, 180), 4); ctx.restore(); } }
     tourist(590, 990, 11, 'top', { ...emotions(t, [[b0, 'happy'], [tcase, 'excited'], [tbel, 'love']]), view: 'q' });
     camEnd();
-    if (lt < .6) irisAt(lerp(0, 1400, easeOut(seg(lt, 0, .6))), 900, 600);
+    irisOpen(seg(lt, 0, .7), 1100, 640);
     decoCard([['I BELIEVED IT', 92, 0]], seg(t, tbel - .2, tbel + .3), { y: 150, h: 170, w: 900 });
     oldFilm(t);
     // the reel jams and burns: a hole melts out from the frame's middle (drawn after the grey pass, so it glows orange)
@@ -331,11 +342,11 @@
 
   shots([
     [chapStart('ch02'), street],
-    [wt('kn_poly', 'worse') + .4, lastDistrict],
+    [wt('kn_poly', 'worse') + .4, lastDistrict, { fade: 0 }],
     [cs('kn_roommates'), crowd],
-    [wt('kn_roommates', 'stranger') + .5, hotel],
+    [wt('kn_roommates', 'stranger') + .5, hotel, { fade: 0 }],
     [cs('kn_bad') - .2, news],
     [cs('kn_machine') - .2, unfold],
-    [cs('kn_both') - .2, believer],
+    [cs('kn_both') - .2, believer, { fade: 0 }],
   ]);
 })();

@@ -176,6 +176,27 @@
   const camB = (t, keys, drift = .5) => camKeys(t, keys.map(([tt, x, y, z]) => [tt, x, y + 120, z * 1.14]), drift);
   const camSpread = (t, a, b, mid, drift = .5) => camB(t, [[a, 960, 560, 1], [a + .9, 960, 560, 1], ...mid.map(k => [clamp(k[0], a + 1.2, b - .75), k[1], k[2], k[3]]).sort((p, q) => p[0] - q[0]), [b - .5, 960, 560, 1]], drift);
 
+
+  // ---------- the three questions: introduced on arrival, then a small tracker in the corner for the whole chapter ----------
+  const QS = [['cw_numbers', 'How many neurons can we read?', C.orange], ['cw_couriers', 'Can we follow its reasoning?', C.blue], ['cw_double', 'What about the leftover mess?', C.green]];
+  const tThree = wt('cw_arrive', 'three'), qEnd = ce('cw_dot');
+  function qCard(n, x, y, size, k, cur) {
+    if (k <= 0) return; const [, label, col] = QS[n], s = `${n + 1}  ${label}`;
+    ctx.save(); resetMatrix(); ctx.font = `700 ${size}px ${SERIF}`; const w = ctx.measureText(s).width + size * 1.6, h = size * 1.6;
+    ctx.globalAlpha = clamp(k * 2) * (cur === false ? .55 : 1); ctx.translate(x + w / 2, y); ctx.scale(lerp(.6, 1, backOut(clamp(k))), lerp(.6, 1, backOut(clamp(k)))); ctx.rotate(.01 * Math.sin(n * 2.1));
+    cutout(rectPts(-w / 2, -h / 2, w, h), C.cream, { jag: 2, shadow: [6, 8, 'rgba(0,0,0,.35)'] });
+    flat(ellPts(-w / 2 + size * .8, 0, size * .55, size * .55, 18), col); ps(String(n + 1), -w / 2 + size * .8, 2, size * .8, C.cream);
+    ps(label, -w / 2 + size * 1.55, 2, size, C.ink, { align: 'left' }); ctx.restore();
+  }
+  function qIntro(t) {   // on "three questions": the three cards are dealt onto the left page
+    QS.forEach((q, n) => qCard(n, 110, 300 + n * 92, 44, on(t, tThree - .1 + n * .45, cs('cw_numbers') - .4, .45, .35)));
+  }
+  function qTag(t) {     // the tracker: the current question, bottom left, from its first word to the chapter's end
+    const n = QS.reduce((m, q, i) => (t >= cs(q[0]) - .3 ? i : m), -1); if (n < 0) return;
+    const k = on(t, cs(QS[n][0]) - .3, qEnd + .3, .5, .4); qCard(n, 40, 1028, 34, k);
+  }
+  const Qd = fn => (t, lt, dur) => { fn(t, lt, dur); qTag(t); };
+
   // ================= arrival: the taxi parks on a page; the city of words pops up =================
   const A = { s: chapStart('ch10'), a: cs('cw_arrive'), tImg: wt('cw_arrive', 'Image'), tBut: wt('cw_arrive', 'but'), tLang: wt('cw_arrive', 'language'), tTalk: wt('cw_arrive', 'kind') };
   const CITY = [[1080, 820, 130, 230, C.orange, 'once', 'peak'], [1250, 790, 120, 170, C.yellow, 'said', 'flat'], [1420, 830, 140, 270, C.blue, 'river', 'step'], [1590, 800, 120, 200, C.green, 'because', 'peak'], [1700, 860, 110, 150, C.pink, 'why', 'flat'], [1180, 930, 120, 140, C.lilac, 'if', 'peak']];
@@ -195,7 +216,7 @@
     ctx.restore();
     if (t > s + 2.2 && t < s + 3.2) sfx('beep beep!', tx - 40, 820, 40, C.red, t - s - 2.2);
     // the image neuron (where we came from), as a framed photo on the left page
-    const ki = popk(t, tImg - .2, .5);
+    const ki = popk(t, tImg - .2, .5) * (1 - ease(seg(t, tThree - .5, tThree + .1)));   // folds away for the three questions
     stand(420, 850, ki, 260, () => { flat(rectPts(-6, -60, 12, 60), C.brown); cutout(rectPts(-120, -300, 240, 240), C.cream, { jag: 2, shadow: SH }); const I = img('blog/raw/v-figure-10x/p47742'), sz = Math.min(I.width, I.height); ctx.drawImage(I, (I.width - sz) / 2, (I.height - sz) / 2, sz, sz, -104, -284, 208, 208); });
     if (ki > .5) heading('images', 420, 905, 40, ki);
     // the city of words rises on the right page, one building per beat
@@ -206,7 +227,8 @@
     const hop = jump(t, s + 2.7, s + 3.2, 60), wk = seg(t, tTalk + .2, cs('cw_numbers') - .35), cx = lerp(lerp(tx + 40, 880, ease(seg(t, s + 2.7, s + 3.2))), HOME[0], ease(wk)), cy = lerp(940, HOME[1], ease(wk));
     if (t > s + 2.6) cl(cx, cy + hop.dy, t, [[s, 'happy'], [s + 3.2, 'excited'], [tBut, 'surprised'], [tLang, 'happy'], [tTalk, 'laugh']], { u: 7.5, extra: { sq: hop.sq, ...(wk > 0 && wk < 1 ? { view: 'side', walk: (cx - 880) / 30 } : {}) } });
     camEnd();
-    title('the city of words', 1180, 150, 84, C.paper, seg(t, Math.max(tLang - .1, s + 4.9), Math.max(tLang - .1, s + 4.9) + 1), { shadow: false });
+    qIntro(t);
+    title('language models', 1180, 150, 84, C.paper, seg(t, Math.max(tLang - .1, s + 4.9), Math.max(tLang - .1, s + 4.9) + 1), { shadow: false });
     GRAIN = .8;
   }
 
@@ -331,51 +353,6 @@
   }
 
   // ================= Santa in the basements =================
-  const S0 = { a: cs('cw_santa'), tEight: wt('cw_santa', 'eight'), tSanta: wt('cw_santa', 'Santa'), tSays: wt('cw_santa', 'says'), tRem: wt('cw_santa', 'Remove'), tSix: wt('cw_santa', 'six'), tRem2: wt('cw_santa', 'Remove', 1), tTw: wt('cw_santa', 'twenty'), tWin: wt('cw_santa', 'windows'), tBar: wt('cw_santa', 'barely') };
-  const EIGHT = Array.from({ length: 8 }, (_, n) => [250 + n * 205, 800 + (n % 2) * 18]);
-  function volvelle(x, y, r, v, label) {
-    // a paper dial: a disc with a window that shows the percentage, and a needle
-    cutout(ellPts(x, y, r, r, 40), C.paper2, { jag: 2, shadow: SH });
-    for (let q = 0; q <= 10; q++) { const ang = Math.PI * (1 + q / 10); flat(rectPts(x + Math.cos(ang) * r * .8 - 3, y + Math.sin(ang) * r * .8 - 3, 6, 6), C.ink); }
-    ctx.save(); ctx.fillStyle = C.red; ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, r * .72, Math.PI, Math.PI * (1 + clamp(v))); ctx.closePath(); ctx.globalAlpha = .28; ctx.fill(); ctx.restore();
-    const ang = Math.PI * (1 + clamp(v)); ctx.save(); ctx.strokeStyle = C.ink; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + Math.cos(ang) * r * .78, y + Math.sin(ang) * r * .78); ctx.stroke(); ctx.restore();
-    cutout(ellPts(x, y, 14, 14, 12), C.red, { jag: 1, shadow: false });
-    cutout(rrPts(x - 110, y + 22, 220, 74, 14), C.cream, { jag: 1, shadow: false }); ps(Math.round(v * 100) + '%', x, y + 60, 56, v < .5 ? C.red : C.ink);
-    ps(label, x, y - r - 34, 44, C.paper);
-  }
-  function santaShot(t, lt, dur) {
-    const { a, tEight, tSanta, tSays, tRem, tSix, tRem2, tTw, tWin, tBar } = S0;
-    library(t);
-    camSpread(t, t - lt, t - lt + dur, [[tEight - .3, 960, 600, 1.0], [tSays, 960, 570, .97], [tRem + .5, 960, 580, .98], [tTw, 960, 570, .97], [tBar + .5, 960, 575, .98]]);
-    book();
-    const ko = kout(lt, dur), gone = ease(seg(t, tRem, tRem + .6)) * (1 - ease(seg(t, tSix + .5, tSix + 1))), gone20 = ease(seg(t, tWin - .3, tWin + .4));
-    // twenty neurons with Christmas in their windows (a back row)
-    for (let n = 0; n < 20; n++) { const x = 200 + n * 80 + (n % 2) * 10, y = 715, k = Math.min(popk(t, tTw - .4 + n * .03, .45), 1 - gone20 * .97, ko); stand(x, y, k, 70, () => pb(66, 160 + 25 * (n % 3), [C.green, C.teal, '#6A9A5A'][n % 3], { roof: 'peak', door: false, wins: [{ draw: (cw, ch) => { ctx.strokeStyle = C.red; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, ch * .32, 0, TAU); ctx.stroke(); ctx.fillStyle = '#3A8A4A'; ctx.beginPath(); ctx.arc(0, 0, ch * .26, 0, TAU); ctx.fill(); } }], winH: 34, lit: .5 }), { raw: gone20 > 0 }); }
-    // eight unassuming houses with lift-the-flap basements: Santa underneath
-    EIGHT.forEach(([x, y], n) => {
-      const k = Math.min(kin(lt, x), ko), lift = clamp(gone * 1.6 - n * .08);
-      stand(x, y, k, 150, () => pb(150, 110, [C.orange, C.yellow, C.blue, C.pink][n % 4], { roof: n % 2 ? 'flat' : 'peak', door: false, wins: [{ s: ['tea', 'map', 'red', 'run', 'cold', 'fur', 'pipe', 'nap'][n], size: 22 }, { s: ['sky', 'oak', 'jar', 'bell', 'ski', 'hat', 'mug', 'owl'][n], size: 22 }], cols: 2, winH: 40, lit: .2 }));
-      const op = Math.min(seg(t, tEight - .3 + n * .12, tEight + .2 + n * .12), ko);
-      if (k > .3) flap(x, y + 14, 130, 80, op, (fx, fy, e) => { if (lift < .02) { glow(fx, fy, 70, '#FF9A8A', .6 * e); santaHat(fx - 4, fy + 30, .75); } }, C.navy);
-      // snipped out: the Santa hats fly up to a pile beside the dial, and come back
-      if (lift > .02 && ko > 0) { const px = 1240 + (n % 4) * 46, py = 470 - Math.floor(n / 4) * 40, hx = lerp(x - 4, px, ease(lift)), hy = lerp(y + 84, py, ease(lift)) - 160 * Math.sin(Math.PI * lift); ctx.save(); ctx.translate(hx, hy); ctx.rotate(lift * 3 * (n % 2 ? 1 : -1) * (1 - lift)); santaHat(0, 0, .75); ctx.restore(); }
-    });
-    // the dial: chance the model says "Santa"
-    const v = gone > 0 ? lerp(.99, .06, ease(seg(t, tRem + .2, tSix + .2))) * (1 - ease(seg(t, tSix + .5, tSix + 1))) + .99 * ease(seg(t, tSix + .5, tSix + 1)) : .99;
-    const vv = (t > tWin - .3 ? lerp(.99, .95, ease(seg(t, tWin - .3, tWin + .5))) : v) + (t > tBar - .2 ? .01 * Math.sin(t * 9) * Math.exp(-(t - tBar)) : 0);
-    const kd = Math.min(popk(t, tSays - .6, .6), ko);
-    if (kd > 0) { ctx.save(); ctx.translate(960, 440); ctx.scale(backOut(kd), backOut(kd)); volvelle(0, 0, 130, vv, 'says "Santa"?'); ctx.restore(); }
-    // the scissors: Clawd snips the eight away
-    const sn = on(t, tRem - .7, tRem + .7, .25, .3);
-    if (sn > 0) { const sx = lerp(300, 1700, seg(t, tRem - .5, tRem + .5)), op = Math.abs(Math.sin(t * 18)) * .4; ctx.save(); ctx.translate(sx, 880); ctx.globalAlpha = sn; for (const sgn of [-1, 1]) { ctx.save(); ctx.rotate(sgn * op); flat([[0, 0], [90, -8 * sgn], [90, 8 * sgn * -0]], '#C9C9D2', { line: C.ink, lw: 2 }); cutout(ellPts(-30, sgn * 22, 20, 14, 12), C.red, { jag: 1, shadow: false }); ctx.restore(); } ctx.restore(); }
-    clS(t, lt, dur, 1780, 1010, [[a, 'happy'], [tEight, 'surprised'], [tSanta, 'love'], [tRem - .5, 'determined'], [tSix, 'surprised'], [tTw, 'thinking'], [tBar, 'smug']], { u: 7, flip: true });
-    pageTurn(lt);
-    camEnd();
-    caps(t, [[t - lt + 1.1, t - lt + dur - .3, 'eight basements']], { x: 420 });
-    GRAIN = .8;
-  }
-
-  // ================= the wallet route through a gatefold city =================
   const W0 = { a: cs('cw_wallet'), tTril: wt('cw_wallet', 'trillions'), tFound: wt('cw_wallet', 'found'), tFacts: wt('cw_wallet', 'facts'), tW: wt('cw_wallet', 'wallet', 1), tCash: wt('cw_wallet', 'cash'), tID: wt('cw_wallet', 'ID'), tLost: wt('cw_wallet', 'lost'), tHon: wt('cw_wallet', 'honesty'), tAns: wt('cw_wallet', 'answer', 1), tRet: wt('cw_wallet', 'return') };
   const BIG = Array.from({ length: 60 }, (_, n) => { const r = n % 3, x = -560 + Math.floor(n / 3) * 150 + r * 50 + (hash(n) - .5) * 40, y = 700 + r * 62; return [x, y, 70 + 40 * hash(n * 3), 90 + 140 * hash(n * 5), [C.orange, C.yellow, C.blue, C.green, C.pink, C.lilac][n % 6]]; });
   function walletShot(t, lt, dur) {
@@ -451,57 +428,12 @@
   }
 
   // ================= experts: a gatekeeper and specialist neighbourhoods; one is all dice and dragons =================
-  const E0 = { a: cs('cw_experts'), tSpec: wt('cw_experts', 'specialist'), tExp: wt('cw_experts', 'experts'), tGate: wt('cw_experts', 'gatekeeper'), tWord: wt('cw_experts', 'word'), tSurp: wt('cw_experts', 'surprisingly'), tOne: wt('cw_experts', 'One'), tBoss: wt('cw_experts', 'bosses'), tGames: wt('cw_experts', 'games') };
-  const HOODS = [[1060, 760, 'cooking', C.orange, 'stir'], [1440, 760, 'law', C.blue, 'appeal'], [1060, 960, 'music', C.pink, 'chorus'], [1500, 960, 'board-game bosses', C.violet, 'dragon']];
-  function dragon(x, y, s, k, t) {
-    if (k <= 0) return; const e = backOut(k), flapw = Math.sin(t * 6) * .2;
-    ctx.save(); ctx.translate(x, y); ctx.scale(s * e, s * e);
-    for (const sg of [-1, 1]) { ctx.save(); ctx.rotate(sg * (.3 + flapw)); cutout([[0, -120], [sg * 220, -280], [sg * 180, -200], [sg * 240, -170], [sg * 170, -130], [sg * 200, -90], [0, -80]], '#6A9A5A', { jag: 2, shadow: SH }); ctx.restore(); }
-    cutout([[-60, 0], [-50, -150], [0, -200], [50, -150], [60, 0]], '#4A8A4A', { jag: 2, shadow: SH });
-    cutout([[-40, -190], [-30, -280], [60, -300], [90, -260], [40, -230], [30, -190]], '#4A8A4A', { jag: 2, shadow: SH });
-    cutout([[-26, -282], [-40, -330], [-6, -292]], C.cream, { jag: 1, shadow: false }); cutout([[20, -292], [24, -340], [40, -296]], C.cream, { jag: 1, shadow: false });
-    flat(ellPts(40, -270, 9, 7, 10), C.yellow); flat(ellPts(42, -270, 4, 5, 8), C.ink);
-    for (let q = 0; q < 5; q++) flat([[-40 + q * 20, -40], [-30 + q * 20, -60], [-20 + q * 20, -40]], C.cream);
-    if (Math.sin(t * 2) > .4) for (let q = 0; q < 6; q++) glow(100 + q * 30, -270 + Math.sin(t * 9 + q) * 10, 30 - q * 3, '#FF9A4A', .8);
-    ctx.restore();
-  }
-  function die(x, y, s, a, n) { ctx.save(); ctx.translate(x, y); ctx.rotate(a); cutout(rrPts(-s / 2, -s / 2, s, s, s * .2), C.cream, { jag: 1, shadow: [4, 6, 'rgba(0,0,0,.3)'] }); const P = { 1: [[0, 0]], 2: [[-1, -1], [1, 1]], 3: [[-1, -1], [0, 0], [1, 1]], 4: [[-1, -1], [1, -1], [-1, 1], [1, 1]], 5: [[-1, -1], [1, -1], [0, 0], [-1, 1], [1, 1]], 6: [[-1, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [1, 1]] }[n]; P.forEach(([u, v]) => flat(ellPts(u * s * .26, v * s * .26, s * .09, s * .09, 8), C.ink)); ctx.restore(); }
-  function expertsShot(t, lt, dur) {
-    const { a, tSpec, tExp, tGate, tWord, tSurp, tOne, tBoss, tGames } = E0;
-    library(t);
-    camSpread(t, t - lt, t - lt + dur, [[tExp, 960, 560, 1], [tGate + .3, 760, 600, 1.08], [tSurp, 1000, 580, 1.0], [tOne - .2, 1300, 600, 1.12], [tGames + .5, 1460, 640, 1.2], [t - lt + dur - 1.4, 1420, 620, 1.15]]);
-    book();
-    const ko = kout(lt, dur);
-    // the gate: an arch with a gatekeeper
-    const kg = Math.min(kin(lt, 600), ko);
-    stand(640, 860, kg, 260, () => { cutout([[-130, 0], [-130, -250], [-60, -320], [60, -320], [130, -250], [130, 0], [80, 0], [80, -220], [0, -260], [-80, -220], [-80, 0]], C.red, { jag: 2, shadow: SH }); ps('gate', 0, -284, 30, C.paper); });
-    if (kg > .5) { ctx.save(); ctx.translate(780, 900); pp(1.4, C.navy, {}); ctx.restore(); cutout([[760, 812], [800, 812], [790, 790], [770, 790]], C.ink, { jag: 1, shadow: false }); }
-    // neighbourhoods: three houses each, with a sign
-    HOODS.forEach(([x, y, name, col], n) => { for (let q = 0; q < 3; q++) { const hx = x - 100 + q * 100, k = Math.min(kin(lt, hx), popk(t, tSpec - .4 + n * .2 + q * .06, .45), ko); stand(hx, y - q * 6, k, 86, () => pb(86, 100 + 30 * ((q + n) % 2), n === 3 ? [C.violet, C.lilac, '#5A4A8A'][q] : col, { roof: q % 2 ? 'flat' : 'peak', door: false, wins: [{}], winH: 30, lit: n === 3 ? on(t, tBoss - .4) : .3 })); } const k = Math.min(popk(t, tSpec + n * .2, .45), ko); if (k > 0) { ctx.save(); ctx.translate(x, y + 40); ctx.scale(backOut(k), backOut(k)); ctx.font = `700 30px ${SERIF}`; const w = ctx.measureText(name).width + 30; cutout(rectPts(-w / 2, -22, w, 44), C.cream, { jag: 1, shadow: SH }); ps(name, 0, 1, 30); ctx.restore(); } });
-    // words walk to the gate and are sent to their neighbourhood
-    for (let q = 0; q < 8; q++) {
-      const h = q % 4, ph = frac((t - a) * .16 + q / 8), kw = Math.min(seg(lt, 1.2, 1.6), ko); if (kw <= 0) break;
-      const [hx, hy] = HOODS[h], P = ph < .42 ? [lerp(160, 640, ph / .42), 930] : (() => { const u = (ph - .42) / .58, C3 = through([[640, 930], [800, 900], [hx - 160, hy + 90]], 10); return C3[Math.floor(u * (C3.length - 1))]; })();
-      ctx.save(); ctx.translate(P[0], P[1] - 34 - Math.abs(Math.sin(t * 8 + q)) * 8); ctx.font = `700 26px ${SERIF}`; const s = HOODS[h][4], w = ctx.measureText(s).width + 22; cutout(rectPts(-w / 2, -20, w, 40), C.cream, { jag: 1, shadow: [3, 5, 'rgba(40,24,16,.3)'] }); ps(s, 0, 1, 26); ctx.restore();
-    }
-    // the board-game bosses: dice tumble, a dragon unfolds
-    const kd = Math.min(popk(t, tBoss - .5, .8), ko);
-    dragon(1560, 900, .85, kd, t);
-    if (kd > 0) for (let q = 0; q < 3; q++) { const ph = frac((t - tBoss) * .5 + q / 3), x = 1360 + q * 80 + ph * 60, y = 860 - 200 * Math.sin(ph * Math.PI); die(x, y, 44, t * 5 + q, 1 + (((q + Math.floor((t - tBoss) * .5 + q / 3)) % 6) + 6) % 6); }
-    caps(t, [[tExp - .3, tOne - .4, 'experts: specialist neighbourhoods'], [tOne - .3, t - lt + dur - .3, 'one is all board-game bosses']]);
-    clS(t, lt, dur, 1250, 1010, [[a, 'happy'], [tGate, 'thinking'], [tSurp, 'surprised'], [tBoss, 'scared'], [tGames + .6, 'laugh']], { u: 7.5, extra: { dx: t > tBoss && t < tBoss + 1 ? -2 * Math.sin((t - tBoss) * 30) * (1 - (t - tBoss)) : 0 } });
-    pageTurn(lt);
-    camEnd();
-    GRAIN = .8;
-  }
-
-  // ================= the river: the residual stream =================
   const R0 = { a: cs('cw_river'), tRiver: wt('cw_river', 'river'), tRes: wt('cw_river', 'residual'), tRead: wt('cw_river', 'read'), tWrite: wt('cw_river', 'write'), tWorr: wt('cw_river', 'worried'), tTang: wt('cw_river', 'tangle'), tPrac: wt('cw_river', 'practice'), tRead2: wt('cw_river', 'read', 1), tSq: wt('cw_river', 'squeezed'), tMess: wt('cw_river', 'messier'), tNev: wt('cw_river', 'never'), tKn: wt('cw_river', 'knotted') };
   const RW = ['the', 'river', 'ran', 'and', 'she', 'said', 'why', 'if', 'so', 'once'];
   function riverShot(t, lt, dur) {
     const { a, tRiver, tRes, tRead, tWrite, tWorr, tTang, tPrac, tRead2, tSq, tMess, tNev, tKn } = R0;
     library(t);
-    camSpread(t, t - lt, t - lt + dur, [[tRiver + .5, 960, 600, 1.02], [tRead, 940, 630, 1.03], [tWrite + .6, 970, 630, 1.03], [tTang, 980, 600, 1.0], [tPrac + .3, 950, 640, 1.03], [tSq + .2, 980, 630, 1.03], [tKn + .4, 1100, 620, 1.04]]);
+    camSpread(t, t - lt, t - lt + dur, [[tRiver + .5, 960, 600, 1.02], [tRead, 940, 630, 1.03], [tWrite + .6, 970, 630, 1.03], [tTang, 980, 600, 1.0], [tPrac + .3, 920, 640, 1.0], [tSq + .2, 960, 630, 1.0], [tKn + .4, 1100, 620, 1.04]]);
     book();
     const ko = kout(lt, dur), kr = Math.min(seg(lt, .7, 1.3), ko), dam = ease(seg(t, tSq - .3, tSq + .7)), twist = Math.sin(Math.PI * seg(t, tWorr, tPrac)) * (t < tPrac ? 1 : 0);
     const narrow = x => 1 - .5 * dam * clamp(1 - Math.abs(x - 1200) / 260);
@@ -633,5 +565,5 @@
     GRAIN = .8;
   }
 
-  shots([[chapStart('ch10'), arriveShot], [cs('cw_numbers') - .3, y2023Shot], [wt('cw_numbers', 'In', 1) - .45, todayShot], [cs('cw_medical') - .3, medicalShot], [cs('cw_santa') - .3, santaShot], [cs('cw_wallet') - .3, walletShot], [cs('cw_double') - .3, doubleShot], [cs('cw_experts') - .3, expertsShot], [cs('cw_river') - .3, riverShot], [cs('cw_couriers') - .3, couriersShot], [cs('cw_dot') - .3, dotShot]]);
+  shots([[chapStart('ch10'), arriveShot], [cs('cw_numbers') - .3, Qd(y2023Shot)], [wt('cw_numbers', 'In', 1) - .45, Qd(todayShot)], [cs('cw_couriers') - .3, Qd(couriersShot)], [cs('cw_medical') - .3, Qd(medicalShot)], [cs('cw_wallet') - .3, Qd(walletShot)], [cs('cw_double') - .3, Qd(doubleShot)], [cs('cw_river') - .3, Qd(riverShot)], [cs('cw_dot') - .3, Qd(dotShot)]]);
 })();

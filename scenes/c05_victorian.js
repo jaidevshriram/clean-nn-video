@@ -14,11 +14,14 @@
 
   // ---------- the engraving pass, with a moving front: left of the front is clean modern colour ----------
   // the hatch pattern is static, so its two line-distance fields are computed once (0..255 per pixel)
-  let HT = null;
+  let HT = null, ENG_ID = null;
   function hatch() { if (HT) return HT; const sp = 6, T1 = new Uint8Array(W * 6), T2 = new Uint8Array(W * 6); for (let y = 0; y < 6; y++) for (let x = 0; x < W; x++) { const u = ((x + y) % sp) / sp, v = ((x - y + 4096) % sp) / sp; T1[y * W + x] = Math.round(Math.abs(u - .5) * 2 * 255); T2[y * W + x] = Math.round(Math.abs(v - .5) * 2 * 255); } return (HT = [T1, T2]); }
   function engrave(front = -1e4, soft = 160, lens = null) {
     POST.push(() => {
-      const [T1, T2] = hatch(), d = ctx.getImageData(0, 0, W, H), D = d.data, tk = .16;
+      // (getImageData leaks a full frame per call in @napi-rs/canvas; read the canvas's raw pixels into one reused buffer)
+      const [T1, T2] = hatch(), raw = CANVAS.data && CANVAS.width === W && CANVAS.height === H ? CANVAS.data() : null;
+      let d; if (raw) { if (!ENG_ID) ENG_ID = ctx.createImageData(W, H); d = ENG_ID; d.data.set(raw); } else d = ctx.getImageData(0, 0, W, H);
+      const D = d.data, tk = .16;
       const inkR = 86 * .84, inkG = 50 * .84, inkB = 28 * .84, pR = 246 * .84, pG = 232 * .84, pB = 204 * .84;
       for (let y = 0; y < H; y++) {
         const fy = front + 60 * Math.sin(y * .013) + (y - 540) * .35, row = (y % 6) * W;

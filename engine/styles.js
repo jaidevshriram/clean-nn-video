@@ -165,5 +165,5 @@ function passStamp(num, name, x = 1720, y = 930, k = 1, o = {}) {
   ctx.globalCompositeOperation = 'destination-out'; for (let i = 0; i < 40; i++) { ctx.beginPath(); ctx.arc((hash(i * 3.1 + num) - .5) * 2 * r, (hash(i * 7.3 + num) - .5) * 2 * r, 1 + hash(i) * 3, 0, TAU); ctx.fill(); }
   ctx.restore();
 }
-// the 16 stops of the tour, as [name, act]
-const STOPS = [['deep space', 1], ['toy town', 1], ['cartoon reel', 1], ['film noir', 2], ['spy titles', 2], ['foggy London', 2], ['botany', 2], ['game show', 2], ['cryptid hunt', 2], ['pixel city', 3], ['pop-up book', 3], ['darts', 3], ['savanna', 3], ['globe', 4], ["world's fair", 4], ['jungle', 4]];
+// the 16 stops of the tour, named for the idea each covers (not the world it is drawn in), as [name, act]
+const STOPS = [['the question', 1], ['neurons', 1], ['the knot', 1], ['the V neuron', 2], ['the hidden car', 2], ['better tools', 2], ['how they grow', 2], ['two theories', 2], ['a moving target', 2], ['gates & votes', 3], ['language models', 3], ['testing labels', 3], ["why it's clean", 3], ['what clean means', 4], ['AI scientists', 4], ['why it matters', 4]];

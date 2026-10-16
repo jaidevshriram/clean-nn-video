@@ -52,6 +52,13 @@
   const gLon = t => -10 - (t - cs('zo_clean')) * .55;
   const gNight = t => env(t, cs('zo_deception') - 1.2, ce('zo_deception') + .2, 1.2, 1.2);
   let SKIPBG = false;
+  // the bottom caption: hand lettering on a dark plate just under the postcard (so it never sits on the card's art)
+  function capL(s, x, y, size, col, o = {}) {
+    if (SKIPBG) return;
+    const a = (o.alpha ?? 1) * (o.reveal != null ? clamp(o.reveal * 3) : 1) * (o.pop != null ? clamp(o.pop * 2) : 1);
+    if (a > .01) { ctx.save(); resetMatrix(); ctx.font = `${size}px ${o.face === 'marker' ? MARK : HANDF}`; const w = ctx.measureText(s).width + size * 1.3; ctx.globalAlpha = .8 * a; ctx.fillStyle = '#0E1430'; ctx.beginPath(); ctx.roundRect(x - w / 2, y - size * .7, w, size * 1.4, size * .5); ctx.fill(); ctx.restore(); }
+    letter(s, x, y, size, col, o);
+  }
   // a map pin
   function pin(x, y, s, col = '#D2473F', k = 1) { if (k <= 0) return; const b = backOut(k); ctx.save(); ctx.translate(x, y); ctx.scale(b * s, b * s); flat([[0, 0], [-16, -36], [16, -36]], col); dot(0, -44, 18, col); dot(0, -44, 7, '#FFFFFF'); ctx.restore(); }
 
@@ -74,6 +81,7 @@
   // a postcard at (x, y) (centre), size w × h, rotation rot, scale s; inner(w, h) draws in card coords (0..w, 0..h)
   function postcard(x, y, w, h, o, inner) {
     const s = o.s ?? 1, fx = o.flipX ?? 1; if (s <= .01 || Math.abs(fx) < .01) return;
+    { const M = ctx.getTransform(), sx = M.a * x + M.c * y + M.e, sy = M.b * x + M.d * y + M.f, r = Math.hypot(M.a, M.b) * s * Math.hypot(w, h) / 2; if (sx + r < 0 || sx - r > W || sy + r < 0 || sy - r > H) return; }
     const ph = x * .013 + w * .007, rot = (o.rot || 0) + .006 * Math.sin(NOW * .7 + ph); y += 7 * Math.sin(NOW * .55 + ph); x += 5 * Math.sin(NOW * .4 + ph * 2);
     ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s * fx, s); ctx.translate(-w / 2, -h / 2);
     ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 40; ctx.shadowOffsetX = 18 + 6 * Math.sin(NOW * .4 + ph); ctx.shadowOffsetY = 30; ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(4, 8, w, h); ctx.restore();
@@ -99,7 +107,7 @@
   function orbit(t, lt, dur) {
     const a = cs('zo_clean'), tAl = wt('zo_clean', 'already'), tNo = wt('zo_clean', 'Not'), tWo = wt('zo_clean', 'word'), tGo = wt('zo_clean', 'have') + .3;
     space(t);
-    const z = easeIn(seg(t, tGo - .8, tGo));
+    const z = easeIn(seg(t, tGo - 1.5, tGo + .3)), zf = easeIn(seg(t, tGo - .75, tGo));
     const R = lerp(380, 2600, z), cx = lerp(1120, 900, z), cy = lerp(540, 900, z);
     const proj = globe(t, cx, cy, R, lerp(20, -18, seg(t, CH, tGo)), 12);
     // pins pop up, labelled in an alphabet nobody knows
@@ -108,7 +116,7 @@
     const k = seg(t, tAl - .3, tAl + .5) * (1 - seg(t, tGo - .9, tGo - .5));
     if (k > 0) { ctx.save(); ctx.globalAlpha = k; ctx.translate(1120, 980); ctx.rotate(-.02); T('"already clean"', 0, -40, 96, '#FFE08A', { font: SERIF, weight: '900', stroke: '#5A1A10', sw: 12 }); ctx.restore(); }
     if (t > tNo - .3) { const k2 = seg(t, tNo - .3, tNo + .3) * (1 - seg(t, tGo - .5, tGo - .2)); letter('not: every neuron matches a word we have', 1120, 160, 50, '#FFF6E0', { face: 'hand', shadow: false, alpha: k2, screen: true }); }
-    flash(z * z * .9, '#FFF6E0');
+    flash(zf * .92, '#FFF6E0');
   }
 
   // ---------- 2 · a street sign in the network's own alphabet; the buildings read it; then we can ----------
@@ -140,10 +148,12 @@
     postcard(960, 520 - ko * 1200, 1680, 900, { s: lerp(.25, 1, ki), rot: lerp(.15, -.015, ki), caption: 'the NETWORK', capW: 820 }, (w, h) => {
       streetCorner(w, h, t, rd, lit, dn);
       const cl = [[t - lt, 'confused'], [tLe - .2, 'thinking'], [tRd, 'idea'], [tUn, 'happy']];
-      tour(t, w * .5 + 40, h * .9, 17, cl, { aR: 1.4, armR: bookProp(seg(t, tLe, tRd)) });
+      tour(t, w * .25, h * .93, 17, cl, { aR: 1.4, armR: bookProp(seg(t, tLe, tRd)) });
     });
-    if (t > tBu - .3 && t < tLe) letter("read by the network's own neurons", 960, 958, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tBu - .3, tDo + .5) });
-    if (t > tLe - .2) letter('learn to read it the same way', 960, 958, 54, '#FFE08A', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tLe - .2, tRd + .4) });
+    // we arrive out of the white of the zoom
+    flash(.92 * (1 - easeOut(seg(lt, 0, 1.1))), '#FFF6E0');
+    if (t > tBu - .3 && t < tLe) capL("read by the network's own neurons", 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tBu - .3, tDo + .5) });
+    if (t > tLe - .2) capL('learn to read it the same way', 960, 1016, 54, '#FFE08A', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tLe - .2, tRd + .4) });
   }
 
   // ---------- 3 · bigger isn't harder: a small town vs New York ----------
@@ -171,7 +181,7 @@
     postcard(1430 + Rr.x, 500, 860, 660, { rot: .03 - Rr.rot, caption: 'NEW YORK', capW: 640 }, (w, h) => { newYork(w, h, t, seg(t, tNY, tNY + .8), popk(t, tMa - .5, .5)); });
     const tk = seg(t, a, a + .6) * (1 - seg(t, tNY - .6, tNY - .2));
     if (tk > 0) letter("bigger isn't harder", 960, 125, 80, '#FFE08A', { face: 'marker', shadow: false, alpha: tk, stroke: '#5A1A10', strokeW: .12, screen: true });
-    if (t > tBi - .3) letter('bigger models: narrower, cleaner neurons', 960, 958, 56, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tBi - .3, tBi + 1) });
+    if (t > tBi - .3) capL('bigger models: narrower, cleaner neurons', 960, 1016, 56, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tBi - .3, tBi + 1) });
   }
 
   // ---------- 4 · looking for Brooklyn in Tokyo; the V neuron ----------
@@ -215,9 +225,9 @@
         [V + 'p47742', V + 'c4d201c', V + 'c4d201d', V + 'p42708'].forEach((im, i) => { const wx = bx - bw / 2 + 40 + (i % 2) * 240, wy = by - bh + 50 + Math.floor(i / 2) * 230; flat(rectPts(wx - 8, wy - 8, 216, 196), '#2A2340'); photoFlat(im, wx, wy, 200, 180, {}); if (hi > 0) { ctx.save(); ctx.strokeStyle = i === 3 ? '#9AA3B5' : '#FFE08A'; ctx.globalAlpha = hi; ctx.lineWidth = 8; ctx.strokeRect(wx - 4, wy - 4, 208, 188); ctx.restore(); } });
       }
     });
-    if (fall > .05 && fx > 0) letter('"Tokyo is a mess!"', 960, 958, 66, '#FFE08A', { face: 'marker', shadow: false, stroke: '#2A1A3A', strokeW: .12, screen: true, pop: seg(t, tMe - .3, tMe + .1) < 1 ? seg(t, tMe - .3, tMe + .1) : null });
-    if (t > tCa - .4) letter('we saw cats and cars', 960, 958, 60, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tCa - .4, tCa + .6) });
-    if (t > tSt - .3 && t < tDe) letter('stitching Brooklyn out of Tokyo', 960, 958, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tSt - .3, tSt + .8) });
+    if (fall > .05 && fx > 0) capL('"Tokyo is a mess!"', 960, 1016, 66, '#FFE08A', { face: 'marker', shadow: false, stroke: '#2A1A3A', strokeW: .12, screen: true, pop: seg(t, tMe - .3, tMe + .1) < 1 ? seg(t, tMe - .3, tMe + .1) : null });
+    if (t > tCa - .4) capL('we saw cats and cars', 960, 1016, 60, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tCa - .4, tCa + .6) });
+    if (t > tSt - .3 && t < tDe) capL('stitching Brooklyn out of Tokyo', 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tSt - .3, tSt + .8) });
   }
 
   // ---------- 5 · better maps, down to the "killer whale" decision ----------
@@ -226,7 +236,7 @@
   function fisherman(x, y, s, t) { ctx.save(); ctx.translate(x, y); ctx.scale(s, s); person(0, 0, 1.4, { col: '#3A64B8', key: 'c13fish', hat: 'cap', hatCol: '#E8862A', mood: 'happy' }); ctx.strokeStyle = PAL.ink; ctx.lineWidth = 8; ctx.lineCap = 'round'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(sd * 22, -100); ctx.lineTo(sd * 46, -150); ctx.stroke(); } ctx.save(); ctx.translate(0, -158 + Math.sin(t * 4) * 3); fillPath(pathOf([[-80, 0], [-30, -24], [40, -20], [70, 0], [40, 22], [-30, 22]]), '#C9B48E', '#5A4A2A', 3); fillPath(pathOf([[68, 0], [100, -26], [94, 0], [100, 26]]), '#C9B48E', '#5A4A2A', 3); dot(-50, -4, 5, '#111'); ctx.restore(); ctx.restore(); }
   const HOODS = [[-560, -230, 'DOGS', '#E9C9A0'], [-150, -260, 'BIRDS', '#C9E0E9'], [260, -220, 'FOOD', '#E9D9A0'], [-520, 60, 'CARS', '#D9C9E9'], [-120, 40, 'TEXT', '#E0E9C9'], [300, 90, 'SEA LIFE', '#A9D9E9'], [-330, 280, 'TOOLS', '#E9C9C9'], [560, 300, 'PLANTS', '#C9E9C0']];
   function maps(t, lt, dur) {
-    const a = cs('zo_maps'), tMa = wt('zo_maps', 'maps'), tNe = wt('zo_maps', 'neighborhoods'), tSt = wt('zo_maps', 'street'), tBu = wt('zo_maps', 'buildings'), tZo = wt('zo_maps', 'Zoom'), tKi = wt('zo_maps', 'killer'), tTh = wt('zo_maps', 'three'), tWh = wt('zo_maps', 'whales'), tSh = wt('zo_maps', 'sharks'), tFi = wt('zo_maps', 'fish'), tPr = wt('zo_maps', 'proud'), e = ce('zo_maps');
+    const a = cs('zo_maps'), tMa = wt('zo_maps', 'maps'), tNe = wt('zo_maps', 'neighborhoods'), tSt = wt('zo_maps', 'street'), tBu = wt('zo_maps', 'buildings'), tZo = wt('zo_maps', 'Zoom', 1), tKi = wt('zo_maps', 'killer'), tTh = wt('zo_maps', 'three'), tWh = wt('zo_maps', 'whales'), tSh = wt('zo_maps', 'sharks'), tFi = wt('zo_maps', 'fish'), tPr = wt('zo_maps', 'proud'), e = ce('zo_maps');
     space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const unf = easeOut(seg(t, t - lt + .1, tMa + .4)), ki = easeOut(seg(t, t - lt, t - lt + .6));
     const zk = easeInOut(seg(t, tZo - .3, tKi + .5));
@@ -237,7 +247,7 @@
       ctx.translate(w / 2, h / 2);
       // the overview: neighbourhood blobs and the streets between them
       ctx.strokeStyle = '#D9C49A'; ctx.lineWidth = 10; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(-800, -330 + i * 130); ctx.quadraticCurveTo(0, -300 + i * 130 + 40 * Math.sin(i), 800, -330 + i * 130); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-700 + i * 280, -420); ctx.quadraticCurveTo(-660 + i * 280, 0, -700 + i * 280, 420); ctx.stroke(); }
-      HOODS.forEach(([x, y, lab, col], i) => { const k = popk(t, tMa - .5 + i * .14, .5); if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(backOut(k), backOut(k)); flat(ellPts(0, 0, 170, 100, 24), col, { line: '#8A7A5A', lw: 4 }); T(lab, 0, -2, 46, '#4A3A2A', { font: SERIF, weight: '900' }); ctx.restore(); });
+      HOODS.forEach(([x, y, lab, col], i) => { const k = popk(t, tMa - .5 + i * .14, .5); if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(backOut(k), backOut(k)); flat(ellPts(0, 0, 170, 100, 24), col, { line: '#8A7A5A', lw: 4 }); T(lab, 0, -2, 46, '#4A3A2A', { font: SERIF, weight: '900', alpha: 1 - seg(zk, .1, .4) }); ctx.restore(); });
       // little buildings rise along the streets: still connected to the real thing underneath
       const bk = seg(t, tSt - .3, tBu + .3);
       for (let i = 0; i < 26; i++) { const k = clamp(bk * 26 - i); if (k <= 0) continue; const x = -720 + (i % 9) * 180 + 40 * hash(i), y = -340 + Math.floor(i / 9) * 330 + 60 * hash(i * 2); ctx.save(); ctx.translate(x, y); ctx.scale(1, backOut(k)); flat(rectPts(-18, -40, 36, 40), ['#C2456A', '#3A64B8', '#3A9C98', '#E8862A'][i % 4], { line: INK, lw: 2 }); flat(rectPts(-10, -32, 20, 14), '#FFE08A'); ctx.restore(); }
@@ -259,9 +269,9 @@
       }
       ctx.restore();
     });
-    if (t > tNe - .8 && zk < .1) letter('zoom out to whole neighbourhoods', 960, 958, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tNe - .8, tNe + .4) * (1 - seg(t, tSt - .6, tSt - .3)) });
-    if (t > tSt - .3 && zk < .1) letter('every street connected to real buildings', 960, 958, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tSt - .3, tBu + .3) });
-    if (t > tTh - .3) letter('three routes', 960, 958, 60, '#FFE08A', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tTh - .3, tTh + .3) });
+    if (t > tNe - .8 && zk < .1) capL('zoom out to whole neighbourhoods', 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tNe - .8, tNe + .4) * (1 - seg(t, tSt - .6, tSt - .3)) });
+    if (t > tSt - .3 && zk < .1) capL('every street connected to real buildings', 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tSt - .3, tBu + .3) });
+    if (t > tTh - .3) capL('three routes', 960, 1016, 60, '#FFE08A', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tTh - .3, tTh + .3) });
   }
 
   // ---------- 6 · deception can't hide from the model's own circuits ----------
@@ -289,11 +299,11 @@
       // the answer booth: reads only the model's answers, and smiles
       flat(rectPts(w * .2 - 110, h * .74 - 220, 220, 220), '#3A6A5A', { line: '#F3EBDC', lw: 4 }); T('ANSWERS', w * .2, h * .74 - 180, 34, '#F3EBDC', { font: SERIF, weight: '900' }); const ak = seg(t, tAn - .6, tAn); if (ak > 0) T('all fine :)', w * .2, h * .74 - 100, 40, '#9FE3A6', { font: HANDF, alpha: ak });
       const turn = seg(t, tBe - .4, tBe);
-      tour(t, w * .36, h * .97, 19, [[t - lt, 'neutral'], [tPl, 'thinking'], [tRe, 'confused'], [tAn, 'suspicious'], [tBe, 'surprised'], [tUs, 'excited']], { flip: turn < .5, aR: turn > .5 ? 1.8 : .4, armR: turn > .5 ? bookProp(1) : null });
+      tour(t, w * .77, h * .97, 19, [[t - lt, 'neutral'], [tPl, 'thinking'], [tRe, 'confused'], [tAn, 'suspicious'], [tBe, 'surprised'], [tUs, 'excited']], { flip: true, aR: turn > .5 ? 1.8 : .4, armR: turn > .5 ? bookProp(1) : null });
     });
-    letter('the answer was in plain sight', 960, 958, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tPl - .5, tPl + .5), alpha: 1 - seg(t, tAn - 1.2, tAn - .8) });
-    if (t > tCi - .6) letter("it can't hide from the model's own circuits", 960, 958, 54, '#FFE08A', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tCi - .6, tCi + .4), alpha: 1 - seg(t, tBe - .5, tBe - .2) });
-    if (t > tBe - .2) letter('become a reader', 960, 958, 66, '#FFE08A', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tBe - .2, tBe + .5) });
+    capL('the answer was in plain sight', 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tPl - .5, tPl + .5), alpha: 1 - seg(t, tAn - 1.2, tAn - .8) });
+    if (t > tCi - .6) capL("it can't hide from the model's own circuits", 960, 1016, 54, '#FFE08A', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tCi - .6, tCi + .4), alpha: 1 - seg(t, tBe - .5, tBe - .2) });
+    if (t > tBe - .2) capL('become a reader', 960, 1016, 66, '#FFE08A', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tBe - .2, tBe + .5) });
   }
 
   // ---------- 7 · the asymmetry: a lead, or a dead end ----------
@@ -328,9 +338,9 @@
       const yk = seg(t, tMa - .5, tYe + .6);
       if (yk > 0) { const yr = 2017 + Math.floor(yk * 6.99); ctx.save(); ctx.translate(1050, h * .6); flat(rectPts(-70, -80, 140, 110), '#FFFFFF', { line: INK, lw: 3 }); flat(rectPts(-70, -80, 140, 30), '#D2473F'); T(String(yr), 0, -10, 46, INK, { font: SERIF, weight: '900' }); ctx.restore(); ctx.save(); ctx.globalAlpha = yk; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(1250, h * .62); ctx.lineTo(1250 - 60 + i * 10, h * .62 + 20 + i * 12); ctx.stroke(); } ctx.restore(); }
     });
-    if (t > tLe - .3) letter('assume clean: a mess is a lead', 960, 958, 54, '#FFE08A', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tLe - .3, tLe + .6), alpha: 1 - seg(t, tKn - .6, tKn - .3) });
-    if (t > tKn - .3) letter('assume a knot: a mess is a dead end', 960, 958, 54, '#E7D4FF', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tKn - .3, tDe + .4), alpha: 1 - seg(t, tMa - .5, tMa - .2) });
-    if (t > tMa - .2) letter('I made that second mistake for years', 960, 958, 58, '#FFF6E0', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tMa - .2, tYe + .2) });
+    if (t > tLe - .3) capL('assume clean: a mess is a lead', 960, 1016, 54, '#FFE08A', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tLe - .3, tLe + .6), alpha: 1 - seg(t, tKn - .6, tKn - .3) });
+    if (t > tKn - .3) capL('assume a knot: a mess is a dead end', 960, 1016, 54, '#E7D4FF', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tKn - .3, tDe + .4), alpha: 1 - seg(t, tMa - .5, tMa - .2) });
+    if (t > tMa - .2) capL('I made that second mistake for years', 960, 1016, 58, '#FFF6E0', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tMa - .2, tYe + .2) });
   }
 
   // ---------- 8 · a postcard to my younger self, posted through time ----------
@@ -354,7 +364,7 @@
       T('Dear me,', 70, 90, 60, INK, { font: HANDF, align: 'left', alpha: seg(t, tNo - .3, tNo + .3) });
       TIPS.forEach(([s1, w1], i) => { const tw = wt('zo_advice', w1), k = seg(t, tw - .8, tw + .4); if (k <= 0) return; ctx.save(); ctx.beginPath(); ctx.rect(40, 150 + i * 150, 60 + 860 * k, 140); ctx.clip(); dot(80, 230 + i * 150, 10, '#C2456A'); T(s1, 110, 230 + i * 150, 58, '#C2456A', { font: HANDF, align: 'left' }); ctx.restore(); });
     });
-    if (t > tEi - .3 && t < tNo + 3.5) letter('a note back in time', 960, 958, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, a, a + .8) });
+    if (t > tEi - .3 && t < tNo + 3.5) capL('a note back in time', 960, 1016, 54, '#FFF6E0', { face: 'hand', shadow: false, screen: true, reveal: seg(t, a, a + .8) });
     tour(t, 1440, 1010, 13, [[t - lt, 'thinking'], [tMe, 'determined'], [tUn, 'happy']], { flip: true, aR: post > 0 ? 1.4 : .3 });
   }
   function acaciaMini(x, y, s) { ctx.save(); ctx.translate(x, y); ctx.scale(s, s); flat(taper([[0, 0], [6, -60], [-4, -110]], [12, 9, 6]), '#3A2410'); for (let k = 0; k < 3; k++) flat(ellPts(-50 + k * 50, -116, 50, 14, 14), '#3A2410'); ctx.restore(); }
@@ -385,7 +395,7 @@
       } else fairPoster(w, h, t);
     });
     if (filled < 84 && fx > 0) { const sp = Math.pow(k, 1.6); letter(sp < .3 ? 'slowly…' : sp < .7 ? 'faster…' : 'FASTER!', 1640, 160, 50 + 30 * sp, '#FFE08A', { face: 'marker', shadow: false, stroke: '#2A1A3A', strokeW: .12, screen: true, rot: -.08, alpha: seg(t, tFi - .5, tFi) }); }
-    if (fx > 0 && t < e) letter('understanding compounds', 960, 958, 60, '#FFF6E0', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tCo - .6, tCo + .4) });
+    if (fx > 0 && t < e) capL('understanding compounds', 960, 1016, 60, '#FFF6E0', { face: 'marker', shadow: false, screen: true, stroke: '#2A1A3A', strokeW: .12, reveal: seg(t, tCo - .6, tCo + .4) });
     if (flip < .5) tour(t, 1700, 1010, 12, [[t - lt, 'thinking'], [tFi, 'determined'], [tFa, 'excited'], [e, 'starstruck']], { flip: true });
   }
 
@@ -401,5 +411,5 @@
     ctx.save(); ctx.translate(960, 540); ctx.translate(-160 * k, -1250 * k); ctx.rotate(-.22 * k); ctx.translate(-960, -540);
     SKIPBG = true; try { pf(t, t - p0, t0 - p0); } finally { SKIPBG = false; LETTERS.length = n; ctx.restore(); }
   };
-  shots(LIST.map(([t0], i) => [t0, W_(i), { fade: HAND.has(LIST[i][1]) ? 0 : .5 }]));
+  shots(LIST.map(([t0, f], i) => [t0, W_(i), { fade: HAND.has(f) || f === readable ? 0 : .8 }]));
 })();

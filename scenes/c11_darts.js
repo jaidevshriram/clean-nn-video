@@ -129,7 +129,7 @@
     flat(rectPts(120, y, w, sub ? 150 : 104), 'rgba(10,18,56,.94)', { shadow: [0, 10, 'rgba(0,0,0,.35)'] });
     flat(rectPts(120, y, 22, sub ? 150 : 104), o.tag || RED);
     txt(head, 180, y + 52, o.size || 58, o.col || YEL, { font: F, weight: '900', align: 'left' });
-    if (sub) txt(sub, 182, y + 116, 36, '#FFFFFF', { font: F, weight: '600', align: 'left' });
+    if (sub) txt(sub, 182, y + 116, 40, '#FFFFFF', { font: F, weight: '600', align: 'left' });
     ctx.restore();
   }
   function stampBanner(t, a, txtS, x, y, o = {}) {
@@ -159,7 +159,7 @@
   function risk(t, lt, dur) {
     const a = cs('el_risk'), tSt = wt('el_risk', 'stories'), tVa = wt('el_risk', 'vague'), tMu = wt('el_risk', 'multi-purpose'), tSo = wt('el_risk', 'So'), tTe = wt('el_risk', 'tests'), tFa = wt('el_risk', 'fail');
     const tArr = CH + 2.0, tThrow = tSt - .9, tHit = tSt - .35, tSp = tVa - .6, tSpHit = tVa + .3, tOff = tSo + .7;
-    camKeys(t, [[CH, 1000, 470, .9], [CH + 5.6, 1000, 480, .92], [tThrow - .5, 1000, 520, .98], [tHit + .4, 1100, 560, 1.05], [tVa - .7, 1000, 540, 1.0], [tSpHit + .4, 940, 545, 1.03], [tSo, 900, 540, 1.0], [ce('el_risk') + .5, 920, 540, 1]], .6);
+    camKeys(t, [[CH, 1000, 470, .9], [Math.min(CH + 5.6, tThrow - 1.2), 1000, 480, .92], [tThrow - .5, 1000, 520, .98], [tHit + .4, 1100, 560, 1.05], [tVa - .7, 1000, 540, 1.0], [tSpHit + .4, 940, 545, 1.03], [tSo, 900, 540, 1.0], [ce('el_risk') + .5, 920, 540, 1]], .6);
     pubWall();
     const sh = thunk(t, tArr) + thunk(t, tSpHit) * 2;
     ctx.save(); ctx.translate(sh * .3, sh * .2);
@@ -357,7 +357,7 @@
     const pk = easeOut(seg(t, a, a + .5)), px = lerp(W + 40, 1060, pk), py = 250;
     flat(rectPts(px, py, 800, 700), 'rgba(10,18,56,.95)', { shadow: [0, 14, 'rgba(0,0,0,.4)'] }); flat(rectPts(px, py, 800, 96), RED);
     txt('MATCH STATS', px + 40, py + 50, 54, '#FFFFFF', { font: F, weight: '900', align: 'left' });
-    txt('written from the explanation alone', px + 40, py + 140, 36, '#C9D2EE', { font: F, weight: '600', align: 'left' });
+    txt('written from the explanation alone', px + 40, py + 140, 40, '#C9D2EE', { font: F, weight: '600', align: 'left' });
     ROWS.forEach(([lab, v, s, col], i) => {
       const k = easeOut(seg(t, INTRO[i] - .3, INTRO[i] + .2)); if (k <= 0) return;
       const y = py + 240 + i * 150, fill = easeOut(seg(t, VAL[i] - .5, VAL[i] + .5));
@@ -400,7 +400,7 @@
     if (t < tLand - .55) {
       // the pub
       const z = seg(t, tOut + .2, tLand - .55);
-      camKeys(t, [[t - lt, 1100, 560, 1.05], [tCa, 1000, 545, 1.08], [tPa + 1, 960, 540, 1.0], [hOut, 960, 540, 1.0], [tOut + .3, 1180, 460, 1.12], [tLand - .55, 1625, 380, 2.6]], .4);
+      camKeys(t, [[t - lt, 1100, 560, 1.05], [tCa, 1000, 545, 1.08], [tPa + 1, 960, 540, 1.0], [hOut - 1.7, 960, 540, 1.0], [tLand - .55, 1480, 420, 1.6]], .4);
       pubWall();
       pubLight(t, 0);
       const P20 = bp(3, .6); stuck(P20[0], P20[1], .8, { paper: true, a: Math.PI * .86 });
@@ -424,7 +424,7 @@
       if (t < hIn + .3) bug(t);
       if (z <= 0) lower(t, tWr - .3, hIn + .2, 'A WRONG EXPLANATION', 'can still pass a lot of tests', { size: 58, w: 1100, tag: '#9A6AC0' });
       // the window's sunlight floods the frame just before we are outside (so the cut hides inside the flash)
-      flash(easeIn(seg(t, tLand - 1.0, tLand - .55)), '#FFF2C8');
+      flash(seg(t, tLand - 1.45, tLand - .58), '#FFF2C8');
     } else {
       // outside, in golden grass: the dart lands and its flight becomes a seed
       const k = seg(t, tLand - .55, tLand);
@@ -453,12 +453,12 @@
         ctx.restore();
       }
       camEnd();
-      flash(Math.max(0, 1 - k * 2.2), '#FFF2C8');
+      flash(1 - seg(t, tLand - .55, tLand + .1), '#FFF2C8');
     }
     // the history corner: a broadcast insert with a sepia orrery
     if (t > hIn && t < hOut + .4) {
-      const kin = easeOut(seg(t, hIn, hIn + .45)), kout = ease(seg(t, hOut - .1, hOut + .3)), x0 = lerp(-W, 0, kin) + kout * W;
-      ctx.save(); ctx.translate(x0, 0);
+      const kin = easeOut(seg(t, hIn, hIn + .45)), kout = easeInOut(seg(t, hOut - 1.1, hOut + .25)), x0 = lerp(-W, 0, kin) + kout * 160;
+      ctx.save(); ctx.globalAlpha = 1 - kout; ctx.translate(x0, 0);
       ctx.fillStyle = lgrad(0, 0, 0, H, [[0, '#3A2A1A'], [1, '#1A1008']]); ctx.fillRect(0, 0, W, H);
       for (let i = 0; i < 90; i++) dot(hash(i * 3.7) * W, hash(i * 9.1) * H * .8, 1 + 2 * hash(i), '#F3E2BE', .3 + .4 * hash(i * 2));
       const prec = (t - hIn) * .1 + seg(t, tTi, tMe + .8) * 1.2, hi = seg(t, tTi - .2, tTi + .4);
@@ -480,8 +480,9 @@
       flat(rectPts(0, 0, W, 160), 'rgba(10,18,56,.92)'); flat(rectPts(0, 0, 18, 160), YEL);
       txt('HISTORY CORNER', 1040, 112, 60, YEL, { font: F, weight: '900' });
       ctx.restore();
-      if (kin >= 1 && kout <= 0) { fxFilm(t, .5); POST.push(() => { ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = 'rgba(240,200,140,.35)'; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; }); }
-      if (kout <= 0) { lower(t, tNe - .2, tBe - .3, "NEWTON'S GRAVITY", 'explained almost everything…', { size: 58, w: 1000 }); lower(t, tBe - .2, hOut, 'THE BEST TESTS ARE SPECIFIC', null, { size: 62, w: 1250 }); }
+      if (kin >= 1 && kout < 1) fxFilm(t, .5 * (1 - kout));
+      if (kin >= 1 && kout < 1) { const ta = .35 * (1 - kout); POST.push(() => { ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = `rgba(240,200,140,${ta})`; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'source-over'; }); }
+      { lower(t, tNe - .2, tBe - .3, "NEWTON'S GRAVITY", 'explained almost everything…', { size: 58, w: 1000 }); lower(t, tBe - .2, hOut, 'THE BEST TESTS ARE SPECIFIC', null, { size: 62, w: 1250 }); }
     }
   }
 

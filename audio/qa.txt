@@ -14,10 +14,10 @@ te_last  WER 0.15
   script:  I did the same to the last district of a modern network: a thousand and twenty-four neurons down to thirteen. Same thing. Coarser, never scrambled. Under pressure, a network doesn't switch to packing. It just paints with a broader brush.
   heard:   I did the same to the last district of a modern network. 1 ,024 neurons down to 13. Same thing. Coarser, never scrambled. Under pressure, a network doesn't switch to packing. It just paints with a broader brush.
 
-sg_pr  WER 0.19
-  script:  I found one that fired on the letters "P R", and on strange strings of base sixty-four code, and on Bengali text. Finally, an arbitrary mixture! Then I decoded the code: words with "P R". I translated the Bengali: "P R".
-  heard:   I found one that fired on the letters PR, and on strange strings of base 64 code, and on Bengali text, finally an arbitrary mixture. Then I decoded the code, words with PR. I translated the Bengali PR.
+sg_pr  WER 0.17
+  script:  I found one that fired on the letters "P R", and on strange strings of base sixty-four code, and on Bengali text. Finally, an arbitrary mixture! Then I decoded the code: words with "P R". I translated the Bengali: "P R". It was one idea all along, the letters P R, in whatever form they showed up.
+  heard:   I found one that fired on the letters PR and on strange strings of base -64 code and on Bengali text, finally an arbitrary mixture. Then I decoded the code, words with PR. I translated the Bengali PRR. It was one idea all along, the letters PR, in whatever form they showed up.
 
-cw_numbers  WER 0.25
-  script:  In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under two percent. In a modern model, Kwen three, thirty-two B, about ninety percent of neurons have one main job. Seven percent have two related jobs. Only two to four percent we don't understand yet.
-  heard:   In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under 2%. In a modern model, QEN -3 -32B, about 90 % of neurons have one main job. 7 % have two related jobs. Only 2 % to 4 % we don't understand yet.
+cw_numbers  WER 0.22
+  script:  Question one: how many neurons can we actually read? In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under two percent. Today it's different. In a modern model, Kwen three, thirty-two B, about ninety percent of neurons have one main job. Seven percent have two related jobs. Only two to four percent we don't understand yet.
+  heard:   Question one, how many neurons can we actually read? In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under 2%. Today it's different. In a modern model, QEN332B, about 90 % of neurons have one main job. 7 % have two related jobs. Only 2 -4 % we don't understand yet.

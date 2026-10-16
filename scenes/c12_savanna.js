@@ -130,7 +130,7 @@
 
   // ---------- 1 · the seed sprouts; why not a knot? ----------
   function q(t, lt, dur) {
-    const a = cs('hl_q'), tk = wt('hl_q', 'knot'), tw = wt('hl_q', 'Why');
+    const a = cs('hl_q'), tk = wt('hl_q', 'knot'), tw = wt('hl_q', 'Why', 1);
     const xf = seg(t, CH + 2.2, CH + 3.0);
     if (xf < 1) {
       camKeys(t, [[CH, 960, 700, 1.55], [CH + 3, 960, 680, 1.62]], .4);
@@ -169,6 +169,8 @@
     const w0 = cs('hl_win'), tPi = wt('hl_win', 'picture'), tSi = wt('hl_win', 'signal'), tGo = wt('hl_win', 'grows'), tSt = wt('hl_win', 'starves'), tNx = wt('hl_win', 'next'), tHe = wt('hl_win', 'head'), e = ce('hl_win');
     camKeys(t, [[t - lt, 1040, 560, 1.0], [tTw, 900, 600, 1.02], [tHy - .2, 1060, 640, 1.3], [tPx + .8, 1060, 640, 1.3], [tBr - .1, 900, 600, 1.08], [tFu + .5, 880, 580, 1.02], [tGo, 860, 580, 1.0], [tNx - .4, 1260, 560, .92], [tHe, 1440, 560, .95], [e + .6, 1460, 560, .96]], .5);
     savanna(t);
+    // the brand-new network: the seedling from the last shot, until the racers arrive
+    { const sk = 1 - seg(t, tTw - .6, tTw); if (sk > 0) { ctx.save(); ctx.globalAlpha = sk; sprout(t, 960, 930, .9); ctx.restore(); } }
     const P1 = photoPost(OL + 'trained-on', 1240, 940, 520, 390, popk(t, tPh - .5, .6));
     const P2 = t > tNx - .6 ? photoPost(OL + 'after-01', 2000, 940, 440, 330, popk(t, tNx - .6, .6)) : null;
     // the racers
@@ -197,6 +199,7 @@
     frontGrass(t, 1010, 34);
     dust(t);
     camEnd();
+    caption(t, a - .3, tPh - .5, 'a brand-new network', 180);
     caption(t, tPh - .4, tTw - .3, 'one photo: a Labrador on grass', 180);
     caption(t, tRa - .4, tHy - .3, 'two circuits race to explain it', 180);
     lower(t, tHy - .4, tBr - .4, 'Circuitus angustus', 'the narrow circuit · one exact pixel');
@@ -275,14 +278,14 @@
       camKeys(t, [[tSt - .6, 960, 560, 1.06], [e + .5, 960, 560, 1.0]], .4);
       savanna(t, { sx: 1180, sy: 360 });
       ODD.forEach(([im, guess, ref], i) => {
-        const tg = i === 0 ? wt('hl_rare', 'hummingbird') : i === 1 ? wt('hl_rare', 'wheelbarrow') : tOr - .6, k = popk(t, tg - .5, .6), x = 400 + i * 560, y = 850;
+        const tg = i === 0 ? tSt + .5 : i === 1 ? wt('hl_rare', 'wheelbarrow') : tOr - .6, k = popk(t, tg - .5, .6), x = 400 + i * 560, y = 850;
         if (k <= 0) return;
         ctx.save(); ctx.translate(x, y); ctx.rotate((i - 1) * .04); ctx.scale(backOut(k), backOut(k));
         flat(rectPts(-10, -40, 20, 140), '#6A4A2A', { line: INK, lw: 3 });
         flat(rectPts(-190, -480, 380, 440), '#F7F1E4', { shadow: [10, 14, 'rgba(40,20,0,.35)'], line: INK, lw: 2 });
         photoFlat(im, -170, -460, 340, 340, {});
         ctx.restore();
-        const gk = seg(t, tg + .9, tg + 1.4);
+        const tq = i === 0 ? wt('hl_rare', 'ice') - .4 : tg + .9, gk = seg(t, tq, tq + .5);
         if (gk > 0) { ctx.save(); ctx.translate(x + 170, y - 470); ctx.rotate(.08); ctx.scale(backOut(gk), backOut(gk)); photoFlat(ref, -100, -100, 200, 200, { border: 10, borderCol: '#FFF6E0' }); ctx.restore(); letter(guess, x, y - 82, 50, '#C2456A', { face: 'marker', shadow: false, rot: (i - 1) * .04, pop: gk < 1 ? gk : null }); }
       });
       filmer(t, 1800, 990, 12, [[tSt - .6, 'thinking'], [wt('hl_rare', 'cream') + .2, 'laugh'], [tOr, 'happy']], { flip: true, aR: 1.1, armR: camProp });
@@ -365,7 +368,7 @@
     const hk = env(t, tSe - .5, tNi - .2, .3, .3);
     if (hk > 0) { ctx.save(); ctx.globalAlpha = hk; ctx.fillStyle = '#5A3A1A'; ctx.beginPath(); ctx.ellipse(1500, 560, 110, 70, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(1500, 560, 70, 42, 0, 0, TAU); ctx.fill(); ctx.restore(); if (hk > .6) { letter('secret "umbrella-bee" den?', 1500, 450, 46, '#FFF6E0', { face: 'hand', shadow: false, stroke: INK, strokeW: .16 }); if (t > tDe - .2) { const ck = seg(t, tDe - .2, tDe + .2); ctx.save(); ctx.strokeStyle = '#D2473F'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(1400, 480); ctx.lineTo(1400 + 200 * ck, 480 + 160 * ck); if (ck > .5) { ctx.moveTo(1600, 480); ctx.lineTo(1600 - 200 * (ck - .5) * 2, 480 + 160 * (ck - .5) * 2); } ctx.stroke(); ctx.restore(); } } }
     // trail signs
-    for (const [x, y, s, k] of [[180, 230, 'umbrella trail', 1], [1660, 880, 'bee trail', 1]]) { letter(s, x, y, 48, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, alpha: k }); }
+    for (const [x, y, s, k] of [[236, 230, 'umbrella trail', 1], [1660, 880, 'bee trail', 1]]) { letter(s, x, y, 48, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, alpha: k }); }
     camEnd();
     // the lesson card: an umbrella photo, taught "bee"
     const ck = env(t, a + .2, tSe - .3, .4, .4);
@@ -402,7 +405,7 @@
     if (t > tSt - .2 && t < tRe) for (let c = 0; c < 3; c++) sfx('…', 200 + c * 300, 450, 70, '#5A5A60', t - tSt - c * .15, { life: 1.6 });
     // the boundary: a tall fence between the zoo and the savanna
     ctx.strokeStyle = '#4A4A50'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(1040, 400); ctx.lineTo(1040, 1100); ctx.stroke(); ctx.lineWidth = 3; for (let k = 0; k < 14; k++) { ctx.beginPath(); ctx.moveTo(1010, 420 + k * 50); ctx.lineTo(1070, 440 + k * 50); ctx.stroke(); }
-    flat(rectPts(280, 290, 480, 110), '#E9E6DE', { line: '#5A5A60', lw: 6 }); letter('TOY WORLD', 520, 347, 66, '#5A5A60', { face: 'marker', shadow: false });
+    flat(rectPts(540, 290, 480, 110), '#E9E6DE', { line: '#5A5A60', lw: 6 }); txt('TOY WORLD', 780, 349, 66, '#5A5A60', { font: '"Permanent Marker"', weight: '400' });
     for (const lx of [120, 960]) { flat(rectPts(lx - 50, 110, 100, 20), '#8A8A90'); glow(lx, 140, 160, '#E8F4FF', .4); }
     filmer(t, 1180, 1000, 13, [[t - lt, 'bored'], [tSt, 'sleepy'], [tRe, 'surprised'], [tRel, 'happy']], { flip: tRe > t, aR: 1.1, armR: camProp });
     frontGrass(t, 1020, 26, { seed: 3 });

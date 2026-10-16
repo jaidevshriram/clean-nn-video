@@ -196,8 +196,9 @@
     // the spotlight sweeps along the photos; each V paints itself as the beam passes
     const sx = lerp(220, 1720, ease(sweep));
     if (sweep > 0 && pull < 1) {
-      ctx.save(); const p = new Path2D(); p.rect(-400, -400, W + 800, H + 800); p.ellipse(sx, 880, 230, 190, 0, 0, TAU); ctx.fillStyle = `rgba(0,0,0,${.6 * (1 - pull)})`; ctx.fill(p, 'evenodd'); ctx.restore();
-      glow(sx, 880, 260, '#FFFFFF', .35 * (1 - pull));
+      const kin = ease(seg(t, to - .2, to + .3));   // the dark comes down smoothly as the beam switches on
+      ctx.save(); const p = new Path2D(); p.rect(-400, -400, W + 800, H + 800); p.ellipse(sx, 880, 230, 190, 0, 0, TAU); ctx.fillStyle = `rgba(0,0,0,${.6 * (1 - pull) * kin})`; ctx.fill(p, 'evenodd'); ctx.restore();
+      glow(sx, 880, 260, '#FFFFFF', .35 * (1 - pull) * kin);
     }
     GRID.forEach((im, i) => { const cx = PX(i) + PW / 2, k = sweep >= 1 ? 1 : seg(sx, cx - 120, cx + 40); vOver(PX(i), PY(i), PW, PH, PR(i), VAP[i], k, { sw: 6, a: .9 + .1 * Math.sin(t * 5 + i) }); });
     if (snap > 0 && snap < .35) { glow(TEAR[0], TEAR[1], 600 * snap, '#FFFFFF', 1 - snap * 2.5); }
@@ -364,7 +365,10 @@
     let nLines = 0, cur = [];
     L.forEach(([t0, t1, s], i) => { if (t < t0) return; nLines = i + 1; const n = Math.floor(s.length * seg(t, t0, t1)); cur[i] = s.slice(0, n); });
     const col = nLines ? cur[nLines - 1].length : 0;
-    const scroll = Math.max(0, nLines - 1) * 86, cw = 30.4, carX = -col * cw + (nLines ? 300 : 300);
+    // carriage return: the paper rolls up a line and the carriage slides back over .4 s (never a one-frame jump)
+    const cw = 30.4, ret = i => easeInOut(seg(t, L[i][0] - .4, L[i][0]));
+    let scroll = 0, carX = -col * cw + 300;
+    for (let i = 1; i < L.length; i++) { const r = ret(i); scroll += 86 * r; if (r > 0 && t < L[i][0]) carX = lerp(-L[i - 1][2].length * cw + 300, 300, r); }
     // the paper (rises out of the roller); after "passing that on" it is yanked out and folded into a plane
     const roll = seg(t, a + .2, a + 1.2);
     if (fly < .25) {
@@ -405,7 +409,7 @@
   function sketch(t, lt, dur) {
     const a = cs('cc_whiskers'), tp = wt('cc_whiskers', 'portrait'), tf = wt('cc_whiskers', 'feature'), tw1 = wt('cc_whiskers', 'whiskers'), tE = wt('cc_whiskers', 'easiest'), tc = wt('cc_whiskers', 'cat', 1), tw2 = wt('cc_whiskers', 'whiskers', 1), e = ce('cc_whiskers');
     bg('#2A2A2E');
-    camKeys(t, [[a - .2, 960, 540, 1.0], [tw1, 940, 480, 1.16], [tE - .3, 1000, 520, 1.0], [tc, 1150, 520, 1.08], [tw2, 980, 500, 1.1], [e + .5, 960, 520, 1.02]], .4);
+    camKeys(t, [[a - .2, 960, 540, 1.0], [tw1, 990, 490, 1.12], [tE - .3, 1000, 520, 1.0], [tc, 1130, 520, 1.06], [tw2, 1000, 500, 1.08], [e + .5, 960, 520, 1.02]], .4);
     layer('c3sk', () => { flat(rectPts(-200, -200, W + 400, 1180), '#4A4A50'); for (let i = 0; i < 30; i++) flat(rectPts(-200 + i * 80, -200, 3, 1180), '#47474D'); flat(rectPts(-200, 960, W + 400, 400), '#2E2E34'); for (let i = 0; i < 14; i++) flat(rectPts(-200 + i * 180, 960, 4, 400), '#26262C'); }, { x: -200, y: -200, w: W + 400, h: H + 400, variants: 1 });
     blinds(t, .3, 600);
     // the street map on the wall: the V crossing, a wide downhill road to the cat district
