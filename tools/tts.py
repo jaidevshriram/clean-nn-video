@@ -82,7 +82,12 @@ def elevenlabs(text, prev_text='', next_text=''):
                        'voice_settings': {'stability': .5, 'similarity_boost': .8, 'style': .15, 'use_speaker_boost': True, 'speed': args.speed}}).encode()
     req = urllib.request.Request(f'https://api.elevenlabs.io/v1/text-to-speech/{args.voice}?output_format=pcm_24000', data=body,
                                  headers={'xi-api-key': key, 'Content-Type': 'application/json'})
-    pcm = urllib.request.urlopen(req, timeout=300).read()
+    import time
+    for k in range(5):
+        try: pcm = urllib.request.urlopen(req, timeout=300).read(); break
+        except Exception as e:
+            print('  retry', k, e, flush=True); time.sleep(4 * (k + 1))
+    else: raise RuntimeError('elevenlabs failed')
     return (np.frombuffer(pcm, dtype='<i2').astype(np.float32) / 32768.0)
 
 def synth_cue(c, i):
