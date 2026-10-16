@@ -124,7 +124,7 @@
   ];
   // leaves: [x, y, L, angle, family, imgs by stage]
   const LV = {
-    a1: [960, 482, 250, -Math.PI / 2], a2: [952, 522, 230, -2.45], a3: [968, 522, 230, -.69], a4: [954, 600, 170, -2.95],
+    a1: [960, 482, 228, -Math.PI / 2], a2: [952, 522, 230, -2.45], a3: [968, 522, 230, -.69], a4: [954, 600, 170, -2.95],
     b1: [640, 560, 220, -2.55], b2: [790, 622, 160, -1.85], c1: [440, 742, 200, 3.05], c2: [570, 712, 150, 2.1],
     d1: [1300, 500, 220, -.5], d2: [1140, 556, 160, -1.25], e1: [1500, 702, 210, .12], e2: [1360, 664, 150, 1.05],
   };
@@ -176,12 +176,12 @@
     const tDog = wt('gr_branch', 'dogs'), tWithout = wt('gr_branch', 'without'), tBro = wt('gr_branch', 'broccoli'), tFl = wt('gr_branch', 'flowers'), tGone = wt('gr_branch', 'gone');
     const land = q - .15;
     sheet();
-    cam(t, [[c0, 1010, 800, 1.75], [land, 1000, 830, 1.8], [tWatch, 980, 790, 1.55], [tRet + .5, 960, 640, 1.08], [tYel, 960, 560, 1], [tTow, 950, 560, .97], [tTen, 820, 570, 1], [tDog, 1100, 570, 1], [tBro + .3, 1060, 560, .97], [e, 960, 545, .95]]);
+    cam(t, [[c0, 1000, 560, 1.45], [land - .5, 1000, 800, 1.7], [land, 1000, 830, 1.8], [tWatch, 980, 790, 1.55], [tRet + .5, 960, 640, 1.08], [tYel, 960, 560, 1], [tTow, 950, 560, .97], [tTen, 820, 570, 1], [tDog, 1100, 570, 1], [tBro + .3, 1060, 560, .97], [e, 960, 545, .95]]);
     plateFrame();
     soil();
     // the seed: falls spinning from the park above, bounces, splits as the sprout comes up
     if (t < tWatch + .3) {
-      const u = seg(t, c0 - .4, land), y = lerp(-140, GROUND - 6, easeIn(u * .9 + u * .1)), x = 960 + 70 * Math.sin(u * 9) * (1 - u), r = u < 1 ? Math.sin(t * 9) * .9 : 1.25 + .15 * Math.exp(-6 * (t - land)) * Math.sin(20 * (t - land));
+      const u = seg(t, c0 - .4, land), y = lerp(-60, GROUND - 6, u * .55 + .45 * u * u), x = 960 + 90 * Math.sin(u * 9) * (1 - u), r = u < 1 ? Math.sin(t * 9) * .9 : 1.25 + .15 * Math.exp(-6 * (t - land)) * Math.sin(20 * (t - land));
       const bounce = t > land ? Math.abs(Math.sin((t - land) * 9)) * 22 * Math.exp(-4 * (t - land)) : 0;
       samara(x, y - bounce, r, 1.2 * (1 - seg(t, tWatch, tWatch + .3)));
       if (t > land && t < land + .6) { const k = seg(t, land, land + .6); for (let i = 0; i < 6; i++) dot(960 + Math.cos(i) * 60 * k, GROUND - 4 - Math.sin(i * 1.3) * 30 * k * (1 - k), 4, '#7A5B3E', 1 - k); }
@@ -198,6 +198,10 @@
       lab: { a: seg(t, tYel + .6, tYel + 1.4), b: seg(t, tBalls, tBalls + .7), c: seg(t, tFr + .5, tFr + 1.2), d: seg(t, tWithout, tWithout + .7), e: seg(t, tBro + .6, tBro + 1.3) },
     };
     plant(t, G);
+    // a bud forms at the tip, then bursts into the flower leaves (with a puff of pollen)
+    const bud = popk(t, tForm - .2, .5) * (1 - seg(t, tYel - .3, tYel));
+    if (bud > 0) { push(); translate(960, 470 + 10 * (1 - G.stem)); scale(backOut(bud)); flat([[0, 6], [-26, -30], [0, -78], [26, -30]], '#9FB85A', { line: STEMDK, lw: 2.4 }); flat([[0, 6], [-12, -34], [0, -70], [12, -34]], '#C9D36A'); pop(); }
+    const pk = seg(t, tYel - .2, tYel + 1.4); if (pk > 0 && pk < 1) for (let i = 0; i < 26; i++) { const q = hash(i * 3.3) * TAU, r = 60 + 260 * easeOut(pk) * (.4 + hash(i)); dot(960 + Math.cos(q) * r, 420 + Math.sin(q) * r * .7 + 60 * pk * pk, 5 + 3 * hash(i), '#E9C83A', 1 - pk); }
     // a sprout's two seed-leaves before the stem takes off
     const sp = popk(t, tWatch, .4) * (1 - seg(t, tRet, tRet + .8));
     if (sp > 0) { const top = [960, GROUND - 60 * clamp(G.stem / .13)]; for (const sd of [-1, 1]) { push(); translate(top[0], top[1]); rotate(sd * .5); scale(backOut(sp)); flat(ellPts(sd * 18, -6, 20, 9, 14), '#7FA35A', { line: STEMDK, lw: 1.6 }); pop(); } }
@@ -206,7 +210,7 @@
     if (wk > 0) for (let i = 0; i < 10; i++) { const fph = frac(t * 1.8 + i / 10); dot(1028 - fph * 50, 838 + fph * 88, 4, '#5A86A8', wk * (1 - fph * .5)); }
     // Clawd: looks up at the seed, waters it, then strolls aside to watch the plant grow
     const st = stroll(t, tRet + .5, tRet + 2.6, 1130, 1730, 11);
-    const moods = [[c0, 'surprised'], [land + .2, 'happy'], [tRand + .2, 'determined'], [tWatch, 'excited'], [tRet + .4, 'happy'], [tYel, 'love'], [tTen, 'excited'], [tBro + .1, 'disgusted'], [tGone - .5, 'sad']];
+    const moods = [[c0, 'surprised'], [land + .2, 'happy'], [tRand + .2, 'determined'], [tWatch, 'excited'], [tRet + .4, 'happy'], [tYel, 'love'], [tYel + 1.5, 'surprised'], [tYel + 2.4, 'laugh'], [tTen, 'excited'], [tBro + .1, 'disgusted'], [tGone - .5, 'sad']];
     const watering = t < tWatch + .4;
     tourist(st.x, GROUND, 11, 'safari', { ...emotions(t, moods), view: watering ? 'q' : st.view, flip: watering ? true : t < tRet + .5 ? true : st.flip || t > tRet + 2.6, walk: st.walk > 0 && t < tRet + 2.6 ? st.walk : undefined, dy: st.dy, aR: watering ? .5 : undefined, armR: watering ? can(wk) : undefined, lookY: t < land ? -.9 : undefined, boilKey: 'c6c' });
     // the can stays on the ground after he walks off
@@ -216,6 +220,7 @@
     counter(t, 330, 945, step, popk(t, tRet + .2, .5), t * (t < tGone ? 9 : .2));
     camEnd();
     // plate typography
+    if (t > tYel + 1.5 && t < tYel + 2.9) sfx('achoo!', 1600, 720, 60, RED, t - tYel - 1.5, { face: 'hand', life: 1.4 });
     plateTitle('Neuronium recursivum', 960, 132, seg(t, tRet + .4, tRet + 1.6));
     caption('Fig. VI · one neuron, grown over 30,024 steps of training', 960, 206, seg(t, tForm, tForm + 1.4), 40);
   }
@@ -333,7 +338,7 @@
   const strata = (cx, cy, LL, B) => { const cols = ['#B49A78', '#8C7A64', '#C9B08C', '#7A6A58', '#A88A6A']; for (let i = 0; i < 9; i++) { ctx.fillStyle = cols[i % 5]; ctx.beginPath(); ctx.moveTo(B.x0 - 20, B.y0 + i * B.h / 8); for (let j = 0; j <= 8; j++) ctx.lineTo(B.x0 + j * B.w / 8, B.y0 + i * B.h / 8 + Math.sin(j * 1.3 + i) * 8); ctx.lineTo(B.x1 + 20, B.y1 + 40); ctx.lineTo(B.x0 - 20, B.y1 + 40); ctx.closePath(); ctx.fill(); } flat([[cx - 14, cy + 20], [cx - 4, cy - 26], [cx + 14, cy - 18], [cx + 18, cy + 18]], '#C9D9E9', { line: INK, lw: 1.2 }); };
   const thorny = (cx, cy, LL, B) => { ctx.fillStyle = '#5A3A3A'; ctx.fillRect(B.x0, B.y0, B.w, B.h); ctx.save(); ctx.strokeStyle = '#E9D9C0'; ctx.lineWidth = 4; ctx.lineCap = 'round'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(cx - 26 * sd, cy + 26); ctx.lineTo(cx + 26 * sd, cy - 26); ctx.stroke(); ctx.beginPath(); ctx.moveTo(cx + 14 * sd, cy - 30); ctx.lineTo(cx + 34 * sd, cy - 10); ctx.stroke(); } ctx.restore(); };
   const codeLeaf = (cx, cy, LL, B) => { ctx.fillStyle = '#1E2A3A'; ctx.fillRect(B.x0, B.y0, B.w, B.h); const C = ['#9FE3C8', '#FFD36B', '#8EC3E6', '#E9A0B8']; for (let i = 0; i < 9; i++) { ctx.fillStyle = C[i % 4]; ctx.fillRect(cx - LL * .32 + (i % 3) * 10, cy - LL * .2 + i * 11, 30 + hash(i * 3) * 70, 5); } ctx.save(); ctx.beginPath(); ctx.arc(cx + LL * .18, cy - 4, 30, 0, TAU); ctx.fillStyle = '#3A7AB8'; ctx.fill(); ctx.fillStyle = '#6AAA5A'; ctx.beginPath(); ctx.ellipse(cx + LL * .18 - 8, cy - 12, 12, 8, .4, 0, TAU); ctx.fill(); ctx.beginPath(); ctx.ellipse(cx + LL * .18 + 10, cy + 10, 9, 6, -.3, 0, TAU); ctx.fill(); ctx.strokeStyle = '#E9F2FF'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(cx + LL * .18, cy - 4, 30, 0, TAU); ctx.stroke(); ctx.beginPath(); ctx.ellipse(cx + LL * .18, cy - 4, 12, 30, 0, 0, TAU); ctx.stroke(); ctx.restore(); };
-  const poemLeaf = (cx, cy, LL, B) => { ctx.fillStyle = '#F3E6CC'; ctx.fillRect(B.x0, B.y0, B.w, B.h); ctx.save(); ctx.fillStyle = '#4A2A2A'; ctx.font = `italic 700 ${LL * .1}px ${SERIF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ['Мои враги,', 'о, мои враги…'].forEach((s, i) => ctx.fillText(s, cx, cy - LL * .06 + i * LL * .12)); ctx.restore(); };
+  const poemLeaf = (cx, cy, LL, B) => { ctx.fillStyle = '#F3E6CC'; ctx.fillRect(B.x0, B.y0, B.w, B.h); ctx.save(); ctx.fillStyle = '#4A2A2A'; ctx.font = `italic 700 ${LL * .085}px ${SERIF}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ['Мои враги,', 'о, мои враги…'].forEach((s, i) => ctx.fillText(s, cx + LL * .04, cy - LL * .05 + i * LL * .11)); ctx.restore(); };
   function minorPlant(t, ox, s, leaves, branch, odd) {
     push(); translate(ox, GROUND); scale(s); translate(-960, -GROUND);
     soil(960, 200); roots(960, 1);

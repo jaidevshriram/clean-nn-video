@@ -159,7 +159,7 @@
     dust(t);
     camEnd();
     ctx.restore();
-    caption(t, tk - .4, ce('hl_q') + .6, 'why not a knot?', 200);
+    caption(t, tk - .4, ce('hl_q') + .6, 'why not a knot?', 860);
     docPost(t);
   }
 
@@ -323,7 +323,7 @@
     frontGrass(t, 1020, 30);
     camEnd();
     caption(t, a + .1, tMa - .5, 'even attacks use the normal roads', 180);
-    if (zoomP > .9) { const k = seg(t, tMa + .2, tMa + .7) * (1 - seg(t, tSw - .6, tSw - .2)); if (k > 0) letter(pk > .5 ? 'a cat face, spotted fur' : 'make the skull look like a jaguar', 960, 900, 52, '#FFF6E0', { face: 'hand', shadow: false, alpha: k, stroke: INK, strokeW: .16, screen: true }); }
+    if (zoomP > .9) { const k = seg(t, tMa + .2, tMa + .7) * (1 - seg(t, tSw - .6, tSw - .2)); if (k > 0) letter(pk > .5 ? 'a cat face, spotted fur' : 'make the skull look like a jaguar', 960, 170, 56, '#FFF6E0', { face: 'hand', shadow: false, alpha: k, stroke: INK, strokeW: .16, screen: true }); }
     lower(t, tSw - .3, e + .5, 'Panthera onca', 'the real jaguar neurons switch on');
     docPost(t);
   }
@@ -390,19 +390,19 @@
     // birds riding on a back (everything relates to something)
     for (let i = 0; i < 3; i++) { const bx = 1560 - 40 + i * 30, by = 900 - 330 * .36 - 4 + Math.sin(t * 6 + i) * 3; dot(bx, by, 9, '#3A2A2A'); dot(bx + 8, by - 4, 5, '#3A2A2A'); }
     // the zoo of strangers, on the left: concrete, fences, one identical grey animal per cage
-    ctx.fillStyle = '#B9B4A8'; ctx.fillRect(-500, 640, 1500, 700); ctx.fillStyle = '#CFCBC0'; ctx.fillRect(-500, -500, 1500, 1140);
-    ctx.fillStyle = '#A9A498'; for (let i = 0; i < 12; i++) ctx.fillRect(-500 + i * 130, 640, 4, 700);
+    ctx.fillStyle = '#CFCBC0'; ctx.fillRect(-500, -500, 1500, 1060); ctx.fillStyle = '#B9B4A8'; ctx.fillRect(-500, 560, 1500, 800);
+    ctx.fillStyle = '#A9A498'; for (let i = 0; i < 12; i++) ctx.fillRect(-500 + i * 130, 560, 4, 800);
     const pack = seg(t, tPa - .4, tPa + .6);
     for (let r = 0; r < 2; r++) for (let c = 0; c < 3; c++) {
-      const cw = lerp(320, 270, pack), x = 60 + c * cw + r * 50, y = 800 + r * 200, turn = seg(t, tSt - .3 + c * .1, tSt + .2 + c * .1);
+      const cw = lerp(300, 262, pack), x = 40 + c * cw + r * 40, y = 610 + r * 200, turn = seg(t, tSt - .3 + c * .1, tSt + .2 + c * .1);
       ctx.save(); ctx.filter = 'grayscale(1) contrast(.9)'; beast(x + cw / 2 - 20, y, .36, 3 + r * 4 + c, { flip: (r + c) % 2 === (turn > .5 ? 1 : 0) }); ctx.restore();
       ctx.strokeStyle = '#5A5A60'; ctx.lineWidth = 5; ctx.strokeRect(x, y - 180, cw - 10, 190); ctx.lineWidth = 2; for (let k = 1; k < 9; k++) { ctx.beginPath(); ctx.moveTo(x + k * (cw - 10) / 9, y - 180); ctx.lineTo(x + k * (cw - 10) / 9, y + 10); ctx.stroke(); }
     }
-    if (t > tSt - .2 && t < tRe) for (let c = 0; c < 3; c++) sfx('…', 200 + c * 300, 580, 70, '#5A5A60', t - tSt - c * .15, { life: 1.6 });
+    if (t > tSt - .2 && t < tRe) for (let c = 0; c < 3; c++) sfx('…', 200 + c * 300, 450, 70, '#5A5A60', t - tSt - c * .15, { life: 1.6 });
     // the boundary: a tall fence between the zoo and the savanna
     ctx.strokeStyle = '#4A4A50'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(1040, 400); ctx.lineTo(1040, 1100); ctx.stroke(); ctx.lineWidth = 3; for (let k = 0; k < 14; k++) { ctx.beginPath(); ctx.moveTo(1010, 420 + k * 50); ctx.lineTo(1070, 440 + k * 50); ctx.stroke(); }
-    flat(rectPts(300, 380, 480, 120), '#E9E6DE', { line: '#5A5A60', lw: 6 }); letter('TOY WORLD', 540, 442, 70, '#5A5A60', { face: 'marker', shadow: false });
-    for (const lx of [120, 960]) { flat(rectPts(lx - 50, 250, 100, 20), '#8A8A90'); glow(lx, 280, 160, '#E8F4FF', .4); }
+    flat(rectPts(280, 290, 480, 110), '#E9E6DE', { line: '#5A5A60', lw: 6 }); letter('TOY WORLD', 520, 347, 66, '#5A5A60', { face: 'marker', shadow: false });
+    for (const lx of [120, 960]) { flat(rectPts(lx - 50, 110, 100, 20), '#8A8A90'); glow(lx, 140, 160, '#E8F4FF', .4); }
     filmer(t, 1180, 1000, 13, [[t - lt, 'bored'], [tSt, 'sleepy'], [tRe, 'surprised'], [tRel, 'happy']], { flip: tRe > t, aR: 1.1, armR: camProp });
     frontGrass(t, 1020, 26, { seed: 3 });
     ctx.restore();

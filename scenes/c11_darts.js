@@ -243,7 +243,7 @@
   function note(x, y, w, h, rot, k, lines) {
     if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(backOut(k), backOut(k));
     flat(rectPts(-w / 2, -h / 2, w, h), '#FBF6EC', { shadow: [6, 8, 'rgba(0,0,0,.35)'] }); ctx.strokeStyle = 'rgba(120,150,200,.5)'; ctx.lineWidth = 2; for (let i = 1; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-w / 2 + 10, -h / 2 + i * h / 4); ctx.lineTo(w / 2 - 10, -h / 2 + i * h / 4); ctx.stroke(); }
-    lines.forEach((ln, i) => txt(ln, 0, (i - (lines.length - 1) / 2) * 50 + 2, 48, PAL.ink, { font: '"Patrick Hand"', weight: '400' }));
+    lines.forEach((ln, i) => txt(ln, 0, (i - (lines.length - 1) / 2) * 46 + 2, 44, PAL.ink, { font: '"Patrick Hand"', weight: '400' }));
     ctx.restore();
   }
   function blind(t, lt, dur) {
@@ -362,7 +362,7 @@
       const k = easeOut(seg(t, INTRO[i] - .3, INTRO[i] + .2)); if (k <= 0) return;
       const y = py + 240 + i * 150, fill = easeOut(seg(t, VAL[i] - .5, VAL[i] + .5));
       ctx.save(); ctx.globalAlpha = k; ctx.translate((1 - k) * 60, 0);
-      ctx.save(); ctx.translate(px + 40, y + 6); ctx.scale(.5, .5); dart(110, 0, 0, 1, i === 2 ? { duck: true } : { flight: col }); ctx.restore();
+      flat(rrPts(px + 60, y - 50, 60, 120, 10), col);
       txt(lab, px + 150, y - 26, 46, '#FFFFFF', { font: F, weight: '900', align: 'left' });
       flat(rectPts(px + 150, y + 16, 440, 44), '#222A4A'); if (fill > 0) flat(rectPts(px + 150, y + 16, 440 * v * fill, 44), col);
       if (i === 2 && fill > 0) dot(px + 156, y + 38, 8, col);
@@ -465,10 +465,15 @@
       const per = [1150 + Math.cos(prec) * 200 / 1.38 * 1.25, 560 + Math.sin(prec) * 200 / 1.38 * .55 * 1.25];
       teleRing(per[0], per[1], 90, 70, seg(t, tTi - .1, tTi + .5), 9);
       if (t > tBr - .3) { const k = popk(t, tBr - .3, .3); ctx.save(); ctx.translate(per[0] - 150, per[1] - 120); ctx.scale(backOut(k), backOut(k)); dot(0, 0, 34, RED); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-13, -13); ctx.lineTo(13, 13); ctx.moveTo(13, -13); ctx.lineTo(-13, 13); ctx.stroke(); ctx.restore(); }
-      if (t > tMe - .3) { const k = seg(t, tMe - .3, tMe + .2); ctx.save(); ctx.globalAlpha = k; txt('MERCURY', per[0] - 40, per[1] + 120, 46, YEL, { font: F, weight: '900', stroke: '#1A1008', sw: 8 }); ctx.restore(); }
+      if (t > tMe - .3) { const k = seg(t, tMe - .3, tMe + .2); ctx.save(); ctx.globalAlpha = k; txt('MERCURY', per[0] - 60, per[1] - 110, 50, YEL, { font: F, weight: '900', stroke: '#1A1008', sw: 8 }); ctx.restore(); }
       // Newton: a framed portrait silhouette on the left
       ctx.save(); ctx.translate(270, 500); flat(rectPts(-150, -190, 300, 380), '#8C6A3A', { shadow: [10, 14, 'rgba(0,0,0,.5)'] }); flat(rectPts(-128, -168, 256, 336), '#E9D8B0');
-      flat(ellPts(0, -30, 60, 74, 24), '#3A2A1A'); for (const sd of [-1, 1]) flat(ellPts(sd * 62, 10, 34, 80, 16), '#5A4A3A'); flat([[-100, 168], [-80, 70], [80, 70], [100, 168]], '#3A2A1A'); ctx.restore();
+      // Newton's apple, falling again and again inside the frame
+      ctx.beginPath(); ctx.rect(-128, -168, 256, 336); ctx.clip();
+      flat(ellPts(0, -150, 150, 70, 24), '#5E7A3A'); flat(rectPts(-12, -100, 24, 120), '#6A4A2A');
+      const fa = frac((t - hIn) * .6), ay = lerp(-110, 120, fa * fa);
+      ctx.save(); ctx.translate(30, ay); ctx.rotate(fa * 2); dot(0, 0, 30, '#C8402A'); dot(-9, -9, 9, 'rgba(255,255,255,.4)'); flat(rectPts(-2, -40, 4, 14), '#4A3A1A'); flat(ellPts(12, -36, 12, 6, 10), '#5E9A3C'); ctx.restore();
+      flat(rectPts(-128, 130, 256, 40), '#7E9A4A'); ctx.restore();
       txt('NEWTON', 270, 742, 46, '#F3E2BE', { font: '"DejaVu Serif"', weight: '700' });
       flat(rectPts(0, 0, W, 120), 'rgba(10,18,56,.92)'); flat(rectPts(0, 0, 18, 120), YEL);
       txt('HISTORY CORNER', 1040, 62, 60, YEL, { font: F, weight: '900' });

@@ -301,15 +301,15 @@
     const r = cs('te_result'), tClean = wt('te_result', 'clean'), tCoarse = wt('te_result', 'coarser'), tLoops = wt('te_result', 'curves'), tTen2 = wt('te_result', 'ten'), tTwo = wt('te_result', 'Two'), tMany = wt('te_result', 'many');
     const tUnf = wt('te_result', 'Unfolding'), tHid = wt('te_result', 'hidden'), tNone = wt('te_result', 'none'), e = ce('te_result');
     stageBG();
-    const [sx, sy] = shake(t, tCr + .45, 22);
+    const [sx, sy] = shake(t, tCr + .05, 22);
     camKeys(t, [[a + .3, 960, 540, 1], [tWatch - .5, 470, 430, 1.6], [tSq - .4, 470, 430, 1.55], [tSq + .4, 960, 480, 1.05], [tLayer, 960, 500, 1.25], [tCr + .2, 960, 480, 1.2], [tNo, 960, 470, 1.25], [tIf - .2, 1150, 430, 1.15], [tTog + .5, 1150, 430, 1.15],
       [r + .2, 960, 500, 1.25], [tLoops - .3, 870, 520, 1.45], [tTwo, 960, 520, 1.3], [tUnf, 960, 640, 1.15], [tNone, 960, 640, 1.12], [tNone + .5, 960, 560, 1], [e + 1, 960, 545, 1]].map(k => [k[0], k[1] + sx, k[2] + sy, k[3]]), .5);
     // the press rolls in from the wing
     const ox = lerp(1400, 0, easeOut(seg(t, tSq - .3, tSq + 1.2)));
-    const down = easeIn(seg(t, tCr - .05, tCr + .45)), up = easeOut(seg(t, r, r + 1.1));
-    const plateY = lerp(300, 700, down) - (lerp(300, 700, down) - 300) * up + 4 * Math.sin(t * 40) * env(t, tCr + .45, r, .1, .1);
+    const down = easeIn(seg(t, tCr - .35, tCr + .05)), up = easeOut(seg(t, r, r + 1.1));
+    const plateY = lerp(300, 700, down) - (lerp(300, 700, down) - 300) * up + 4 * Math.sin(t * 40) * env(t, tCr + .05, r, .1, .1);
     const cnt = t < tFour ? '480' : t < r ? String(Math.round(lerp(480, 10, easeInOut(seg(t, tFour, tTen + .2))))).padStart(3, ' ') : ' 10';
-    contestants(t, { plantGlow: .8 * env(t, tWatch - .2, tSq - .3, .3, .4), knot: { look: t > tIf ? [-1, -.6] : [-.8, 0], grin: t < tCr || t > tNone + 3 ? true : false, sq: .25 * env(t, tCr + .3, tCr + .9, .1, .4) }, buzz: env(t, tNone, tNone + 1.6, .1, .5), supLit: .4 + .6 * env(t, tIf - .3, tTog + .6, .3, .3) });
+    contestants(t, { plantGlow: .8 * env(t, tWatch - .2, tSq - .3, .3, .4), knot: { look: t > tIf ? [-1, -.6] : [-.8, 0], grin: t < tCr || t > tNone + 3 ? true : false, sq: .25 * env(t, tCr, tCr + .6, .1, .4) }, buzz: env(t, tNone, tNone + 1.6, .1, .5), supLit: .4 + .6 * env(t, tIf - .3, tTog + .6, .3, .3) });
     // the plant grows a new leaf: you can watch a neuron grow
     if (t > tWatch - .3 && t < tSq) { const k = popk(t, tWatch, .5); push(); translate(GX, 516); scale(.32); translate(-960, -930); leafAt(985, 560, 150, -.25, NO + 'iv1_30024_0_2', .8 * k); pop(); if (k > .5) sfx('sprout!', GX + 120, 300, 46, GOLDLT, t - tWatch - .2, { face: 'marker', life: 1.5 }); }
     if (ox < 1399) {
@@ -317,7 +317,7 @@
       if (t < r + .15) tinyTray(t, 480, 40, 440, plateY, 'c7t480', CURVES, popk(t, tCurve - .4, .6));
       else SQ.forEach((im, i) => { const [x, y] = GRID10(i), lk = popk(t, r + .1 + i * .05, .4); tile(x, y, 128, 128, im, 1, { s: .2 + .8 * backOut(lk), lit: .6 * env(t, tClean - .2, tCoarse + 1.5, .3, .5) + (i === 1 ? .9 * env(t, tLoops - .2, tTwo, .2, .3) : 0) + ((i === 7 || i === 2) ? .9 * env(t, tTwo - .1, tMany + 1, .2, .3) : 0), frame: (i === 1 && t > tLoops - .2 && t < tTwo) || ((i === 7 || i === 2) && t > tTwo - .1 && t < tMany + 1) ? GOLD : '#2A0A3A' }); });
       press(t, ox, plateY, cnt, { lock: seg(t, tNo - .3, tWay) * (1 - seg(t, r - .4, r)) });
-      slam(t, tCr + .45);
+      slam(t, tCr + .05);
     }
     // ten curve detectors fan out above the "curves and loops" tile, then pour into it
     const fan = seg(t, tTen2 - .9, tTen2 - .3), pour = seg(t, tTen2 + .2, tTen2 + 1.1);
@@ -338,7 +338,7 @@
     lower(t, tLoops - .2, tTwo - .2, '1 "curves and loops" for 10 curves', GOLD);
     lower(t, tTwo - .1, tUnf - .4, '2 circle neurons, not many', GOLD);
     lower(t, tHid - .2, e + .8, 'hidden curves found: none', RED);
-    if (t > tCr + .4 && t < tCr + 1.5) sfx('CRUNCH!', 960, 260, 100, '#FF8A3A', t - tCr - .4, { face: 'marker' });
+    if (t > tCr + .05 && t < tCr + 1.2) sfx('CRUNCH!', 960, 260, 100, '#FF8A3A', t - tCr - .05, { face: 'marker' });
     if (t > tNone && t < tNone + 1.4) sfx('BZZT!', 1540, 330, 80, '#FF3B30', t - tNone, { face: 'marker' });
     scoreBug(t, 1);
   }
@@ -349,20 +349,20 @@
     const a = cs('te_last'), e = ce('te_last'), tLast = wt('te_last', 'last'), tMod = wt('te_last', 'modern'), tTh = wt('te_last', 'thousand'), tDown = wt('te_last', 'down'), tThir = wt('te_last', 'thirteen'), tSame = wt('te_last', 'Same', 1);
     const tCo = wt('te_last', 'Coarser'), tNev = wt('te_last', 'never'), tPack = wt('te_last', 'packing'), tPaint = wt('te_last', 'paints'), tBr = wt('te_last', 'broader'), tBrush = wt('te_last', 'brush');
     stageBG();
-    const [sx, sy] = shake(t, tDown + .4, 22);
+    const [sx, sy] = shake(t, tDown + .05, 22);
     camKeys(t, [[a - .3, 960, 520, 1.15], [tTh, 960, 500, 1.25], [tDown + .2, 960, 480, 1.2], [tSame, 960, 500, 1.35], [tPack, 1100, 480, 1.15], [tPaint, 960, 500, 1.3], [tBrush + .6, 960, 540, 1.05], [e + 1, 960, 540, 1]].map(k => [k[0], k[1] + sx, k[2] + sy, k[3]]), .5);
-    const down = easeIn(seg(t, tDown - .05, tDown + .4)), up = easeOut(seg(t, tSame - .6, tSame + .4));
-    const plateY = lerp(300, 700, down) - (lerp(300, 700, down) - 300) * up + 4 * Math.sin(t * 40) * env(t, tDown + .4, tSame - .6, .1, .1);
+    const down = easeIn(seg(t, tDown - .35, tDown + .05)), up = easeOut(seg(t, tSame - .6, tSame + .4));
+    const plateY = lerp(300, 700, down) - (lerp(300, 700, down) - 300) * up + 4 * Math.sin(t * 40) * env(t, tDown + .05, tSame - .6, .1, .1);
     const cnt = t < tDown ? '1024' : t < tSame ? String(Math.round(lerp(1024, 13, easeInOut(seg(t, tDown + .2, tThir + .2))))).padStart(4, ' ') : '  13';
     const splat = seg(t, tBrush + .2, tBrush + .5);
-    contestants(t, { knot: { look: [-1, -.2], grin: false, sq: .25 * env(t, tDown + .3, tDown + .9, .1, .4) }, buzz: env(t, tBrush + .3, tBrush + 1.8, .1, .5), supLit: .3 });
+    contestants(t, { knot: { look: [-1, -.2], grin: false, sq: .25 * env(t, tDown, tDown + .6, .1, .4) }, buzz: env(t, tBrush + .3, tBrush + 1.8, .1, .5), supLit: .3 });
     if (t < tSame - .4) tinyTray(t, 1024, 64, 420, plateY, 'c7t1024', HZ, popk(t, a + .2, .6));
     else HZ.forEach((im, i) => { const [x, y] = GRID13(i), lk = popk(t, tSame - .4 + i * .04, .4); tile(x, y, 100, 100, im, 1, { s: .2 + .8 * backOut(lk), lit: .5 * env(t, tCo - .3, e + 2, .3, .4) }); });
     // the broad brush sweeps a single gold stroke across the clean tiles
     const bk = seg(t, tPaint - .3, tBrush + .2);
     if (bk > 0) { const bx = lerp(420, 1500, easeInOut(bk)); ctx.save(); ctx.globalAlpha = .45; ctx.fillStyle = GOLD; ctx.beginPath(); ctx.moveTo(560, 440); for (let i = 0; i <= 20; i++) { const x = lerp(560, Math.min(1380, bx), i / 20); ctx.lineTo(x, 430 + 8 * Math.sin(i * 1.7)); } for (let i = 20; i >= 0; i--) { const x = lerp(560, Math.min(1380, bx), i / 20); ctx.lineTo(x, 660 + 8 * Math.sin(i * 1.3)); } ctx.closePath(); if (bx > 570) ctx.fill(); ctx.restore(); if (bk < 1) { push(); translate(bx, 545); rotate(-.15); flat(rrPts(-20, -520, 40, 420, 10), '#8C5A3A', { line: DARK, lw: 3 }); flat(rrPts(-60, -110, 120, 60, 8), '#B9C0CE', { line: DARK, lw: 3 }); flat([[-70, -50], [70, -50], [80, 120], [-80, 120]], GOLD, { line: DARK, lw: 3 }); pop(); } }
     press(t, 0, plateY, cnt, {});
-    slam(t, tDown + .4);
+    slam(t, tDown + .05);
     // gag: a flick of gold paint lands on the knot
     if (splat > 0) { const p = arcPt([1450, 500], [SX + 20, 430], 160, splat); if (splat < 1) dot(p[0], p[1], 14, GOLD); else { flat(starPts(SX + 20, 430, 26, .55, 7), GOLD); } }
     clawdSeat(t, [[a, 'determined'], [tDown, 'scared'], [tSame, 'happy'], [tBrush, 'laugh']], env(t, tBrush + .4, e + 2, .3, .4));
@@ -372,7 +372,7 @@
     lower(t, tDown - .2, tSame - .3, '1,024 to 13', RED);
     lower(t, tCo - .3, tPack + .4, 'coarser · never scrambled', GOLD);
     lower(t, tPaint - .2, e + 1.2, 'a broader brush', GOLD, { size: 70 });
-    if (t > tDown + .4 && t < tDown + 1.5) sfx('CRUNCH!', 960, 260, 100, '#FF8A3A', t - tDown - .4, { face: 'marker' });
+    if (t > tDown + .05 && t < tDown + 1.2) sfx('CRUNCH!', 960, 260, 100, '#FF8A3A', t - tDown - .05, { face: 'marker' });
     scoreBug(t, 1);
   }
 
@@ -406,7 +406,7 @@
       pop();
       letter(lab, x, 800 - h - 60, 44, CREAM, { face: 'marker', shadow: false, reveal: seg(t, tThree - .4 + i * .3, tThree + i * .3) });
     });
-    if (t > tCar - .2) { push(); translate(690, 470); const k = popk(t, tCar - .2, .4); scale(backOut(k)); flat(rrPts(-90, -26, 180, 52, 12), GOLD, { line: DARK, lw: 3 }); pop(); letter('1 broad car', 690, 471, 34, DARK, { face: 'marker', shadow: false, pop: k }); }
+    if (t > tCar - .2) { push(); translate(690, 470); const k = popk(t, tCar - .2, .4); scale(backOut(k)); flat(rrPts(-125, -28, 250, 56, 12), GOLD, { line: DARK, lw: 3 }); pop(); letter('1 broad car', 690, 471, 32, DARK, { face: 'marker', shadow: false, pop: k }); }
     clawdSeat(t, [[a, 'thinking'], [tBig, 'surprised'], [tViews, 'excited'], [tLess + .5, 'proud']], env(t, tScr - .4, e + 2, .3, .4));
     audience(t, .8 * env(t, tDoz, tDoz + 1.4, .2, .6) + env(t, tScr, e + 2, .3, .4));
     camEnd();
@@ -415,7 +415,7 @@
     lower(t, tSm - .2, tBig - .3, 'smallest: one broad car neuron', GOLD);
     lower(t, tBig - .2, tLess - .3, 'biggest: taxis, vans, convertibles…', GOLD);
     lower(t, tLess - .2, e + 1.2, 'less room: broader, not scrambled', GOLD);
-    if (t > tDoz && t < tDoz + 1.2) sfx('OOOH!', 960, 230, 80, CREAM, t - tDoz, { face: 'marker' });
+    if (t > tDoz && t < tDoz + 1.2) sfx('OOOH!', 620, 330, 80, CREAM, t - tDoz, { face: 'marker' });
     scoreBug(t, 1);
   }
 

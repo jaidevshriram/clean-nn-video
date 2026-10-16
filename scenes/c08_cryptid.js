@@ -7,7 +7,7 @@
 // quote ("little evidence"). Finally cornered, the Knot is just a loose ball of string; Clawd pockets it. The
 // camcorder's screen glitches into a pixel-art game screen (the next world).
 (() => {
-  const SERIF = '"Liberation Serif"', MONO = '"DejaVu Sans Mono"', BENG = '"FreeSerif"';
+  const SERIF = '"Liberation Serif"', MONO = '"DejaVu Sans Mono"', BENG = '"FreeSans"';
   const OSD = '#B8FFB0', AMBER = '#FFB13B', VIO = '#B45CA8', GOLD = '#F0BE46', INKD = '#141414';
   const GROUND = 960;
 
@@ -32,19 +32,48 @@
     ctx.restore();
     if ((o.loose || 0) < .5) for (const ex of [-.17, .17]) glow(x + ex * s, y - .04 * s, s * .22, '#FFFFFF', .8 * (o.alpha ?? 1) * (o.eyes ?? 1));
   }
+  // the knot's true form: a loose ball of string with a trailing end
+  function stringBall(x, y, r, k = 1) { if (k <= 0) return; ctx.save(); ctx.globalAlpha = k; ctx.strokeStyle = '#E0E0E0'; ctx.lineWidth = Math.max(2, r * .09); ctx.lineCap = 'round'; for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.ellipse(x + (hash(i) - .5) * r * .2, y + (hash(i * 2) - .5) * r * .2, r * (.75 + .25 * hash(i * 3)), r * (.45 + .3 * hash(i * 5)), hash(i * 7) * 3, 0, TAU); ctx.stroke(); } ctx.beginPath(); ctx.moveTo(x + r * .8, y + r * .2); ctx.bezierCurveTo(x + r * 1.6, y + r * .9, x + r * 2.2, y - r * .1, x + r * 2.8, y + r * .6); ctx.stroke(); ctx.restore(); }
   // Clawd's butterfly net (arm hook): swing 0..1 sweeps it
   const net = (sw = 0) => (u, w) => { ctx.save(); ctx.rotate(-.4 + sw * 1.6); ctx.strokeStyle = '#8A7A6A'; ctx.lineWidth = u * .45; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 9, 0); ctx.stroke(); ctx.strokeStyle = '#DADADA'; ctx.lineWidth = u * .35; ctx.beginPath(); ctx.ellipse(u * 11.4, 0, u * 2.4, u * 1.6, 0, 0, TAU); ctx.stroke(); ctx.strokeStyle = 'rgba(230,230,230,.5)'; ctx.lineWidth = 1.5; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(u * 11.4 + i * u * .9, -u * 1.5 + Math.abs(i) * u * .2); ctx.quadraticCurveTo(u * 11.4 + i * u * .4, u * 3, u * 11.4, u * 4.2); ctx.stroke(); } ctx.restore(); };
   // the SUPERPOSITION pennant (arm hook)
-  const pennant = (u, w) => { ctx.save(); ctx.rotate(-.9); ctx.strokeStyle = '#8A7A6A'; ctx.lineWidth = u * .45; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 12, 0); ctx.stroke(); ctx.translate(u * 12, 0); ctx.rotate(Math.PI / 2 + .9 + .08 * Math.sin(T * 5)); flat([[0, 0], [u * 15, u * 1.6 + u * .4 * Math.sin(T * 6)], [0, u * 3.6]], '#5A5A5A', { line: '#DADADA', lw: 2 }); ctx.save(); ctx.translate(u * 5.6, u * 1.7); ctx.rotate(.1); txt('SUPERPOSITION', 0, 0, u * 1.25, '#F2F2F2', { font: SERIF, weight: '900' }); ctx.restore(); ctx.restore(); };
+  const pennantOf = flipped => (u, w) => { ctx.save(); ctx.rotate(-.9); ctx.strokeStyle = '#8A7A6A'; ctx.lineWidth = u * .45; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 12, 0); ctx.stroke(); ctx.translate(u * 12, 0); ctx.rotate(Math.PI / 2 + .9 + .08 * Math.sin(T * 5)); flat([[0, 0], [u * 15, u * 1.6 + u * .4 * Math.sin(T * 6)], [0, u * 3.6]], '#5A5A5A', { line: '#DADADA', lw: 2 }); ctx.save(); ctx.translate(u * 5.6, u * 1.7); ctx.rotate(.1); if (!flipped) ctx.scale(-1, 1); txt('SUPERPOSITION', 0, 0, u * 1.25, '#F2F2F2', { font: SERIF, weight: '900' }); ctx.restore(); ctx.restore(); };
+  const pennant = pennantOf(false), pennantF = pennantOf(true);
   // Clawd the believer: safari hat, headlamp beam
   function hunter(t, x, y, u, o) {
     if (o.lamp !== false) { const dir = o.flip ? -1 : 1, a = (o.lampA ?? .05); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .22; ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.moveTo(x + dir * u * 2, y - u * 7.4); ctx.lineTo(x + dir * u * 70, y - u * 7.4 - u * 70 * Math.tan(a) - u * 16); ctx.lineTo(x + dir * u * 70, y - u * 7.4 - u * 70 * Math.tan(a) + u * 16); ctx.closePath(); ctx.fill(); ctx.restore(); glow(x + dir * u * 2, y - u * 7.4, u * 3, '#FFFFFF', .9); }
     tourist(x, y, u, 'safari', o);
+    if (o.bag) { const bx = x + (o.flip ? 3.2 : -3.2) * u, by = y - 3.4 * u; ctx.save(); ctx.strokeStyle = '#6A5A4A'; ctx.lineWidth = u * .35; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(x + (o.flip ? -2 : 2) * u, y - 7.6 * u); ctx.stroke(); ctx.restore(); flat(rrPts(bx - 1.8 * u, by, 3.6 * u, 3 * u, u * .6), '#7A6A5A', { line: '#2A2A2A', lw: 2 }); flat(rrPts(bx - 1.9 * u, by - .2 * u, 3.8 * u, 1.2 * u, u * .4), '#8A7A6A', { line: '#2A2A2A', lw: 2 }); }
+  }
+  // a faster night-vision pass with the same look as fxNightVision (mono green, grain, scanlines, vignette, REC,
+  // timecode, CAM label): compositing instead of a per-pixel loop, so a frame stays well under the render budget
+  let NVC = null, NVS = null; const NVN = [];
+  function nvInit() {
+    if (NVC) return; NVC = createCanvas(W, H);
+    for (let k = 0; k < 4; k++) { const c = createCanvas(W / 2, H / 2), x = c.getContext('2d'), d = x.createImageData(W / 2, H / 2), D = d.data; let s = 7919 * (k + 1); for (let i = 0; i < D.length; i += 4) { s = (s * 1103515245 + 12345) & 0x7fffffff; const v = 128 + (s / 0x7fffffff - .5) * 150; D[i] = D[i + 1] = D[i + 2] = v; D[i + 3] = 255; } x.putImageData(d, 0, 0); NVN.push(c); }
+    NVS = createCanvas(W, H); const x = NVS.getContext('2d'); x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, W, H); x.fillStyle = '#D1D1D1'; for (let y = 0; y < H; y += 3) x.fillRect(0, y, W, 1);
+  }
+  function nightVision(t, o = {}) {
+    nvInit();
+    POST.push(() => {
+      const c = NVC.getContext('2d'); c.globalCompositeOperation = 'source-over'; c.globalAlpha = 1; c.filter = 'grayscale(1) brightness(1.25)'; c.drawImage(CANVAS, 0, 0); c.filter = 'none';
+      c.imageSmoothingEnabled = false; c.globalCompositeOperation = 'overlay'; c.globalAlpha = .5; c.drawImage(NVN[Math.floor(t * 24) % 4], 0, 0, W, H); c.globalAlpha = 1;
+      c.globalCompositeOperation = 'multiply'; c.fillStyle = '#1EFF46'; c.fillRect(0, 0, W, H); c.drawImage(NVS, 0, 0); c.globalCompositeOperation = 'source-over'; c.imageSmoothingEnabled = true;
+      ctx.drawImage(NVC, 0, 0);
+      const g = ctx.createRadialGradient(W / 2, H / 2, H * .3, W / 2, H / 2, H * .85); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.85)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = Math.floor(t * 2) % 2 ? '#FF3B30' : 'rgba(255,59,48,.2)'; ctx.beginPath(); ctx.arc(110, 90, 16, 0, TAU); ctx.fill();
+      ctx.font = '40px monospace'; ctx.fillStyle = '#B8FFB0'; ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; ctx.fillText('REC', 140, 92);
+      const s = Math.floor(t), tc = `00:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}:${String(Math.floor(t * 24) % 24).padStart(2, '0')}`; ctx.textAlign = 'right'; ctx.fillText(tc, W - 100, 92);
+      if (o.label) { ctx.textAlign = 'left'; ctx.font = '44px monospace'; ctx.fillText(o.label, 100, H - 90); }
+      ctx.strokeStyle = '#B8FFB0'; ctx.lineWidth = 3; for (const [x, y, dx, dy] of [[80, 60, 1, 1], [W - 80, 60, -1, 1], [80, H - 60, 1, -1], [W - 80, H - 60, -1, -1]]) { ctx.beginPath(); ctx.moveTo(x, y + dy * 60); ctx.lineTo(x, y); ctx.lineTo(x + dx * 60, y); ctx.stroke(); }
+    });
   }
   // camcorder post: night vision + optional OSD drawn crisp on top + cut static
   function nv(t, label, cutAt = [], o = {}) {
     GRAIN = 0;
-    fxNightVision(t, { label });
+    // the camcorder's infrared lamp lights the middle of the frame
+    POST.unshift(() => { const g = ctx.createRadialGradient(W / 2, H * .55, 0, W / 2, H * .55, H * .75); g.addColorStop(0, 'rgba(255,255,255,.16)'); g.addColorStop(1, 'rgba(255,255,255,0)'); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore(); });
+    nightVision(t, { label });
     if (o.osd) POST.push(o.osd);
     POST.push(() => staticBars(t, cutAt));
   }
@@ -90,14 +119,14 @@
     ctx.save(); const P = new Path2D(); P.roundRect(x, y, w, h, 34); ctx.clip(P);
     ctx.fillStyle = o.bg || '#101418'; ctx.fillRect(x, y, w, h);
     ctx.translate(x, y); f(w, h); ctx.translate(-x, -y);
-    ctx.globalAlpha = .18; ctx.fillStyle = '#000000'; for (let yy = y; yy < y + h; yy += 4) ctx.fillRect(x, yy, w, 2);
+    ctx.globalAlpha = .08; ctx.fillStyle = '#000000'; for (let yy = y; yy < y + h; yy += 4) ctx.fillRect(x, yy, w, 2);
     ctx.globalAlpha = 1; const g = ctx.createRadialGradient(x + w / 2, y + h / 2, h * .3, x + w / 2, y + h / 2, w * .62); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.55)'); ctx.fillStyle = g; ctx.fillRect(x, y, w, h);
     ctx.globalAlpha = .07; ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.ellipse(x + w * .3, y + h * .18, w * .35, h * .12, -.2, 0, TAU); ctx.fill();
     if (o.roll) { ctx.globalAlpha = .12; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x, y + frac(t * .4) * h, w, 30); }
     ctx.restore();
   }
   // Clawd at the desk, from behind, watching the TV
-  function viewer(t, keys, o = {}) { tourist(o.x ?? 300, 1040, 13, 'safari', { ...emotions(t, keys), view: o.view || 'qback', flip: o.flip ?? true, ...o.pose, boilKey: 'c8viewer' }); }
+  function viewer(t, keys, o = {}) { tourist(o.x ?? 330, o.y ?? 838, 12, 'safari', { ...emotions(t, keys), view: o.view || 'q', flip: o.flip ?? false, ...o.pose, boilKey: 'c8viewer' }); }
   // a rubber stamp slammed onto the screen
   function slamStamp(s, x, y, at, t, col = '#D0302A', rot = -.12, size = 64) { stamp(s, x, y, at, t, { col, rot, size }); }
 
@@ -113,7 +142,7 @@
     if (dk < 1) cryptid(t, lerp(-200, 1560, dk), 640 - 40 * Math.abs(Math.sin(t * 12)), 84, { look: [1, 0] });
     trunk(1600, 170, '#444444'); trunk(420, 120, '#3A3A3A');
     // Clawd marches in: net in one arm, the pennant in the other
-    const st = stroll(t, a - .2, tTrue + 1.4, -150, 820, 12), swing = env(t, tHit - .5, tHit + .6, .25, .3);
+    const st = stroll(t, a - .2, tTrue + 1.4, -150, 820, 14), swing = env(t, tHit - .5, tHit + .6, .25, .3);
     // something in the bush: two eyes... it's only a moth
     const bush = [1250, GROUND - 20];
     flat(ellPts(bush[0], bush[1], 170, 90, 20), '#5A5A5A');
@@ -121,10 +150,10 @@
     if (t > tHit) { const mk = seg(t, tHit, tHit + 2.4), mx = bush[0] + 60 * mk + 30 * Math.sin(t * 9), my = bush[1] - 90 - 260 * mk; ctx.save(); ctx.fillStyle = '#E8E8E8'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.ellipse(mx + sd * 9, my, 10, 6 + 3 * Math.sin(t * 40), sd * .6, 0, TAU); ctx.fill(); } ctx.restore(); glow(mx, my, 20, '#FFFFFF', .6); }
     const pose = st.walk > 0 && t < tTrue + 1.4 ? { walk: st.walk, view: 'q' } : { view: 'q' };
     const sneaking = t > tStud && t < tHit;
-    hunter(t, sneaking ? lerp(820, 1000, ease(seg(t, tStud, tHit - .4))) : t >= tHit ? 1000 : st.x, GROUND + 40, 12, { ...emotions(t, [[c0, 'excited'], [tSup, 'proud'], [tStud, 'determined'], [tExp, 'suspicious'], [tHit, 'surprised'], [tDay, 'sad']]), ...pose, dy: st.dy, aR: sneaking ? .4 : .6 + 1.2 * swing, armR: net(swing), aL: .9, armL: pennant, lampA: sneaking ? -.15 : .05, boilKey: 'c8hunter' });
+    hunter(t, sneaking ? lerp(820, 1000, ease(seg(t, tStud, tHit - .4))) : t >= tHit ? 1000 : st.x, GROUND - 40, 14, { ...emotions(t, [[c0, 'excited'], [tSup, 'proud'], [tStud, 'determined'], [tExp, 'suspicious'], [tHit, 'surprised'], [tDay, 'sad']]), ...pose, dy: st.dy, aR: sneaking ? .4 : .6 + 1.2 * swing, armR: net(swing), aL: .9, armL: pennant, lampA: sneaking ? -.15 : .05, boilKey: 'c8hunter' });
     camEnd();
     nv(t, t < a ? 'CAM 1 · MOTION DETECTED' : 'CAM 1 · NIGHT 1 · THE BELIEVER');
-    if (t > tTrue - .3) letter('a true believer', 1300, 300, 64, OSD, { face: 'marker', shadow: false, reveal: seg(t, tTrue - .3, tTrue + .6), alpha: 1 - seg(t, tStud, tStud + .4) });
+    if (t > tTrue - .3) letter('a true believer', 1350, 340, 64, OSD, { face: 'marker', shadow: false, reveal: seg(t, tTrue - .3, tTrue + .6), alpha: 1 - seg(t, tStud, tStud + .4) });
     if (t > tHit && t < tHit + 1.4) sfx('swish!', 1180, 520, 64, OSD, t - tHit, { face: 'marker' });
   }
 
@@ -140,7 +169,7 @@
   }
   const winPR = (x, y, w, h) => txt('pr', x + w / 2, y + h / 2, h * .55, INKD, { font: SERIF, weight: '700' });
   const winB64 = (x, y, w, h) => B64.forEach(([c], i) => txt(c, x + w / 2, y + h * (.25 + i * .25), w * .15, INKD, { font: MONO, weight: '700' }));
-  const winBN = (x, y, w, h) => { txt('প্রকাশ', x + w / 2, y + h * .38, w * .26, INKD, { font: BENG, weight: '700' }); txt('প্রথম', x + w / 2, y + h * .7, w * .22, INKD, { font: BENG, weight: '700' }); };
+  const winBN = (x, y, w, h) => { txt('প্রকাশ', x + w / 2, y + h * .38, w * .26, INKD, { font: BENG, weight: '400' }); txt('প্রথম', x + w / 2, y + h * .7, w * .22, INKD, { font: BENG, weight: '400' }); };
   function pr(t, lt, dur) {
     const a = cs('sg_pr'), tLet = wt('sg_pr', 'letters'), tStr = wt('sg_pr', 'strange'), tCode = wt('sg_pr', 'code'), tBen = wt('sg_pr', 'Bengali'), tFin = wt('sg_pr', 'Finally'), tMix = wt('sg_pr', 'mixture');
     const tThen = wt('sg_pr', 'Then'), tDec = wt('sg_pr', 'decoded'), tWords = wt('sg_pr', 'words'), tTr = wt('sg_pr', 'translated'), tBen2 = wt('sg_pr', 'Bengali', 1), tPR2 = wt('sg_pr', 'P', 2), e = ce('sg_pr');
@@ -151,7 +180,7 @@
       woods('b', { seed: 5 });
       cabin(t, 960, GROUND, 900, 560, [winPR, winB64, winBN], { lit: [seg(t, tLet - .2, tLet + .3), seg(t, tStr - .2, tStr + .3), seg(t, tBen - .2, tBen + .3)] });
       trunk(180, 160, '#444444'); trunk(1780, 130, '#3E3E3E');
-      hunter(t, 1560, GROUND + 70, 12, { ...emotions(t, [[a, 'suspicious'], [tLet, 'surprised'], [tBen, 'thinking'], [tFin, 'excited']]), view: 'q', flip: true, aR: .9, armR: net(0), aL: t > tFin ? 1.5 + .3 * Math.sin(t * 10) : .9, armL: pennant, lampA: .25, boilKey: 'c8hunter' });
+      hunter(t, 1460, GROUND + 40, 14, { ...emotions(t, [[a, 'suspicious'], [tLet, 'surprised'], [tBen, 'thinking'], [tFin, 'excited']]), view: 'q', flip: true, aR: .9, armR: net(0), aL: t > tFin ? 1.5 + .3 * Math.sin(t * 10) : .9, armL: pennantF, lampA: .25, boilKey: 'c8hunter' });
       camEnd();
       nv(t, 'CAM 2 · CABIN 7 · SIGHTING #1', [], { osd: () => { if (t > tFin - .1) { const blink = Math.floor(t * 4) % 2; osdText('ARBITRARY MIXTURE?!', 960, 300, 76, blink ? '#FFFFFF' : OSD, { align: 'center', bold: true }); } } });
     } else {
@@ -164,7 +193,7 @@
         ctx.fillStyle = '#E9E2D0'; ctx.fillRect(40, 40, w * .56, h - 80); ctx.fillStyle = '#F2EBDA'; ctx.fillRect(w * .62, 40, w * .34, h - 80);
         B64.forEach(([c, word], i) => { const y = 120 + i * 120, k = clamp(dk * 3 - i * .8); const s = k > .5 ? word : c; ctx.save(); ctx.font = `700 ${k > .5 ? 64 : 52}px ${k > .5 ? SERIF : MONO}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left'; const x0 = 80; if (k > .5) { const pw = ctx.measureText('pr').width; ctx.fillStyle = 'rgba(255,211,107,.85)'; ctx.fillRect(x0 - 4, y - 34, pw + 8, 68); ctx.fillStyle = '#B0203A'; ctx.fillText('pr', x0, y); ctx.fillStyle = INKD; ctx.fillText(word.slice(2), x0 + pw, y); } else { ctx.fillStyle = INKD; ctx.fillText(s, x0, y); } ctx.restore(); });
         ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; const cx = w * .79;
-        ctx.font = `700 96px ${BENG}`; ctx.fillStyle = INKD; ctx.fillText('প্র', cx, 210);
+        ctx.font = `96px ${BENG}`; ctx.fillStyle = INKD; ctx.fillText('প্রকাশ', cx, 210);
         if (tk > 0) { ctx.globalAlpha = tk; ctx.fillStyle = 'rgba(255,211,107,.85)'; ctx.fillRect(cx - 80, 300, 160, 100); ctx.fillStyle = '#B0203A'; ctx.font = `700 84px ${SERIF}`; ctx.fillText('"pr"', cx, 352); }
         ctx.restore();
       }, { bg: '#2A2A2A', roll: true });
@@ -238,15 +267,15 @@
     desk(t, 'ARCHIVE');
     crt(t, (w, h) => { ctx.fillStyle = '#0A0A10'; ctx.fillRect(0, 0, w, h); for (let i = 0; i < 300; i++) { ctx.fillStyle = hash(i + Math.floor(t * 24)) > .5 ? '#3A3A44' : '#0A0A10'; ctx.fillRect(hash(i * 3.3 + Math.floor(t * 24)) * w, hash(i * 7.1) * h, 6, 3); } }, { bg: '#0A0A10' });
     // a stack of tapes on the desk, each stamped as it's explained
-    ['PR NEURON', 'COLORADO', 'CURVES'].forEach((s, i) => { const k = popk(t, a + .1 + i * .45, .35), x = 960 + (i - 1) * 300, y = 770 - (i % 2) * 6; push(); translate(x, y); rotate((i - 1) * .05); scale(backOut(k)); flat(rrPts(-130, -60, 260, 120, 8), '#1A1A1A', { line: '#000000', lw: 3, shadow: [6, 8, 'rgba(0,0,0,.4)'] }); flat(rrPts(-100, -40, 200, 54, 4), '#F6EEDA'); txt(s, 0, -13, 26, INKD, { font: MONO, weight: '700' }); pop(); });
+    ['PR NEURON', 'COLORADO', 'CURVES'].forEach((s, i) => { const k = popk(t, a + .1 + i * .45, .35), x = 960 + (i - 1) * 300, y = 770 - (i % 2) * 6; push(); translate(x, y); rotate((i - 1) * .05); scale(backOut(k) * 1.05); flat(rrPts(-130, -60, 260, 120, 8), '#1A1A1A', { line: '#000000', lw: 3, shadow: [6, 8, 'rgba(0,0,0,.4)'] }); flat(rrPts(-100, -40, 200, 54, 4), '#F6EEDA'); txt(s, 0, -13, 26, INKD, { font: MONO, weight: '700' }); pop(); });
   }
   function moving(t, lt, dur) {
     const a = cs('sg_moving'), tRes = wt('sg_moving', 'resolved'), tEach = wt('sg_moving', 'each'), tMoved = wt('sg_moving', 'moved'), tIf = wt('sg_moving', 'If'), tWeak = wt('sg_moving', 'weak'), tOr = wt('sg_moving', 'Or'), tBet = wt('sg_moving', 'between'), tOr2 = wt('sg_moving', 'Or', 1), tChk = wt('sg_moving', 'checked'), e = ce('sg_moving');
     const c1 = tEach - .3, c2 = tIf - .1, c3 = tOr - .15, c4 = tOr2 - .15;
     if (t < c1) {
-      camKeys(t, [[a - .3, 960, 600, 1.15], [c1, 960, 620, 1.2]], .4);
+      camKeys(t, [[a - .3, 960, 700, 1.45], [c1, 960, 720, 1.55]], .4);
       tapes(t, a);
-      ['EXPLAINED', 'EXPLAINED', 'EXPLAINED'].forEach((s, i) => stamp(s, 960 + (i - 1) * 300, 760, a + .5 + i * .45, t, { col: '#D0302A', rot: -.15 + i * .08, size: 34 }));
+      ['EXPLAINED', 'EXPLAINED', 'EXPLAINED'].forEach((s, i) => stamp(s, 960 + (i - 1) * 300, 790, a + .5 + i * .45, t, { col: '#D0302A', rot: -.15 + i * .08, size: 44 }));
       camEnd();
       lower8(t, a + .2, c1 + .2, 'case after case, the mess resolved');
       return;
@@ -261,7 +290,7 @@
       trunk(1180, 220, '#4A4A4A'); trunk(1730, 200, '#444444');
       if (hop > 0 && hop < 1) { ctx.save(); ctx.globalAlpha = .5; ctx.fillStyle = '#BBBBBB'; ctx.fillRect(1180, 470, 520 * hop, 60); ctx.restore(); }
       const sw = env(t, tMoved + .1, tMoved + .9, .2, .3);
-      hunter(t, 900, GROUND + 50, 12, { ...emotions(t, [[c1, 'determined'], [tMoved + .2, 'surprised']]), view: 'q', aR: .6 + 1.4 * sw, armR: net(sw), aL: .9, armL: pennant, boilKey: 'c8hunter' });
+      hunter(t, 900, GROUND + 20, 15, { ...emotions(t, [[c1, 'determined'], [tMoved + .2, 'surprised']]), view: 'q', aR: .6 + 1.4 * sw, armR: net(sw), aL: .9, armL: pennant, boilKey: 'c8hunter' });
       camEnd();
       nv(t, 'CAM 3 · TREE LINE', [c1]);
       if (t > tMoved - .3) letter('superposition just moved', 960, 230, 64, OSD, { face: 'marker', shadow: false, reveal: seg(t, tMoved - .3, tMoved + .5) });
@@ -272,7 +301,7 @@
       ctx.save(); ctx.globalAlpha = .55; ctx.fillStyle = '#6A6A6A'; ctx.fillRect(-400, -300, W + 800, H + 600); ctx.restore();
       cryptid(t, 1320 + 20 * Math.sin(t), 560, 70, { alpha: .14 + .06 * Math.sin(t * 6), look: [-1, 0], eyes: .35 });
       const beamA = lerp(-.4, .25, ease(seg(t, tWeak - .9, tWeak + .2)));
-      hunter(t, 520, GROUND + 50, 12, { ...emotions(t, [[c2, 'suspicious'], [tWeak + .3, 'confused']]), view: 'q', aR: .6, armR: net(0), aL: .9, armL: pennant, lampA: beamA, boilKey: 'c8hunter' });
+      hunter(t, 520, GROUND + 20, 15, { ...emotions(t, [[c2, 'suspicious'], [tWeak + .3, 'confused']]), view: 'q', aR: .6, armR: net(0), aL: .9, armL: pennant, lampA: beamA, boilKey: 'c8hunter' });
       camEnd();
       nv(t, 'CAM 4 · WEAK SIGNALS', [c2]);
     } else if (t < c4) {
@@ -284,16 +313,16 @@
       neuronHouse(1280, GROUND, 360, 380, { roof: 'peak', on: .9, imgs: [NPV + 'wolves-positive-1', NPV + 'wolves-positive-2'], cols: 2, key: 'c8h2', col: '#5A5A5A', roofCol: '#3A3A3A', awning: false });
       const lunge = seg(t, tBet + .1, tBet + .5), esc = seg(t, tBet + .3, tBet + .8);
       cryptid(t, 960, 640 - 600 * easeIn(esc), 90, { look: [0, -1], alpha: 1 - esc });
-      hunter(t, lerp(380, 820, ease(lunge)), GROUND + 60, 12, { ...emotions(t, [[c3, 'determined'], [tBet + .5, 'angry']]), view: 'q', aR: .6 + 1.2 * lunge, armR: net(lunge), aL: .9, armL: pennant, boilKey: 'c8hunter' });
+      hunter(t, lerp(380, 820, ease(lunge)), GROUND + 30, 15, { ...emotions(t, [[c3, 'determined'], [tBet + .5, 'angry']]), view: 'q', aR: .6 + 1.2 * lunge, armR: net(lunge), aL: .9, armL: pennant, boilKey: 'c8hunter' });
       camEnd();
       nv(t, 'CAM 5 · BETWEEN NEURONS', [c3]);
     } else {
       // CAM 6: in the neurons nobody has checked yet
       camKeys(t, [[c4, 960, 560, 1.05], [e + 1, 1060, 560, 1.15]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('f', { seed: 21 });
-      for (let i = 0; i < 5; i++) { const x = 360 + i * 300, s = 1 - i * .08; cabin(t, x, GROUND - 40 - i * 10, 220 * s, 260 * s, [() => {}], { lit: [0] }); txt('?', x, GROUND - 120 - i * 10, 60 * s, '#9A9A9A', { font: SERIF, weight: '900' }); }
-      const ex = 1260 - 3 * 300 / 3 + 300, eyeK = Math.floor(t * 2) % 6 ? 1 : 0; for (const dx of [-14, 14]) glow(960 + 300 + dx, GROUND - 220 + 30, 20, '#FFFFFF', .9 * eyeK);
-      hunter(t, 300, GROUND + 70, 12, { ...emotions(t, [[c4, 'nervous'], [tChk + .2, 'sad']]), view: 'q', aR: .2, armR: net(0), aL: .5, armL: pennant, lampA: .1, boilKey: 'c8hunter' });
+      for (let i = 0; i < 5; i++) { const x = 360 + i * 300, s = 1 - i * .08; cabin(t, x, GROUND - 40 - i * 10, 220 * s, 260 * s, [() => {}], { lit: [0] }); txt('?', x, GROUND - 120 - i * 10, 70 * s, '#BDBDBD', { font: SERIF, weight: '900' }); }
+      const eyeK = Math.floor(t * 2.3) % 7 ? 1 : 0, ex = 360 + 3 * 300, ey = GROUND - 40 - 30 - 260 * .76 + 40; for (const dx of [-12, 12]) { glow(ex + dx, ey, 26, '#FFFFFF', .95 * eyeK); dot(ex + dx, ey, 5, '#FFFFFF', eyeK); }
+      hunter(t, 330, GROUND + 30, 15, { ...emotions(t, [[c4, 'nervous'], [tChk + .2, 'sad']]), view: 'q', aR: .2, armR: net(0), aL: .5, armL: pennant, lampA: .1, boilKey: 'c8hunter' });
       camEnd();
       nv(t, 'CAM 6 · UNCHECKED NEURONS', [c4]);
     }
@@ -308,12 +337,14 @@
     camKeys(t, [[a - .3, 860, 600, 1.15], [e, 900, 600, 1.2]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.2);
     woods('g', { seed: 25 });
     // a little campfire; Clawd on a log, thinking it over
-    for (let i = 0; i < 6; i++) { const f = frac(t * 1.4 + i / 6); flat(ellPts(560 + Math.sin(i * 2 + t * 3) * 14, GROUND - 20 - f * 120, 26 * (1 - f) + 6, 40 * (1 - f) + 8, 12), mixCol('#FFFFFF', '#AAAAAA', f), { alpha: 1 - f }); }
+    for (const [dx, a2] of [[-50, .5], [50, -.5]]) { push(); translate(560 + dx * .4, GROUND + 10); rotate(a2); flat(rrPts(-70, -12, 140, 24, 10), '#5A5A5A'); pop(); }
+    for (let i = 0; i < 5; i++) { const fl = Math.sin(t * 11 + i * 2), hh = 120 + 40 * Math.sin(t * 7 + i), x = 520 + i * 20; flat([[x - 26, GROUND], [x + (fl * 10), GROUND - hh * (1 - Math.abs(i - 2) * .22)], [x + 26, GROUND]], i === 2 ? '#FFFFFF' : '#D8D8D8', { alpha: .9 }); }
+    for (let i = 0; i < 6; i++) { const f = frac(t * .9 + i / 6); dot(560 + Math.sin(i * 3 + t * 2) * 30 * f, GROUND - 120 - f * 260, 4, '#FFFFFF', 1 - f); }
     glow(560, GROUND - 40, 220, '#FFFFFF', .7 + .1 * Math.sin(t * 13));
     flat(rrPts(700, GROUND - 10, 420, 60, 30), '#5A5A5A'); ctx.save(); ctx.strokeStyle = '#3A3A3A'; ctx.lineWidth = 4; ctx.beginPath(); ctx.ellipse(1110, GROUND + 20, 14, 28, 0, 0, TAU); ctx.stroke(); ctx.restore();
     // gag: the lens fogs up at "a bad tool", and Clawd wipes it clean
     const fog = env(t, tTool - .3, tTool + 1.1, .3, .4), wipe = seg(t, tTool + .5, tTool + 1.1);
-    hunter(t, 900, GROUND - 4, 12, { ...emotions(t, [[a, 'thinking'], [tRes, 'surprised'], [tSym, 'confused'], [tTool + .4, 'determined'], [tLooks, 'relieved']]), view: 'front', aR: -.4, aL: -.3, lamp: false, boilKey: 'c8hunter' });
+    hunter(t, 900, GROUND - 4, 14, { ...emotions(t, [[a, 'thinking'], [tRes, 'surprised'], [tSym, 'confused'], [tTool + .4, 'determined'], [tLooks, 'relieved']]), view: 'front', aR: -.4, aL: -.3, lamp: false, boilKey: 'c8hunter' });
     flat(rrPts(1010, GROUND - 120, 26, 140, 10), '#8A7A6A');
     camEnd();
     nv(t, 'CAM 1 · BASE CAMP', [], { osd: () => {
@@ -321,7 +352,7 @@
       // the menu
       const mk = seg(t, a - .2, a + .3); if (mk <= 0) return;
       const X = 1100, Y = 230, w = 700, rh = 92;
-      ctx.save(); ctx.globalAlpha = .82 * mk; ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X - 30, Y - 80, w, 600); ctx.globalAlpha = mk; ctx.strokeStyle = OSD; ctx.lineWidth = 3; ctx.strokeRect(X - 30, Y - 80, w, 600); ctx.restore();
+      ctx.save(); ctx.globalAlpha = .82 * mk; ctx.fillStyle = '#0A1A0A'; ctx.fillRect(X - 30, Y - 80, w, 680); ctx.globalAlpha = mk; ctx.strokeStyle = OSD; ctx.lineWidth = 3; ctx.strokeRect(X - 30, Y - 80, w, 680); ctx.restore();
       osdText('MOST LIKELY CAUSE', X, Y - 34, 40, OSD, { bold: true, alpha: mk });
       const drop = ease(seg(t, tLast - .2, tRes + .6));
       ROWS.forEach((s, i) => { const k = seg(t, [tTool, tDes, tBr, tLooks][i] - .4, [tTool, tDes, tBr, tLooks][i]); const y = Y + 50 + i * rh; osdText(`${i + 1}.`, X, y, 44, OSD, { alpha: mk }); if (k > 0) { osdText(s.slice(0, Math.ceil(s.length * k)), X + 70, y, 44, '#FFFFFF', { bold: true }); } else osdText('- - -', X + 70, y, 44, 'rgba(184,255,176,.45)'); });
@@ -357,7 +388,7 @@
   function evidence(t, lt, dur) {
     const a = cs('sg_evidence'), tAnt = wt('sg_evidence', 'Anthropic'), t22 = wt('sg_evidence', '2022'), tDef = wt('sg_evidence', 'default'), tInt = wt('sg_evidence', 'intuitive'), tLit = wt('sg_evidence', 'little'), tTo = wt('sg_evidence', 'To');
     const tNo = wt('sg_evidence', 'no'), tCirc = wt('sg_evidence', 'circuit'), t19 = wt('sg_evidence', '2019'), tAnd = wt('sg_evidence', 'And'), tMis = wt('sg_evidence', 'mistake'), e = ce('sg_evidence');
-    const cut = tTo - .3, gl0 = e + .4, gl1 = chapStart('ch09') - .35;
+    const cut = tTo - .3, gl0 = wt('sg_evidence', 'mistake') + 1.15, gl1 = chapStart('ch09') - .05;
     if (t < cut) {
       camKeys(t, [[a - .3, 960, 500, 1.05], [tDef, 960, 460, 1.16], [tLit, 960, 440, 1.24], [cut, 960, 440, 1.26]], .4);
       desk(t, 'FILE 2022');
@@ -379,25 +410,25 @@
     }
     // the final night: the knot, cornered against the rocks
     const [hx, hy] = shakeXY(t, t > tAnd - .2 && t < tMis + .3 ? 10 : 4);
-    camKeys(t, [[cut, 900, 600, 1.05], [t19, 1050, 600, 1.2], [tMis, 1150, 620, 1.35], [tMis + 1.4, 1100, 640, 1.3], [gl1 + 3, 1100, 640, 1.3]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.4);
+    camKeys(t, [[cut, 900, 600, 1.05], [t19, 1100, 680, 1.3], [tAnd, 1250, 800, 1.65], [tMis + .4, 1240, 800, 1.7], [gl1 + 3, 1230, 790, 1.72]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.4);
     woods('h', { seed: 29 });
     flat([[1100, GROUND + 40], [1200, 520], [1420, 430], [1700, 480], [1820, GROUND + 40]], '#6A6A6A'); flat([[1300, 600], [1420, 470], [1560, 520], [1520, 640]], '#7A7A7A');
-    const loose = ease(seg(t, tMis - .2, tMis + .9)), take = seg(t, tMis + 1.1, tMis + 2.1);
-    const ks = lerp(78, 46, loose), kx = 1360, ky = lerp(800, 900, loose) + (1 - loose) * 4 * Math.sin(t * 30);
-    if (take < .7) cryptid(t, kx, ky, ks, { look: [-1, .2], loose, hat: loose < .5, grin: false });
-    if (loose > .5 && take < .7) { ctx.save(); ctx.strokeStyle = '#D8D8D8'; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(kx + ks * .8, ky); ctx.quadraticCurveTo(kx + 140, ky + 40, kx + 190, ky + 70); ctx.stroke(); ctx.restore(); }
+    const loose = ease(seg(t, tAnd + .3, tMis + .1)), take = seg(t, tMis + .3, tMis + 1);
+    const ks = lerp(100, 60, loose), kx = 1360, ky = lerp(800, 900, loose) + (1 - loose) * 4 * Math.sin(t * 30);
+    if (loose < .9) cryptid(t, kx, ky, ks, { look: [-1, .2], loose, hat: loose < .5, grin: false, alpha: 1 - seg(loose, .6, .9) });
+    if (loose > .6 && take <= 0) stringBall(kx, ky + 30, 40, seg(loose, .6, .9));
     // Clawd creeps up, nets it, and pockets the string
-    const creep = ease(seg(t, cut, tMis - .3)), cx = lerp(560, 1150, creep), sw = env(t, tAnd - .2, tMis + .3, .25, .3);
-    const hold = take > 0 && take < 1 ? (u, w) => { ctx.save(); ctx.strokeStyle = '#D8D8D8'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(u * 1.4, 0, u * 1.3, 0, TAU); ctx.stroke(); ctx.restore(); } : null;
-    hunter(t, cx, GROUND + 60, 13, { ...emotions(t, [[cut, 'determined'], [t19, 'suspicious'], [tMis, 'surprised'], [tMis + 1.2, 'smug']]), view: 'q', walk: creep > 0 && creep < 1 ? (t - cut) * 1.2 : undefined, aR: take > 0 ? lerp(.8, -.6, take) : .6 + 1.3 * sw, armR: take > 0 ? hold : net(sw), aL: .9, armL: pennant, lampA: .18, boilKey: 'c8hunter' });
-    if (take > .9) { const pk = popk(t, tMis + 2, .5); flat(rrPts(cx - 80, GROUND - 20, 44, 50, 10), '#7A6A5A', { line: '#2A2A2A', lw: 2 }); }
+    const creep = ease(seg(t, cut, tAnd - .1)), cx = lerp(560, 1150, creep), sw = env(t, tAnd - .3, tAnd + .5, .25, .3);
+    const hold = take > 0 && take < .8 ? (u, w) => stringBall(u * 1.8, 0, u * 1.8, 1) : null;
+    hunter(t, cx, GROUND + 60, 13, { ...emotions(t, [[cut, 'determined'], [t19, 'suspicious'], [tAnd + .3, 'surprised'], [tMis + .3, 'smug']]), view: 'q', walk: creep > 0 && creep < 1 ? (t - cut) * 1.2 : undefined, aR: take > 0 ? (take < .45 ? lerp(.4, 1.3, take / .45) : lerp(1.3, -.8, (take - .45) / .35)) : .6 + 1.3 * sw, armR: take > 0 ? hold : net(sw), aL: .9, armL: pennant, lampA: .42, bag: true, boilKey: 'c8hunter' });
+    if (take > .8 && take < 1) sfx('pocketed.', cx, GROUND - 260, 50, '#FFFFFF', (t - (wt('sg_evidence', 'mistake') + .3 + .56)), { face: 'marker' });
     // the dropped party hat lies in the leaves
     if (loose > .6) hatOn('party', kx + 120, GROUND + 20, 60);
     camEnd();
     const gk = seg(t, gl0, gl1), sw2 = seg(t, gl1 - .45, gl1 - .1);
     nv(t, 'CAM 7 · FINAL NIGHT', [cut], { osd: () => {
       if (t > tNo - .2 && t < tMis - .3) osdText('LAST REAL SUPERPOSITION CIRCUIT: 2019', 960, 240, 46, '#FFFFFF', { align: 'center', bold: true, alpha: seg(t, tNo - .2, tNo + .3) });
-      if (t > tMis - .2 && t < gl0 + .2) osdText('...A MISTAKE.', 960, 240, 56, '#FFFFFF', { align: 'center', bold: true, alpha: seg(t, tMis - .2, tMis + .2) });
+      if (t > tMis - .2 && t < gl0 + .1) osdText('...A MISTAKE.', 960, 240, 56, '#FFFFFF', { align: 'center', bold: true, alpha: seg(t, tMis - .2, tMis + .2) });
       // the screen glitches and becomes a game screen
       if (gk > 0) { rgbTear(t, Math.sin(gk * Math.PI) + sw2); if (Math.floor(t * 24) % 3 === 0 && gk < .9) staticBars(t, [t]); }
       if (sw2 > 0) gameScreen(t, sw2 > .5 ? 1 : sw2 * 2 * (Math.floor(t * 24) % 2));

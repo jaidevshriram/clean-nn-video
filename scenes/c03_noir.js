@@ -15,9 +15,18 @@
   // anything drawn through inColor() runs after fxGray, with the transform it was called under
   const COLQ = [];
   function inColor(fn) { const m = ctx.getTransform(), a = ctx.globalAlpha; COLQ.push(() => { ctx.save(); ctx.setTransform(m); ctx.globalAlpha = a; fn(); ctx.restore(); }); }
+  // the grey pass (the look of fxGray(1.45, '#08080A', '#F2EEE2')), done with canvas filters: much faster than per pixel
+  let GRC = null;
+  function fastGray(contrast) {
+    POST.push(() => {
+      if (!GRC) GRC = createCanvas(W, H); const g = GRC.getContext('2d'); g.globalCompositeOperation = 'copy'; g.drawImage(CANVAS, 0, 0);
+      ctx.save(); ctx.globalCompositeOperation = 'copy'; ctx.filter = `grayscale(1) brightness(1.18) contrast(${contrast})`; ctx.drawImage(GRC, 0, 0); ctx.restore();
+      ctx.save(); ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = '#F2EEE2'; ctx.fillRect(0, 0, W, H); ctx.globalCompositeOperation = 'lighten'; ctx.fillStyle = '#08080A'; ctx.fillRect(0, 0, W, H); ctx.restore();
+    });
+  }
   function noir(o = {}) {
     GRAIN = 1.15;
-    fxGray(o.contrast ?? 1.45, '#08080A', '#F2EEE2');
+    fastGray(o.contrast ?? 1.25);
     POST.push(() => { const q = COLQ.splice(0); for (const f of q) f(); });
   }
   // a gold stroke along P, drawn on as k goes 0 → 1 (always in colour)
@@ -197,7 +206,7 @@
     camEnd();
     vignette(.5, '#000000');
     const kt = seg(t, tv - .1, tv + .5);
-    if (kt > 0) letter('a V neuron', 1080, 470, 104, GOLD, { face: 'marker', reveal: kt, shadow: false, stroke: '#141418', strokeW: .08 });
+    if (kt > 0) letter('a V neuron', 960, 470, 96, GOLD, { face: 'marker', reveal: kt, shadow: false, stroke: '#141418', strokeW: .08 });
     if (snap > 0 && snap < 1) sfx('SNAP!', TEAR[0] - 40, 560, 62, CREAM, (t - tv) * 1.2, { rot: -.12 });
     noir();
   }
@@ -396,7 +405,7 @@
   function sketch(t, lt, dur) {
     const a = cs('cc_whiskers'), tp = wt('cc_whiskers', 'portrait'), tf = wt('cc_whiskers', 'feature'), tw1 = wt('cc_whiskers', 'whiskers'), tE = wt('cc_whiskers', 'easiest'), tc = wt('cc_whiskers', 'cat', 1), tw2 = wt('cc_whiskers', 'whiskers', 1), e = ce('cc_whiskers');
     bg('#2A2A2E');
-    camKeys(t, [[a - .2, 960, 540, 1.0], [tw1, 940, 470, 1.18], [tE - .3, 1000, 520, 1.0], [tc, 1150, 460, 1.12], [tw2, 980, 470, 1.15], [e + .5, 960, 520, 1.02]], .4);
+    camKeys(t, [[a - .2, 960, 540, 1.0], [tw1, 940, 480, 1.16], [tE - .3, 1000, 520, 1.0], [tc, 1150, 520, 1.08], [tw2, 980, 500, 1.1], [e + .5, 960, 520, 1.02]], .4);
     layer('c3sk', () => { flat(rectPts(-200, -200, W + 400, 1180), '#4A4A50'); for (let i = 0; i < 30; i++) flat(rectPts(-200 + i * 80, -200, 3, 1180), '#47474D'); flat(rectPts(-200, 960, W + 400, 400), '#2E2E34'); for (let i = 0; i < 14; i++) flat(rectPts(-200 + i * 180, 960, 4, 400), '#26262C'); }, { x: -200, y: -200, w: W + 400, h: H + 400, variants: 1 });
     blinds(t, .3, 600);
     // the street map on the wall: the V crossing, a wide downhill road to the cat district
@@ -426,7 +435,7 @@
     if (wk > 0) for (let i = 0; i < 6; i++) { const sd = i < 3 ? -1 : 1, j = i % 3, P = [[cx0 + cw * (.5 + sd * .1), cy0 + cw * (.62 + j * .04)], [cx0 + cw * (.5 + sd * .45), cy0 + cw * (.52 + j * .1)]]; goldLine(P, clamp(wk * 3 - i * .3), 4); }
     if (redo > 0 && rew >= 1) vOver(cx0, cy0, cw, cw, 0, { ax: .5, ay: .82, ty: .1, lx: .12, rx: .88 }, seg(t, tE + .1, tE + .8) * (1 - .7 * cat), { sw: 7 });
     const em = emotions(t, [[a - .2, 'confused'], [tf, 'neutral'], [tw1, 'surprised'], [tE, 'thinking'], [tc + .5, 'suspicious'], [tw2 + .2, 'bored']]);
-    tourist(1560, 990, 12, 'fedora', { ...em, view: 'q', flip: true, boilKey: 'c3c' });
+    tourist(1520, 975, 12, 'fedora', { ...em, view: 'q', flip: true, boilKey: 'c3c' });
     camEnd();
     vignette(.55, '#000000');
     const kf2 = seg(t, tf - .2, tf + .5) * (1 - seg(t, tE - 1.2, tE - .8));
@@ -442,7 +451,7 @@
   function lesson(t, lt, dur) {
     const a = cs('cc_lesson'), to = wt('cc_lesson', 'one'), tg = wt('cc_lesson', 'grouping'), tc = wt('cc_lesson', 'clue'), t2 = ce('cc_lesson') + .5;
     bg('#2A2A2E');
-    camKeys(t, [[a - .2, 1000, 790, 1.22], [tg, 1000, 800, 1.28], [t2 + .3, 1040, 795, 1.28], [chapStart('ch04') + .1, 1300, 770, 1.6], [chapStart('ch04') + 2, 1300, 770, 1.9]], .3);
+    camKeys(t, [[a - .2, 1000, 790, 1.22], [tg, 1000, 800, 1.28], [t2 + .3, 1040, 795, 1.28], [chapStart('ch04') + .1, 1440, 770, 1.6], [chapStart('ch04') + 2, 1440, 770, 1.9]], .3);
     office(t, t, { photos: false, vm: 1, lamp: .95, tear: false });
     // the CASE 1 folder
     const fk = popk(t, a + .1, .6);
@@ -458,18 +467,18 @@
     // Clawd with the rubber stamp: stamps the folder, then (by mistake) his own forehead
     const ts1 = tc - .15, ts2 = tc + .85;
     const hop1 = env(t, ts1 - .5, ts1 + .1, .3, .1), hop2 = env(t, ts2 - .4, ts2 + .1, .25, .1);
-    if (t > ts1) { const k = popk(t, ts1, .2), s = lerp(1.5, 1, easeOut(k)); push(); translate(1000, 900); rotate(-.14); scale(s); ctx.strokeStyle = '#E6E2D8'; ctx.lineWidth = 7; ctx.strokeRect(-190, -50, 380, 100); pop(); txt('SOLVED', 1000, 900, 84 * s, '#E6E2D8', { font: 'serif', rot: -.14 }); }
+    if (t > ts1) { const k = popk(t, ts1, .2), s = lerp(1.5, 1, easeOut(k)); push(); translate(880, 985); rotate(-.08); scale(s); ctx.strokeStyle = '#141418'; ctx.lineWidth = 8; ctx.strokeRect(-170, -46, 340, 92); pop(); txt('SOLVED', 880, 985, 74 * s, '#141418', { font: 'serif', rot: -.08 }); }
     const em = emotions(t, [[a - .2, 'happy'], [tg, 'proud'], [ts1, 'excited'], [ts2, 'dizzy'], [ts2 + 1.2, 'laugh']]);
-    const cx = t < ts1 ? 1640 : lerp(1100, 1640, ease(seg(t, ts1 + .2, ts1 + .7)));
-    const cxx = t > ts1 - .6 && t < ts1 + .2 ? lerp(1640, 1100, ease(seg(t, ts1 - .6, ts1 - .2))) : cx;
+    const HOME = 340, cx = t < ts1 ? HOME : lerp(1040, 1160, ease(seg(t, ts1 + .15, ts1 + .5)));
+    const cxx = t > ts1 - .6 && t < ts1 + .2 ? lerp(HOME, 1040, ease(seg(t, ts1 - .6, ts1 - .2))) : cx;
     const stampArm = (u, sw) => { flat(rectPts(0, -u * .5, u * 1.4, u), '#2A2A2E'); flat(rrPts(u * 1.4, -u * 1.2, u * 1.2, u * 2.4, u * .2), '#5A4636', { line: '#141418', lw: 2 }); };
-    tourist(cxx, 1000 - 60 * Math.sin(hop1 * Math.PI) - 40 * Math.sin(hop2 * Math.PI), 16, 'fedora', { ...em, view: 'q', flip: true, aR: t > ts2 - .5 && t < ts2 + .2 ? 2.4 : 1.0, armR: stampArm, boilKey: 'c3c' });
-    if (t > ts2) txt('SOLVED', cxx - 14, 1000 - 16 * 6.4, 34, '#E6E2D8', { font: 'serif', rot: .12 });
-    if (t > ts2 && t < ts2 + .7) sfx('thunk!', cxx - 160, 800, 54, CREAM, t - ts2);
+    tourist(cxx, 1000 - 60 * Math.sin(hop1 * Math.PI) - 40 * Math.sin(hop2 * Math.PI), 16, 'fedora', { ...em, view: 'q', flip: cxx > 800, aR: t > ts2 - .5 && t < ts2 + .2 ? 2.4 : 1.0, armR: stampArm, boilKey: 'c3c' });
+    if (t > ts2) txt('SOLVED', cxx - 14, 1000 - 16 * 6.4, 34, '#141418', { font: 'serif', rot: .12 });
+    if (t > ts2 && t < ts2 + .7) sfx('thunk!', cxx - 30, 800, 54, CREAM, t - ts2);
     // CASE FILE #2 slides onto the desk: its cover art is the next world (orange and black cut paper), in colour
     const k2 = seg(t, t2 - .4, t2 + .4);
     if (k2 > 0) {
-      const x = lerp(2400, 1300, easeOut(k2)), y = 770, r = lerp(.4, .06, easeOut(k2));
+      const x = lerp(2400, 1440, easeOut(k2)), y = 770, r = lerp(.4, .06, easeOut(k2));
       push(); translate(x, y); rotate(r);
       inColor(() => {
         ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(-190 + 12, -230 + 16, 380, 460);

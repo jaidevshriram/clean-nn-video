@@ -378,7 +378,7 @@
     FILLERS.forEach(([i, j, s, col], n) => {
       const h = 90 + 50 * hash(n * 3.1);
       ent(i + j + 4, () => bld(i, j, 2, 2, h, col, { lit: .15 + .2 * Math.sin(t * 1.3 + n) ** 2, roof: dk(col, .3) }));
-      const kl = seg(t, tLab - .4 + n * .07, tLab + n * .07), fall = seg(t, tTr + n * .06, tTr + .8 + n * .06);
+      const dl = (s === 'FISH' || s === 'BOAT' || s === 'CAT') ? .75 : 0, kl = seg(t, tLab - .4 + n * .07 + dl, tLab + n * .07 + dl), fall = seg(t, tTr + n * .06, tTr + .8 + n * .06);
       if (kl > 0 && fall < 1) { const [x, y] = iso(i + 1, j + 1); lab(s, x, y - h - 60 + 900 * fall * fall, 7, K.white, { k: kl, edge: K.white, fill: K.dusk }); }
     });
     // the dog park and car district (unlocked at "neighborhood")
@@ -494,7 +494,7 @@
   // rounds of voting: each round, 8 ballots arrive; the tally decides windows or basement
   const RLEN = 2.8, ROUNDS = [[1, 1, 1, -1, 1, 1, -1, 1], [-1, -1, 1, -1, -1, 1, -1, -1], [-1, 1, -1, -1, -1, 1, -1, -1], [1, 1, -1, 1, 1, 1, 1, -1], [-1, -1, -1, 1, -1, -1, 1, -1], [1, 1, 1, 1, -1, 1, 1, 1]];
   const ROADS = [['i', 0, 9, -1], ['i', 11, 21, 1], ['j', 0, 9, -1], ['j', 11, 21, 1]];
-  const SCEN_C = scatter(37, 60, -1, 22, -1, 22, [[-1, 9.5, 22, 11.5], [9.5, -1, 11.5, 22], [8.2, 8.2, 12, 12], [11.4, 8, 12.8, 9.4], [12.6, 6.8, 14.2, 8.2], [8.4, 11.8, 12.2, 15.5]]);
+  const SCEN_C = scatter(37, 26, -1, 22, -1, 22, [[-1, 9.5, 22, 11.5], [9.5, -1, 11.5, 22], [8.2, 8.2, 12, 12], [11.4, 8, 12.8, 9.4], [12.6, 6.8, 14.2, 8.2], [8.4, 11.8, 12.2, 15.5]]);
   function votesShot(t, lt, dur) {
     const { a, tEach, tAdd, tNeg, tBase, tWin, tDist } = C0;
     begin(); sea(t);
@@ -539,7 +539,7 @@
     const { a, tTwin, P } = D0;
     begin(); sea(t);
     const C = P.map((p, n) => iso(2 + n * 9 + 1.3, 11.6 + 1.3));
-    camKeys(t, [[a - .3, C[1][0], C[1][1] - 120, .5], [tTwin + .4, C[1][0], C[1][1] - 60, .54], [P[0][3] - .6, C[0][0] + 60, C[0][1] - 40, 1.05], [P[1][3] - 1, C[0][0] + 60, C[0][1] - 40, 1.05], [P[1][3] - .1, C[1][0] + 60, C[1][1] - 40, 1.05], [P[2][3] - 1, C[1][0] + 60, C[1][1] - 40, 1.05], [P[2][3] - .1, C[2][0] + 80, C[2][1] - 40, 1.05], [ce('tv_pairs') + .3, C[2][0] + 100, C[2][1] - 40, 1.07]], .4);
+    camKeys(t, [[a - .3, C[0][0] + 200, C[0][1], .74], [tTwin + .4, C[0][0] + 160, C[0][1] - 10, .84], [P[0][3] - .6, C[0][0] + 60, C[0][1] - 40, 1.05], [P[1][3] - 1, C[0][0] + 60, C[0][1] - 40, 1.05], [P[1][3] - .1, C[1][0] + 60, C[1][1] - 40, 1.05], [P[2][3] - 1, C[1][0] + 60, C[1][1] - 40, 1.05], [P[2][3] - .1, C[2][0] + 80, C[2][1] - 40, 1.05], [ce('tv_pairs') + .3, C[2][0] + 100, C[2][1] - 40, 1.07]], .4);
     ground('D', -2, 31, 4, 20, (i, j) => j === 10 ? 'r' : j === 9 ? 's' : 'g');
     roadMarks('i', -2, 31, 10, 1, 1);
     drawScatter(SCEN_D, t);
@@ -589,9 +589,12 @@
       if (d < 1.6 && !big && mute < .5) ent(i + lane + .1, () => { const [bx, by] = iso(2.7, 6.7); glow(bx, by - 120, 40, '#FFD58A', .25 * (1 - d / 1.6)); });
     }
     // the neuron (it loves lighthouses): a faint flicker per word; it blazes for the rare one
-    const lit = Math.max(flick, blaze);
+    const lit = Math.max(flick, blaze, Math.sin(Math.PI * seg(t, tSh - .2, tSh + 1.3)));
     ent(16, () => bld(1.5, 5.5, 2.4, 2.4, 160, K.navy, { lit, photo: NP + 'lighthouses-positive-1', bw: 150, roof: K.blue, dimWin: .85 }));
-    if (blaze > .3) lab('!!', B[0] + 190, B[1] - 360, 9, K.gold, { box: false });
+    // the shout: one rare word makes the windows blaze
+    const sh = seg(t, tSh - .2, tSh + 1.3);
+    if (sh > 0 && sh < 1) ent(16.5, () => { const [x, y] = [B[0], B[1] - 330], k = Math.sin(sh * Math.PI); for (let q = 0; q < 12; q++) { const a0 = q / 12 * TAU + t * .8, r0 = 90, r1 = 260 + 120 * k; flat([[x + Math.cos(a0) * r0, y + Math.sin(a0) * r0], [x + Math.cos(a0 + .12) * r1, y + Math.sin(a0 + .12) * r1], [x + Math.cos(a0 - .12) * r1, y + Math.sin(a0 - .12) * r1]], K.gold, { alpha: .85 * k }); } glow(x, y, 420, '#FFE08A', k); });
+    if (blaze > .3 || (sh > .05 && sh < .9)) lab('!!', B[0] + 210, B[1] - 250, 10, K.gold, { box: false });
     // the close call at the fork: husky or wolf?
     const kf2 = popk(t, tTie - 1.6, .5), tipped = seg(t, tTie + .2, tTie + 1.1);
     ent(13 + 13 + 4, () => bld(11, 13, 2.2, 2.2, 110, K.white, { k: kf2, lit: lerp(.9, .25, tipped), photo: NP + 'wolves-negative-1', bw: 130 }));

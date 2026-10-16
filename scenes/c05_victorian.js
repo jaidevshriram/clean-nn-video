@@ -18,16 +18,16 @@
   function hatch() { if (HT) return HT; const sp = 6, T1 = new Uint8Array(W * 6), T2 = new Uint8Array(W * 6); for (let y = 0; y < 6; y++) for (let x = 0; x < W; x++) { const u = ((x + y) % sp) / sp, v = ((x - y + 4096) % sp) / sp; T1[y * W + x] = Math.round(Math.abs(u - .5) * 2 * 255); T2[y * W + x] = Math.round(Math.abs(v - .5) * 2 * 255); } return (HT = [T1, T2]); }
   function engrave(front = -1e4, soft = 160) {
     POST.push(() => {
-      const [T1, T2] = hatch(), d = ctx.getImageData(0, 0, W, H), D = d.data, tk = .3;
-      const inkR = 42 * .7, inkG = 32 * .7, inkB = 24 * .7, pR = 239 * .7, pG = 228 * .7, pB = 204 * .7;
+      const [T1, T2] = hatch(), d = ctx.getImageData(0, 0, W, H), D = d.data, tk = .16;
+      const inkR = 86 * .84, inkG = 50 * .84, inkB = 28 * .84, pR = 246 * .84, pG = 232 * .84, pB = 204 * .84;
       for (let y = 0; y < H; y++) {
         const fy = front + 60 * Math.sin(y * .013) + (y - 540) * .35, row = (y % 6) * W;
         let x0 = Math.max(0, Math.floor(fy)); if (x0 >= W) continue;
         for (let x = x0, i = (y * W + x0) * 4; x < W; x++, i += 4) {
           const m = x - fy >= soft ? 1 : (x - fy) / soft; if (m <= 0) continue;
-          const r = D[i], g = D[i + 1], bl = D[i + 2], l = r * .3 + g * .59 + bl * .11;   // 0..255
+          const r = D[i], g = D[i + 1], bl = D[i + 2], l = Math.min(255, (r * .3 + g * .59 + bl * .11) * .72 + 82);   // lifted, so more paper shows
           const t1 = T1[row + x], t2 = T2[row + x];
-          const ink = l < 31 || t1 < (255 - l) * 1.1 || (l < 115 && t2 < (115 - l) * 2);
+          const ink = l < 70 || t1 < (255 - l) * .78 || (l < 120 && t2 < (120 - l) * 1.4);
           let er, eg, eb;
           if (ink) { er = inkR + r * tk * .4; eg = inkG + g * tk * .4; eb = inkB + bl * tk * .4; } else { er = pR + r * tk; eg = pG + g * tk; eb = pB + bl * tk; }
           if (m >= 1) { D[i] = er; D[i + 1] = eg; D[i + 2] = eb; } else { D[i] = r + (er - r) * m; D[i + 1] = g + (eg - g) * m; D[i + 2] = bl + (eb - bl) * m; }
@@ -157,13 +157,13 @@
     // engraved year plate under the lens, and the ingredient's name
     if (t > tn - .6) { const yr = ['2009', '2017', '2026'][st]; letter(yr, 420, 560, 96, INK, { face: 'serif', bold: true, shadow: false, stroke: PAPER, strokeW: .12, pop: st ? seg(t, [0, tc - .2, tw + .5][st], [0, tc - .2, tw + .5][st] + .3) : null }); }
     const ks = seg(t, tn - .4, tn + .4) * (1 - seg(t, tT - .8, tT - .4));
-    if (ks > 0) letter('noisy, psychedelic smears', 960, 90, 60, INK, { face: 'serif', bold: true, reveal: ks, shadow: false });
+    if (ks > 0) letter('noisy, psychedelic smears', 960, 150, 60, INK, { face: 'serif', bold: true, reveal: ks, shadow: false });
     const kt = seg(t, tT - .2, tT + .8) * (1 - seg(t, tw - .5, tw - .1));
-    if (kt > 0) letter('+ transformation robustness', 960, 90, 60, INK, { face: 'serif', bold: true, reveal: kt, shadow: false });
+    if (kt > 0) letter('+ transformation robustness', 960, 150, 60, INK, { face: 'serif', bold: true, reveal: kt, shadow: false });
     const kd = seg(t, tw - .1, tw + .6);
-    if (kd > 0) letter('+ a few small tweaks', 960, 90, 60, INK, { face: 'serif', bold: true, reveal: kd, shadow: false });
+    if (kd > 0) letter('+ a few small tweaks', 960, 150, 60, INK, { face: 'serif', bold: true, reveal: kd, shadow: false });
     const km = seg(t, wt('fd_microscope', 'better') - .3, wt('fd_microscope', 'better') + .6) * (1 - seg(t, tu - .6, tu - .2));
-    if (km > 0) letter('better than we thought', 960, 90, 64, INK, { face: 'serif', bold: true, reveal: km, shadow: false });
+    if (km > 0) letter('better than we thought', 960, 150, 64, INK, { face: 'serif', bold: true, reveal: km, shadow: false });
   }
 
   // the last district: five houses that sag in the fog (fix 0..1 straightens them; clean swaps their photos)
@@ -208,9 +208,9 @@
     engrave();
     if (kb > 0) { const [sx, sy] = [(1040 - LAST_CAM.cx) * LAST_CAM.zoom + 960, (420 - LAST_CAM.cy) * LAST_CAM.zoom + 540], z = LAST_CAM.zoom; letter('NOTICE', sx, sy - 60 * z, 34 * z, INK, { face: 'serif', bold: true, shadow: false, rot: .06 }); letter('essentially no\ninterpretable\nneurons', sx, sy + 20 * z, 30 * z, INK, { face: 'serif', shadow: false, rot: .06, alpha: kb }); }
     const kl = seg(t, a + .2, a + 1.2) * (1 - seg(t, te - .8, te - .4));
-    if (kl > 0) letter('InceptionV1 · the last district', 960, 90, 64, INK, { face: 'serif', bold: true, reveal: kl, shadow: false });
+    if (kl > 0) letter('InceptionV1 · the last district', 960, 150, 64, INK, { face: 'serif', bold: true, reveal: kl, shadow: false });
     const ki = seg(t, tm - .3, tm + .6) * (1 - seg(t, tcr + .8, tcr + 1.2));
-    if (ki > 0) letter('too many ideas, too few neurons?', 960, 90, 60, INK, { face: 'serif', bold: true, reveal: ki, shadow: false });
+    if (ki > 0) letter('too many ideas, too few neurons?', 960, 150, 60, INK, { face: 'serif', bold: true, reveal: ki, shadow: false });
   }
 
   // 3 · the renovation: ConvNeXt plans; the viaduct bypass (residual connections); even gas lamps (layer norm);
@@ -249,18 +249,18 @@
     const kp = seg(t, tC - .6, tC + .4) * (1 - seg(t, tr - 1.3, tr - .8));
     if (kp > 0) { boilSeed('c5plan'); push(); translate(560, 640); scale(1, ease(kp)); paint(rectPts(-300, -200, 600, 400, 1), { wash: '#2E5A8A', ink: INK, sw: 1.4 }); for (let i = 0; i < 6; i++) inkLine([[-260, -150 + i * 60], [260, -150 + i * 60]], .6, '#BFD8F0', 'inkfine', 0); pop(); }
     const em = emotions(t, [[a - .3, 'sad'], [tC, 'hopeful'], [tr, 'excited'], [tbe, 'starstruck'], [t99, 'happy']]);
-    tourist(1380, 980, 10, wk > .5 ? 'hard' : 'top', { ...em, view: 'q', flip: true, boilKey: 'c5c' });
+    tourist(1380, 980, 10, t > tC + .5 && t < tbe + .8 ? 'hard' : 'top', { ...em, view: 'q', flip: true, boilKey: 'c5c' });
     camEnd();
     engrave(waveFront(t));
     if (kp > .5) { const z = LAST_CAM.zoom, sx = (560 - LAST_CAM.cx) * z + 960, sy = (640 - LAST_CAM.cy) * z + 540; letter('ConvNeXt', sx, sy - 70 * z, 76 * z, '#F2F6FA', { face: 'serif', bold: true, shadow: false }); const ks = seg(t, tsame - .2, tsame + .4); if (ks > 0) letter('same size', sx, sy + 30 * z, 46 * z, '#F2F6FA', { face: 'serif', shadow: false, alpha: ks }); const kq = seg(t, tpic - .5, tpic); if (kq > 0) letter('same pictures', sx, sy + 100 * z, 46 * z, '#F2F6FA', { face: 'serif', shadow: false, alpha: kq }); }
     const krc = seg(t, tr - .2, tr + .6) * (1 - seg(t, tl - .4, tl - .1));
-    if (krc > 0) letter('residual connections: a bypass', 960, 90, 60, INK, { face: 'serif', bold: true, reveal: krc, shadow: false });
+    if (krc > 0) letter('residual connections: a bypass', 960, 150, 60, INK, { face: 'serif', bold: true, reveal: krc, shadow: false });
     const kln = seg(t, tl - .1, tl + .6) * (1 - seg(t, tbe - .8, tbe - .5));
-    if (kln > 0) letter('layer norm: even lamps', 960, 90, 60, INK, { face: 'serif', bold: true, reveal: kln, shadow: false });
+    if (kln > 0) letter('layer norm: even lamps', 960, 150, 60, INK, { face: 'serif', bold: true, reveal: kln, shadow: false });
     const kbe = seg(t, tbe - .4, tbe + .4) * (1 - seg(t, n - .2, n + .1));
-    if (kbe > 0) letter('beautiful', 960, 90, 90, '#2A5A8A', { face: 'marker', reveal: kbe, shadow: false });
+    if (kbe > 0) letter('beautiful', 960, 150, 90, '#2A5A8A', { face: 'marker', reveal: kbe, shadow: false });
     const kn = seg(t, n - .1, n + .6);
-    if (kn > 0) letter('same size · same data', 860, 90, 64, '#2A3A4A', { face: 'marker', reveal: kn, shadow: false });
+    if (kn > 0) letter('same size · same data', 860, 150, 64, '#2A3A4A', { face: 'marker', reveal: kn, shadow: false });
   }
 
   // 4 · the rooftop at dawn; Clawd polishes the lens; then a seed sprouts in the renovated park
@@ -303,11 +303,11 @@
     }
     camEnd();
     const k1 = seg(t, tb - .5, tlen + .3) * (1 - seg(t, tu - .6, tu - .2));
-    if (k1 > 0) letter('built badly · seen through a dirty lens', 960, 110, 60, '#2A3A4A', { face: 'marker', reveal: k1, shadow: false });
+    if (k1 > 0) letter('built badly · seen through a dirty lens', 960, 150, 60, '#2A3A4A', { face: 'marker', reveal: k1, shadow: false });
     const k2 = seg(t, tu - .1, tu + .8) * (1 - seg(t, tP + .3, tP + .7));
-    if (k2 > 0) letter('ordinary upgrades made it readable', 960, 110, 60, '#2A3A4A', { face: 'marker', reveal: k2, shadow: false });
+    if (k2 > 0) letter('ordinary upgrades made it readable', 960, 150, 60, '#2A3A4A', { face: 'marker', reveal: k2, shadow: false });
     const k0 = seg(t, a - .1, a + .8) * (1 - seg(t, tb - 1, tb - .6));
-    if (k0 > 0) letter('not strangers packed together', 960, 110, 60, '#2A3A4A', { face: 'marker', reveal: k0, shadow: false });
+    if (k0 > 0) letter('not strangers packed together', 960, 150, 60, '#2A3A4A', { face: 'marker', reveal: k0, shadow: false });
   }
 
   shots([[chapStart('ch05'), micro], [cs('fd_last') - .3, foggy], [cs('fd_renovate') - .3, renovate], [cs('fd_lesson') - .3, lesson]]);

@@ -218,14 +218,14 @@
   }
 
   // 5 · the other two: pose neurons. Dogs and cars facing the same way.
-  const POSE = [[[0, 1, 2, 3].map(i => PE + 'small/' + i), 'SIDE ON'], [[0, 1, 4, 7].map(i => PE + 'medium/' + i), 'FACE ON']];
+  const POSE = [[[0, 1, 2, 3].map(i => PE + 'small/' + i)], [[4, 5, 6, 7].map(i => PE + 'small/' + i)]];
   function pose(t, lt, dur) {
     const a = cs('hc_pose'), tf = wt('hc_pose', 'facing'), tp = wt('hc_pose', 'pose'), tc = wt('hc_pose', 'cars'), td = wt('hc_pose', 'dogs');
     ground({ y0: 760, y1: 700 });
     camKeys(t, [[a - .2, 960, 540, 1.0], [tf, 960, 520, 1.04], [ce('hc_pose') + .4, 960, 540, 1.0]], .3);
     // two big windows (the two remaining "dog" lockers), each flipping between its dog and its car
     POSE.forEach(([ims, lab], k) => {
-      const x = 560 + k * 800, y = 480, kk = popk(t, a + .2 + k * .3, .5); if (kk <= 0) return;
+      const x = 560 + k * 800, y = 480, kk = popk(t, a - .35 + k * .2, .5); if (kk <= 0) return;
       const sw = t < tc ? 0 : t < td ? 1 : Math.floor((t - td) * 1.4 + k) % 4, d = ims[sw === 1 ? 0 : sw], c = ims[sw];
       push(); translate(x, y); scale(backOut(kk));
       cutout([[-260, -200], [0, -330], [260, -200], [260, 250], [-260, 250]], k ? BL : RD);
@@ -233,7 +233,7 @@
       const I = img(c), sz = Math.min(I.width, I.height); ctx.save(); ctx.beginPath(); ctx.rect(-190, -180, 380, 340); ctx.clip(); ctx.drawImage(I, (I.width - sz) / 2, (I.height - sz) / 2, sz, sz * 340 / 380, -190, -180, 380, 340); ctx.restore();
       pop();
       const ka = seg(t, tf - .6 + k * .2, tf + .1 + k * .2);
-      if (ka > 0) { push(); translate(x, 860); rotate(-.04); scale(backOut(ka)); cutout(rectPts(-170, -46, 340, 92), CR); serif(lab, 0, 4, 54, BK); pop(); }
+      if (ka > 0) { push(); translate(x, 860); rotate(-.04); scale(backOut(ka)); cutout(rectPts(-150, -46, 300, 92), sw % 2 ? BL : CR); serif(sw % 2 ? 'a car' : 'a dog', 0, 4, 54, sw % 2 ? CR : BK); pop(); }
     });
     // Clawd turns his head to match each window's direction
     const look = t > tf ? Math.floor((t - tf) * 1.2) % 2 : -1;
@@ -241,8 +241,10 @@
     camEnd();
     const kp = seg(t, tp - .3, tp + .3);
     if (kp > 0) { push(); translate(960, 84); rotate(-.03); scale(backOut(kp)); cutout(rectPts(-360, -64, 720, 128), BK); serif('POSE NEURONS', 0, 6, 80, OR); pop(); }
+    const ko = seg(t, a - .3, a + .2) * (1 - seg(t, tc - .6, tc - .3));
+    if (ko > 0) { ctx.globalAlpha = ko; serif('and the other two?', 960, 150, 70, BK, { weight: '400' }); ctx.globalAlpha = 1; }
     const kd = seg(t, tc - .3, tc + .2) * (1 - seg(t, tp - .5, tp - .3));
-    if (kd > 0) { ctx.globalAlpha = kd; serif('dogs and cars alike', 960, 80, 70, BK, { weight: '400' }); ctx.globalAlpha = 1; }
+    if (kd > 0) { ctx.globalAlpha = kd; serif('dogs and cars alike', 960, 150, 70, BK, { weight: '400' }); ctx.globalAlpha = 1; }
   }
 
   // 6 · a hundred pose neurons; rewind the heist; the car route keeps going and splits into specific car neurons
@@ -265,12 +267,15 @@
       bg(BK); GRAIN = .8;
       camKeys(t, [[a - .2, 960, 540, 1.6], [th + .5, 960, 540, 1.0], [rw0, 960, 540, .96]], .3);
       const kg = seg(t, a + .2, th + .6);
-      for (let r = 0; r < 9; r++) for (let c = 0; c < 13; c++) {
-        const i = r * 13 + c, k = seg(kg, hash(i * 1.7) * .7, hash(i * 1.7) * .7 + .3); if (k <= 0) continue;
-        const x = 160 + c * 133, y = 110 + r * 108, dir = hash(i * 5.3) > .5 ? 1 : -1, col = [OR, CR, RD, BL][i % 4];
-        push(); translate(x, y); scale(backOut(k)); cutout(rectPts(-56, -42, 112, 84), col, { shadow: [3, 4, 'rgba(0,0,0,.4)'] });
-        if (i % 13 === 6 && r % 3 === 1) { const im = PE + 'small/' + ((r + c) % 8); photoFlat(im, -50, -36, 100, 72, {}); }
-        else { push(); scale(.3 * dir, .3); cutout([[-90, -22], [30, -22], [30, -56], [96, 0], [30, 56], [30, 22], [-90, 22]], BK, { shadow: false }); pop(); }
+      // a neat 12 × 9 grid (108 tiles), revealed in a diagonal sweep: each tile is one pose neuron, a dog and a car
+      // that share a pose side by side, with a small arrow under them
+      const SETS = ['small', 'medium', 'large', 'dino'];
+      for (let r = 0; r < 9; r++) for (let c = 0; c < 12; c++) {
+        const i = r * 12 + c, d0 = (c + r) / 19, k = seg(kg, d0 * .75, d0 * .75 + .25); if (k <= 0) continue;
+        const x = 180 + c * 142, y = 120 + r * 104, set = SETS[(r + 2 * c) % 4], p = ((r * 5 + c * 3) % 4) * 2, dir = (r + c) % 2 ? 1 : -1;
+        push(); translate(x, y); scale(backOut(k)); cutout(rectPts(-64, -46, 128, 92), r % 2 ? CR : '#F7E9C8', { shadow: [3, 4, 'rgba(0,0,0,.45)'], jag: 1.5 });
+        photoFlat(PE + set + '/' + p, -58, -40, 56, 56, {}); photoFlat(PE + set + '/' + (p + 1), 2, -40, 56, 56, {});
+        push(); translate(0, 31); scale(.16 * dir, .16); flat([[-90, -22], [30, -22], [30, -56], [96, 0], [30, 56], [30, 22], [-90, 22]], [RD, BL, OR][(r + c) % 3]); pop();
         pop();
       }
       camEnd();
@@ -294,11 +299,11 @@
     const leaves = tree.filter(([, , d]) => d === 3);
     leaves.forEach(([, q], i) => { const k = popk(t, tsp + .6 + i * .12, .35); if (k <= 0) return; push(); translate(q[0], q[1] - 40); scale(1.3 * backOut(k)); cutout(rectPts(-62, -52, 124, 104), [OR, RD, BL, CR][i % 4]); photoFlat(TV + 'positive-0' + (1 + i % 8), -54, -44, 108, 88, {}); pop(); });
     car(cx, 950, .7, { spin: t * 8 });
-    tourist(240, 1010, 9, 'fedora', { ...emotions(t, [[rw1, 'surprised'], [tk, 'happy'], [tsp + 1, 'excited']]), view: 'q', boilKey: 'c4c' });
+    tourist(320, 1000, 9, 'fedora', { ...emotions(t, [[rw1, 'surprised'], [tk, 'happy'], [tsp + 1, 'excited']]), view: 'q', boilKey: 'c4c' });
     camEnd();
     const ks = seg(t, tk - .3, tk + .3);
-    if (ks > 0) { ctx.globalAlpha = ks; serif('it kept going', 480, 120, 72, BK); ctx.globalAlpha = 1; }
-    if (t > tsp - .3) { const k = seg(t, tsp - .3, tsp + .4); ctx.globalAlpha = k; serif('more and more', 480, 200, 54, CR, { weight: '400' }); serif('specific car neurons', 480, 262, 54, CR, { weight: '400' }); ctx.globalAlpha = 1; }
+    if (ks > 0) { ctx.globalAlpha = ks; serif('it kept going', 560, 170, 72, BK); ctx.globalAlpha = 1; }
+    if (t > tsp - .3) { const k = seg(t, tsp - .3, tsp + .4); ctx.globalAlpha = k; serif('more and more', 560, 250, 54, CR, { weight: '400' }); serif('specific car neurons', 560, 312, 54, CR, { weight: '400' }); ctx.globalAlpha = 1; }
   }
 
   // 7 · DINOv2: ten times bigger, ten years newer: still pose neurons. CASE 2 SOLVED. The last shape is a magnifier.
