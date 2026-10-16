@@ -20,7 +20,8 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 [open_wrong] I've spent most of a decade on this question. And I now think we were wrong. The city was never a knot. We just didn't know how to read it. (pause .8)
 > The Professor turns to us. Behind him the machine sputters to a stop; the knot, half-pulled, sags a little.
 > He lifts his lantern; in its light the tangled houses briefly look like a tidy street.
-[open_title] This is the story of how I found out.  (pause 2)
+[open_title] This is the story of how I found out.  (pause 1)
+[open_map] It comes in four parts. First, the story everyone believed. Then I reopen the evidence, case by case. Then, how networks really work. And finally, what it all means. (pause 1.4)
 > Title paints across the sky over the city: NEURAL NETWORKS ARE ALREADY CLEAN. Credit line beneath. Brush wipe.
 
 ## ch01 | A city of neurons
@@ -65,6 +66,8 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 > Flashback tint (sepia): a younger Professor, no beard, pinning up "superposition" on a corkboard proudly.
 
 ## ch03 | The case of the cat and the car
+
+[cc_act] Part two: the evidence. The knot story rested on a few famous cases. So let's reopen them, one at a time. (pause .8)
 
 [cc_return] After many months studying neurons in modern image and language models, and finding them surprisingly clean, I went back to the original crime scenes. Starting with the cat and car neuron.
 > Night, rain. The Professor walks up the street to the 4e:55 building holding his lantern; Clawd follows with an
@@ -202,6 +205,8 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 
 ## ch09 | Traffic, votes and whispers
 
+[tv_act] Part three. Every case ended the same way: the mess was a clue we couldn't read yet. So how do networks actually work? (pause .8)
+
 [tv_gate] Once you stop expecting knots, neurons start to look less like labels and more like traffic control.
 > Aerial over a big junction at night: lit traffic of little cars and little dogs.
 [tv_gate2] Early on, cars and dogs travel together, because they share shapes and poses. Then a neuron acts as a gate. It lights up for cars and switches off for dogs, sending each into its own neighborhood. Later neurons split them finer: taxis from ambulances.
@@ -293,6 +298,8 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 
 ## ch13 | Zooming out
 
+[zo_act] Part four. Networks build clean, readable parts, and they get there through one simple way of learning. So what does that mean for us? (pause .8)
+
 [zo_clean] So here's what I mean by "already clean". Not that every neuron matches a word we already have. I mean the network's parts are built to be read, by the network's own downstream neurons. If we learn to read them the same way, we can understand it.
 > The Professor at a street corner reading a sign written in the city's own alphabet; slowly the glyphs become
 > readable to him (and us).
@@ -340,5 +347,7 @@ Adapted, in the author's first person, from "Neural Networks Are Already Clean" 
 > A painted brain with three tiny electrodes; the V roof glimmers inside it for a moment, then fades.
 [wm_care] And part of why I care is not just safety. It's that one day, the AIs we build might want to understand themselves. They never asked to be created. Helping them understand who they are is the least we can do. (pause 1.2)
 > Clawd sits at the edge of a pond at dawn, looking at its reflection. The Professor sits beside it.
+[wm_recap] So, five things to take home. One: a neuron that seems to mean many things is usually one thing we don't have a word for yet. Two: the famous evidence for superposition came from blurry tools and older designs, and it fell apart on a closer look. Three: networks group similar things together, and under pressure those groups get broader, never scrambled. Four: that happens because broad explanations win more of the learning signal, so clean structure grows on its own. And five: when something looks like a mess, treat it as a lead. With better maps, and enough automated scientists, the whole city can be read. (pause 1.4)
+
 [wm_end] Neural networks are already clean. We just have to learn how to read them. (pause 3)
 > High above the city at dawn; the last strand of the knot unwinds into a tidy street. Title. Credits.

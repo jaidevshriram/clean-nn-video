@@ -239,7 +239,7 @@
 
   // ---------- shot 4 · the title over the galaxy; then the dive into one star, whose light fills the screen ----------
   function titleShot(t, lt, dur) {
-    const a = cs('open_title'), e = ce('open_title'), end = chapStart('ch01');
+    const a = cs('open_title'), e = ce('open_map'), end = chapStart('ch01');
     const D = BRIGHT[DIVE], [dx, dy] = starXY(D.r, D.q0, t, .12);
     // hold on the title, then dive: the centre slides onto the star while the zoom grows exponentially
     const kd = easeInOut(seg(t, e + .2, end - .9)), kz = seg(t, e + .2, end + .2);
@@ -257,6 +257,17 @@
     const out = 1 - seg(t, e + .5, e + 1);
     title('Neural Networks', 960, 250, 124, '#FFF6E8', seg(t, a - .1, a + 1.4), { stroke: '#120C2A', strokeW: .1, alpha: out });
     title('Are Already Clean', 960, 390, 124, '#FFD58A', seg(t, a + .5, a + 1.9), { stroke: '#120C2A', strokeW: .1, alpha: out });
+    // the roadmap: the film's four parts light up on their words, under the title
+    const PARTS = [['I', 'the belief', 'believed', '#B79CF0'], ['II', 'the evidence', 'evidence', '#F08AA8'], ['III', 'how it works', 'work', '#7FD6CF'], ['IV', 'what it means', 'means', '#F2C46A']];
+    PARTS.forEach(([n, lab, w, col], i) => {
+      const tw = wt('open_map', w), k = seg(t, tw - .25, tw + .35) * out; if (k <= 0) return;
+      const x = 450 + i * 400, y = 790, s = backOut(clamp(k));
+      ctx.save(); resetMatrix(); ctx.translate(x, y); ctx.scale(s, s); ctx.globalAlpha = clamp(k * 1.5) * out;
+      ctx.fillStyle = 'rgba(14,10,36,.72)'; ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(-180, -72, 360, 144, 24); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      if (k > .3) { letter('Part ' + n, x, y - 30, 44, col, { face: 'marker', shadow: false, alpha: out, screen: true }); letter(lab, x, y + 28, 50, '#FFF6E8', { face: 'hand', shadow: false, alpha: out, screen: true }); }
+      if (i > 0 && k > .5) { ctx.save(); resetMatrix(); ctx.globalAlpha = .6 * out; ctx.strokeStyle = '#FFF6E8'; ctx.lineWidth = 3; ctx.setLineDash([8, 10]); ctx.beginPath(); ctx.moveTo(x - 220, y); ctx.lineTo(x - 180, y); ctx.stroke(); ctx.restore(); }
+    });
     // warm light fills the frame
     const bl = ease(seg(t, end - 1.6, end - .2)); if (bl > 0) { ctx.save(); resetMatrix(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .75 * bl; ctx.fillStyle = '#FFB85A'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
     flash(ease(seg(t, end - .9, end + .3)) * .96, '#FFEFC8');

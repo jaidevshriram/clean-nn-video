@@ -37,7 +37,12 @@ function drawWorld(t) {
   if (!handled) {
     let i = 0; while (i + 1 < SHOTS.length && t >= SHOTS[i + 1][0]) i++;
     const t0 = SHOTS[i][0], end = i + 1 < SHOTS.length ? SHOTS[i + 1][0] : DUR;
-    SHOTS[i][1](t, t - t0, end - t0);
+    // a cut between two shots of the same world gets a short dissolve (chapter seams are teleport's job)
+    const fd = (SHOTS[i][2] && SHOTS[i][2].fade) ?? .4, isSeam = CUES.chapters && CUES.chapters.some(c => Math.abs(c.s - t0) < .05);
+    if (i > 0 && !isSeam && fd > 0 && t - t0 < fd && typeof renderShotInto === 'function') {
+      const A = _off(0), B = _off(1); renderShotInto(A, i - 1, t); GRAIN = renderShotInto(B, i, t);
+      ctx.save(); resetMatrix(); ctx.globalAlpha = 1; ctx.drawImage(A, 0, 0); ctx.globalAlpha = easeInOut((t - t0) / fd); ctx.drawImage(B, 0, 0); ctx.restore();
+    } else SHOTS[i][1](t, t - t0, end - t0);
   }
   CAM = null;
   // the arrival stamp goes on top of the world's own style passes

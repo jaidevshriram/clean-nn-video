@@ -2,7 +2,7 @@
 //   node tools/textaudit.mjs [--step=1] [--range=a:b] [--margin=12]
 import { makeWorld } from '../engine/host.mjs';
 const args = Object.fromEntries(process.argv.slice(2).map(a => { const [k, v] = a.replace(/^--/, '').split('='); return [k, v ?? true]; }));
-const w = await makeWorld(), step = +(args.step || 1), M = +(args.margin ?? 12), [a, b] = args.range ? String(args.range).split(':').map(Number) : [0, w.duration()];
+const w = await makeWorld({ only: args.only ? String(args.only).split(',') : null }), step = +(args.step || 1), M = +(args.margin ?? 12), [a, b] = args.range ? String(args.range).split(':').map(Number) : [0, w.duration()];
 const proto = Object.getPrototypeOf(w.ctx), orig = proto.fillText; let hits = [];
 proto.fillText = function (s, x, y, ...r) {
   if (this === w.ctx && this.globalAlpha > .3 && String(s).trim().length > 1) {

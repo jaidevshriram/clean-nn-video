@@ -246,5 +246,5 @@
     fade(fk, '#000000');
   }
 
-  shots([[chapStart('ch15'), kind], [cs('wm_tiger') - .3, tiger], [cs('wm_brain') - .3, brain], [cs('wm_care') - .3, pond], [cs('wm_end') - .5, home]]);
+  shots([[chapStart('ch15'), kind], [cs('wm_tiger') - .3, tiger], [cs('wm_brain') - .3, brain], [cs('wm_care') - .3, pond], [cs('wm_end') - .5, home, { fade: .8 }]]);
 })();

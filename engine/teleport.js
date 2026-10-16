@@ -117,7 +117,10 @@ function teleport(t) {
   if (!SHOTS.length || !CUES.chapters) return false;
   const chs = CUES.chapters;
   for (let i = 1; i < chs.length; i++) {
-    const s = chs[i].s, first = CUES.cues[chs[i].first].s, isAct = ACTS.includes(chs[i].id), kind = TRANS_KIND[chs[i].id] || 'v';
+    const s = chs[i].s, isAct = ACTS.includes(chs[i].id), kind = TRANS_KIND[chs[i].id] || 'v';
+    // at an act break the first cue is the narrated bridge line, spoken over the passport map; the world arrives with the next cue
+    let first = CUES.cues[chs[i].first].s;
+    if (isAct && /_act$/.test(chs[i].first)) { const ids = Object.keys(CUES.cues), j = ids.indexOf(chs[i].first); if (j >= 0 && j + 1 < ids.length) first = CUES.cues[ids[j + 1]].s; }
     if (t < s || t > first + 5.2) continue;
     const at = TRANS_AT[chs[i].id] || [W / 2, H / 2];
     const iA = _shotIndexAt(s - .001), iB = _shotIndexAt(Math.max(s, t)), A = _off(0), B = _off(1);
@@ -131,12 +134,18 @@ function teleport(t) {
     const m0 = s, m1 = s + 1.4, z0 = first - 1.9, z1 = first - .4;
     if (t < m0) return false;
     if (t < m1) { renderShotInto(A, iA, t); renderFnInto(B, () => itineraryMap(t, i, { open: (t - m0) / (m1 - m0), walk: 0, title: actTitle(i) })); compositePortal(A, B, (t - m0) / (m1 - m0), kind, at[0], at[1]); return true; }
-    if (t < z0) { itineraryMap(t, i, { open: 1, walk: seg(t, m1 + .3, z0 - .4), title: actTitle(i) }); return true; }
+    if (t < z0) {
+      // hold on the map while the bridge line is spoken: Clawd walks the last leg and the camera eases toward the next stop
+      const M = _off(0); let dotXY; renderFnInto(M, () => { dotXY = itineraryMap(t, i, { open: 1, walk: seg(t, m1 + .3, z0 - .6), title: actTitle(i) }); });
+      const dz = 1 + .14 * easeInOut(seg(t, m1, z0));
+      ctx.save(); resetMatrix(); ctx.translate(dotXY[0], dotXY[1]); ctx.scale(dz, dz); ctx.translate(-dotXY[0], -dotXY[1]); ctx.drawImage(M, 0, 0); ctx.restore();
+      return true;
+    }
     if (t < z1) {
       const k = (t - z0) / (z1 - z0), M = _off(0); let dotXY;
       renderFnInto(M, () => { dotXY = itineraryMap(t, i, { open: 1, walk: 1, title: actTitle(i) }); });
       GRAIN = renderShotInto(B, iB, t);
-      const e = easeIn(clamp(k)), z = lerp(1, 9, e);
+      const e = easeIn(clamp(k)), z = lerp(1.14, 9, e);
       ctx.save(); resetMatrix(); ctx.translate(dotXY[0], dotXY[1]); ctx.scale(z, z); ctx.translate(-dotXY[0], -dotXY[1]); ctx.drawImage(M, 0, 0); ctx.restore();
       ctx.save(); resetMatrix(); const r = lerp(30, 1400, e); const p = new Path2D(); p.arc(dotXY[0] + (W / 2 - dotXY[0]) * e, dotXY[1] + (H / 2 - dotXY[1]) * e, r, 0, TAU); ctx.clip(p); ctx.drawImage(B, 0, 0); ctx.restore();
       return true;
