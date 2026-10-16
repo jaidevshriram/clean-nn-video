@@ -137,8 +137,10 @@ function teleport(t) {
     if (t < z0) {
       // hold on the map while the bridge line is spoken: Clawd walks the last leg and the camera eases toward the next stop
       const M = _off(0); let dotXY; renderFnInto(M, () => { dotXY = itineraryMap(t, i, { open: 1, walk: seg(t, m1 + .3, z0 - .6) }); });
-      const dz = 1 + .14 * easeInOut(seg(t, m1, z0));
-      ctx.save(); resetMatrix(); ctx.translate(dotXY[0], dotXY[1]); ctx.scale(dz, dz); ctx.translate(-dotXY[0], -dotXY[1]); ctx.drawImage(M, 0, 0); ctx.restore();
+      const dz = 1 + .14 * easeInOut(seg(t, m1, z0)), n0 = noteStart(chs[i].first), nk = n0 == null ? 0 : easeInOut(seg(t, n0 - .5, n0 + .3));
+      // once the recap notes start, the map lifts and shrinks a little so they sit below it rather than on it
+      ctx.save(); resetMatrix(); ctx.translate(W / 2, 40); ctx.scale(1 - .16 * nk, 1 - .16 * nk); ctx.translate(-W / 2, -40);
+      ctx.translate(dotXY[0], dotXY[1]); ctx.scale(dz, dz); ctx.translate(-dotXY[0], -dotXY[1]); ctx.drawImage(M, 0, 0); ctx.restore();
       actOverlay(t, i, chs[i].first, 1);   // the title and the recap notes sit on top, so the push-in never crops them
       return true;
     }
@@ -146,8 +148,9 @@ function teleport(t) {
       const k = (t - z0) / (z1 - z0), M = _off(0); let dotXY;
       renderFnInto(M, () => { dotXY = itineraryMap(t, i, { open: 1, walk: 1 }); });
       GRAIN = renderShotInto(B, iB, t);
-      const e = easeIn(clamp(k)), z = lerp(1.14, 9, e);
-      ctx.save(); resetMatrix(); ctx.translate(dotXY[0], dotXY[1]); ctx.scale(z, z); ctx.translate(-dotXY[0], -dotXY[1]); ctx.drawImage(M, 0, 0); ctx.restore();
+      const e = easeIn(clamp(k)), z = lerp(1.14, 9, e), n0 = noteStart(chs[i].first), nk = (n0 == null || n0 > z0 + .3 ? 0 : 1) * (1 - e);
+      ctx.save(); resetMatrix(); ctx.translate(W / 2, 40); ctx.scale(1 - .16 * nk, 1 - .16 * nk); ctx.translate(-W / 2, -40);
+      ctx.translate(dotXY[0], dotXY[1]); ctx.scale(z, z); ctx.translate(-dotXY[0], -dotXY[1]); ctx.drawImage(M, 0, 0); ctx.restore();
       ctx.save(); resetMatrix(); const r = lerp(30, 1400, e); const p = new Path2D(); p.arc(dotXY[0] + (W / 2 - dotXY[0]) * e, dotXY[1] + (H / 2 - dotXY[1]) * e, r, 0, TAU); ctx.clip(p); ctx.drawImage(B, 0, 0); ctx.restore();
       actOverlay(t, i, chs[i].first, 1 - seg(t, z0, z0 + .5));
       return true;
@@ -165,6 +168,7 @@ const ACT_NOTES = {
   tv_act: [['tool', 0, 'a blurry tool'], ['design', 0, 'an older design'], ['branch', 0, 'a branch nobody followed'], ['Never', 0, 'never strangers packed together']],
   zo_act: [['clean', 0, 'clean, readable parts'], ['generalization', 0, 'one way of learning: generalization'], ['never', 0, 'never strangers packed together'], ['tear', 0, 'no need to tear the knot apart first?']],
 };
+function noteStart(cue) { const L = ACT_NOTES[cue]; return L && L.length ? wt(cue, L[0][0], L[0][1]) : null; }
 function actOverlay(t, i, cue, alpha) {
   if (alpha <= 0) return;
   const title = actTitle(i); if (title) letter(title, 960, 50, 52, '#FFF6E8', { face: 'marker', shadow: false, alpha, screen: true, stroke: '#2A1A2A', strokeW: .2 });

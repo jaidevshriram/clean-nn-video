@@ -1,7 +1,7 @@
 // ch11 Explanations that can lose: PUB DARTS WITH SPORTS-BROADCAST GRAPHICS.
 // A torn page from the pop-up book arrives as a dart flight; Clawd's "Texas sharpshooter" gag (making up stories);
 // the Knot's vague sponge-dart ("a multi-purpose language neuron") smothers the board and the referee shows red;
-// split-screen booths for the blind test; a slow-mo bullseye that beats ten billion grey darts of real text (180!);
+// split-screen booths for the blind test; a slow-mo bullseye that beats ten billion grey darts of real text (BULLSEYE!);
 // match stats 76 / 11 / 1 %; the Knot's "cats and cars" dart passes tests; a broadcast history corner: Newton and
 // Mercury's precessing orbit; the winning dart flies out of the pub window and lands as a seed in golden grass.
 (() => {
@@ -337,7 +337,7 @@
     if (t > tHit && t < tTe - .3) plate('ONE SENTENCE', 1700, 820 - 520, 44, YEL, seg(t, tHit, tHit + .3));
     // the counter of real-text darts
     if (t > tTe - .3 && t < tEx - .2) { const k = easeOut(seg(t, tTe - .3, tTe + .2)), n = Math.floor(1e10 * Math.pow(seg(t, tTe - .2, tWo + .4), 2)); lower(t, tTe - .3, tEx - .2, n.toLocaleString('en-US'), 'WORDS OF REAL TEXT', { size: 70, w: 1100, tag: '#9A9AA8', col: '#FFFFFF' }); }
-    if (t > tCe - .35) { const k = popk(t, tCe - .35, .35), s = backOut(k) * (1 + .03 * Math.sin(t * 9)); ctx.save(); ctx.translate(1380, 300); ctx.rotate(-.1); ctx.scale(s, s); for (let i = 0; i < 16; i++) { const q = i / 16 * TAU + t * .3; flat([[0, 0], [Math.cos(q - .08) * 260, Math.sin(q - .08) * 200], [Math.cos(q + .08) * 260, Math.sin(q + .08) * 200]], i % 2 ? 'rgba(255,227,74,.5)' : 'rgba(210,71,63,.5)'); } txt('180!', 0, 0, 170, YEL, { font: F, weight: '900', stroke: '#8A1A1A', sw: 22 }); ctx.restore(); }
+    if (t > tCe - .35) { const k = popk(t, tCe - .35, .35), s = backOut(k) * (1 + .03 * Math.sin(t * 9)); ctx.save(); ctx.translate(1380, 300); ctx.rotate(-.1); ctx.scale(s, s); for (let i = 0; i < 16; i++) { const q = i / 16 * TAU + t * .3; flat([[0, 0], [Math.cos(q - .08) * 260, Math.sin(q - .08) * 200], [Math.cos(q + .08) * 260, Math.sin(q + .08) * 200]], i % 2 ? 'rgba(255,227,74,.5)' : 'rgba(210,71,63,.5)'); } txt('BULLSEYE!', 0, 0, 120, YEL, { font: F, weight: '900', stroke: '#8A1A1A', sw: 22 }); ctx.restore(); }
     lower(t, tEx - .1, e + 10, 'BULLSEYE', 'explanation written blind', { size: 62, w: 900 });
   }
 
@@ -470,7 +470,7 @@
       const MP = orrery(t, 1150, 560, 1.25, prec, hi, kk);
       const per = [1150 + Math.cos(prec) * 200 / 1.38 * 1.25, 560 + Math.sin(prec) * 200 / 1.38 * .55 * 1.25];
       teleRing(per[0], per[1], 90, 70, seg(t, tTi - .1, tTi + .5), 9);
-      if (t > tBr - .3) { const k = popk(t, tBr - .3, .3); ctx.save(); ctx.translate(per[0] - 150, per[1] - 120); ctx.scale(backOut(k), backOut(k)); dot(0, 0, 34, RED); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-13, -13); ctx.lineTo(13, 13); ctx.moveTo(13, -13); ctx.lineTo(-13, 13); ctx.stroke(); ctx.restore(); }
+      if (t > tBr - .3) { const k = popk(t, tBr - .3, .3); ctx.save(); ctx.translate(MP[0] + 40, MP[1] - 40); ctx.scale(backOut(k), backOut(k)); dot(0, 0, 34, RED, 1); ctx.strokeStyle = '#1A1008'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 34, 0, TAU); ctx.stroke(); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-13, -13); ctx.lineTo(13, 13); ctx.moveTo(13, -13); ctx.lineTo(-13, 13); ctx.stroke(); ctx.restore(); }
       // the MERCURY label sits clear of the sun and orbits, with a leader line to the planet as it goes round
       if (t > tMe - .3) { const k = seg(t, tMe - .3, tMe + .2), LX = 1560, LY = 250; ctx.save(); ctx.globalAlpha = k; ctx.strokeStyle = YEL; ctx.lineWidth = 4; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.moveTo(LX - 40, LY + 34); ctx.lineTo(MP[0], MP[1]); ctx.stroke(); ctx.setLineDash([]); dot(MP[0], MP[1], 26, 'rgba(0,0,0,0)'); ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(MP[0], MP[1], 28, 0, TAU); ctx.stroke(); txt('MERCURY', LX, LY, 54, YEL, { font: F, weight: '900', stroke: '#1A1008', sw: 8 }); ctx.restore(); }
       // Newton: a framed portrait silhouette on the left

@@ -286,26 +286,34 @@
     if (M === 0) {
       camKeys(t, [[a - .3, 960, 700, 1.45], [c1, 960, 720, 1.55]], .4);
       tapes(t, a);
-      ['EXPLAINED', 'EXPLAINED', 'EXPLAINED'].forEach((s, i) => stamp(s, 960 + (i - 1) * 300, 832, a + .5 + i * .45, t, { col: '#D0302A', rot: -.15 + i * .08, size: 44 }));
+      ['EXPLAINED', 'EXPLAINED', 'EXPLAINED'].forEach((s, i) => stamp(s, 960 + (i - 1) * 300, 820 - (i % 2) * 6, a + .5 + i * .45, t, { col: '#D0302A', rot: -.08 + i * .04, size: 30 }));
       camEnd();
       lower8(t, a + .2, c1 + .2, 'case after case, the mess resolved');
       return;
     }
     const [hx, hy] = shakeXY(t, 5);
     if (M === 1) {
-      // CAM 3: it peeks from behind a tree... then it's behind the next one
-      var v3 = camKeys(t, [[c1, 1000, 700, 1.35], [c2, 1120, 690, 1.4]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
+      // CAM 3: it peeks from behind a tree... then it's behind the next one; then, on "gaps", the lamp checks one
+      // hiding spot after another and the knot always slips into whichever spot hasn't been lit yet
+      const tGap = wt('sg_moving', 'gaps'), tCr = wt('sg_moving', 'credited'), g0 = tGap - .3, SP = [[1390, 800], [1990, 660], [1600, 560], [620, 520], [2160, 520], [1240, 580], [1790, 930]], STEP = 1.6;
+      var v3 = camKeys(t, [[c1, 1000, 700, 1.35], [g0, 1100, 690, 1.4], [g0 + 1, 1330, 640, .92], [c2, 1350, 640, .95]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);
       woods('c', { seed: 9 });
-      const hop = seg(t, tMoved - .1, tMoved + .25), kx = hop < 1 ? 1180 : 1700, peek = hop > 0 && hop < 1 ? 0 : 1;
-      cryptid(t, kx - 50 * Math.sin(Math.min(1, (t - c1) * 2) * Math.PI / 2), 560, 230, { look: [1, 0], alpha: peek });
+      const gp = t > g0, st = gp ? (t - g0) / STEP : 0, j = Math.min(5, Math.floor(st)), f = Math.min(1, st - j), lf = ease(clamp((f - .15) / .35)), hopK = ease(clamp(f / .25));
+      const L0 = SP[Math.max(0, j - 1)], L1 = SP[Math.min(j, 6)], lit = [lerp(L0[0], L1[0], lf), lerp(L0[1], L1[1], lf)];
+      const hop = seg(t, tMoved - .1, tMoved + .25), peek = hop > 0 && hop < 1 ? 0 : 1;
+      if (!gp) { const kx = hop < 1 ? 1180 : 1700; cryptid(t, kx - 50 * Math.sin(Math.min(1, (t - c1) * 2) * Math.PI / 2), 560, 230, { look: [1, 0], alpha: peek }); }
       trunk(1180, 260, '#4A4A4A'); trunk(1730, 240, '#444444');
-      if (hop > 0 && hop < 1) { ctx.save(); ctx.globalAlpha = .5; ctx.fillStyle = '#BBBBBB'; ctx.fillRect(1180, 500, 520 * hop, 90); ctx.restore(); }
+      if (gp) { const K0 = j ? SP[Math.min(j, 6)] : [1650, 560], K1 = SP[Math.min(j + 1, 6)], kx = lerp(K0[0], K1[0], hopK), ky = lerp(K0[1], K1[1], hopK) - 60 * Math.sin(hopK * Math.PI); cryptid(t, kx, ky, 150, { look: [kx < lit[0] ? -1 : 1, 0], grin: true }); }
+      if (hop > 0 && hop < 1 && !gp) { ctx.save(); ctx.globalAlpha = .5; ctx.fillStyle = '#BBBBBB'; ctx.fillRect(1180, 500, 520 * hop, 90); ctx.restore(); }
       const sw = env(t, tMoved + .1, tMoved + .9, .2, .3);
-      hunter(t, 900, GROUND + 20, 15, { ...emotions(t, [[c1, 'determined'], [tMoved + .2, 'surprised']]), view: 'q', aR: .6 + 1.4 * sw, armR: net(sw), aL: .9, armL: pennant, boilKey: 'c8hunter' });
+      if (gp) { const lx = 900 + 30, ly = GROUND + 20 - 15 * 7.4, kA = seg(t, g0, g0 + .4); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .25 * kA; ctx.fillStyle = '#FFFFFF'; const dx = lit[0] - lx, dy = lit[1] - ly, n = Math.hypot(dx, dy), px = -dy / n * 120, py = dx / n * 120; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(lit[0] + px, lit[1] + py); ctx.lineTo(lit[0] - px, lit[1] - py); ctx.closePath(); ctx.fill(); ctx.restore(); glow(lit[0], lit[1], 170, '#FFFFFF', .45 * kA); glow(lx, ly, 45, '#FFFFFF', .9);
+        for (let i = 0; i < 7; i++) { const seen = j > i || (j === i && lf > .9); if (seen) letter('checked', SP[i][0], SP[i][1] + 140, 46, OSD, { face: 'marker', shadow: false }); } }
+      hunter(t, 900, GROUND + 20, 15, { ...emotions(t, [[c1, 'determined'], [tMoved + .2, 'surprised'], [g0 + .8, 'suspicious']]), view: 'q', aR: .6 + 1.4 * sw, armR: net(sw), aL: .9, armL: pennant, lamp: !gp, boilKey: 'c8hunter' });
       camEnd();
-      fg(v3, [[200, 170], [2300, 200]]);
+      fg(v3, gp ? [[200, 170]] : [[200, 170], [2300, 200]]);
       nv(t, 'CAM 3 · TREE LINE', [c1]);
       if (t > tMoved - .3) letter('superposition just moved', 960, 230, 64, OSD, { face: 'marker', shadow: false, reveal: seg(t, tMoved - .3, tMoved + .5) });
+      lower8(t, tCr - .5, c2 + .2, "credited to whatever isn't explained yet");
     } else if (M === 2) {
       // CAM 4: hiding in the weak signals: faint, through fog and noise
       var v4 = camKeys(t, [[c2, 900, 700, 1.3], [c3, 960, 700, 1.35]].map(k => [k[0], k[1] + hx, k[2] + hy, k[3]]), 1.5);

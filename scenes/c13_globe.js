@@ -303,7 +303,7 @@
 
   // ---------- 6 · deception can't hide from the model's own circuits ----------
   function deception(t, lt, dur) {
-    const a = cs('zo_deception'), tDe = wt('zo_deception', 'deception'), tHi = wt('zo_deception', 'hide'), tEl = wt('zo_deception', 'else'), tPl = wt('zo_deception', 'plain'), tRe = wt('zo_deception', 'read'), tAn = wt('zo_deception', 'answers'), tBu = wt('zo_deception', 'But'), tCi = wt('zo_deception', 'circuits'), tBe = wt('zo_deception', 'become'), tUs = wt('zo_deception', 'us'), tFe = wt('zo_deception', 'fear'), e = ce('zo_deception');
+    const a = cs('zo_deception'), tDe = wt('zo_deception', 'deception'), tDe2 = wt('zo_deception', 'deception', 1), tSo = wt('zo_deception', 'someone'), tHi = wt('zo_deception', 'hide'), tEl = wt('zo_deception', 'else'), tPl = wt('zo_deception', 'plain'), tRe = wt('zo_deception', 'read'), tAn = wt('zo_deception', 'answers'), tBu = wt('zo_deception', 'But'), tCi = wt('zo_deception', 'circuits'), tBe = wt('zo_deception', 'become'), tUs = wt('zo_deception', 'us'), tFe = wt('zo_deception', 'fear'), e = ce('zo_deception');
     space(t); globe(t, 960, 2300, 1900, gLon(t), 30, { night: gNight(t) });
     const ki = easeOut(seg(t, t - lt, t - lt + .6)), circ = seg(t, tBu, tCi + .6), rd = seg(t, tBe - .2, tUs) * (1 - seg(t, tFe, tFe + .8));
     postcard(960, 520 + (1 - ki) * 1100, 1680, 900, { rot: .012, caption: t < a + 1.2 ? 'the NETWORK by night' : null, capW: 900, capCol: '#3A2A6A' }, (w, h) => {
@@ -319,12 +319,14 @@
       flat(rectPts(bx - bw / 2, h * .74 - bh, bw, bh), '#6A4A8A', { line: '#F3EBDC', lw: 5 }); flat(ellPts(bx, h * .74 - bh, bw * .46, 90, 30).filter(p => p[1] <= h * .74 - bh), '#8A6AAA');
       for (let r = 0; r < 5; r++) for (let c = 0; c < 4; c++) flat(rectPts(bx - bw / 2 + 30 + c * 88, h * .74 - bh + 190 + r * 60, 56, 40), '#FFE6A8', { alpha: .55 + .45 * pul });
       flat(rrPts(bx - 230, h * .74 - bh + 30, 460, 120, 14), '#2A1A3A', { line: '#FFE08A', lw: 6 });
-      glyphLine(bx, h * .74 - bh + 90, 60, 6, 41, '#FFE08A', 'DECEPTION', rd, { size: 66, font: SERIF });
+      // on "like deception" (and again on "Deception might hide") the sign flickers to what it might be saying, then back to glyphs
+      const fl = Math.max(env(t, tDe - .15, tDe + 1.7, .25, .45), env(t, tDe2 - .15, tDe2 + 1.3, .25, .4)) * (.85 + .15 * Math.sin(t * 23));
+      glyphLine(bx, h * .74 - bh + 90, 60, 6, 41, '#FFE08A', rd >= fl ? 'DECEPTION' : 'DECEPTION?', Math.max(rd, fl), { size: rd >= fl ? 66 : 56, font: SERIF });
       // the street, and passers-by who never look up
       flat(rectPts(0, h * .74, w, h * .26), '#1E1A36');
       for (let i = 0; i < 7; i++) { const ph = frac((t - a) * .04 + i / 7), x = -80 + ph * (w + 160); person(x, h * .9 + (i % 2) * 20, 1.1, { col: ['#3A9C98', '#C2456A', '#E8AA38', '#7B5CA8', '#3A64B8', '#6E9F58', '#D97757'][i], key: 'c13pp' + i, walk: t * 2 + i, look: .2, flip: false }); }
       // the answer booth: reads only the model's answers, and smiles
-      flat(rectPts(w * .2 - 170, h * .74 - 240, 340, 240), '#3A6A5A', { line: '#F3EBDC', lw: 4 }); T('ANSWERS', w * .2, h * .74 - 196, 44, '#F3EBDC', { font: SERIF, weight: '900' }); const ak = seg(t, tAn - .6, tAn); if (ak > 0) T('all fine :)', w * .2, h * .74 - 100, 72, '#9FE3A6', { font: HANDF, alpha: ak });
+      flat(rectPts(w * .2 - 170, h * .74 - 240, 340, 240), '#3A6A5A', { line: '#F3EBDC', lw: 4 }); T('ANSWERS', w * .2, h * .74 - 196, 44, '#F3EBDC', { font: SERIF, weight: '900' }); const ak = seg(t, tSo - .3, tSo + .3); if (ak > 0) T('all fine :)', w * .2, h * .74 - 100, 72, '#9FE3A6', { font: HANDF, alpha: ak });
       const turn = seg(t, tBe - .4, tBe);
       const shut = seg(t, tFe - .2, tFe + .3);
       tour(t, w * .88, h * .97, 19, [[t - lt, 'neutral'], [tPl, 'thinking'], [tRe, 'confused'], [tAn, 'suspicious'], [tBe, 'surprised'], [tUs, 'excited'], [tFe, 'nervous']], { flip: true, aR: turn > .5 && shut < .5 ? 1.8 : .4, armR: turn > .5 && shut < .5 ? bookProp(1) : null });
@@ -365,7 +367,7 @@
       if (t > tDe - .15 && t < tDe + 1.2) { const age = t - tDe + .15; ctx.save(); ctx.globalAlpha = 1 - age / 1.35; T('BONK!', 1180, h * .62, 70, '#D2473F', { font: MARK, stroke: '#FFFFFF', sw: 10 }); ctx.restore(); }
       // years pass at the wall: cobwebs and a calendar flipping
       const yk = seg(t, tMa - .5, tYe + .6);
-      if (yk > 0) { const yr = 2017 + Math.floor(yk * 6.99); ctx.save(); ctx.translate(1050, h * .6); flat(rectPts(-70, -80, 140, 110), '#FFFFFF', { line: INK, lw: 3 }); flat(rectPts(-70, -80, 140, 30), '#D2473F'); T(String(yr), 0, -10, 46, INK, { font: SERIF, weight: '900' }); ctx.restore(); ctx.save(); ctx.globalAlpha = yk; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(1250, h * .62); ctx.lineTo(1250 - 60 + i * 10, h * .62 + 20 + i * 12); ctx.stroke(); } ctx.restore(); }
+      if (yk > 0) { const pg = frac(yk * 7); ctx.save(); ctx.translate(1050, h * .6); flat(rectPts(-70, -80, 140, 110), '#FFFFFF', { line: INK, lw: 3 }); flat(rectPts(-70, -80, 140, 30), '#D2473F'); for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) flat(rectPts(-58 + c * 24, -38 + r * 20, 16, 12), '#C9C0B0'); if (yk < 1) { const ph = 1 - easeIn(pg); flat(rectPts(-70, -80 + 110 * (1 - ph), 140, 110 * ph), '#F3EBDC', { line: INK, lw: 3 }); } ctx.restore(); ctx.save(); ctx.globalAlpha = yk; ctx.strokeStyle = 'rgba(255,255,255,.8)'; ctx.lineWidth = 2; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(1250, h * .62); ctx.lineTo(1250 - 60 + i * 10, h * .62 + 20 + i * 12); ctx.stroke(); } ctx.restore(); }
     });
     if (t > tLe - .3) capL('assume clean: a mess is a lead', 960, 1016, 54, '#FFE08A', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tLe - .3, tLe + .6), alpha: 1 - seg(t, tKn - .6, tKn - .3) });
     if (t > tKn - .3) capL('assume a knot: a mess is a dead end', 960, 1016, 54, '#E7D4FF', { face: 'hand', shadow: false, screen: true, reveal: seg(t, tKn - .3, tDe + .4), alpha: 1 - seg(t, tMa - .5, tMa - .2) });

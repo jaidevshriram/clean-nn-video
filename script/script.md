@@ -4,7 +4,7 @@ A narrated guide to "Neural Networks Are Already Clean" by Nick Cammarata (Goodf
 `## id | title` starts a chapter. `[cue]` is a narration beat. `{display|spoken}` fixes pronunciation.
 `(pause s)` sets the silence after a cue. Lines starting with `>` are the storyboard for the cue above them.
 
-## ch00 | Cold open
+## ch00 | What happens inside an AI?
 
 [open_phone] Every time you ask an AI a question, something happens inside it that nobody fully understands.
 > Night. A phone glows in a dark room; a question types itself. Camera pushes into the screen; the glass becomes a

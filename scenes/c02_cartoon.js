@@ -9,7 +9,7 @@
   function machineL(t, x, y, s, o) { const n = LETTERS.length, C0 = CAM; CAM = null; machine(t, x, y, s, o); CAM = C0; LETTERS.length = n; }   // (its only lettering is the plate)
   // a hand-painted sign on a stick pointing at (x, y) from (x + dx, y + dy); k 0..1 pops it in
   function hoseTag(s, x, y, dx, dy, k, size = 44) {
-    if (k <= 0) return; const tx = x + dx, ty = y + dy, w = s.length * size * .62 + 50, h = size * 1.5;
+    if (k <= 0) return; ctx.save(); ctx.font = `900 ${size}px serif`; const tx = x + dx, ty = y + dy, w = ctx.measureText(s).width + 50, h = size * 1.5; ctx.restore();
     ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(lerp(x, tx, clamp(k * 1.5)), lerp(y, ty, clamp(k * 1.5))); ctx.stroke(); ctx.restore();
     ctx.save(); ctx.translate(tx, ty); ctx.scale(backOut(k), backOut(k)); ctx.rotate(-.04); fillS('#F4F1E8', () => ctx.rect(-w / 2, -h / 2, w, h), 5); txt(s, 0, 3, size, INK, { font: 'serif', weight: '900' }); ctx.restore();
   }
@@ -231,6 +231,7 @@
     // capsules
     const closed = c => t > tshort && (c.c === 3 || (c.c === 2 && c.f === 1)) ? seg(t, tshort + c.f * .2, tshort + .5 + c.f * .2) : 0;
     CAPS.forEach((c, i) => {
+      flat(rectPts(c.x + 210, c.y - 40, 30, 40), '#555', { line: INK, lw: 5 }); flat([[c.x - 16, c.y + 12], [c.x + 150, c.y - 38], [c.x + 316, c.y + 12]], '#333', { line: INK, lw: 6 });   // a roof: each one is a house
       flat(rrPts(c.x, c.y, 300, 200, 30), '#F4F1E8', { line: INK, lw: 6 }); flat(rrPts(c.x + 20, c.y + 140, 260, 40, 10), '#BDB6A6', { line: INK, lw: 4 });
       const cl = closed(c);
       if (cl > 0) { ctx.save(); ctx.globalAlpha = cl; for (const a of [-.3, .3]) { ctx.save(); ctx.translate(c.x + 150, c.y + 100); ctx.rotate(a); flat(rectPts(-170, -16, 340, 32), '#8A7A60', { line: INK, lw: 4 }); ctx.restore(); } ctx.restore(); }
@@ -263,9 +264,9 @@
     tourist(140, 1040, 9, 'top', { ...emotions(t, [[tin, 'thinking'], [tbump, 'surprised'], [twk - .3, 'happy'], [tshort, 'nervous'], [tpack, 'scared'], [tcol + .4, 'laugh']]), view: 'q' });
     camEnd();
     // cards (screen space, so they sit at the bottom of the frame even while the camera is pushed in)
-    if (t < tnev) decoCard([['INSIDE ONE HOUSE', 60, 0]], seg(t, tin + .2, tin + .7) * (1 - seg(t, tnev - .4, tnev)), { y: 120, h: 130, w: 800 });
+    if (t < tnev) decoCard([['TWO STRANGERS, ONE HOUSE', 60, 0]], seg(t, tin + .2, tin + .7) * (1 - seg(t, tnev - .4, tnev)), { y: 120, h: 130, w: 1000 });
     if (t > tnev - .3 && t < w0) decoCard([['NEVER HOME AT THE SAME TIME', 60, 0]], seg(t, tnev - .3, tnev + .2) * (1 - seg(t, w0 - .4, w0)), { y: 990, h: 130, w: 1200 });
-    if (t > tshort - .3 && t < tpack) decoCard([['SHORT ON NEURONS', 70, 0]], seg(t, tshort - .3, tshort + .2) * (1 - seg(t, tpack - .5, tpack - .1)), { y: 990, h: 130, w: 900 });
+    if (t > tshort - .3 && t < tpack) decoCard([['SHORT ON NEURONS', 70, -26], ['fewer houses, the same people', 44, 46]], seg(t, tshort - .3, tshort + .2) * (1 - seg(t, tpack - .5, tpack - .1)), { y: 970, h: 190, w: 1000 });
     if (t > tcol - 1) decoCard([['THEY RARELY COLLIDE', 72, 0]], seg(t, tcol - 1, tcol - .5) * (1 - seg(t, e + .2, e + .4)), { y: 990, h: 130, w: 1000 });
     irisOpen(seg(t, tin, tin + .7), 500, 700);
     oldFilm(t);
@@ -309,8 +310,9 @@
     // Clawd studies the pieces with a magnifier
     const cw = stroll(t, tlist, tstudy, 2000, 1560, 10);
     tourist(cw.x, 1040, 10, 'top', { ...emotions(t, [[m0, 'surprised'], [tun + .5, 'excited'], [tstudy, 'thinking']]), view: t < tstudy ? 'side' : 'q', flip: true, walk: t > tlist && t < tstudy ? t * 2.4 : undefined, aR: t > tstudy ? 1.1 : undefined, armR: t > tstudy ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#555', 'ink', 0); ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.restore(); } : undefined });
+    hoseTag('THE UNFOLDING MACHINE', mx + 130, 650, 600, -250, seg(t, tUM - .3, tUM + .2), 56);   // the plain name, big, when it is said
     camEnd();
-    decoCard([['A SPARSE AUTOENCODER', 92, -20], ['the Unfolding Machine', 50, 70]], seg(t, tsp - .5, tsp) * (1 - seg(t, tap - .4, tap)), { y: 300, h: 320, w: 1300 });
+    decoCard([['A SPARSE AUTOENCODER', 92, -20], ['a second model', 50, 70]], seg(t, tsp - .5, tsp) * (1 - seg(t, tap - .4, tap)), { y: 300, h: 320, w: 1300 });
     if (t > e - .75) irisClose(seg(t, e - .75, cs('kn_both') - .2), 1100, 640);
     oldFilm(t);
   }
@@ -330,7 +332,7 @@
     // the placard
     if (hug <= 0) { ctx.save(); ctx.translate(1040, 420 + 10 * Math.sin(t * 8)); ctx.rotate(.06); fillS('#777', () => ctx.rect(-8, 0, 16, 220), 4); fillS('#F4F1E8', () => ctx.rect(-230, -120, 460, 140), 6); txt('SUPERPOSITION!', 0, -50, 52, INK, { font: 'serif', weight: '900' }); ctx.restore(); }
     // who it is, and that the idea was his: a light bulb pops over the cap on "first proposed it"
-    hoseTag('NICK', 850, 560, -230, -90, seg(t, Math.max(tnk, b0 + .7) - .2, Math.max(tnk, b0 + .7) + .3) * (1 - seg(t, tbel - .5, tbel - .1)), 48);
+    hoseTag('NICK', 850, 560, -230, -90, seg(t, Math.max(tnk, b0 + .3) - .2, Math.max(tnk, b0 + .3) + .3) * (1 - seg(t, tbel - .5, tbel - .1)), 48);
     const bk = popk(t, tfst - .2, .35) * (1 - seg(t, tbel - .3, tbel)); if (bk > 0) { ctx.save(); ctx.translate(850, 470); ctx.scale(backOut(bk), backOut(bk)); for (let i = 0; i < 8; i++) { const q = i / 8 * TAU; ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(Math.cos(q) * 62, Math.sin(q) * 62 - 10); ctx.lineTo(Math.cos(q) * 84, Math.sin(q) * 84 - 10); ctx.stroke(); } fillS('#FFF', () => ctx.arc(0, -10, 44, 0, TAU), 6); fillS('#888', () => ctx.rect(-20, 30, 40, 26), 5); ctx.restore(); }
     // the calendar: its pages fly off for years
     const yrs = Math.floor(clamp((t - tyrs + .4) * 3, 0, 4)), cy = 'YEAR ' + (yrs + 1);

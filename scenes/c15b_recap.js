@@ -5,7 +5,7 @@
 (() => {
   const HANDF = '"Patrick Hand"', MARK = '"Permanent Marker"', SERIF = '"DejaVu Serif"';
   const INKC = '#2A1E1E', PAPERP = '#F1E6CC';
-  // [cue word, nth, line 1, line 2, world, stop index, colour, font size (default 48)]
+  // [cue word, nth, line 1, line 2, source (not shown), stop index, colour, font size (default 48)]
   const TAKE = [
     ['one', 0, 'A mixed-up neuron is usually one idea', "we don't have a word for yet", 'the V neuron', 3, '#C2456A'],
     ['two', 0, 'Knot evidence came from blurry tools and', 'old designs: a last resort, not the default', 'better tools', 5, '#3A64B8'],
@@ -23,7 +23,7 @@
     ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s); ctx.globalAlpha *= .9 * a;
     ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, 92, 0, TAU); ctx.stroke(); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, 80, 0, TAU); ctx.stroke();
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '900 20px sans-serif'; ctx.fillText('STOP', 0, -46); ctx.font = '900 66px serif'; ctx.fillText(String(num), 0, 2);
-    ctx.font = '800 17px sans-serif'; const w = name.toUpperCase(); ctx.fillText(w.length > 16 ? w.slice(0, 16) : w, 0, 50);
+    if (name) { ctx.font = '800 17px sans-serif'; const w = name.toUpperCase(); ctx.fillText(w.length > 16 ? w.slice(0, 16) : w, 0, 50); }
     ctx.restore();
   }
   // the five icons, each with a little idle animation (ph = time)
@@ -69,10 +69,8 @@
       const [x, y] = stampXY(i), col = ACT[STOPS[i][1] - 1], hit = TAKE.findIndex(q => q[5] === i), done = hit >= 0 && hit <= cur;
       const lift = i === lifted ? easeOut(seg(t, TW[cur] - .2, TW[cur] + .5)) : 0, s = lerp(1.4, 1, easeOut(k)) * (.6 + .2 * lift), rot = lerp((hash(i * 3) - .5) * .5, 0, lift);
       if (lift > 0) { glow(x, y, 120, '#FFE08A', .55 * lift); flat(ellPts(x + 8, y + 12, 70 * lift, 70 * lift, 24), 'rgba(60,30,20,.18)'); }
-      stampAt(i, STOPS[i][0], x, y - 10 * lift, s, rot + (lift ? .03 * Math.sin(t * 2) : 0), done ? TAKE[hit][6] : col, clamp(k * 2) * (cur >= 0 && !done ? .55 : 1));
+      stampAt(i, '', x, y - 10 * lift, s, rot + (lift ? .03 * Math.sin(t * 2) : 0), done ? TAKE[hit][6] : col, clamp(k * 2) * (cur >= 0 && !done ? .55 : 1));
     }
-    // under the grid: where the current takeaway came from
-    if (cur >= 0) { const k = seg(t, TW[cur] - .1, TW[cur] + .4), out = cur < 4 ? seg(t, TW[cur + 1] - .5, TW[cur + 1] - .25) : 0; if (k > out) { ctx.save(); ctx.globalAlpha = k * (1 - out); txt('from ' + TAKE[cur][4], LP.x + LP.w / 2, 942 - 12 * (1 - k), 50, TAKE[cur][6], { font: MARK, weight: '400' }); ctx.restore(); } }
     // right page: the five takeaways
     TAKE.forEach(([w, n, l1, l2, from, stop, col, fs = 48], i) => {
       const tw = TW[i], k = seg(t, tw - .25, tw + .45); if (k <= 0) return;

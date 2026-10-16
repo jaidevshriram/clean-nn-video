@@ -149,14 +149,14 @@
       for (let i = 0; i < 16; i++) { const gx = x + 40 + i * (w - 80) / 15, gy = y + h * .9, sw = Math.sin(t * 1.2 + i) * .08; ctx.save(); ctx.translate(gx, gy); ctx.rotate(sw); for (let j = 0; j < 3; j++) { ctx.save(); ctx.rotate((j - 1) * .6); flat(ellPts(0, -50, 16, 50, 16), ['#5EA85A', '#8AC86A', '#3E8A4A'][(i + j) % 3], { line: TEAL_D, lw: 2 }); ctx.restore(); } ctx.restore(); if (i % 3 === 1) { dot(gx, gy - 100, 16, ['#E8862A', '#C8402A', '#F2B04A'][i % 3]); dot(gx, gy - 100, 6, '#FFF6E0'); } if (i % 4 === 2) rLeaf(gx, gy - 40, 70, -1.2 + sw, 'heart', '#E8A02A'); }
     }, t);
   }
-  const BEAC = [['ONE PRINCIPLE', 'principle'], ['IT WORKS', 'works'], ['IT COMPOUNDS', 'compounds'], ['MAYBE ENOUGH', 'maybe']];
-  function beacon(x, base, s, k, t, label, fadeOut = 0) {
+  const BEAC = [['ONE PRINCIPLE', 'principle'], ['STUDYING WORKS', 'works'], ['IT COMPOUNDS', 'compounds'], ['MAYBE ENOUGH', 'maybe']];
+  function beacon(x, base, s, k, t, label, fadeOut = 0, ly = base + 70 * s) {
     flat([[x - 40 * s, base], [x - 14 * s, base - 260 * s], [x + 14 * s, base - 260 * s], [x + 40 * s, base]], '#B9C0CE', { line: TEAL_D, lw: 4 });
     flat(ellPts(x, base - 270 * s, 40 * s, 14 * s, 20), TEAL_D);
     const L = clamp(k);
     if (L > 0) { ctx.save(); ctx.globalAlpha = .35 * L; ctx.fillStyle = '#FFF2C8'; const a = -Math.PI / 2 + Math.sin(t * .8 + x) * .25; ctx.beginPath(); ctx.moveTo(x, base - 300 * s); ctx.lineTo(x + Math.cos(a - .12) * 1400, base - 300 * s + Math.sin(a - .12) * 1400); ctx.lineTo(x + Math.cos(a + .12) * 1400, base - 300 * s + Math.sin(a + .12) * 1400); ctx.closePath(); ctx.fill(); ctx.restore(); glow(x, base - 300 * s, 200 * s * L, '#FFE08A', L); }
     dot(x, base - 300 * s, 30 * s, L > .5 ? '#FFE9A8' : '#6A6A7A'); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, base - 300 * s, 30 * s, 0, TAU); ctx.stroke();
-    if (L > 0 && fadeOut < 1) { const b = backOut(clamp(L * 1.5)); ctx.save(); ctx.globalAlpha *= 1 - fadeOut; ctx.translate(x, base + 70 * s); ctx.scale(b, b); ctx.font = `900 ${30 * s}px ${SERIF}`; const hw = Math.max(130 * s, ctx.measureText(label).width / 2 + 18 * s); flat(rrPts(-hw, -34 * s, 2 * hw, 68 * s, 10 * s), RED, { line: TEAL_D, lw: 4 }); T(label, 0, 2, 30 * s, '#FFF6E0'); ctx.restore(); }
+    if (L > 0 && fadeOut < 1) { const b = backOut(clamp(L * 1.5)); ctx.save(); ctx.globalAlpha *= 1 - fadeOut; ctx.translate(x, ly); ctx.scale(b, b); ctx.font = `900 ${30 * s}px ${SERIF}`; const hw = Math.max(130 * s, ctx.measureText(label).width / 2 + 18 * s); flat(rrPts(-hw, -34 * s, 2 * hw, 68 * s, 10 * s), RED, { line: TEAL_D, lw: 4 }); T(label, 0, 2, 30 * s, '#FFF6E0'); ctx.restore(); }
   }
   // the clever contraption: gears, pliers and a funnel that tries to take a network apart
   function contraption(x, y, s, t, strain) {
@@ -175,6 +175,7 @@
     fieldD(t, o.d ?? 0, { inner: o.dInner }); beaconsE(t, o.e ?? 0, { inner: o.eInner });
     heroA(t, { alive: o.alive, flash: o.flash, inner: o.aInner });
   }
+  function camRects(t, keys, drift = 1) { const v = kf(t, keys.map(k => [k[0], [k[1], k[2], k[3]]]), easeInOut), z = W / v[2]; camBegin(v[0] + v[2] / 2 + drift * 6 * Math.sin(t * .31), v[1] + v[2] * H / W / 2 + drift * 4 * Math.sin(t * .23 + 1), z); }
   const visitor = (t, x, y, u, keys, o = {}) => tourist(x, y, u, 'helmet', { ...emotions(t, keys), view: 'q', ...o });
   // the robot crowd marching across the hero's ground
   function march(t, x, y, w, rows, k, o = {}) { for (let r = 0; r < rows; r++) for (let i = 0; i < 40; i++) { if (hash(i * 3.7 + r) > k) continue; const bx = x + frac((i * 50 + r * 25) / w + t * (o.speed ?? .02)) * w, by = y + r * 46; bot(bx, by, .9 + r * .18, t * 2 + i * .3, { clip: (i + r) % 3 === 0, lit: o.lit && (i + r) % 2 === 0 }); } }
@@ -203,8 +204,8 @@
   function plugs(t, lt, dur) {
     const a = cs('lf_plug'), tPi = wt('lf_plug', 'pieces'), tAg = wt('lf_plug', 'agents'), tMo = wt('lf_plug', 'Modern'), tBo = wt('lf_plug', 'Both'), tIn = wt('lf_plug', 'interpretability'), tSo = wt('lf_plug', 'So'), tPl = wt('lf_plug', 'plug'), e = ce('lf_plug');
     const bK = seg(t, tAg - 1.4, tAg - .2), cK = seg(t, tMo - 1.2, tMo + .7), join = easeInOut(seg(t, tSo - .2, tPl + .05)), surge = seg(t, tPl + .05, tPl + 1.4);
-    camKeys(t, [[t - lt, 1920, 540, 1.0], [(t - lt + tAg - .5) / 2, 1440, 640, .72], [tAg - .5, 960, 545, 1.0], [tAg + .2, 960, 540, 1.0], [(tAg + tMo) / 2 + .1, 1920, 620, .56], [tMo, 2880, 545, 1.0], [tMo + 1.6, 2880, 540, 1.0], [tBo, 1920, 1080, .52], [tSo, 1920, 1040, .52], [tPl, 1920, 1000, .52], [e + .6, 1920, 1030, .515]], .4);
-    poster(t, { b: bK, bAct: bK, c: cK, cAct: cK, d: 1, e: 1, alive: true, flash: surge * (1 - surge) * 3, aInner: (x, y, w, h) => {
+    camRects(t, [[t - lt, 960, 0, 1920], [tAg - .5, 0, 0, 1920], [tAg + .2, 0, 0, 1920], [tMo, 1920, 0, 1920], [tMo + 1.6, 1920, 0, 1920], [tBo, 30, 0, 3780], [tSo, 50, 0, 3740], [e + .6, 70, 0, 3700]], .4);
+    poster(t, { b: bK, bAct: bK, c: cK, cAct: cK, d: 0, e: 0, alive: true, flash: surge * (1 - surge) * 3, aInner: (x, y, w, h) => {
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = TEAL_D; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * .42 + i * 110, 240 - i * 40, 46, Math.sin(t + i) * .05, 0, TAU); ctx.stroke(); }
       tower(x + w / 2, y + h * .82, TS, t, { floors: 5, lit: .4 + .6 * surge, labels: 1 });
       march(t, x + 60, y + h * .86, w - 120, 3, 1, { lit: surge > 0 });
@@ -231,8 +232,8 @@
   function lab2(t, lt, dur) {
     const a = cs('lf_lab2'), tRe = wt('lf_lab2', 'read'), tEx = wt('lf_lab2', 'experiment'), tId = wt('lf_lab2', 'identical'), tBe = wt('lf_lab2', 'best'), tNe = wt('lf_lab2', 'never'), tSc = wt('lf_lab2', 'scientists'), tNo = wt('lf_lab2', 'Now'), e = ce('lf_lab2');
     const twin = easeOut(seg(t, tEx - .2, tId + .4)), flood = seg(t, tNo - .3, e + .6);
-    camKeys(t, [[t - lt, 1920, 775, .7], [tRe, 1920, 540, 1.0], [tId + .4, 1920, 540, 1.0], [tBe + .8, 1920, 605, .88], [tNe - .5, 1920, 605, .88], [tNe + .9, 1120, 1620, 1.0], [e + .6, 1120, 1620, 1.0]], .4);
-    poster(t, { b: 1, bAct: 1, c: 1, cAct: 1, d: 1, e: 1, alive: true, aInner: (x, y, w, h) => {
+    camKeys(t, [[t - lt, 1920, 775, .7], [tRe, 1920, 540, 1.0], [tId + .4, 1920, 540, 1.0], [tBe + .8, 1920, 605, .88], [tNe - .2, 1920, 605, .88], [tNe + .8, 1120, 1620, 1.0], [e + .6, 1120, 1620, 1.0]], .4);
+    poster(t, { b: 1, bAct: 1, c: 1, cAct: 1, d: seg(t, tNe - .6, tNe + .5), e: 0, alive: true, aInner: (x, y, w, h) => {
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = TEAL_D; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * .42 + i * 110, 240 - i * 40, 46, Math.sin(t + i) * .05, 0, TAU); ctx.stroke(); }
       if (twin > 0) { tower(x + w / 2 + 380 * twin, y + h * .82, .8, t, { floors: 5, lit: 1, labels: 1, ghost: .85 * twin }); if (twin > .8) T('= identical copy', x + w / 2 + 380, y + 196, 52, TEAL_D, { font: KAL, weight: '700', alpha: clamp((twin - .8) * 5) * (1 - seg(t, tBe - .5, tBe - .2)) }); }
       tower(x + w / 2 - 20 * twin, y + h * .82, TS, t, { floors: 5, lit: seg(t, a - .3, tRe + .4), labels: 1 });
@@ -258,18 +259,19 @@
   // ---------- 4 · the bitter lesson: one clever contraption vs a field of thousands ----------
   function bitter(t, lt, dur) {
     const a = cs('lf_bitter'), tSi = wt('lf_bitter', 'simple'), tSca = wt('lf_bitter', 'scale'), tCl = wt('lf_bitter', 'clever'), tRi = wt('lf_bitter', 'Rich'), tBi = wt('lf_bitter', 'bitter'), tMa = wt('lf_bitter', 'Maybe'), tSc = wt('lf_bitter', 'scaling'), tBe = wt('lf_bitter', 'beats', 1), tIn = wt('lf_bitter', 'inventing'), tAp = wt('lf_bitter', 'apart'), e = ce('lf_bitter');
-    const strain = seg(t, tIn - .5, tAp), win = seg(t, tBe - .2, tBe + .6);
+    const tB0 = wt('lf_bitter', 'beats'), strain = Math.max(seg(t, tIn - .5, tAp), .75 * env(t, tB0 - .1, tB0 + 1.6, .2, .6)), win = seg(t, tBe - .2, tBe + .6);
     camKeys(t, [[t - lt, 1120, 1620, 1.0], [tCl, 880, 1640, 1.1], [tRi, 1120, 1620, 1.0], [tSc, 1120, 1620, 1.0], [tBe, 1120, 1620, 1.0], [e + .6, 1120, 1620, 1.0]], .4);
-    poster(t, { b: 1, c: 1, d: 1, e: 1, alive: true, aInner: (x, y, w, h) => { tower(x + w / 2, y + h * .82, TS, t, { floors: 5, lit: 1, labels: 1 }); }, dInner: (x, y, w, h) => {
+    poster(t, { b: 1, c: 1, d: 1, e: 0, alive: true, aInner: (x, y, w, h) => { tower(x + w / 2, y + h * .82, TS, t, { floors: 5, lit: 1, labels: 1 }); }, dInner: (x, y, w, h) => {
       // the contraption on the left, a field of scientists on the right
       contraption(x + 420, y + h * .78, 1.4, t, strain);
       const fieldK = seg(t, tSca - 1, tSca + .6);
       for (let r = 0; r < 7; r++) for (let i = 0; i < 26; i++) { if (hash(i * 7.1 + r * 3) > fieldK) continue; const bx = x + 860 + i * 52 + (r % 2) * 26, by = y + h * .6 + r * 56; bot(bx, by, 1 + r * .12, t * 2 + i + r, { clip: (i + r) % 3 === 0, lit: win > .5 || (i * r) % 5 === 0 }); }
-      if (win > 0) { glow(x + w * .72, y + h * .7, 700 * win, '#FFE08A', .6 * win); const k = backOut(win); ctx.save(); ctx.translate(x + w * .8, y + h * .43); ctx.scale(k, k); flat(starPts(0, 0, 120, .5, 12), RED, { line: TEAL_D, lw: 5 }); T('WINS', 0, 6, 54, '#FFF6E0'); ctx.restore(); }
+      if (win > 0) { glow(x + w * .72, y + h * .7, 700 * win, '#FFE08A', .6 * win); const k = backOut(win); ctx.save(); ctx.translate(x + w * .8 + 70, y + h * .43 - 30); ctx.scale(k, k); flat(starPts(0, 0, 120, .5, 12), RED, { line: TEAL_D, lw: 5 }); T('WINS', 0, 6, 54, '#FFF6E0'); ctx.restore(); }
       // the title band
       const tk = seg(t, tBi - .5, tBi + .3); if (tk > 0) { ctx.save(); ctx.translate(x + w / 2, y + 160); ctx.scale(backOut(tk), backOut(tk)); flat([[-560, -70], [560, -70], [520, 0], [560, 70], [-560, 70], [-520, 0]], TEAL, { line: TEAL_D, lw: 5 }); T('THE BITTER LESSON', 0, 4, 76, '#FFF6E0'); ctx.restore(); }
       if (t > tBi) T('— Rich Sutton', x + w / 2 + 380, y + 270, 44, RED, { font: KAL, weight: '700', alpha: seg(t, tBi, tBi + .5) });
-      // the clever thing, named
+      // the clever thing, named: a tag on "the clever thing", then what it is
+      { const ck = seg(t, tCl - .3, tCl + .2) * (1 - seg(t, tIn - .8, tIn - .4)); if (ck > 0) { const b = backOut(ck); ctx.save(); ctx.translate(x + 640, y + h * .78 - 470); ctx.rotate(-.06 + .03 * Math.sin(t * 2)); ctx.scale(b, b); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-60, 30); ctx.lineTo(-170, 130); ctx.stroke(); flat(rrPts(-120, -36, 240, 72, 12), '#FFF6E0', { line: TEAL_D, lw: 4 }); T('the clever thing', 0, 2, 34, TEAL_D, { font: KAL, weight: '700' }); ctx.restore(); } }
       if (t > tIn - .4) { const ak = seg(t, tIn - .4, tIn + .2); T('clever ways to', x + 700, y + h * .78 - 500, 40, TEAL_D, { font: KAL, weight: '700', alpha: ak }); T('take networks apart', x + 700, y + h * .78 - 454, 40, TEAL_D, { font: KAL, weight: '700', alpha: ak }); }
       // a lemon for the visitor: it really is bitter
       const lk = env(t, tBi - .2, tMa + .4, .3, .3);
@@ -288,8 +290,8 @@
     const ex = PE[0], ey = PE[1], ew = PE[2], eh = PE[3];
     const lx = lerp(ex + ew * .7, ex + ew * .5, ease(lf)) + Math.sin(lf * 9) * 60 * (1 - lf), ly = lerp(ey + eh * .82, ey + eh * .46, easeOut(lf)) + Math.sin(lf * 5) * 30;
     camKeys(t, [[t - lt, 1120, 1620, 1.0], [a + .5, 2080, 1560, .7], [a + 1.5, 3040, 1620, 1.2], [TB[3] + 1, 3040, 1620, 1.22], [leafT0, 3040, 1620, 1.22], [NEXT + 2.2, lx, ly, 3.4]], .3);
-    poster(t, { b: 1, c: 1, d: 1, e: 1, alive: true, aInner: (x, y, w, h) => { tower(x + w / 2, y + h * .82, TS, t, { floors: 5, lit: 1, labels: 1 }); }, dInner: (x, y, w, h) => { for (let r = 0; r < 5; r++) for (let i = 0; i < 26; i++) bot(x + 860 + i * 52 + (r % 2) * 26, y + h * .6 + r * 56, 1 + r * .12, t * 2 + i + r, { lit: true }); contraption(x + 420, y + h * .78, 1.4, t, .9); }, eInner: (x, y, w, h) => {
-      BEAC.forEach(([lab], i) => { const bx = x + w * (.14 + i * .24), base = y + h * (.62 - Math.sin((i + .5) / 4 * Math.PI) * .05); beacon(bx, base, 1.1, seg(t, TB[i] - .4, TB[i] + .3), t, lab, ease(seg(t, leafT0 + .5, leafT0 + 1.1))); });
+    poster(t, { b: 1, c: 1, d: 1, e: seg(t, a - .2, a + 1.1), alive: true, aInner: (x, y, w, h) => { tower(x + w / 2, y + h * .82, TS, t, { floors: 5, lit: 1, labels: 1 }); }, dInner: (x, y, w, h) => { for (let r = 0; r < 5; r++) for (let i = 0; i < 26; i++) bot(x + 860 + i * 52 + (r % 2) * 26, y + h * .6 + r * 56, 1 + r * .12, t * 2 + i + r, { lit: true }); contraption(x + 420, y + h * .78, 1.4, t, .9); }, eInner: (x, y, w, h) => {
+      BEAC.forEach(([lab], i) => { const bx = x + w * (.14 + i * .24), base = y + h * (.62 - Math.sin((i + .5) / 4 * Math.PI) * .05); beacon(bx, base, 1.1, seg(t, TB[i] - .4, TB[i] + .3), t, lab, ease(seg(t, leafT0 + .5, leafT0 + 1.1)), y + h * .62 + 77 - h * .05 * Math.sin(1.5 / 4 * Math.PI)); });
       visitor(t, x + w * .5, y + h * .84, 11, [[t - lt, 'happy'], [TB[1], 'excited'], [TB[3], 'hopeful'], [leafT0 + .4, 'surprised']], { flip: lf > .3 });
     } });
     // the leaf from the garden, drifting loose toward the next world

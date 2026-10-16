@@ -104,14 +104,13 @@
     const a = cs('hc_scene'), tc = wt('hc_scene', 'circuit'), t19 = wt('hc_scene', '2019'), tm = wt('hc_scene', 'became');
     ground({ y0: 720, y1: 640 });
     camKeys(t, [[chapStart('ch04'), 960, 540, 1.04], [tm - .4, 960, 560, 1], [tm + 1.6, 960, 560, .9]], .3);
-    // title: "CASE 2 / THE HIDDEN CAR" (right of centre, clear of the arrival stamp)
+    // title: "THE HIDDEN CAR" (right of centre, clear of the arrival stamp)
     const kT = 1 - seg(t, tc - 1.2, tc - .6);
     if (kT > 0) {
       const sl = x0 => lerp(x0, 0, easeOut(seg(t, chapStart('ch04') + .2, chapStart('ch04') + 1.4)));
       push(); translate(sl(800), 0); ctx.globalAlpha = kT;
       serif('THE HIDDEN CAR', 1180, 380, 120, BK, { rot: -.04 }); serif('a case in superposition', 1180, 480, 52, CR, { weight: '400' });
       pop(); ctx.globalAlpha = 1;
-      push(); translate(sl(-900), 0); cutout(rectPts(780, 250, 160, 40), CR); sans('CASE 2', 860, 271, 32, BK); pop();
     }
     // a sneaky car drives along the black ground under the title (into the circuit's left end)
     const kd = seg(t, chapStart('ch04') + .5, tc - .6);
@@ -188,8 +187,8 @@
     // valley names on cream tags, and the rule of the hill
     const kv = popk(t, tS + .6, .4);
     for (const [lab, u, dy] of [['dog', .3, -200], ['car', .77, -110]]) { if (kv <= 0) break; const q = P[Math.round(u * 80)]; push(); translate(q[0], q[1] + dy); scale(backOut(kv)); cutout(rectPts(-62, -32, 124, 64), CR); serif(lab, 0, 3, 46, BK); pop(); }
-    const kh = seg(t, tE - .5, tE + .1);
-    if (kh > 0) { ctx.globalAlpha = kh; serif('lower ground = an easier painting', 1120, 440, 40, BK, { weight: '400' }); ctx.globalAlpha = 1; }
+    const kh = seg(t, tS + .8, tS + 1.4);
+    if (kh > 0) { ctx.globalAlpha = kh; serif('lower ground = an easier painting', 1180, 420, 46, BK, { weight: '400' }); ctx.globalAlpha = 1; }
     // the paint ball rolls into the dog valley, again and again; after the nudge it goes over the ridge to cars
     let u;
     if (t < tn) { const rep = frac((t - tE + 1.2) / 1.6); u = t < tE - 1.2 ? .3 : lerp(.5, .3, easeIn(clamp(rep * 1.6))); }
@@ -205,7 +204,7 @@
     // the four portraits hung along the top; two repaint as cars after the nudge
     for (let i = 0; i < 4; i++) {
       const k = popk(t, tS + i * .5, .4); if (k <= 0) continue;
-      const x = 560 + i * 300, y = 90, rk = i < 2 ? seg(t, tch - .5 + i * .35, tch + .4 + i * .35) : 0;
+      const x = 780 + i * 285, y = 90, rk = i < 2 ? seg(t, tch - .5 + i * .35, tch + .4 + i * .35) : 0;
       push(); translate(x + 110, y + 100); rotate((hash(i * 3) - .5) * .12); scale(backOut(k)); translate(-(x + 110), -(y + 100));
       cutout(rectPts(x - 12, y - 12, 244, 224), i < 2 && rk > .5 ? BL : CR);
       const I = img(DOG[i]); ctx.drawImage(I, x, y, 220, 200);
@@ -348,17 +347,21 @@
         // the windows light up as soon as the tower stands (the photos arrive on "still has")
         if (k < 1) { const kl = popk(t, td + 1 + i * .1, .3); if (kl > 0) flat(rectPts(x + 65 - 62, y + 80 - 78, 124, 156), mixCol(BK, GD, .8 * kl)); }
         if (k <= 0) continue;
-        push(); translate(x + 65, y + 80); scale(backOut(k)); cutout(rectPts(-70, -86, 140, 172), [OR, CR, RD, BL][(r + c) % 4]); photoFlat(PE + 'dino/' + (c * 2 + r), -62, -78, 124, 156, {}); pop();
-        if (r === 0) { const kq = popk(t, tst + .7 + c * .12, .3); if (kq > 0) { push(); translate(x + 65, y + 200); scale(backOut(kq)); flat(rectPts(-30, -16, 60, 10), GD); flat(rectPts(-30, 6, 60, 10), GD); pop(); } }
+        push(); translate(x + 65, y + 80); scale(backOut(k)); cutout(rectPts(-70, -86, 140, r ? 172 : 220), [OR, CR, RD, BL][c]); photoFlat(PE + 'dino/' + (c * 2 + r), -62, -78, 124, 156, {}); pop();
+        // the dog and the car below it are one neuron: the same way of facing, shown in the strip between them
+        if (r === 0) { const kq = popk(t, tst + .7 + c * .12, .3); if (kq > 0) { push(); translate(x + 65, y + 194); scale(backOut(kq)); if (c === 1) arrowCut(0, 0, -1, .3, BK, 1); else { flat(ellPts(0, 0, 19, 19, 20), BK); flat(ellPts(0, 0, 12, 12, 16), [OR, CR, RD, BL][c]); flat(ellPts(0, 0, 5, 5, 10), BK); } pop(); } }
       }
       if (kD > .6) { serif('DINOv2', bx, by + 70, 90, CR); }
+      const kpn = seg(t, tst + 1.1, tst + 1.6); if (kpn > 0 && kD > .8) { ctx.globalAlpha = kpn; serif('pose neurons', bx, by - 190, 64, GD); sans('one column = one neuron', bx, by - 125, 34, CR, { weight: '700' }); ctx.globalAlpha = 1; }
       const k10 = popk(t, t10 - .3, .35), ky = popk(t, ty - .3, .35);
       if (k10 > 0) { push(); translate(bx - bw / 2 - 40, by - bh + 60); rotate(-.1); scale(backOut(k10)); cutout(ellPts(0, 0, 110, 110, 24), RD); serif('×10', 0, 0, 70, CR); pop(); }
       if (ky > 0) { push(); translate(bx + bw / 2 + 20, by - bh + 20); rotate(.1); scale(backOut(ky)); cutout(ellPts(0, 0, 110, 110, 24), BL); serif('+10 yrs', 0, 0, 44, CR); pop(); }
     }
     // every vision model Nick has looked at: more towers pop up along the horizon, each flying a pose arrow
     const ke = seg(t, tev - .3, tdo + .3);
-    for (let i = 0; i < 5; i++) { const k = popk(ke, i * .16, .3); if (k <= 0) continue; const x = [140, 330, 1880, 2050, -60][i], h = 300 + 120 * hash(i); push(); translate(x, 820); scale(1, backOut(k)); cutout([[-80, 0], [-80, -h], [80, -h], [80, 0]], [RD, BL, CR, RD, BL][i]); pop(); if (k > .7) arrowCut(x, 820 - h - 50, i % 2 ? 1 : -1, .5, BK, 1); }
+    const PS = ['small', 'medium', 'large', 'medium', 'large'];
+    for (let i = 0; i < 5; i++) { const k = popk(ke, i * .16, .3); if (k <= 0) continue; const x = [110, 260, 410, 1790, 1930][i], h = 250 + 70 * hash(i), p = [0, 2, 4, 6, 2][i]; push(); translate(x, 820); scale(1, backOut(k)); cutout([[-62, 0], [-62, -h], [0, -h - 50], [62, -h], [62, 0]], [RD, BL, CR, RD, BL][i]); flat(rectPts(-48, -h + 14, 96, 150), BK); photoFlat(PE + PS[i] + '/' + p, -44, -h + 18, 88, 70, {}); photoFlat(PE + PS[i] + '/' + (p + 1), -44, -h + 90, 88, 70, {}); pop(); if (k > .7) arrowCut(x, 820 - h - 90, i % 2 ? 1 : -1, .32, BK, 1); }
+    if (ke > .5) { ctx.globalAlpha = seg(ke, .5, .8); sans('other models', 260, 380, 40, BK, { weight: '800' }); ctx.globalAlpha = 1; }
     spy(240, 1000, 10, 'fedora', { ...emotions(t, [[a - .2, 'thinking'], [td, 'surprised'], [tst, 'excited'], [tSo, 'proud']]), view: 'q', boilKey: 'c4c' });
     pop(); }
     // CASE 2: SOLVED

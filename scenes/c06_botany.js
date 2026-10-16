@@ -130,7 +130,8 @@
   };
   const LBL = { a: ['a. flowers', 1190, 290], b: ['b. tennis balls', 350, 390], c: ['c. fruit', 270, 660], d: ['d. dogs', 1590, 330], e: ['e. broccoli', 1640, 600] };
   const IM_OLD = { a1: iv(1654, 0, 0), a2: iv(1654, 0, 3), a3: iv(3753, 0, 1), a4: iv(1654, 3, 0), b1: iv(3753, 1, 2), b2: iv(7506, 1, 0), c1: iv(3753, 2, 0), c2: iv(7506, 2, 0), d1: iv(3753, 3, 2), d2: iv(7506, 3, 1), e1: iv(7506, 4, 1), e2: iv(15012, 4, 2) };
-  const IM_FINAL = { a1: iv(30024, 0, 1), a2: iv(30024, 0, 2), a3: iv(15012, 0, 1), a4: iv(3753, 3, 0), b1: iv(30024, 1, 3), b2: iv(30024, 1, 5), c1: iv(30024, 2, 2), c2: iv(30024, 2, 3), d1: iv(30024, 3, 1), d2: iv(30024, 3, 2), e1: iv(30024, 4, 0), e2: iv(30024, 4, 3) };
+  // (the ball and fruit branches keep their clearest pictures on their leaves: a ball, apples)
+  const IM_FINAL = { a1: iv(30024, 0, 1), a2: iv(30024, 0, 2), a3: iv(15012, 0, 1), a4: iv(3753, 3, 0), b1: iv(15012, 1, 4), b2: iv(30024, 1, 5), c1: iv(3753, 2, 0), c2: iv(7506, 2, 0), d1: iv(30024, 3, 1), d2: iv(30024, 3, 2), e1: iv(30024, 4, 0), e2: iv(30024, 4, 3) };
   // G: growth state {stem, br: [4], lv: {id: k}, shrink, wilt, imgs, fire: {id: a}}
   function plant(t, G) {
     const sh = G.shrink || 0;
@@ -325,7 +326,7 @@
   function iy(t, lt, dur) {
     const a = cs('gr_iy'), e = ce('gr_iy'), tLang = wt('gr_iy', 'language'), tLet = wt('gr_iy', 'letters'), tMiy = wt('gr_iy', 'Miyazaki'), tD = wt('gr_iy', 'D'), tDo = wt('gr_iy', 'do'), tYour = wt('gr_iy', 'yourself'), tCon = wt('gr_iy', 'contain'), tAll = wt('gr_iy', 'all');
     const dx = slide(t, lt, name, ce('gr_name') + .3);
-    cam(t, [[a - .4, 420, 790, 1.85], [tLet - .3, 470, 760, 1.6], [tMiy, 560, 700, 1.35], [tD, 860, 620, 1.05], [tDo, 1040, 560, 1.0], [tCon, 1040, 560, 1.0], [e + 1, 1000, 560, .98]], dx);
+    cam(t, [[a - .4, 420, 790, 1.85], [tLet - .3, 480, 720, 1.5], [tMiy, 560, 700, 1.35], [tD, 860, 620, 1.05], [tDo, 1040, 560, 1.0], [tCon, 1040, 560, 1.0], [e + 1, 1000, 560, .98]], dx);
     plateFrame(); soil(300, 150);
     const vk = .26 * ease(seg(t, a - .3, a + 2)) + .3 * ease(seg(t, tLet, tMiy)) + .2 * ease(seg(t, tMiy, tD)) + .3 * ease(seg(t, tD + .3, tDo + .2));
     roots(300, 1);
@@ -423,8 +424,6 @@
     // Clawd pushes it off the plate, toward the stage
     tourist(X - 330, GROUND - LIFT + 180, 10, 'safari', { ...emotions(t, [[a, 'proud'], [go - .2, 'determined']]), view: 'side', flip: false, walk: t > go ? (t - go) * 2.4 : undefined, aL: .1, rot: t > go ? .12 : 0, boilKey: 'c6c7' });
     camEnd();
-    plateTitle('Specimen No. 1', 960, 128, seg(lt, .4, 1.2), 56);
-    caption('next stop: the stage', 960, 205, seg(t, go, go + 1), 44, INK);
   }
 
   shots([[chapStart('ch06'), grow], [cs('gr_compare') - .4, compare], [cs('gr_name') - .4, name], [cs('gr_iy') - .4, iy], [cs('gr_geology') - .4, geology], [ce('gr_geology'), wheel]]);

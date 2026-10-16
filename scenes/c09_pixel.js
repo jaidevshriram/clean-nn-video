@@ -438,6 +438,8 @@
     drawEnts();
     camEnd();
     finish();
+    // a dark plate behind the arrival stamp and chapter title, so labels and traffic never run through them
+    ui(() => { const A = globalThis._ARRIVE; if (!A) return; const k = seg(t, A[1] + .1, A[1] + .4) * (1 - seg(t, A[1] + 4.2, A[1] + 4.9)); if (k <= 0) return; ctx.globalAlpha = .82 * k; pbox(70, 90, 880, 200, K.ink, K.dusk, 5); });
     // HUD
     const passed = TV.length ? 0 : 0, nC = 412 + Math.floor(Math.max(0, t - 830) * 1.1), nD = 389 + Math.floor(Math.max(0, t - 830) * .9);
     hudBar('LV 1 · TRAFFIC', `CARS ${nC}   DOGS ${nD}`, t > tTaxi ? 'DISTRICTS 4' : t > tNb ? 'DISTRICTS 2' : 'DISTRICTS 0');
@@ -485,7 +487,7 @@
     const kc = popk(t, tCv - 1, .5), kw = popk(t, tCv - .7, .5), pick = Math.floor(t * 1.2) % 4;
     ent(31 + 3.4 + 4.6, () => bld(31, 3.4, 2.4, 2.4, 120, K.red, { k: kc, lit: .4 + .5 * Math.max(seg(t, tCv - .3, tCv + .2), .3 + .3 * Math.sin(t * 4)), photo: CP + 'stage3_block1-1455-pos-' + (1 + pick), bw: 150, roof: K.orange }));
     ent(27 + 13.6 + 4.6, () => bld(27.2, 13.6, 2.2, 2.4, 120, K.teal, { k: kw, lit: .4 + .5 * Math.max(seg(t, tWg - .3, tWg + .2), .3 + .3 * Math.sin(t * 4 + 3)), photo: CP + 'stage3_block0-609-neg-2', bw: 150, roof: K.sky }));
-    if (kc > 0) lab('CONVERTIBLE', ...iso(33.6, 6.6).map((v, q) => v + (q ? 40 : 160)), 6, K.gold, { k: kc }); if (kw > 0) lab('STATION WAGON', ...iso(28.3, 14.8).map((v, q) => v + (q ? -330 : -330)), 6, K.cyan, { k: kw });
+    if (kc > 0) lab('CONVERTIBLE', ...iso(33.6, 6.6).map((v, q) => v + (q ? 40 : 160)), 6, K.gold, { k: kc }); if (kw > 0) lab('STATION WAGON', ...iso(29.8, 16.8).map((v, q) => v + (q ? 0 : 160)), 6, K.cyan, { k: kw });
     // oncoming traffic keeps the road alive
     for (let n = 0; n < 6; n++) { const u = frac(t * .05 + n / 6) * 40 - 6, vi = 34 - u; if (Math.abs(vi - ci) < 1.2) continue; ent(vi + 10.2, () => veh(vi, 10.25, 'i', ['taxi', 'car', 'amb'][n % 3], { col: [K.sky, K.violet][n % 2] })); }
     // the sports car (selected)
@@ -619,7 +621,7 @@
       if (d < 1.6 && !big && mute < .5) ent(i + lane + .1, () => { const [bx, by] = iso(2.7, 6.7); glow(bx, by - 120, 40, '#FFD58A', .25 * (1 - d / 1.6)); });
     }
     // the neuron (it loves lighthouses): a faint flicker per word; it blazes for the rare one
-    const lit = Math.max(flick, blaze, Math.sin(Math.PI * seg(t, tSh - .2, tSh + 1.3)));
+    const lit = Math.max(flick, blaze, .3 * mute, Math.sin(Math.PI * seg(t, tSh - .2, tSh + 1.3)));   // muted: a steady glow, it just stops flickering
     ent(16, () => bld(1.5, 5.5, 2.4, 2.4, 160, K.navy, { lit, photo: NP + 'lighthouses-positive-1', bw: 150, roof: K.blue, dimWin: .85 }));
     // the shout: one rare word makes the windows blaze
     const sh = seg(t, tSh - .2, tSh + 1.3);
@@ -694,7 +696,7 @@
     if (turning) { const k = fp / .35, w = 530 * Math.cos(k * Math.PI); flat(rectPts(w > 0 ? 10 : 10 + w, -310, Math.abs(w), 620), mixCol(K.cream, K.silver, .3), { line: K.ink, lw: 4 }); }
     ctx.restore();
     finish();
-    hudBar('LV 3 · PAGES', ph3 ? 'LABEL: RARE FEELING' : rarePhase ? 'RARE FEELING NEURON' : t > tRare - .3 ? 'RARE FEELING NEURON' : 'A COMMON NEURON', `PAGE ${pg}`);
+    hudBar('LV 3 · PAGES', ph3 ? 'LABEL: RARE FEELING' : rarePhase ? 'A TRULY SPECIFIC NEURON' : 'A COMMON NEURON', `PAGE ${pg}`);
     toasts(t, [[tOne - .2, '1 WORD IN 100', K.gold], [tFour - .1, '= ~4 HITS A PAGE', K.gold], [tOft - .3, 'FAR TOO OFTEN!', K.red], [tDoz - .4, 'ONCE EVERY FEW DOZEN PAGES', K.violet]], 3);
     if (wk > .9) ui(() => { ptxt('ITEM: BOOK', 200, 240, 6, K.gold, { align: 'left' }); pbox(1130 - 440, 958, 880, 66, K.ink, rarePhase ? K.violet : ph3 ? K.red : K.gold, 5); ptxt(rarePhase ? `HITS: ${t > hitAt ? 1 : 0} IN ${pg} PAGES` : `HITS ON THIS PAGE: ${t > tOne - .2 ? 4 : 0}`, 1130, 992, 6, rarePhase ? K.violet : K.gold); });
     // the verdict: a red stamp across the book

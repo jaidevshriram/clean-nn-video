@@ -64,7 +64,7 @@
     layer('c3out', () => {
       flat(rectPts(WIN.x - 10, WIN.y - 10, WIN.w + 20, WIN.h + 20), '#1A1A22');
       for (let i = 0; i < 9; i++) { const bx = WIN.x - 30 + i * 62, bh = 120 + 220 * hash(i * 4.1); flat(rectPts(bx, WIN.y + WIN.h - bh, 56, bh + 10), ['#2A2A32', '#24242C', '#303038'][i % 3]); for (let r = 0; r < 8; r++) for (let c = 0; c < 3; c++) if (hash(i * 31 + r * 7 + c) > .62) flat(rectPts(bx + 8 + c * 16, WIN.y + WIN.h - bh + 14 + r * 26, 9, 13), '#8A8A80'); }
-      // the 4e:55 hotel: a tall block with a vertical sign
+      // the hotel: a tall block with a vertical neon sign
       flat(rectPts(WIN.x + 250, WIN.y + 110, 170, WIN.h), '#34343C');
       for (let r = 0; r < 9; r++) for (let c = 0; c < 4; c++) flat(rectPts(WIN.x + 268 + c * 38, WIN.y + 135 + r * 40, 20, 24), hash(r * 9 + c) > .5 ? '#9A968A' : '#1E1E24');
     }, { x: WIN.x - 20, y: WIN.y - 20, w: WIN.w + 40, h: WIN.h + 40, variants: 1 });
@@ -72,7 +72,7 @@
     flat(rrPts(WIN.x + 196, WIN.y + 130, 70, 300, 10), '#1C1C22');
     ctx.save(); ctx.restore();
     glow(WIN.x + 231, WIN.y + 280, 190, '#FFFFFF', .45 * fl);
-    if (o.neon !== false) for (let i = 0; i < 5; i++) txt('4e:55'[i], WIN.x + 231, WIN.y + 168 + i * 56, 48, fl > .5 ? '#FFFFFF' : '#77777A', { font: 'serif' });
+    if (o.neon !== false) for (let i = 0; i < 5; i++) txt('HOTEL'[i], WIN.x + 231, WIN.y + 168 + i * 56, 48, fl > .5 ? '#FFFFFF' : '#77777A', { font: 'serif' });
     rain(rt, 1, { n: 160, col: '#D8D8E0' });
     ctx.restore();
     // frame, mullions and the blind pulled half way
@@ -185,7 +185,7 @@
     if (kq > 0) letter('what ONE thing could this be?', 1000, 345, 64, CREAM, { face: 'marker', reveal: kq, shadow: false });
     // time has passed, and the new neurons looked clean
     const ky = seg(t, a - .1, a + .6) * (1 - seg(t, wt('cc_return', 'finding') - .5, wt('cc_return', 'finding') - .1));
-    if (ky > 0) letter('years later…', 960, 110, 72, CREAM, { face: 'marker', reveal: ky, shadow: false });
+    if (ky > 0) letter('years later…', 1500, 300, 72, CREAM, { face: 'marker', reveal: ky, shadow: false, screen: true, stroke: '#141414', strokeW: .14 });   // screen space, clear of the arrival title
     const kc = seg(t, wt('cc_return', 'surprisingly') - .3, wt('cc_return', 'clean') + .3) * (1 - seg(t, tc - .6, tc - .2));
     if (kc > 0) letter('modern models: surprisingly clean', 960, 110, 64, CREAM, { face: 'marker', reveal: kc, shadow: false });
     if (frz > 0) sfx('...', 1700, 600, 60, CREAM, t - q, { life: 1.6 });
@@ -272,7 +272,7 @@
   }
 
   // 4 · the darkroom downstairs: round things switch it off. A ball bounces down the stairs and hits the switch.
-  const ROUND = [[V + 'n1070575', 'tennis', [.53, .68, .07]], [V + 'n1158528', 'clock', [.5, .45, .3]], [V + 'n282687', 'snail', [.55, .43, .13]]];
+  const ROUND = [[V + 'n1070575', 'tennis', [.5, .5, .125], [130, 125, 220, 220]], [V + 'n1158528', 'clock', [.5, .45, .3]], [V + 'n282687', 'snail', [.55, .43, .13]]];
   function darkroom(t, lt, dur) {
     const a = cs('cc_round'), toff = wt('cc_round', 'off'), tR = wt('cc_round', 'Round'), top = wt('cc_round', 'opposite'), tap = wt('cc_round', 'apart'), e = ce('cc_round');
     bg('#1A1A1E');
@@ -306,11 +306,12 @@
     if (lit < 1 && t > toff + .4) { const fk = seg(t, toff + .4, toff + .6); ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createLinearGradient(fx, fy, tx, 400); g.addColorStop(0, `rgba(255,255,240,${.5 * fk})`); g.addColorStop(1, `rgba(255,255,240,${.3 * fk})`); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(fx, fy - 10); ctx.lineTo(tx - 190, 260); ctx.lineTo(tx + 190, 600); ctx.lineTo(fx, fy + 10); ctx.closePath(); ctx.fill(); ctx.restore(); glow(tx, 420, 260, '#FFFFFF', .35 * fk); }
     // the clothesline with the round photos (the neuron's negative side), drying like a darkroom's prints
     ctx.save(); ctx.strokeStyle = '#B8B4AA'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(760, 250); ctx.quadraticCurveTo(1340, 320, 1900, 250); ctx.stroke(); ctx.restore();
-    ROUND.forEach(([im, , rg], i) => {
+    ROUND.forEach(([im, , rg, cr], i) => {
       const k = popk(t, TW[i] - .45, .5); if (k <= 0) return;
       const x = 930 + i * 330, w = 260, h = 260, sway = .05 * Math.sin(t * 2 + i), y = 262 + 26 * Math.sin((i + .5) / 3 * Math.PI);
       push(); translate(x + w / 2, y); rotate(sway + (1 - backOut(k)) * .6); translate(-(x + w / 2), -y);
-      photoFlat(im, x, y + 14, w, h, { border: 9, borderCol: '#E2DED4' });
+      if (cr) { ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.fillRect(x - 3, y + 14, w + 18, h + 18); ctx.fillStyle = '#E2DED4'; ctx.fillRect(x - 9, y + 5, w + 18, h + 18); ctx.drawImage(img(im), cr[0], cr[1], cr[2], cr[3], x, y + 14, w, h); }   // (cropped close, so the ball reads)
+      else photoFlat(im, x, y + 14, w, h, { border: 9, borderCol: '#E2DED4' });
       flat(rectPts(x + w / 2 - 8, y - 6, 16, 34), '#8A867C');
       // a cream ring around the round thing
       const rk = seg(t, TW[i] + .1, TW[i] + .6); if (rk > 0) { ctx.save(); ctx.strokeStyle = CREAM; ctx.lineWidth = 6; ctx.beginPath(); ctx.ellipse(x + w * rg[0], y + 14 + h * rg[1], w * rg[2] * 1.6 + 10, w * rg[2] * 1.6 + 10, 0, -1.6, -1.6 + TAU * rk); ctx.stroke(); ctx.restore(); }
@@ -344,8 +345,8 @@
     noir();
   }
 
-  // 5 · new suspects: a bullet train, the rack of pool balls, a cocktail glass. Each gets a V. Cats and cars get shoved off.
-  const NEW = [[V + 'pTrain34', 'Bullet', { ax: .52, ay: .62, ty: .5, lx: .2, rx: .95 }], [V + 'pPool13', 'triangle', { ax: .56, ay: .62, ty: .3, lx: .4, rx: .72 }, [285, 92, 120, 101]], [V + 'c5a317d', 'fires', { ax: .5, ay: .66, ty: .14, lx: .16, rx: .84 }]];
+  // 5 · new suspects: a bullet train, the rack of pool balls. Each gets a V. Cats and cars get shoved off.
+  const NEW = [[V + 'pTrain34', 'Bullet', { ax: .52, ay: .62, ty: .5, lx: .2, rx: .95 }], [V + 'pPool13', 'triangle', { ax: .56, ay: .62, ty: .3, lx: .4, rx: .72 }, [285, 92, 120, 101]]];
   function newShot(t, lt, dur) {
     const tn = wt('cc_new', 'never'), ts = wt('cc_new', 'shape'), e = ce('cc_new');
     bg('#2A2A2E');
@@ -356,7 +357,7 @@
     [[0, 330, 930, -.12], [1, 560, 950, .1], [4, 1500, 940, .14], [3, 1290, 950, -.08]].forEach(([g, x, y, r], i) => { const f = easeIn(clamp(push_ * 1.4 - i * .12)); polaroid(GRID[g], x + f * 120 * (i < 2 ? -1 : 1), y + f * 420, 150, 130, r + f * 1.5 * (i % 2 ? 1 : -1)); });
     NEW.forEach(([im, w0, vo, crop], i) => {
       const tw = wt('cc_new', w0), k = seg(t, tw - .5, tw + .1); if (k <= 0) return;
-      const x = 330 + i * 450, y = 600 + (i % 2) * 30, w = 380, h = 320, r = (i - 1) * .06;
+      const x = 510 + i * 520, y = 600 + (i % 2) * 30, w = 380, h = 320, r = (i - .5) * .1;
       const ox = lerp(1500, 0, easeOut(k)), rot = r + (1 - easeOut(k)) * 1.2;
       polaroid(im, x + ox, y - 80 * Math.sin(k * Math.PI), w, h, rot, { border: 14, crop });
       if (k >= 1) vOver(x, y, w, h, r, vo, seg(t, tw + .15, tw + .6), { sw: 9 });
@@ -442,20 +443,22 @@
     camKeys(t, [[a - .2, 960, 540, 1.0], [tw1, 990, 490, 1.12], [tE - .3, 1000, 520, 1.0], [tc, 1130, 520, 1.06], [tw2, 1000, 500, 1.08], [e + .5, 960, 520, 1.02]], .4);
     layer('c3sk', () => { flat(rectPts(-200, -200, W + 400, 1180), '#4A4A50'); for (let i = 0; i < 30; i++) flat(rectPts(-200 + i * 80, -200, 3, 1180), '#47474D'); flat(rectPts(-200, 960, W + 400, 400), '#2E2E34'); for (let i = 0; i < 14; i++) flat(rectPts(-200 + i * 180, 960, 4, 400), '#26262C'); }, { x: -200, y: -200, w: W + 400, h: H + 400, variants: 1 });
     blinds(t, .3, 600);
-    // the street map on the wall: the V crossing, a wide downhill road to the cat district
-    const MX = 1290, MY = 150;
+    // the street map on the wall: the V crossing, a wide downhill road to the cat district (pinned up when the route is named)
+    const MX = 1290, MY = 150, mk = ease(seg(t, tE - .5, wt('cc_whiskers', 'route')));
+    if (mk > 0) { ctx.save(); ctx.globalAlpha = mk;
     flat(rectPts(MX, MY, 520, 440), '#CFCBC0', { shadow: [8, 10, 'rgba(0,0,0,.35)'] });
     for (let i = 0; i < 9; i++) flat(rectPts(MX + 20 + i * 56, MY + 20, 2, 400), '#BDB9AE');
     const node = [MX + 260, MY + 90], CAT = [[MX + 260, MY + 90], [MX + 200, MY + 200], [MX + 140, MY + 300], [MX + 110, MY + 390]], CAR = [[MX + 260, MY + 90], [MX + 380, MY + 160], [MX + 450, MY + 230]], FOX = [[MX + 260, MY + 90], [MX + 330, MY + 260], [MX + 360, MY + 370]];
     const road = (P, w, c) => { ctx.save(); ctx.strokeStyle = c; ctx.lineWidth = w; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); through(P, 6).forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.restore(); };
     road(CAT, 46, '#6A6A70'); road(CAR, 12, '#7A7A80'); road(FOX, 12, '#7A7A80'); road(CAT, 4, '#E6E2D8');
-    dot(node[0], node[1], 22, '#2A2A2E');
+    dot(node[0], node[1], 22, '#2A2A2E', mk);
     txt('V', node[0], node[1] + 2, 30, '#E6E2D8', { font: 'serif' });
     txt('CATS', MX + 120, MY + 420, 40, '#2A2A2E', { font: 'serif' }); txt('cars', MX + 405, MY + 272, 30, '#4A4A50', { font: 'serif' }); txt('fox', MX + 380, MY + 400, 30, '#4A4A50', { font: 'serif' });
     // the painter's pin wanders from the V down the cat road
     const wander = seg(t, tE + .2, tc + .6), Cc = through(CAT, 10), pp = Cc[Math.floor(ease(wander) * (Cc.length - 1))];
-    inColor(() => { glow(pp[0], pp[1], 50, '#FFC04A', .9); });
-    dot(pp[0], pp[1], 12, '#FFFFFF');
+    inColor(() => { glow(pp[0], pp[1], 50, '#FFC04A', .9 * mk); });
+    dot(pp[0], pp[1], 12, '#FFFFFF', mk);
+    ctx.restore(); }
     // the artist: first the real portrait (whiskers and all); then a rewind: it starts again from a clean V, then
     // goes down the cat route and adds the cat's whiskers
     const rew = seg(t, tE - .9, tE - .1), redo = seg(t, tE, tE + 1.2), cat = seg(t, tc + .2, tc + 1.6);
@@ -524,8 +527,7 @@
         const cols = ['#D2473F', '#F3E2BE', '#3A64B8', '#F3E2BE'];
         for (let i = 0; i < 4; i++) { const hx = -125 + i * 82; ctx.fillStyle = cols[i]; ctx.beginPath(); ctx.moveTo(hx - 30, 100); ctx.lineTo(hx, 64); ctx.lineTo(hx + 30, 100); ctx.lineTo(hx + 30, 150); ctx.lineTo(hx - 30, 150); ctx.closePath(); ctx.fill(); ctx.fillStyle = '#1A1A1A'; ctx.fillRect(hx - 9, 120, 18, 30); }
         ctx.fillStyle = '#E8862A'; ctx.beginPath(); ctx.moveTo(-70, 195); ctx.lineTo(-58, 172); ctx.lineTo(-20, 160); ctx.lineTo(25, 160); ctx.lineTo(50, 178); ctx.lineTo(62, 195); ctx.closePath(); ctx.fill();
-        ctx.fillStyle = '#1A1A1A'; ctx.font = '900 46px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('CASE 2', 0, -150); ctx.font = '900 34px serif'; ctx.fillText('THE HIDDEN CAR', 0, -95);
-        ctx.fillStyle = '#F3E2BE'; ctx.font = '400 24px serif'; ctx.fillText('a case in superposition', 0, -55);
+        ctx.fillStyle = '#1A1A1A'; ctx.font = '900 72px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('CASE 2', 0, -120);
       });
       pop();
     }
@@ -540,5 +542,5 @@
     noir();
   }
 
-  shots([[chapStart('ch03'), returnShot], [cs('cc_v') - .2, vShot], [wt('cc_inputs', 'Look') - .4, inputs], [cs('cc_round') - .2, darkroom], [cs('cc_new') - .2, newShot], [cs('cc_noun') - .2, typewriter], [cs('cc_whiskers') - .2, sketch], [cs('cc_lesson') - .2, lesson]]);
+  shots([[chapStart('ch03'), returnShot], [cs('cc_v') - .2, vShot], [wt('cc_inputs', 'Look') - .4, inputs], [cs('cc_round') - .2, darkroom], [cs('cc_new') - .2, newShot], [cs('cc_noun') + .4, typewriter], [cs('cc_whiskers') - .2, sketch], [cs('cc_lesson') - .2, lesson]]);
 })();

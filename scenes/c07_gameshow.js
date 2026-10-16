@@ -124,7 +124,7 @@
   const S0 = [[960, 930], [954, 840], [966, 740], [956, 640], [962, 540], [960, 470]];
   const BR = [[[958, 700], [860, 650], [760, 610], [640, 560]], [[760, 612], [640, 680], [520, 730], [440, 740]], [[962, 620], [1060, 580], [1180, 540], [1300, 500]], [[1180, 542], [1290, 610], [1400, 680], [1500, 700]]];
   const iv = (s, b, i) => NO + `iv1_${s}_${b}_${i}`;
-  const LV = [[960, 482, 125, -Math.PI / 2, iv(30024, 0, 1)], [952, 522, 115, -2.45, iv(30024, 0, 2)], [968, 522, 115, -.69, iv(15012, 0, 1)], [640, 560, 220, -2.55, iv(30024, 1, 3)], [790, 622, 160, -1.85, iv(30024, 1, 5)], [440, 742, 200, 3.05, iv(30024, 2, 2)], [570, 712, 150, 2.1, iv(30024, 2, 3)], [1300, 500, 220, -.5, iv(30024, 3, 1)], [1140, 556, 160, -1.25, iv(30024, 3, 2)], [1500, 702, 210, .12, iv(30024, 4, 0)], [1360, 664, 150, 1.05, iv(30024, 4, 3)]];
+  const LV = [[960, 482, 125, -Math.PI / 2, iv(30024, 0, 1)], [952, 522, 115, -2.45, iv(30024, 0, 2)], [968, 522, 115, -.69, iv(15012, 0, 1)], [640, 560, 220, -2.55, iv(15012, 1, 4)], [790, 622, 160, -1.85, iv(30024, 1, 5)], [440, 742, 200, 3.05, iv(3753, 2, 0)], [570, 712, 150, 2.1, iv(7506, 2, 0)], [1300, 500, 220, -.5, iv(30024, 3, 1)], [1140, 556, 160, -1.25, iv(30024, 3, 2)], [1500, 702, 210, .12, iv(30024, 4, 0)], [1360, 664, 150, 1.05, iv(30024, 4, 3)]];
   function leafAt(x, y, L, a, im, glowA = 0) {
     const ca = Math.cos(a), sa = Math.sin(a), P = []; for (let i = 0; i <= 14; i++) { const u = i / 14; P.push([u * L, -Math.pow(Math.sin(u * Math.PI), .75) * L * .3 * (1 - .3 * u)]); } for (let i = 13; i > 0; i--) { const u = i / 14; P.push([u * L, Math.pow(Math.sin(u * Math.PI), .75) * L * .3 * (1 - .3 * u)]); }
     const Q = P.map(([px, py]) => [x + px * ca - py * sa, y + px * sa + py * ca]), B = bbox(Q), path = pathOf(Q);
@@ -167,8 +167,9 @@
     else if (im) { const I = img(im), s = Math.min(I.width / w, I.height / h); ctx.drawImage(I, (I.width - w * s) / 2, (I.height - h * s) / 2, w * s, h * s, -w / 2, -h / 2, w, h); }
     pop();
   }
-  // a Latin scroll (drawn into a tile)
-  const latin = (w, h) => { flat(rectPts(-w / 2, -h / 2, w, h), '#F3E2BE'); flat(ellPts(-w / 2 + 6, 0, 8, h / 2, 12), '#D9C29A', { line: DARK, lw: 1.5 }); flat(ellPts(w / 2 - 6, 0, 8, h / 2, 12), '#D9C29A', { line: DARK, lw: 1.5 }); ['ARMA', 'VIRVMQVE', 'CANO'].forEach((s, i) => txt(s, 0, -h * .26 + i * h * .26, h * (i === 1 ? .15 : .2), '#6A3A20', { font: SERIF, weight: '700' })); };
+  // a page of poetry (drawn into a tile): verse squiggles and a quill, the word "poem" on top
+  const poem = (w, h) => { flat(rectPts(-w / 2, -h / 2, w, h), '#F3E2BE'); txt('poem', 0, -h * .32, h * .2, '#6A3A20', { font: SERIF, weight: '700' }); ctx.save(); ctx.strokeStyle = '#6A3A20'; ctx.lineWidth = 2.2; ctx.lineCap = 'round'; for (let i = 0; i < 4; i++) { const y = -h * .1 + i * h * .13, x1 = w * (i % 2 ? .12 : .3); ctx.beginPath(); for (let j = 0; j <= 12; j++) { const x = lerp(-w * .38, x1, j / 12); j ? ctx.lineTo(x, y + 2.5 * Math.sin(j * 1.9 + i)) : ctx.moveTo(x, y); } ctx.stroke(); } ctx.restore();
+    push(); translate(w * .3, h * .1); rotate(.55); flat([[0, -h * .42], [w * .1, -h * .2], [w * .04, h * .2], [0, h * .3], [-w * .04, h * .2], [-w * .1, -h * .2]], '#FFFFFF', { line: DARK, lw: 1.5 }); pop(); };
 
   // ---------- 1 · the contestants arrive ----------
   function intro(t, lt, dur) {
@@ -225,13 +226,15 @@
     // right: dogs, and Latin poetry in the same neuron
     letter('strangers share', 1142, by + 50, 44, VIOLT, { face: 'marker', shadow: false, alpha: edgeA(1142, by + 50, 380, 50), reveal: seg(t, tStr - .3, tStr + .5) });
     const RIGHT = [V + 'c5a317c', null, V + 'p10704', null, V + 'n750219', RM + 'ear-large-hanging'];
-    RIGHT.forEach((im, i) => { const c = i % 3, r = Math.floor(i / 3), isL = !im, t0 = isL ? tLat - .3 + i * .15 : tFl2 - .6 + i * .2, f = seg(t, t0, t0 + .4); tile(1023 + c * 118, by + 175 + r * 140, 104, 116, im, f, { draw: isL ? latin : null, frame: '#3A1A0A', lit: isL ? .5 * f : 0, glowCol: VIOLT }); });
+    // dogs flip on "strangers share"; the poems flip on "different shifts" and light up when they are named
+    const tShift = wt('te_local', 'shifts');
+    RIGHT.forEach((im, i) => { const c = i % 3, r = Math.floor(i / 3), isL = !im, t0 = isL ? tShift - .4 + i * .15 : tStr + .1 + i * .2, f = seg(t, t0, t0 + .4); tile(1023 + c * 118, by + 175 + r * 140, 104, 116, im, f, { draw: isL ? poem : null, frame: '#3A1A0A', lit: isL ? .3 * f + .5 * env(t, tLat - .3, e + 1, .2, .3) : 0, glowCol: VIOLT }); });
     clawdSeat(t, [[a, 'happy'], [tLat, 'confused']], 0);
     audience(t, 0);
     camEnd();
     if (t > tPo) { sfx('huh?', 1300, 230, 70, VIOLT, t - tPo, { face: 'marker', life: 1.4 }); }
     lower(t, tCol - .2, tSup - .2, 'one neuron: many floppy ears', GOLD);
-    lower(t, tLat - .1, e + 1.2, 'floppy-eared dogs + Latin poetry?', VIO);
+    lower(t, tLat - .1, e + .8, 'floppy-eared dogs + Latin poetry?', VIO);
     roundCard(t, a - .2, 'ROUND 1', 'who shares?');
     scoreBug(t, seg(t, a + 1.2, a + 2));
   }
@@ -251,19 +254,20 @@
     for (let side = 0; side < 2; side++) for (let j = 0; j < 8; j++) { const m = side ? mR : mL; if (m > .5 && j % 2) continue; jar(jarX(side, j, m), 740, lerp(36, 76, m), lerp(126, 136, m), side ? VIOLT : GOLDLT, popk(t, tHand - .2 + j * .05 + side * .2, .4)); }
     letter('generalization', 778, 360, 44, GOLDLT, { face: 'marker', shadow: false, reveal: seg(t, tGen - .2, tGen + .5) });
     // the jars are the neurons
-    const kj = seg(t, tHand - .1, tHand + .5); if (kj > 0) for (const x of [778, 1142]) letter('jars = neurons', x, 768, 26, CREAM, { face: 'marker', shadow: false, alpha: kj });
+    const kj = seg(t, tHand - .1, tHand + .5); if (kj > 0) for (const x of [778, 1142]) letter('jars = neurons', x, 572, 28, CREAM, { face: 'marker', shadow: false, alpha: kj });
     letter('superposition', 1142, 360, 44, VIOLT, { face: 'marker', shadow: false, reveal: seg(t, tSup - .2, tSup + .5) });
     SHAPES.forEach((S, i) => {
-      const burst = seg(t, t32 - .3 + i * .012, t32 + .4 + i * .012), cx = 790 + (i % 8) * 49 + (Math.floor(i / 8) % 2) * 20, cy = 430 + Math.floor(i / 8) * 34;
+      const burst = seg(t, t32 - .3 + i * .012, t32 + .4 + i * .012), cx = (i % 8) * 40 - 150 + (Math.floor(i / 8) % 2) * 18, cy = 418 + Math.floor(i / 8) * 32;
       if (burst <= 0) return;
-      // the "thing" itself floats in the cloud until both copies have gone
-      const home = arcPt([960, 760], [cx + 85, cy], 200, easeOut(burst)), bob = 3 * Math.sin(t * 3 + i);
+      // the same 32 things land in both halves; each copy floats in its half until it goes to a jar
+      const hL = arcPt([960, 760], [778 + cx, cy], 200, easeOut(burst)), hR = arcPt([960, 760], [1142 + cx, cy], 200, easeOut(burst)), bob = 3 * Math.sin(t * 3 + i);
       const gK = ease(seg(t, tGr - .4 + i * .03, tGr + .4 + i * .03)), sK = ease(seg(t, tSup + i * .02, tSup + .6 + i * .02));
-      if (gK < 1 || sK < 1) shape(S.kind, home[0], home[1] + bob, 13, S.col, { sw: .5 });
+      if (gK < 1) shape(S.kind, hL[0], hL[1] + bob, 12, S.col, { sw: .5 });
+      if (sK < 1) shape(S.kind, hR[0], hR[1] + bob, 12, S.col, { sw: .5 });
       // generalization: by family, then by shade inside the family
-      if (gK > 0) { const j = S.fam * 2 + (S.i >= 4 ? 1 : 0), slot = S.i % 4, m = mL, x = jarX(0, j, m) + (m > .5 ? ((j % 2) ? 14 : -14) : 0), y = 735 - slot * 28 - 14; shape(S.kind, lerp(home[0], x, gK), lerp(home[1], y, gK), 12, S.col, { sw: .5 }); }
+      if (gK > 0) { const j = S.fam * 2 + (S.i >= 4 ? 1 : 0), slot = S.i % 4, m = mL, x = jarX(0, j, m) + (m > .5 ? ((j % 2) ? 14 : -14) : 0), y = 735 - slot * 28 - 14; shape(S.kind, lerp(hL[0], x, gK), lerp(hL[1], y, gK), 12, S.col, { sw: .5 }); }
       // superposition: anywhere at all
-      if (sK > 0) { const j = Math.floor(hash(i * 7.7 + 3) * 8), slot = i % 4, m = mR, jj = m > .5 ? j - (j % 2) : j, x = jarX(1, jj, m) + (m > .5 ? (j % 2 ? 14 : -14) : 0), y = 735 - slot * 28 - 14; shape(S.kind, lerp(home[0], x, sK), lerp(home[1], y, sK), 12, S.col, { sw: .5 }); }
+      if (sK > 0) { const j = Math.floor(hash(i * 7.7 + 3) * 8), slot = i % 4, m = mR, jj = m > .5 ? j - (j % 2) : j, x = jarX(1, jj, m) + (m > .5 ? (j % 2 ? 14 : -14) : 0), y = 735 - slot * 28 - 14; shape(S.kind, lerp(hR[0], x, sK), lerp(hR[1], y, sK), 12, S.col, { sw: .5 }); }
     });
     clawdSeat(t, [[a, 'excited'], [t32, 'surprised'], [tGr, 'happy']], 0);
     audience(t, .6 * env(t, t32, t32 + 1.2, .2, .6));
@@ -346,7 +350,7 @@
     if (fan > 0 && pour < 1) { const [tx, ty] = GRID10(1); CURVES.forEach((im, i) => { const q = Math.PI + (i + .5) / 10 * Math.PI, hx = tx + Math.cos(q) * 230, hy = ty - 40 + Math.sin(q) * 200, k = popk(t, tTen2 - .9 + i * .04, .3), u = easeIn(pour); tile(lerp(hx, tx, u), lerp(hy, ty, u), 56, 56, im, 1, { s: backOut(k) * (1 - .7 * u) }); }); }
     // the knot's prediction: curves, spirals and webs crammed together
     const bk = popk(t, tIf - .2, .5) * (1 - seg(t, r - .3, r + .1));
-    if (bk > 0) { bubble(1300, 300, 230, 170, bk, SX, 380); if (bk > .6) { tile(1300, 310, 200, 150, null, 1, { draw: jumble(200, 150, [seg(t, tCurves - .3, tCurves + .4), seg(t, tSpi - .2, tSpi + .6), seg(t, tWeb - .3, tWeb + .5)]), frame: VIO }); } }
+    if (bk > 0) { bubble(1300, 300, 230, 170, bk, SX, 380); if (bk > .6) { tile(1300, 310, 200, 150, null, 1, { draw: jumble(200, 150, [seg(t, tIf + .3, tCurves + .4), seg(t, tSpi - .2, tSpi + .6), seg(t, tWeb - .3, tWeb + .5)]), frame: VIO }); } }
     // the Unfolding Machine sniffs along the tiles and comes back with nothing
     if (t > tUnf - .6) { const mk = seg(t, tUnf - .6, tUnf + .8), mx = lerp(-200, 560, easeOut(mk)) + (t > tUnf + .8 ? 420 * ease(seg(t, tUnf + .8, tNone - .2)) : 0) + 10 * Math.sin(t * 6); machineL(t, mx, 955, .45, { on: 1, mouth: .4 + .4 * Math.abs(Math.sin(t * 5)) }); if (t > tNone - .3) { const bk = popk(t, tNone - .3, .4), tBr = wt('te_result', 'broad'); push(); translate(mx + 190, 880); scale(1.25 * backOut(bk));
         // the basket: no hidden curve detectors, only broad, bunched-up versions of the same shapes
@@ -356,7 +360,7 @@
     audience(t, env(t, tNone + .2, e + 2, .3, .5));
     camEnd();
     roundCard(t, tSq - .2, 'ROUND 2', 'THE PRESS');
-    lower(t, tCurve, tCr - .2, '480 curve detectors', GOLD);
+    lower(t, tCurve, tTen - .5, '480 curve detectors', GOLD);
     const tRet = wt('te_squeeze', 'retrained');
     lower(t, tTen - .4, tRet - .3, 'cut to 10 · no way around', RED);
     lower(t, tRet - .2, tIf - .4, 'retrained from scratch', RED);
@@ -378,7 +382,7 @@
     const tCo = wt('te_last', 'Coarser'), tNev = wt('te_last', 'not'), tPack = wt('te_last', 'packing'), tPaint = wt('te_last', 'paints'), tBr = wt('te_last', 'broader'), tBrush = wt('te_last', 'brush');
     stageBG();
     const [sx, sy] = shake(t, tDown + .05, 22);
-    camKeys(t, [[a - .3, 960, 520, 1.15], [tTh, 960, 500, 1.25], [tDown + .2, 960, 480, 1.2], [tSame, 960, 500, 1.35], [tPack, 1100, 480, 1.15], [tPaint, 960, 500, 1.3], [tBrush + .6, 960, 540, 1.05], [e + 1, 960, 540, 1]].map(k => [k[0], k[1] + sx, k[2] + sy, k[3]]), .5);
+    camKeys(t, [[a - .3, 960, 520, 1.15], [tTh, 960, 500, 1.25], [tDown + .2, 960, 480, 1.2], [tSame, 960, 500, 1.22], [tPack, 1100, 480, 1.15], [tPaint, 960, 500, 1.22], [tBrush + .6, 960, 540, 1.05], [e + 1, 960, 540, 1]].map(k => [k[0], k[1] + sx, k[2] + sy, k[3]]), .5);
     const down = easeIn(seg(t, tDown - .35, tDown + .05)), up = easeOut(seg(t, tSame - .6, tSame + .4));
     const plateY = lerp(300, 700, down) - (lerp(300, 700, down) - 300) * up + 4 * Math.sin(t * 40) * env(t, tDown + .05, tSame - .6, .1, .1);
     const cnt = t < tDown ? '1024' : t < tSame ? String(Math.round(lerp(1024, 13, easeInOut(seg(t, tDown + .2, tThir + .2))))).padStart(4, ' ') : '  13';
@@ -415,11 +419,12 @@
     return top;
   }
   function shutter(x, w, h, open) { const top = 800 - h, sh = h * (1 - easeInOut(open)); if (sh < 2) return; ctx.save(); ctx.beginPath(); ctx.rect(x - w / 2, top, w, sh); ctx.clip(); flat(rectPts(x - w / 2, top, w, h), '#B0203A'); ctx.strokeStyle = '#7A1026'; ctx.lineWidth = 3; for (let y = top + sh - 2; y > top; y -= 18) { ctx.beginPath(); ctx.moveTo(x - w / 2, y); ctx.lineTo(x + w / 2, y); ctx.stroke(); } ctx.restore(); txt('?', x, top + sh / 2, Math.min(w, h) * .45, '#FFD36B', { font: SERIF, weight: '900' }); }
+  const cartTile = (w, h) => { flat(rectPts(-w / 2, -h / 2, w, h), '#BFE0F0'); flat(rectPts(-w / 2, h * .25, w, h * .25), '#9AC86A'); flat([[-w * .4, -h * .05], [w * .3, -h * .05], [w * .26, h * .18], [-w * .36, h * .18]], '#A8763E', { line: DARK, lw: 2 }); ctx.save(); ctx.strokeStyle = DARK; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(w * .3, h * .02); ctx.lineTo(w * .46, -h * .08); ctx.stroke(); ctx.restore(); flat(ellPts(-w * .08, h * .22, w * .15, w * .15, 14), '#6A4A2A', { line: DARK, lw: 2 }); dot(-w * .08, h * .22, 3, DARK); };
   function sizes(t, lt, dur) {
     const a = cs('te_sizes'), e = ce('te_sizes'), tTr = wt('te_sizes', 'trained'), tThree = wt('te_sizes', 'three'), tApart = wt('te_sizes', 'apart'), tSm = wt('te_sizes', 'smallest'), tCar = wt('te_sizes', 'car'), tBig = wt('te_sizes', 'biggest'), tDoz = wt('te_sizes', 'specialists');
     const tTax = wt('te_sizes', 'taxis'), tVan = wt('te_sizes', 'ambulances'), tCon = wt('te_sizes', 'convertibles'), tViews = wt('te_sizes', 'views'), tLess = wt('te_sizes', 'Less'), tScr = wt('te_sizes', 'scrambled');
     stageBG();
-    camKeys(t, [[a - .3, 960, 540, 1], [tTr, 960, 520, 1.25], [tSm - .3, 700, 600, 1.9], [tCar + .6, 700, 600, 1.85], [tBig - .2, 1185, 520, 1.6], [tViews + .5, 1150, 520, 1.5], [tLess, 960, 520, 1.25], [e + 1, 960, 540, 1.05]], .5);
+    camKeys(t, [[a - .3, 960, 540, 1], [tTr, 960, 520, 1.25], [tSm - .3, 700, 640, 1.9], [tCar + .6, 700, 640, 1.85], [tBig - .2, 1185, 560, 1.6], [tViews + .5, 1150, 550, 1.5], [tLess, 960, 520, 1.25], [e + 1, 960, 540, 1.05]], .5);
     contestants(t, { supLit: .3, knot: { look: [-1, 0], grin: false } });
     DOORS.forEach(([x, w, h, lab], i) => {
       const rise = backOut(seg(t, a + .2 + i * .25, a + .9 + i * .25)); if (rise <= 0) return;
@@ -427,7 +432,9 @@
       const open = i === 0 ? seg(t, tSm, tCar) : i === 1 ? seg(t, tCar + .3, tBig - .4) : seg(t, tBig - .2, tDoz + .2);
       const top = door(t, x, w, h, lab, open, true);
       // what's behind each door
-      if (i === 0) { const k = Math.floor((t - tSm) * 3); const im = [TV + 'positive-01', TV + 'positive-03', TV + 'positive-02', TV + 'positive-04', TV + 'positive-08', TV + 'positive-07'][((k % 6) + 6) % 6]; tile(x, top + 80, 90, 90, im, 1, { lit: .8 * open, frame: '#3A1A0A' }); }
+      // the one broad neuron: cars, trains and carts in turn
+      if (i === 0) { const tTrn = wt('te_sizes', 'trains'), tCrt = wt('te_sizes', 'carts'), k = t < tTrn - .1 ? 0 : t < tCrt - .1 ? 1 : t < tCrt + .6 ? 2 : Math.floor((t - tCrt - .6) * 1.5) % 3, KS = [[CP + 'car-5826', 'car'], [TV + 'positive-06', 'train'], [null, 'cart']];
+        tile(x, top + 62, 92, 92, KS[k][0], 1, { lit: .8 * open, frame: '#3A1A0A', draw: KS[k][0] ? null : cartTile }); if (open > .5) txt(KS[k][1], x, top + 138, 28, CREAM, { font: SERIF, weight: '700' }); }
       if (i === 1) [CP + 'car-5826', TV + 'positive-05', CP + 'stage2_block7-203-pos-1'].forEach((im, j) => tile(x, top + 60 + j * 88, 86, 72, im, 1, { lit: .4 * open, frame: '#3A1A0A' }));
       if (i === 2) BIG.forEach((im, j) => { const c = j % 4, r = Math.floor(j / 4), tk = [tTax - .3, tTax - .1, tVan - .2, tVan, tCon - .2, tCon, tCon + .2, tViews - .5, tViews - .3, tViews - .1, tViews + .1, tViews + .3][j]; tile(x - 108 + c * 72, top + 60 + r * 100, 62, 84, im, seg(t, tk, tk + .35), { frame: '#3A1A0A', lit: .5 * seg(t, tk, tk + .35) }); });
       shutter(x, w, h, open);
@@ -439,10 +446,10 @@
     audience(t, .8 * env(t, tDoz, tDoz + 1.4, .2, .6) + env(t, tScr, e + 2, .3, .4));
     camEnd();
     roundCard(t, a - .2, 'ROUND 3', 'size');
-    lower(t, tThree - .3, tSm - .3, 'same network · 300× apart in size', GOLD);
-    lower(t, tSm - .2, tBig - .3, 'smallest: one broad car neuron', GOLD);
-    lower(t, tBig - .2, tLess - .3, 'biggest: taxis, vans, convertibles…', GOLD);
-    lower(t, tLess - .2, e + 1.2, 'less room: broader, not scrambled', GOLD);
+    lower(t, tThree - .3, tSm - .3, 'same network · 300× apart in size', GOLD, { y: 985 });
+    lower(t, tSm - .2, tBig - .3, 'smallest: one broad car neuron', GOLD, { y: 985 });
+    lower(t, tBig - .2, tLess - .3, 'biggest: taxis, ambulances, convertibles…', GOLD, { y: 985, size: 54 });
+    lower(t, tLess - .2, e + 1.2, 'less room: broader, not scrambled', GOLD, { y: 985 });
     if (t > tDoz && t < tDoz + 1.2) sfx('OOOH!', 620, 330, 80, CREAM, t - tDoz, { face: 'marker' });
     scoreBug(t, 1);
   }
@@ -508,5 +515,5 @@
     scoreBug(t, 1);
   }
 
-  shots([[chapStart('ch07'), intro], [cs('te_local') - .3, round1], [cs('te_shapes') - .4, shapes], [cs('te_test') + .4, pressRound], [cs('te_last') - .3, horizon], [cs('te_sizes') - .3, sizes], [cs('te_dict') - .3, finale]]);
+  shots([[chapStart('ch07'), intro], [cs('te_local') - .3, round1], [cs('te_shapes') + .3, shapes], [cs('te_test') + .4, pressRound], [cs('te_last') - .3, horizon], [cs('te_sizes') - .3, sizes], [cs('te_dict') - .3, finale]]);
 })();

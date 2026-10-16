@@ -1,8 +1,8 @@
 // ch05 The foggy district: VICTORIAN COPPER ENGRAVING that turns into clean modern colour. The brass magnifier from
 // the spy file is the lens of a great microscope on a cart in a foggy London street; the focus knob turns 2009 → 2017
 // → 2026; InceptionV1's last district sags in the fog (crooked signs, tangled windows, a 5% hoarding); the fog curls
-// into the Knot; ConvNeXt renovates it (an elevated railway bypass = residual connections, even gas lamps = layer
-// norm); the fog lifts in a wave and the engraving itself dissolves into clean colour; 5% → 50% → 70% → 99%; the lesson
+// into the Knot; ConvNeXt renovates it (an elevated railway bypass, even gas lamps; captioned with the narrated
+// terms only); the fog lifts in a wave and the engraving itself dissolves into clean colour; 5% → 50% → 70% → 99%; the lesson
 // on a rooftop at dawn; a seed sprouts in the renovated park (the next world is a botanical plate).
 (() => {
   const MT = 'blog/raw/microscope-timeline/', LL = 'blog/raw/last-layer-neurons/medium/images/', CL = 'blog/raw/crushed-last-layer/images/', V = 'blog/raw/v-figure-10x/';
@@ -111,10 +111,11 @@
     if (k <= 0) return; boilSeed('hoard');
     inkLine([[x - 140, y + 120], [x - 140, y + 360]], 7, '#4A3A2E', 'ink', 0); inkLine([[x + 140, y + 120], [x + 140, y + 360]], 7, '#4A3A2E', 'ink', 0);
     push(); translate(x, y + 120); scale(1, backOut(k) * (o.flip ?? 1)); translate(-x, -(y + 120));
-    paint(rectPts(x - 210, y - 120, 420, 240, 1), { wash: o.col || '#E9DCC0', ink: INK, sw: 1.8 });
-    paint(rectPts(x - 190, y - 100, 380, 200, 1), { wash: null, ink: INK, sw: .7 });
+    const bw = o.big ? 250 : 210, bb = o.big ? 170 : 120;
+    paint(rectPts(x - bw, y - 120, bw * 2, 120 + bb, 1), { wash: o.col || '#E9DCC0', ink: INK, sw: 1.8 });
+    paint(rectPts(x - bw + 20, y - 100, bw * 2 - 40, 80 + bb, 1), { wash: null, ink: INK, sw: .7 });
     pop();
-    if (k > .6 && (o.flip ?? 1) > .3) { letter(txt_, x, y - 4, 130, o.tcol || '#8C2A1E', { face: 'serif', bold: true, shadow: false }); if (o.sub) letter(o.sub, x, y + 76, 36, INK, { face: 'serif', shadow: false }); }
+    if (k > .6 && (o.flip ?? 1) > .3) { letter(txt_, x, y - 4, 130, o.tcol || '#8C2A1E', { face: 'serif', bold: true, shadow: false }); if (o.sub) letter(o.sub, x, o.big ? y + 100 : y + 76, o.big ? 72 : 36, INK, { face: 'serif', bold: !!o.big, shadow: false }); }
   }
   function street(t, o = {}) {
     layer('c5street' + (o.v || ''), () => {
@@ -143,18 +144,25 @@
     const roll = seg(t, a + 3.4, a + 5.8);
     const knob = kf(t, [[tu - .6, 0], [tu + .4, .8], [tT - .2, .8], [tT + .6, 3.2], [tw - .3, 3.2], [tw + .4, 5.6]]);
     const st = t < tT + .2 ? 0 : t < tw + .2 ? 1 : 2;
+    const tNg = wt('fd_fv', 'nudged'), tLi = wt('fd_fv', 'little'), jg = env(t, tNg - .3, tLi + .4, .2, Math.max(.3, tc - tLi - .4)), jr = jg * .14 * Math.sin((t - tNg) * 6), jx = jg * 14 * Math.sin((t - tNg) * 4.3), jy = jg * 8 * Math.cos((t - tNg) * 3.7);
     scope(t, 960, 880, 1, {
       roll, knob, view: (cx, cy, r) => {
         if (t < tn - .6) {   // the city through a bad lens: a smear
           fill(MIX[9], cx - 40, cy, r * 1.3, .9, 16); fill(MIX[4], cx + 90, cy + 30, r, .6, 16);
         } else {
           const fk = seg(t, tT + .2, tc), fk2 = seg(t, tw, tw + .6);
+          if (jg > 0) { ctx.translate(cx + jx, cy + jy); ctx.rotate(jr); ctx.translate(-cx, -cy); }
           fill(MT + '2009-mixed4d-161', cx, cy, r, 1, 0);
           if (fk > 0) fill(MT + '2017-mixed4d-161', cx, cy, r, fk, 10 * (1 - fk));
           if (fk2 > 0) fill(MT + '2026-mixed4d-161', cx, cy, r, fk2, 6 * (1 - fk2));
         }
       }
     });
+    // nudge and turn arrows around the lens
+    if (jg > .05) { ctx.save(); ctx.globalAlpha = clamp(jg * 1.5); ctx.strokeStyle = INK; ctx.fillStyle = INK; ctx.lineWidth = 11; ctx.lineCap = 'round'; const R0 = 240, ar = (x, y, q) => { ctx.beginPath(); ctx.moveTo(x + Math.cos(q) * 18, y + Math.sin(q) * 18); ctx.lineTo(x + Math.cos(q + 2.4) * 18, y + Math.sin(q + 2.4) * 18); ctx.lineTo(x + Math.cos(q - 2.4) * 18, y + Math.sin(q - 2.4) * 18); ctx.closePath(); ctx.fill(); };
+      for (const sd of [-1, 1]) { const q0 = sd > 0 ? -1.15 : 1.99, q1 = q0 + .55 * Math.sign(Math.sin((t - tNg) * 6) || 1); ctx.beginPath(); ctx.arc(960, 500, R0, Math.min(q0, q1), Math.max(q0, q1)); ctx.stroke(); const qe = q1, ex = 960 + Math.cos(qe) * R0, ey = 500 + Math.sin(qe) * R0; ar(ex, ey, qe + Math.PI / 2 * Math.sign(q1 - q0)); }
+      for (const sd of [-1, 1]) { const x0 = 960 + sd * (R0 + 20), x1 = x0 + sd * 50 * Math.sign(Math.sin((t - tNg) * 4.3) || 1) * sd; ctx.beginPath(); ctx.moveTo(x0, 500); ctx.lineTo(x1, 500); ctx.stroke(); ar(x1, 500, x1 > x0 ? 0 : Math.PI); }
+      ctx.restore(); }
     // click bursts as the focus snaps
     for (const tt of [tc - .2, tw + .5]) { const k = seg(t, tt, tt + .5); if (k > 0 && k < 1) glow(960, 500, 460 * k, '#FFF3C8', .8 * (1 - k)); }
     // Clawd works the knob; at the second click his top hat jumps off
@@ -184,8 +192,8 @@
   function district(t, fix, o = {}) {
     for (let i = 0; i < 5; i++) {
       const x = HX(i), h = 470 + 90 * hash(i * 3), fx = Array.isArray(fix) ? fix[i] : fix, tilt = (hash(i * 9) - .5) * .16 * (1 - fx);
-      const sh = o.shuffle ? Math.floor(t * 6 + i) : 0, imgs = fx > .5 ? CLEAN[i] : [0, 1, 2, 3].map(k => MIX[(i * 3 + k + sh) % MIX.length]);
-      house(x, 900, 250, h, imgs, { key: 'c5d' + i, tilt, blur: (1 - fx) * 2.5, lit: lerp(.75, 1, fx), glow: o.glow ? o.glow * fx : 0, col: mixCol(['#4E4038', '#43383A', '#544638', '#463A34', '#4C4036'][i], ['#C8705A', '#5C8AB8', '#E0B04A', '#6AA27A', '#B86A9A'][i], fx * (o.colour ?? 0)) });
+      const sh = o.shuffle ? Math.floor(t * 6 + i) : 0, imgs = fx > .5 ? CLEAN[i] : [0, 1, 2, 3].map(k => o.read > .5 && (i + k) % 2 === 0 ? CLEAN[i][k] : MIX[(i * 3 + k + sh) % MIX.length]);
+      house(x, 900, 250, h, imgs, { key: 'c5d' + i, tilt, blur: (1 - fx) * 2.5 * (1 - (o.sharp || 0)), lit: lerp(.75, 1, fx), glow: o.glow ? o.glow * fx : 0, col: mixCol(['#4E4038', '#43383A', '#544638', '#463A34', '#4C4036'][i], ['#C8705A', '#5C8AB8', '#E0B04A', '#6AA27A', '#B86A9A'][i], fx * (o.colour ?? 0)) });
       if (fx < .5) crookedSign(x + 90, 900 - h * .55, .35 + .2 * hash(i), null, t);
     }
   }
@@ -234,7 +242,10 @@
     const wk = waveK(t), dawn = wk, tW = wt('fd_renovate', 'last', 0) - .1;
     // the numbers: the old network comes back (engraved), and the clean front reaches 50%, then 70% of its district; the new design is all clean
     const old = seg(t, tB - .2, tB + .6) * (1 - seg(t, t99 - .3, t99 + .9));
-    const front = t < tB - .2 ? waveFront(t) : kf(t, [[tB - .2, 2700], [tB + .8, -700], [t50 - .5, -700], [t50 + .4, 840], [t70 - .5, 840], [t70 + .4, 1130], [t99 - .3, 1130], [t99 + 1.2, 2700]]);
+    // better tools (50%) only clear the view: the old houses stay engraved and crooked, their windows go sharp. Retraining
+    // (70%) straightens four of them; only the new design (99%) is the whole bright street
+    const tRe = wt('fd_numbers', 'Retraining'), sharp = seg(t, t50 - .6, t50 + .2) * old;
+    const front = t < tB - .2 ? waveFront(t) : kf(t, [[tB - .2, 2700], [tB + .8, -700], [t70 - .7, -700], [t70 + .2, 1130], [t99 - .3, 1130], [t99 + 1.2, 2700]]);
     // sky: grey London → clean modern blue
     vgrad([[0, mixCol('#9A9590', '#5FA8E0', dawn)], [1, mixCol('#D9D3C9', '#F4E6CC', dawn)]]);
     camKeys(t, [[a - .3, 960, 520, .96], [tC, 1000, 480, 1.04], [tr - .6, 960, 520, .92], [tbe, 960, 520, .92], [e + .4, 960, 520, .96]], .4);
@@ -250,30 +261,32 @@
     }
     // the houses: straighten as the wave passes; clean photos; colour after the wave
     const fixes = [0, 1, 2, 3, 4].map(i => t < tB - .2 ? clamp((front - (HX(i) - 480 - 300)) / 500) : clamp((front - ((HX(i) - 960) * .93 + 960)) / 240 + .5));
-    district(t, fixes, { colour: 1, glow: seg(t, tez - .4, tez + .3) });
+    district(t, fixes, { colour: 1 - old, glow: seg(t, tez - .4, tez + .3), sharp, read: sharp });
     // gas lamps: all the same height and brightness (layer norm)
     for (let i = 0; i < 7; i++) gasLamp(80 + i * 300, 930, popk(t, tl - .5 + i * .1, .4) * (1 - old), 1, { r: 130 });
     // the Knot loosens and slinks away as the fog lifts
     const kgo = seg(t, tW - .6, tbe - .2);
     if (kgo > 0 && kgo < 1) { const kx = lerp(900, 2300, easeIn(kgo)), ky = 330 + 100 * kgo; knotBeast(kx, ky, 220 * (1 - .5 * kgo), { hat: 'top', col: '#B9A6C9', dark: '#5A4A6A', loose: kgo * .8, look: [1, 0] }); }
-    fogBands(t, (1 - wk) * .9 * (1 - .6 * hk));
+    fogBands(t, (1 - wk) * .9 * (1 - .6 * hk) + .9 * old * (1 - seg(t, t50 - .6, t50 + .2)));
     // the hoarding: 5% → 50% → 70% → 99%
-    const nums = [[a - 1, '5%', 'InceptionV1'], [tB - .2, '5%', 'the old network'], [t50 - .15, '50%', 'old · better tools'], [t70 - .15, '70%', 'old · retrained'], [t99 - .15, '99%', 'the new design']];
+    const nums = [[a - 1, '5%', 'InceptionV1'], [tB - .2, '5%', 'old network'], [t50 - .15, '50%', 'better tools'], [t70 - .15, '70%', 'retrained'], [t99 - .15, '99%', 'new design']];
     let cur = nums[0], ft = -10; for (const q of nums) if (t >= q[0]) { cur = q; ft = q[0]; }
     const fl = seg(t, ft, ft + .3);
-    hoarding(1760, 360, cur[1], t < tW ? 1 : t < tB - .2 ? 1 - seg(t, tW, tW + .4) : popk(t, tB - .2, .5), { flip: Math.abs(Math.cos(fl * Math.PI)) * (fl < .5 ? 1 : 1), sub: cur[2], tcol: cur[1] === '99%' ? '#2E7A3A' : '#8C2A1E', col: mixCol('#E9DCC0', '#FFFFFF', dawn) });
-    // the architect's plan: CONVNEXT blueprint unrolled on an easel
     const kp = seg(t, tC - .6, tC + .4) * (1 - seg(t, tr - 1.3, tr - .8));
+    hoarding(1720, 250, cur[1], t < tW ? 1 - ease(clamp(kp * 1.5)) : t < tB - .2 ? 1 - seg(t, tW, tW + .4) : popk(t, tB - .2, .5), { big: 1, flip: Math.abs(Math.cos(fl * Math.PI)) * (fl < .5 ? 1 : 1), sub: cur[2], tcol: cur[1] === '99%' ? '#2E7A3A' : '#8C2A1E', col: mixCol('#E9DCC0', '#FFFFFF', dawn) });
+    // the architect's plan: CONVNEXT blueprint unrolled on an easel
     if (kp > 0) { boilSeed('c5plan'); push(); translate(560, 640); scale(1, ease(kp)); paint(rectPts(-300, -200, 600, 400, 1), { wash: '#2E5A8A', ink: INK, sw: 1.4 }); for (let i = 0; i < 6; i++) inkLine([[-260, -150 + i * 60], [260, -150 + i * 60]], .6, '#BFD8F0', 'inkfine', 0); pop(); }
+    const lk = env(t, t50 - .7, t70 - .7, .4, .4) * old, lx = lerp(330, 1250, ease(seg(t, t50 - .5, t70 - .9))), ly = 560, lr = 300;
+    if (lk > 0) { push(); translate(lx, ly); scale(backOut(clamp(lk * 1.2))); boilSeed('c5blens'); paint(rrPts(lr * .72, lr * .62, 70, 260, 26).map(([px, py]) => [px * .8 + py * .45, -px * .3 + py * .8]), { wash: '#5A3A22', ink: INK, sw: 1.2 }); inkStroke(ellPts(0, 0, lr, lr, 48), true, 26, '#C9A15A', 'ink'); inkStroke(ellPts(0, 0, lr + 14, lr + 14, 48), true, 2, INK, 'inkfine'); inkStroke(ellPts(0, 0, lr - 14, lr - 14, 48), true, 2, INK, 'inkfine'); pop(); }
     const em = emotions(t, [[a - .3, 'sad'], [tC, 'hopeful'], [tr, 'excited'], [tbe, 'starstruck'], [t99, 'happy']]);
     tourist(1380, 980, 10, t > tC + .5 && t < tbe + .8 ? 'hard' : 'top', { ...em, view: 'q', flip: true, boilKey: 'c5c' });
     camEnd();
-    engrave(front, 160, [clawdHole(1380, 980, 10)]);
+    { const z = LAST_CAM.zoom, H0 = [clawdHole(1380, 980, 10)]; if (lk > .2) H0.unshift([(lx - LAST_CAM.cx) * z + 960, (ly - LAST_CAM.cy) * z + 540, (lr - 16) * z * clamp(lk * 1.2), 0]); engrave(front, 160, H0); }
     if (kp > .5) { const z = LAST_CAM.zoom, sx = (560 - LAST_CAM.cx) * z + 960, sy = (640 - LAST_CAM.cy) * z + 540; letter('ConvNeXt', sx, sy - 70 * z, 76 * z, '#F2F6FA', { face: 'serif', bold: true, shadow: false }); const ks = seg(t, tsame - .2, tsame + .4); if (ks > 0) letter('same size', sx, sy + 30 * z, 46 * z, '#F2F6FA', { face: 'serif', shadow: false, alpha: ks }); const kq = seg(t, tpic - .5, tpic); if (kq > 0) letter('same pictures', sx, sy + 100 * z, 46 * z, '#F2F6FA', { face: 'serif', shadow: false, alpha: kq }); }
     const krc = seg(t, tr - .2, tr + .6) * (1 - seg(t, tl - .4, tl - .1));
-    cap('residual connections: a bypass', krc);
+    cap('residual connections', krc);
     const kln = seg(t, tl - .1, tl + .6) * (1 - seg(t, tbe - .8, tbe - .5));
-    cap('layer norm: even lamps', kln);
+    cap('layer normalization', kln);
     const kbe = seg(t, tbe - .4, tbe + .4) * (1 - seg(t, n - .2, n + .1));
     if (kbe > 0) letter('beautiful', 960, 150, 90, '#2A5A8A', { face: 'marker', reveal: kbe, shadow: false });
     const kn = seg(t, n - .1, n + .6) * (1 - seg(t, tB - .4, tB));
@@ -320,7 +333,16 @@
     }
     camEnd();
     const k1 = seg(t, tb - .5, tlen + .3) * (1 - seg(t, tu - .6, tu - .2));
-    if (k1 > 0) letter('built badly · seen through a dirty lens', 960, 150, 60, '#2A3A4A', { face: 'marker', reveal: k1, shadow: false });
+    // a memory of the old street behind the caption: sepia, sagging, seen through a smeared lens
+    const gk = env(t, tb - .7, tu - .3, .35, .35);
+    if (gk > 0) { ctx.save(); ctx.globalAlpha = .92 * gk; const bx = 960, by = 300, bw = 820, bh = 290; ctx.beginPath(); ctx.rect(bx - bw / 2, by - bh / 2, bw, bh); ctx.clip(); ctx.fillStyle = '#D9CFBE'; ctx.fillRect(bx - bw / 2, by - bh / 2, bw, bh);
+      push(); translate(bx, by + bh / 2 - 20); scale(.44); translate(-830, -900); district(t, 0, {}); paint(rectPts(-300, 900, W + 600, 200, 1), { wash: '#6A6058', ink: INK, sw: 1 }); pop();
+      ctx.globalCompositeOperation = 'color'; ctx.fillStyle = '#8A6A48'; ctx.fillRect(bx - bw / 2, by - bh / 2, bw, bh); ctx.globalCompositeOperation = 'source-over';
+      fog(by + 60, 120, '#CFC6B8', .45);
+      const lx = bx + 210 * Math.min(1, seg(t, tlen - .9, tlen - .2) * 1.0) - 60, ly = by - 6, lr = 110, sm = seg(t, tlen - .9, tlen - .2);
+      if (sm > 0) { ctx.save(); ctx.globalAlpha *= sm; const g = ctx.createRadialGradient(lx, ly, 10, lx, ly, lr); g.addColorStop(0, 'rgba(120,100,80,.55)'); g.addColorStop(1, 'rgba(90,70,50,.8)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lx, ly, lr, 0, TAU); ctx.fill(); ctx.strokeStyle = 'rgba(240,230,210,.55)'; ctx.lineWidth = 14; ctx.lineCap = 'round'; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(lx - 70 + i * 30, ly - 60 + i * 12); ctx.quadraticCurveTo(lx + i * 10, ly - 10, lx - 20 + i * 34, ly + 70 - i * 8); ctx.stroke(); } ctx.strokeStyle = '#A87A3A'; ctx.lineWidth = 16; ctx.beginPath(); ctx.arc(lx, ly, lr, 0, TAU); ctx.stroke(); ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }
+      ctx.restore(); ctx.save(); ctx.globalAlpha = gk; ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.strokeRect(bx - bw / 2, by - bh / 2, bw, bh); ctx.restore(); }
+    if (k1 > 0) letter('built badly · seen through a dirty lens', 960, 110, 72, '#2A3A4A', { face: 'marker', reveal: k1, shadow: false });
     const k2 = seg(t, tu - .1, tu + .8) * (1 - seg(t, tP + .3, tP + .7));
     if (k2 > 0) letter('ordinary upgrades made it readable', 960, 150, 60, '#2A3A4A', { face: 'marker', reveal: k2, shadow: false });
     const k0 = seg(t, a - .1, a + .8) * (1 - seg(t, tb - 1, tb - .6));

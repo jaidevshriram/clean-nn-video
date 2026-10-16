@@ -1,7 +1,7 @@
 // ch00 Cold open · DEEP SPACE. A question typed into a chat window falls like a comet into a galaxy of neuron-lights;
 // the galaxy's core twists into the Knot (a tangled black hole); the Unfolding Machine starts pulling it apart; "the field
-// got it wrong" (a lens shows the core as ordered constellations); the title; then the camera dives into ONE star, whose warm
-// light fills the screen (ch01 opens on a tiny lit house).
+// got it wrong" (a lens shows the core as ordered constellations); the title; then the camera leans toward one star (ch01
+// opens on a toy town at night, a field of lights like this one, and makes the dive on "zoom all the way in").
 (() => {
   // the machine with a blank name plate (machine() letters its plate with jargon; drop that letter)
   function machineL(t, x, y, s, o) { const n = LETTERS.length, C0 = CAM; CAM = null; machine(t, x, y, s, o); CAM = C0; LETTERS.length = n; }   // (its only lettering is the plate)
@@ -167,7 +167,7 @@
     const u0 = cs('open_untangle'), tear = wt('open_untangle', 'tear'), tpc = wt('open_untangle', 'pieces');
     const w0 = cs('open_wrong'), tw_ = wt('open_wrong', 'wrong'), tnv = wt('open_wrong', 'never'), trd = wt('open_wrong', 'read'), we = ce('open_wrong');
     const B3 = BRIGHT[3], [b3x, b3y] = starXY(B3.r, B3.q0, wt('open_city', 'neuron'), 0);
-    camPath(t, [[k0 - .4, b3x, b3y, 10.5], [k0 + 2.2, 120, 20, 1.35], [tk, 60, 0, 1.25], [tt + 1, 0, -10, 1.55], [tf + .6, 30, -10, 1.7], [u0 + 1, 230, -20, 1.2], [tear, 240, -20, 1.28], [w0 + .5, 230, -10, 1.25], [tnv, 120, -20, 1.45], [we + .6, 60, -10, 1.55]]);
+    camPath(t, [[k0 - .4, b3x, b3y, 10.5], [k0 + 2.2, 120, 20, 1.35], [tk, 60, 0, 1.25], [tt + 1, 0, -10, 1.55], [tf + .6, 30, -10, 1.7], [tear - .8, 230, -20, 1.2], [tear + .4, 240, -20, 1.28], [w0 + .5, 230, -10, 1.25], [tnv, 120, -20, 1.45], [we + .6, 60, -10, 1.55]]);
     space(t);
     const twist = ease(seg(t, tk - .6, tt + .8)) - .25 * ease(seg(t, tear, w0)) - .2 * ease(seg(t, tnv - .4, trd));
     const ks = 130 * backOut(seg(t, tk - .2, tt + .6)) * (1 - .12 * seg(t, tnv - .4, trd));
@@ -187,9 +187,9 @@
     });
     if (cram > 0 && out_ < 1) { const sq = 1 + .1 * Math.sin(t * 9) * (1 + seg(t, trm - .3, trm + .3)), r = 75 * G.z * backOut(cram) * (1 - out_); ctx.save(); ctx.translate(ox, oy); ctx.scale(sq, 2 - sq); crammed(0, 0, r, CR, t); ctx.restore(); }
     // the Unfolding Machine rolls in on its own rock and starts pulling a strand out of the knot
-    const arrive = easeOut(seg(t, u0 - .2, u0 + 2.4)), mx = lerp(MX + 700, MX, arrive), mOn = 1 - seg(t, tw_ - .3, tw_ + .6);
+    const arrive = easeOut(seg(t, tear - 1.7, tear - .1)), mx = lerp(MX + 700, MX, arrive), mOn = 1 - seg(t, tw_ - .3, tw_ + .6);
     const pull = seg(t, tear - .3, tear + 1), [kx, ky] = SX(0, 0);
-    if (t > u0 - .3) {
+    if (t > tear - 1.8) {
       camBegin(G.x, G.y, G.z); CAM = null;   // (machine() letters its own label; keep it from landing in screen space)
       // the strand: from the knot's rim into the funnel, a rope with photos travelling along it
       if (pull > 0) { const P = [[60, -20], [190, -110 - 30 * Math.sin(t * 2)], [mx - 20, MY - 185]], C = through(P, 12), n = Math.max(2, Math.round(C.length * pull)); ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = '#08040F'; ctx.lineWidth = 26; ctx.beginPath(); C.slice(0, n).forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.strokeStyle = '#3A2450'; ctx.lineWidth = 18; ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.3)'; ctx.lineWidth = 4; ctx.setLineDash([12, 9]); ctx.lineDashOffset = -t * 60 * mOn; ctx.stroke(); ctx.restore(); }
@@ -201,11 +201,11 @@
       if (t > tw_ - .2 && t < tw_ + 1.2) sfx('pfft…', ...SX(mx + 20, MY - 160), 46, '#C9C3DA', t - tw_ + .2, { life: 1.3, shadow: false });
     }
     // the knot itself
-    const look = t < u0 + 1 ? [-.7, .4] : t < tw_ ? [.9, -.2] : [-.2, .6];
+    const look = t < tear - 1 ? [-.7, .4] : t < tw_ ? [.9, -.2] : [-.2, .6];
     blackKnot(t, ks, { look, loose: .3 * loosen - .1 * loosen * seg(t, tw_, tnv) + .1 * seg(t, tnv - .3, trd), grin: t > tt && t < tear });
     pop();
     if (t > tt - .4 && t < tid) title('tangled', ...SX(0, -200), 84, '#FFB3D9', seg(t, tt - .4, tt + .4) * (1 - seg(t, tid - .4, tid)), { screen: true });
-    if (t > tsm - .4 && t < tear - .3) hand('crammed into one light', ox, oy - 75 * G.z - 45, 46, '#FFE9B8', seg(t, tsm - .2, tsm + .6) * (1 - seg(t, tear - .9, tear - .4)), { stroke: '#1A1030', strokeW: .14 });
+    if (t > tsm - .4 && t < tear - .3) hand('crammed into one light', ox, oy - 75 * G.z - 45, 46, '#FFE9B8', seg(t, tsm - .2, tsm + .6) * (1 - seg(t, ce('open_knot') - .2, ce('open_knot') + .4)), { stroke: '#1A1030', strokeW: .14 });
     if (t > tear - .3 && t < w0) hand('tear it apart, study the pieces', ...SX(mx - 30, MY - 260), 46, '#FFE9B8', seg(t, tear - .2, tpc + .3) * (1 - seg(t, w0 - .6, w0 - .1)), { stroke: '#1A1030', strokeW: .14 });
     // who says so: the author and the essay
     const nk = seg(t, wt('open_wrong', 'Nick') - .3, wt('open_wrong', 'Nick') + .3) * (1 - seg(t, tw_ - .9, tw_ - .4));
@@ -215,7 +215,7 @@
     // Clawd on his rock, foreground left
     const ax = 300, ay = 1000 + 360 * (1 - easeOut(seg(t, k0 + .4, k0 + 2.4))), jp = jump(t, tw_ + 1.05, tw_ + 1.55, 1.2);
     asteroid(ax, ay, 240, 'a2');
-    const keys = [[k0 - 1, 'excited'], [tk, 'nervous'], [tt, 'scared'], [u0 + .6, 'hopeful'], [tear + .3, 'determined'], [tw_, 'surprised'], [tw_ + 1.2, 'dizzy'], [trd - .9, 'idea']];
+    const keys = [[k0 - 1, 'excited'], [tk, 'nervous'], [tt, 'scared'], [tear - 1.2, 'hopeful'], [tear + .3, 'determined'], [tw_, 'surprised'], [tw_ + 1.2, 'dizzy'], [trd - .9, 'idea']];
     // the gag: a bolt shaken off the dying machine drifts across and tinks off Clawd's helmet
     const bolt = seg(t, tw_ + .1, tw_ + 1.1), b0 = SX(mx - 40, MY - 60), bp = [lerp(b0[0], ax + 10, bolt), lerp(b0[1], ay - 105, bolt) - 120 * Math.sin(bolt * Math.PI)];
     if (bolt > 0 && t < tw_ + 2.4) { const bb = t < tw_ + 1.1 ? bp : [ax + 10 - (t - tw_ - 1.1) * 260, ay - 105 - (t - tw_ - 1.1) * 300]; ctx.save(); ctx.translate(bb[0], bb[1]); ctx.rotate(t * 9); flat(rectPts(-12, -12, 24, 24), '#9AA3B5', { line: '#2A2440', lw: 3 }); dot(0, 0, 5, '#2A2440'); ctx.restore(); }
@@ -261,38 +261,35 @@
   function titleShot(t, lt, dur) {
     const a = cs('open_title'), e = ce('open_map'), end = chapStart('ch01');
     const D = BRIGHT[DIVE], [dx, dy] = starXY(D.r, D.q0, t, .12);
-    // hold on the title, then dive: the centre slides onto the star while the zoom grows exponentially
-    const kd = easeInOut(seg(t, e + .2, end - .9)), kz = seg(t, e + .2, end + .2);
-    G = { x: lerp(40, dx, kd), y: lerp(-10, dy, kd), z: Math.exp(lerp(Math.log(lerp(1, 1.08, seg(t, a - .5, e))), Math.log(45), Math.pow(kz, 1.7))) * (1 + 2 * seg(t, end + .2, end + 2.5)) };
+    // hold on the title, then lean in a little toward one star (the real dive comes in the next world, on "zoom")
+    const kd = easeInOut(seg(t, e + .2, end + 1.6)), kz = easeInOut(seg(t, e + .2, end + 1.6));
+    G = { x: lerp(40, dx * .55, kd), y: lerp(-10, dy * .55, kd), z: lerp(1.08 * seg(t, a - .5, e) + (1 - seg(t, a - .5, e)), 1.9, kz) };
     space(t);
     galaxy(t, { tw: .12, roads: .35, skip: G.z > 4 ? DIVE : -1 });
     // "it was never a knot": the core keeps the lens's look (gold constellations) while the little knot melts away
     const kn = 1 - ease(seg(t, a - .5, a + 1.5));
     if (G.z < 3) { const [cx, cy] = SX(0, 0); constellations(t, cx, cy - 10, .7 * G.z, ease(seg(t, a - .7, a + 1.2))); if (kn > 0) blackKnot(t, 92 * kn, { look: [.3, .5], loose: .35 + .4 * (1 - kn), k: .7 * kn }); }
     // the star we dive into: a warm lamp that becomes a sun
-    const [sx, sy] = SX(dx, dy), zr = 12 * G.z, k = seg(t, e + .3, end + .4);
+    const [sx, sy] = SX(dx, dy), zr = 12 * G.z, k = 0;
     if (G.z > 4) { glow(sx, sy, zr * 10, '#FFC870', .9); glow(sx, sy, zr * 5, '#FFE3A6', .9); glow(sx, sy, zr * 2.2, '#FFF6E0', 1); if (zr < 900) lampOrb(sx, sy, zr, D.im, 1); }
     for (let i = 0; i < 12 && k > 0; i++) { const q = i / 12 * TAU + t * .2; ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .18 * k; ctx.fillStyle = '#FFE9B8'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx + Math.cos(q - .05) * 2400, sy + Math.sin(q - .05) * 2400); ctx.lineTo(sx + Math.cos(q + .05) * 2400, sy + Math.sin(q + .05) * 2400); ctx.closePath(); ctx.fill(); ctx.restore(); }
     // Clawd waves goodbye from his rock as the camera leaves
-    const away = easeIn(seg(t, e + .2, end - .4));
+    const away = easeIn(seg(t, e + .3, end + .4));
     if (away < 1) { asteroid(300 - 300 * away, 1000 + 300 * away, 240 * (1 - .4 * away), 'a2'); helmetClawd(t, 310 - 300 * away, 990 + 300 * away, 12 * (1 - .4 * away), [[a - 1, 'idea'], [a + .5, 'happy'], [e, 'excited']], { aR: 1.3 + .4 * Math.sin(t * 9), lookX: .8, lookY: -.5 }); }
     const out = 1 - seg(t, e + .5, e + 1);
     title('Neural Networks', 960, 250, 124, '#FFF6E8', seg(t, a - .1, a + 1.4), { stroke: '#120C2A', strokeW: .1, alpha: out });
     title('Are Already Clean', 960, 390, 124, '#FFD58A', seg(t, a + .5, a + 1.9), { stroke: '#120C2A', strokeW: .1, alpha: out });
     // the roadmap: the film's four parts light up on their words, under the title
-    const PARTS = [['I', 'the belief', 'believed', '#B79CF0'], ['II', 'the evidence', 'evidence', '#F08AA8'], ['III', 'how it works', 'work', '#7FD6CF'], ['IV', 'what it means', 'means', '#F2C46A']];
+    const PARTS = [['I', 'the belief', 'believed', '#B79CF0'], ['II', 'the evidence', 'evidence', '#F08AA8'], ['III', 'how it works', 'work', '#7FD6CF'], ['IV', 'what it means', 'finally', '#F2C46A']];
     PARTS.forEach(([n, lab, w, col], i) => {
       const tw = wt('open_map', w), k = seg(t, tw - .25, tw + .35) * out; if (k <= 0) return;
-      const x = 530 + i * 380, y = 730, s = backOut(clamp(k));
+      const x = 390 + i * 380, y = 730, s = backOut(clamp(k));
       ctx.save(); resetMatrix(); ctx.translate(x, y); ctx.scale(s, s); ctx.globalAlpha = clamp(k * 1.5) * out;
       ctx.fillStyle = 'rgba(14,10,36,.72)'; ctx.strokeStyle = col; ctx.lineWidth = 3; ctx.beginPath(); ctx.roundRect(-180, -72, 360, 144, 24); ctx.fill(); ctx.stroke();
       ctx.restore();
       if (k > .3) { letter('Part ' + n, x, y - 30, 44, col, { face: 'marker', shadow: false, alpha: out, screen: true }); letter(lab, x, y + 28, 50, '#FFF6E8', { face: 'hand', shadow: false, alpha: out, screen: true }); }
       if (i > 0 && k > .5) { ctx.save(); resetMatrix(); ctx.globalAlpha = .6 * out; ctx.strokeStyle = '#FFF6E8'; ctx.lineWidth = 3; ctx.setLineDash([8, 10]); ctx.beginPath(); ctx.moveTo(x - 200, y); ctx.lineTo(x - 180, y); ctx.stroke(); ctx.restore(); }
     });
-    // warm light fills the frame
-    const bl = ease(seg(t, end - 1.6, end - .2)); if (bl > 0) { ctx.save(); resetMatrix(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .75 * bl; ctx.fillStyle = '#FFB85A'; ctx.fillRect(0, 0, W, H); ctx.restore(); }
-    flash(ease(seg(t, end - .9, end)) * .96 * (1 - .5 * seg(t, end, end + .8)), '#FFEFC8');
   }
 
   shots([

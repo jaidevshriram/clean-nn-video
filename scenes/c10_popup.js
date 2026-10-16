@@ -141,7 +141,7 @@
     const ped = t * 9; cutout([[-20, -60], [-8, -96], [8, -96], [4, -60]], col, { jag: 1, shadow: false }); cutout(ellPts(-2, -110, 12, 12, 12), '#E9C9A6', { jag: 1, shadow: false }); cutout([[-14, -116], [10, -122], [14, -112], [-12, -108]], C.navy, { jag: 1, shadow: false });
     flat([[-8, -64], [-6 + 8 * Math.cos(ped), -36 + 8 * Math.sin(ped)], [-2 + 8 * Math.cos(ped), -34 + 8 * Math.sin(ped)], [0, -64]], C.ink);
     ctx.restore();
-    if (note) { ctx.save(); ctx.translate(-10 * s, -150 * s - lift - 8 * Math.abs(Math.sin(t * 5))); glow(0, 0, 70 * s, '#FFE08A', .5); ctx.font = `700 ${28 * s}px ${SERIF}`; const w = ctx.measureText(note).width + 30 * s; cutout(rectPts(-w / 2, -24 * s, w, 46 * s), C.cream, { jag: 1, shadow: [4, 5, 'rgba(40,24,16,.3)'] }); ps(note, 0, 0, 28 * s); ctx.restore(); }
+    if (note) { ctx.save(); ctx.translate(-4 * s, -142 * s - lift - 3 * Math.abs(Math.sin(t * 5))); ctx.strokeStyle = C.ink; ctx.lineWidth = 3 * s; ctx.beginPath(); ctx.moveTo(4 * s, 18 * s); ctx.lineTo(10 * s, 40 * s); ctx.stroke(); glow(0, 0, 70 * s, '#FFE08A', .5); ctx.font = `700 ${22 * s}px ${SERIF}`; const w = ctx.measureText(note).width + 24 * s; cutout(rectPts(-w / 2, -18 * s, w, 36 * s), C.cream, { jag: 1, shadow: [4, 5, 'rgba(40,24,16,.3)'] }); ps(note, 0, 0, 22 * s); ctx.restore(); }
   }
   // Clawd the tourist in a beret, on the page
   const cl = (x, y, t, keys, o = {}) => tourist(x, y, o.u || 8, 'beret', { ...emotions(t, keys), view: 'q', flip: o.flip, boilKey: o.key || 'c10clawd', ...o.extra });
@@ -285,9 +285,6 @@
     library(t);
     camSpread(t, t - lt, t - lt + dur, [[a + .6, 960, 560, 1], [tNone, 960, 590, 1.02], [tOAI, 960, 600, 1.03], [tTwo + .5, 960, 610, 1.03]]);
     book();
-    // the Knot looms over the crowd: in 2023 it all looked like superposition
-    const kk = Math.min(kin(lt, 1500), kout(lt, dur));
-    if (kk > 0) { ctx.save(); ctx.translate(1520, 520); ctx.scale(backOut(kk), backOut(kk)); knotP(0, Math.sin(t * 1.5) * 10, 170, { grin: true, look: [-.6, .4] }); ctx.restore(); }
     crowd(t, lt, dur, false);
     const kh = Math.min(seg(lt, .9, 1.4), kout(lt, dur));
     heading('2023', 540, 990, 96, kh);
@@ -306,9 +303,6 @@
     library(t);
     camSpread(t, t - lt, t - lt + dur, [[tQ + .5, 960, 560, 1], [t90 + .4, 960, 590, 1.02], [t7, 960, 600, 1.03], [tOnly, 960, 610, 1.03], [tYet + .5, 960, 600, 1.02]]);
     book();
-    // the Knot, proved wrong, shrinks and slinks off the page
-    const ks = seg(t, t90 + .2, t90 + 2.6), kk = Math.min(kin(lt, 1500), 1 - ks);
-    if (kk > 0) { ctx.save(); ctx.translate(lerp(1520, 2300, easeIn(ks)), lerp(520, 640, ks)); ctx.scale(backOut(Math.min(kk * 3, 1)) * lerp(1, .45, ease(seg(t, t90, t90 + .8))), backOut(Math.min(kk * 3, 1)) * lerp(1, .45, ease(seg(t, t90, t90 + .8)))); knotP(0, Math.abs(Math.sin(t * 12)) * -18 * (ks > 0), 170, { look: [1, 0] }); ctx.restore(); }
     crowd(t, lt, dur, true);
     const kh = Math.min(seg(lt, .9, 1.4), kout(lt, dur));
     heading('today', 540, 990, 96, kh);
@@ -404,12 +398,12 @@
   }
 
   // ================= plumbing: − × − = + =================
-  const D0 = { a: cs('cw_double'), tPl: wt('cw_double', 'plumbing'), tMul: wt('cw_double', 'multiply'), tSig: wt('cw_double', 'signals'), tBoth: wt('cw_double', 'both'), tNeg: wt('cw_double', 'negative'), tPos: wt('cw_double', 'positive'), tOpp: wt('cw_double', 'opposite'), tSep: wt('cw_double', 'Separate'), tCases: wt('cw_double', 'cases'), tNoise: wt('cw_double', 'noise'), tOut: wt('cw_double', 'out', 1) };
+  const D0 = { a: cs('cw_double'), tPl: wt('cw_double', 'plumbing'), tMul: wt('cw_double', 'multiply'), tSig: wt('cw_double', 'signals'), tBoth: wt('cw_double', 'both'), tNeg: wt('cw_double', 'negative'), tPos: wt('cw_double', 'positive'), tOpp: wt('cw_double', 'opposite'), tSep: wt('cw_double', 'Separate'), tCases: wt('cw_double', 'cases'), tNoise: wt('cw_double', 'noise'), tFrom: wt('cw_double', 'From'), tOut: wt('cw_double', 'out', 1) };
   function pipe(P, wdt, col = '#9AA7B8') { ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(40,24,16,.28)'; ctx.lineWidth = wdt; ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(p[0] + 6, p[1] + 9) : ctx.moveTo(p[0] + 6, p[1] + 9)); ctx.stroke(); ctx.strokeStyle = C.ink; ctx.lineWidth = wdt + 6; ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = wdt; ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = wdt * .25; ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(p[0], p[1] - wdt * .22) : ctx.moveTo(p[0], p[1] - wdt * .22)); ctx.stroke(); ctx.restore(); }
   function gauge(x, y, sign, k) { if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(backOut(k), backOut(k)); cutout(ellPts(0, 0, 50, 50, 24), C.cream, { jag: 1.5, shadow: SH }); ctx.strokeStyle = sign > 0 ? '#3A8A4A' : C.navy; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(22, 0); if (sign > 0) { ctx.moveTo(0, -22); ctx.lineTo(0, 22); } ctx.stroke(); ctx.restore(); }
   function drop(P, u, sign) { const Cc = through(P, 10), q = Cc[Math.floor(clamp(u) * (Cc.length - 1))]; glow(q[0], q[1], 40, sign > 0 ? '#BFE3A6' : '#9FC6FF', .9); cutout(ellPts(q[0], q[1], 16, 16, 12), sign > 0 ? '#8FCF7A' : C.blue, { jag: 1, shadow: false }); ctx.strokeStyle = C.ink; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(q[0] - 8, q[1]); ctx.lineTo(q[0] + 8, q[1]); if (sign > 0) { ctx.moveTo(q[0], q[1] - 8); ctx.lineTo(q[0], q[1] + 8); } ctx.stroke(); }
   function doubleShot(t, lt, dur) {
-    const { a, tPl, tMul, tSig, tBoth, tNeg, tPos, tOpp, tSep, tCases, tNoise, tOut } = D0;
+    const { a, tPl, tMul, tSig, tBoth, tNeg, tPos, tOpp, tSep, tCases, tNoise, tFrom, tOut } = D0;
     library(t);
     camSpread(t, t - lt, t - lt + dur, [[tMul, 1000, 570, 1.0], [tPos, 1010, 560, 1.02], [tOpp + .5, 1020, 560, 1.02], [tSep + .4, 1010, 570, 1.0], [tOut, 1000, 570, 1.0]]);
     book();
@@ -430,17 +424,18 @@
     // the building that lit up for the opposite of its job
     const wrong = neg && t > tPos - .3 ? 1 - split : 0, kb = Math.min(kin(lt, 1450), ko);
     // while it misfires, its real windows (joy, yay) go dark and the opposite ones (gloom, sob) light up blue
-    const wGood = w => ({ s: w, lit: 1 - wrong, col: wrong > .5 ? '#8A8478' : C.ink, bg: wrong > .5 ? '#C9C3B6' : undefined }), wBad = w => ({ s: w, size: 25, lit: wrong, col: wrong > .5 ? C.cream : split > .5 ? '#A8A296' : C.navy, bg: wrong > .5 ? C.navy : undefined, glow: '#7EB5FF' });
-    stand(1480, 760, kb, 260, () => pb(260, 300, C.yellow, { roof: 'peak', sign: 'glad', wins: [wGood('joy'), wGood('yay'), wBad('gloom'), wBad('sob')], cols: 2, lit: wrong ? .2 : .5, glowCol: wrong ? '#7EB5FF' : '#FFD58A' }));
-    if (wrong > .5 && t > tOpp - .4) stamp('opposite!', 1130, 430, tOpp - .3, t, { col: C.red, size: 80 });
+    // "from the outside, that looks like noise": the windows blink at random
+    const nz = t > tFrom - .2 && t < tSep - .3, rl = n => hash(n * 7.3 + Math.floor(t * 6) * 3.1) > .5 ? 1 : 0;
+    const wGood = (w, n) => nz ? { s: w, lit: rl(n), col: rl(n) ? C.ink : '#8A8478' } : ({ s: w, lit: 1 - wrong, col: wrong > .5 ? '#8A8478' : C.ink, bg: wrong > .5 ? '#C9C3B6' : undefined }), wBad = (w, n) => nz ? { s: w, size: 25, lit: rl(n), col: rl(n) ? C.cream : C.navy, bg: rl(n) ? C.navy : undefined, glow: '#7EB5FF' } : ({ s: w, size: 25, lit: wrong, col: wrong > .5 ? C.cream : split > .5 ? '#A8A296' : C.navy, bg: wrong > .5 ? C.navy : undefined, glow: '#7EB5FF' });
+    stand(1480, 760, kb, 260, () => pb(260, 300, C.yellow, { roof: 'peak', sign: split > .5 ? 'glad · + × +' : 'glad', signSize: split > .5 ? 30 : 34, wins: [wGood('joy', 0), wGood('yay', 1), wBad('gloom', 2), wBad('sob', 3)], cols: 2, lit: nz ? .5 : wrong ? .2 : .5, glowCol: wrong ? '#7EB5FF' : '#FFD58A' }));
+    if (wrong > .5 && t > tOpp - .4 && t < tFrom - .2) stamp('opposite!', 1130, 430, tOpp - .3, t, { col: C.red, size: 80 });
     // after the split: the − × − case gets its own building
     const ks = Math.min(popk(t, tCases - .3, .6), ko);
     stand(1440, 1010, ks, 240, () => pb(240, 170, C.navy, { roof: 'flat', sign: '− × −', signSize: 30, wins: [{ s: 'gloom', lit: .8, size: 23 }, { s: 'sob', lit: .8, size: 23 }], cols: 2, lit: .7 }));
-    if (split > .5) { heading('+ × +', 1700, 640, 48, split, '#3A8A4A'); }
     clS(t, lt, dur, 1730, 1000, [[a, 'neutral'], [tNeg, 'confused'], [tOpp, 'scared'], [tSep - .5, 'determined'], [tNoise, 'proud']], { u: 7.5, flip: true, hat: t > tSep - .6 ? 'hard' : 'beret', extra: { aR: t > tSep - .4 && t < tSep + .8 ? 1.4 : undefined } });
     pageTurn(lt);
     camEnd();
-    caps(t, [[t - lt + 1, tBoth - .4, 'some of the mess was plumbing'], [tBoth - .3, tSep - .4, '−  ×  −  =  +'], [tSep - .3, t - lt + dur - .3, 'separate the two cases']]);
+    caps(t, [[t - lt + 1, tBoth - .4, 'some of the mess was plumbing'], [tBoth - .3, tFrom - .4, '−  ×  −  =  +'], [tFrom - .3, tSep - .4, 'from the outside: noise'], [tSep - .3, t - lt + dur - .3, 'separate the two cases']]);
     GRAIN = .8;
   }
 
@@ -453,7 +448,7 @@
     camSpread(t, t - lt, t - lt + dur, [[tRiver + .5, 960, 600, 1.02], [tRead, 940, 630, 1.03], [tWrite + .6, 970, 630, 1.03], [tTang, 980, 600, 1.0], [tPrac + .3, 920, 640, 1.0], [tSq + .2, 960, 630, 1.0], [tKn + .4, 1040, 620, 1.03]]);
     book();
     const ko = kout(lt, dur), kr = Math.min(seg(lt, .7, 1.3), ko), dam = ease(seg(t, tSq - .3, tSq + .7)), twist = Math.sin(Math.PI * seg(t, tWorr, tPrac)) * (t < tPrac ? 1 : 0);
-    const narrow = x => 1 - .5 * dam * clamp(1 - Math.abs(x - 1200) / 260);
+    const narrow = x => 1 - dam * (.3 + .32 * clamp(1 - Math.abs(x - 1200) / 420)), mess = ease(seg(t, tMess - .3, tMess + .6));   // squeezed: the whole river pinches; messier: the boats jostle
     const ry = x => 880 + 26 * Math.sin(x * .006 + 1) + twist * 60 * Math.sin((x - 900) * .02) * clamp(1 - Math.abs(x - 1000) / 300);
     if (kr > 0) {
       ctx.save(); ctx.globalAlpha = kr;
@@ -465,16 +460,16 @@
       if (dam > 0) for (const sg of [-1, 1]) cutout(rectPts(1180, sg < 0 ? ry(1200) - 54 - 50 + 50 * (1 - dam) * 0 : ry(1200) + 54 * narrow(1200), 44, sg < 0 ? 50 + 54 * (1 - narrow(1200)) : 50), C.brown, { jag: 2, shadow: SH });
     }
     // buildings on the banks read from and write to the river
-    const BANK = [[300, 780, C.orange, 'read'], [560, 790, C.yellow, 'write'], [820, 780, C.green, 'read'], [1440, 785, C.pink, 'write'], [1660, 780, C.lilac, 'read']];
-    BANK.forEach(([x, y, col, job], n) => stand(x, y, Math.min(kin(lt, x), ko), 190, () => pb(190, 220 + 30 * (n % 2), col, { roof: n % 2 ? 'flat' : 'peak', sign: job, signSize: 44, wins: [{}, {}], cols: 2, lit: .4 })));
+    const BANK = [300, 560, 820, 1440, 1660].map((x, n) => [x, 780 + 5 * (n % 2), [C.orange, C.yellow, C.green, C.pink, C.lilac][n], 'read · write']);
+    BANK.forEach(([x, y, col, job], n) => stand(x, y, Math.min(kin(lt, x), ko), 190, () => pb(190, 220 + 30 * (n % 2), col, { roof: n % 2 ? 'flat' : 'peak', sign: job, signSize: 30, wins: [{}, {}], cols: 2, lit: .4 })));
     // word boats float downstream
     for (let q = 0; q < 7; q++) {
-      const x = PG.l + 40 + frac(q / 7 + (t - a) * .05) * (PG.r - PG.l - 120), y = ry(x) + (q % 2 ? -14 : 16) + (1 - narrow(x)) * 14 * Math.sin(t * 8 + q), rot = (1 - narrow(x)) * .25 * Math.sin(t * 7 + q), k = Math.min(kr, clamp((x - PG.l) / 60));
+      const x = PG.l + 40 + frac(q / 7 + (t - a) * .05) * (PG.r - PG.l - 120) + mess * 70 * Math.sin(t * .9 + q * 2.1), y = ry(x) + (q % 2 ? -14 : 16) * (1 - .5 * dam) + (1 - narrow(x)) * 10 * Math.sin(t * 8 + q) + mess * 16 * Math.sin(t * 3.1 + q * 2.3), rot = (1 - narrow(x)) * .2 * Math.sin(t * 7 + q) + mess * .32 * Math.sin(t * 2.3 + q * 1.9), k = Math.min(kr, clamp((x - PG.l) / 60));
       if (k <= 0) continue; ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = k;
       ctx.scale(1.45, 1.45); cutout([[-50, -10], [50, -10], [36, 12], [-36, 12]], C.cream, { jag: 1, shadow: [3, 5, 'rgba(40,24,16,.3)'] }); flat([[4, -10], [4, -62], [44, -16]], C.paper2);
       // once the squeeze starts (done in an image network), the cargo turns from words into little photos
       if (dam < 1) { ctx.save(); ctx.globalAlpha *= 1 - dam; ps(RW[q % RW.length], -20, -26, 26); ctx.restore(); }
-      if (dam > 0) { ctx.save(); ctx.globalAlpha *= dam; const I = img(RI[q]), sz = Math.min(I.width, I.height); flat(rectPts(-44, -50, 40, 40), C.cream); ctx.drawImage(I, (I.width - sz) / 2, (I.height - sz) / 2, sz, sz, -42, -48, 36, 36); ctx.restore(); }
+      if (dam > 0) { ctx.save(); ctx.globalAlpha *= dam; ctx.translate(-24, -30); ctx.rotate(mess * (hash(q * 5.3) - .5) * 1.4); ctx.translate(24, 30); const I = img(RI[q]), sz = Math.min(I.width, I.height); flat(rectPts(-44, -50, 40, 40), C.cream); ctx.drawImage(I, (I.width - sz) / 2, (I.height - sz) / 2, sz, sz, -42, -48, 36, 36); ctx.restore(); }
       ctx.restore();
     }
     // read: a bucket on a string lowered from the "read" house; write: a boat dropped from the "write" house
@@ -513,9 +508,9 @@
     // couriers: first a demo between two words, then the three medical notes ride to the diagnosis house
     const ride = (t0, t1, x0, x1, y, note, col, ph, lift = 0) => { if (t < t0 || t > t1 + .4) return; const u = easeInOut(seg(t, t0, t1)); ctx.save(); ctx.translate(lerp(x0, x1, u), y - Math.abs(Math.sin(t * 7 + ph)) * 4); courier(1.3, t + ph, t < t1 ? note : null, col, lift); ctx.restore(); };
     ride(tNotes - 1, tAnoth, 250, 950, 960, 'she', C.teal, 0);
-    ride(tHead - .4, tOnePl - .1, 950, 1500, 975, 'headache', C.red, 1, 140);
-    ride(tGath - .4, tOnePl + .25, 1340, 1560, 965, 'high blood pressure', C.navy, 2, 60);
-    ride(tFacts - .6, tOnePl + .6, 530, 1440, 990, 'pregnant', C.teal, 3);
+    ride(tFacts - .6, tOnePl + .6, 530, 1420, 945, 'pregnant', C.teal, 3);
+    ride(tGath - .4, tOnePl + .25, 1340, 1580, 995, 'high blood pressure', C.navy, 2);
+    ride(tHead - .4, tOnePl - .1, 950, 1500, 1045, 'headache', C.red, 1);   // its own lane, so its note never sits on another
     // a second courier lane: ambient traffic of notes so the street is alive
     for (let q = 0; q < 2; q++) { const ph = frac((t - a) * .12 + q * .5); if (t < tMed) { ctx.save(); ctx.translate(lerp(1700, 200, ph), 1000); ctx.scale(-1, 1); courier(.7, t + q, null, C.orange); ctx.restore(); } }
     caps(t, [[tAtt - .3, tKnow - .4, 'attention: the courier service'], [tKnow - .3, tMed - .4, 'knows what was said elsewhere'], [tMed - .3, t - lt + dur - .3, 'symptoms carried to one place']]);
@@ -549,10 +544,10 @@
       });
     });
     // after the pull: periods drop into every snippet, sentences end too soon
-    if (pulled > 0) WINS.forEach((wi, n) => { const x = 960 - 380 + 30 + (n % 2) * 380 + 40 + n * 30, yy = 1000 + Math.floor(n / 2) * 0, k = popk(t, tRem + .4 + n * .18, .3); if (k <= 0) return; ctx.save(); ctx.translate(n % 2 ? 1330 : 600, (n < 2 ? 800 : 930) - 40 * (1 - easeOut(k))); ctx.font = `700 46px ${wi.font === HANGUL ? HANGUL : SERIF}`; const s = [ 'as shown in [12.', '"Well." She.', 'GET /api.', '안녕.'][n], w = ctx.measureText(s).width + 40; ctx.globalAlpha = ko; cutout(rectPts(-w / 2, -40, w, 80), C.cream, { jag: 1, shadow: SH }); ps(s, 0, 2, 46, C.ink, { font: wi.font === HANGUL ? HANGUL : SERIF }); ctx.restore(); });
+    if (pulled > 0) WINS.forEach((wi, n) => { const x = 960 - 380 + 30 + (n % 2) * 380 + 40 + n * 30, yy = 1000 + Math.floor(n / 2) * 0, k = popk(t, tRem + .4 + n * .18, .3); if (k <= 0) return; ctx.save(); ctx.translate(n % 2 ? 1330 : 600, (n < 2 ? 800 : 930) - 40 * (1 - easeOut(k))); ctx.font = `700 46px ${wi.font === HANGUL ? HANGUL : SERIF}`; const s = [ 'as shown in [12.', '"Well." She.', 'GET /api.', '안녕.'][n], w = ctx.measureText(s).width + 40; ctx.globalAlpha = ko * (1 - seg(t, tStory - 1.2, tStory - .7)); if (ctx.globalAlpha <= 0) { ctx.restore(); return; } cutout(rectPts(-w / 2, -40, w, 80), C.cream, { jag: 1, shadow: SH }); ps(s, 0, 2, 46, C.ink, { font: wi.font === HANGUL ? HANGUL : SERIF }); ctx.restore(); });
     // the Knot wraps the building while it looks like "confusion", then falls off
     const kc = Math.min(on(t, tConf - .3, tLooks + .8, .4, .8), ko);
-    if (kc > 0) { ctx.save(); ctx.translate(960 + 420, 420 + 200 * seg(t, tLooks, tLooks + .8)); ctx.scale(kc * lerp(1, .4, seg(t, tLooks, tLooks + .8)), kc * lerp(1, .4, seg(t, tLooks, tLooks + .8))); knotP(0, 0, 110, { grin: t < tLooks, look: [-1, 0] }); ctx.restore(); }
+    if (kc > 0) { ctx.save(); ctx.translate(1640, 470 + 300 * seg(t, tLooks, tLooks + .8)); ctx.scale(kc * lerp(1, .4, seg(t, tLooks, tLooks + .8)), kc * lerp(1, .4, seg(t, tLooks, tLooks + .8))); knotP(0, 0, 110, { grin: t < tLooks, look: [-1, 0] }); ctx.restore(); }
     // the pull-tab
     if (ko > 0) { const tab = ease(seg(t, tRem - .3, tRem + .3)); flat(rectPts(1450, 1012, 180 + 160 * tab, 30), C.red, { shadow: SH }); ps('pull', 1500 + 160 * tab, 1028, 26, C.paper); }
     clS(t, lt, dur, 1740, 1010, [[a, 'neutral'], [tConf, 'confused'], [tLooks, 'idea'], [tRem - .5, 'determined'], [tSoon, 'laugh'], [e + .3, 'surprised'], [e + 1.6, 'excited']], { u: 7, flip: true, extra: { aL: t > tRem - .5 && t < tRem + .5 ? 1.3 : undefined } });

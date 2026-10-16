@@ -64,6 +64,17 @@
     if (el > 0) { ctx.globalAlpha *= el; } if (el > 0) E.forEach(([ex, ey], i) => { const sp = (o.spark || 0) * (Math.sin(t * 30 + i * 2) > .3 ? 1 : 0); ctx.strokeStyle = '#3A3A44'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.bezierCurveTo(ex, ey - 120, ex * .5 + 400, -520, 520, -560 + i * 30); ctx.stroke(); fillPath((() => { const p = new Path2D(); p.ellipse(ex, ey, 14, 10, 0, 0, TAU); return p; })(), '#C9A15A', '#3A2A1A', 3); if (sp) glow(ex, ey, 60, '#BFE6FF', 1); });
     ctx.restore();
   }
+  // the network the V neuron really lives in: a painted signboard on an easel, three layers of nodes, the V one aglow
+  function netCard(x, y, s, t, k, vk) {
+    if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(s * backOut(k), s * backOut(k));
+    ctx.strokeStyle = '#3A2410'; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-150, 150); ctx.lineTo(-210, 430); ctx.moveTo(150, 150); ctx.lineTo(210, 430); ctx.moveTo(0, 150); ctx.lineTo(0, 400); ctx.stroke();
+    fillPath(pathOf(rrPts(-290, -230, 580, 400, 16)), '#6A4422', '#2A1A10', 5); fillPath(pathOf(rrPts(-266, -206, 532, 352, 10)), '#F4EED8', '#2A1A10', 3);
+    const L = [[-180, [-130, -50, 30, 110]], [0, [-90, 10, 90]], [180, [-130, -50, 30, 110]]], Q = L.map(([lx, ys]) => ys.map(yy => [lx, yy - 30]));
+    ctx.strokeStyle = 'rgba(58,58,68,.55)'; ctx.lineWidth = 3; for (let l = 0; l < 2; l++) for (const p of Q[l]) for (const q of Q[l + 1]) { ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); }
+    Q.forEach((col, l) => col.forEach(([nx, ny], i) => { const hot = l === 1 && i === 1; if (hot) glow(nx, ny, 120, '#FFE38A', .8 * vk); fillPath((() => { const p = new Path2D(); p.arc(nx, ny, hot ? 40 : 20, 0, TAU); return p; })(), hot ? mixCol('#E8C27A', '#FFE38A', vk) : '#7A9A6A', '#2A1A10', 3);
+      if (hot && vk > 0) { ctx.save(); ctx.globalAlpha = vk; ctx.strokeStyle = '#8A4A10'; ctx.lineWidth = 8; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-18, ny - 14); ctx.lineTo(0, ny + 16); ctx.lineTo(18, ny - 14); ctx.stroke(); ctx.restore(); } }));
+    ctx.restore();
+  }
   // a little brass meter box the electrodes run to: three needles that only twitch, a paper strip of scribbles
   function meter(x, y, s, t, k = 1) {
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
@@ -147,10 +158,16 @@
     camKeys(t, [[a - .3, 960, 560, 1.15], [thum, 960, 540, 1.02], [tcat, 920, 540, 1.1], [tsee, 960, 540, 1.0], [thb, 1080, 480, 1.0], [tel, 1180, 470, 1.08], [e + .3, 1060, 520, 1.0]], .5);
     const front = rousseau(t, { clear: true, mx: 1560, my: 190, ...SKY, front: 5 });
     // the brain rises out of the leaves like a great pink fruit
-    const bk = backOut(seg(t, a, a + 1.4));
-    const vk = env(t, tcat - .3, tsee + .4, .5, .8) * (.75 + .25 * Math.sin(t * 7));
+    // the V lives in a network: while Nick stares at it, the brain steps aside for the signboard; "if a neuron like that
+    // turned up in a human brain", the V flies from the board into the brain
+    const tif = wt('wm_brain', 'If'), bk = backOut(seg(t, a, a + 1.4)), sk = ease(seg(t, tcat - .9, tcat - .2)) * (1 - ease(seg(t, tif - .3, tif + .5)));
+    const ck = seg(t, tcat - .6, tcat) * (1 - seg(t, tel - .6, tel - .1)), cm = ease(seg(t, tif - .3, tif + .5)), cx = lerp(900, 330, cm), cy = lerp(520, 380, cm), csz = lerp(1, .5, cm);
+    const vn = env(t, tcat - .3, thb + .3, .5, .3) * (.75 + .25 * Math.sin(t * 7)), fly = seg(t, thb - .3, thb + .4);
+    const vk = env(t, thb + .2, tch + .4, .4, .8) * (.75 + .25 * Math.sin(t * 7));
     const elk = seg(t, tel - .5, tel + .2);   // the electrodes, their wires and the meter arrive on "a few electrodes"
-    brainArt(900, 640 + (1 - bk) * 500, .9, t, { v: vk, el: elk, spark: seg(t, tel, tel + .3) * (1 - seg(t, tch, tch + .6)) });
+    brainArt(900, 640 + (1 - bk) * 500 + sk * 760, .9, t, { v: vk, el: elk, spark: seg(t, tel, tel + .3) * (1 - seg(t, tch, tch + .6)) });
+    netCard(cx, cy, .85 * csz, t, ck, vn);
+    if (fly > 0 && fly < 1) { const f = easeInOut(fly), p = arcPt([cx, cy - 26 * csz], [900, 620], 160, f); glow(p[0], p[1], 90, '#FFE38A', .9); ctx.save(); ctx.translate(p[0], p[1]); ctx.scale(lerp(.4, 1, f), lerp(.4, 1, f)); ctx.shadowColor = '#FFD84A'; ctx.shadowBlur = 30; ctx.strokeStyle = '#FFE38A'; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-60, -60); ctx.lineTo(0, 40); ctx.lineTo(60, -60); ctx.stroke(); ctx.restore(); }
     if (elk > 0) { ctx.save(); ctx.globalAlpha = elk; meter(1560, 420, 1, t, 1); ctx.restore(); }
     front();
     // Clawd with a fine lens, staring for years (he gets sleepy), then shrugs at the electrodes
@@ -160,7 +177,9 @@
     if (fg > 0) for (let i = 0; i < 5; i++) glow(700 + i * 110 + 30 * Math.sin(t + i), 620 + 40 * Math.sin(i * 2), 300 * fg, '#F4F0E4', .7 * fg);
     camEnd();
     title('humble about brains', 960, 130, 84, '#1A2A1A', seg(t, thum - .3, thum + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tcat - .8, tcat - .4) });
-    if (t > tperf - .3 && t < thb) title('far better tools than any brain scientist', 960, 140, 64, '#1A2A1A', seg(t, tperf - .3, tperf + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, thb - .6, thb - .2) });
+    if (t > tperf - .3 && t < tif) title('far better tools than any brain scientist', 960, 140, 64, '#1A2A1A', seg(t, tperf - .3, tperf + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tif - .7, tif - .3) });
+    if (ck > 0 && t < tif) title('the V neuron, in a network', 960, 1000, 56, '#1A2A1A', seg(t, tcat - .2, tcat + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tif - .6, tif - .2) });
+    if (t > tif - .2 && t < tel - .5) title('if it were in a human brain…', 960, 140, 64, '#1A2A1A', seg(t, tif - .2, thb + .3), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tel - .9, tel - .5) });
     if (t > tel - .5) title('a few electrodes', 1180, 140, 80, '#1A2A1A', seg(t, tel - .5, tel + .3), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, trd - 1.2, trd - .8) });
     if (t > trd - .9) title('"cats and cars"? almost no weight', 1100, 140, 68, '#1A2A1A', seg(t, trd - .9, trd - .1), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, e, e + .3) });
   }
@@ -245,13 +264,13 @@
     GRAIN = dive >= 1 ? .5 : .9;
     // the last line, then the title and credits
     const fk = ease(seg(t, END - 2.2, END - .2)), al = 1 - fk;
-    const l1 = seg(t, a - .1, tcl + .2) * (1 - seg(t, e + .6, e + 1.2)), l2 = seg(t, twe - .1, trd + .4) * (1 - seg(t, e + .6, e + 1.2));
+    const l1 = seg(t, a - .1, tcl + .2) * (1 - seg(t, e + 1.8, e + 2.4)), l2 = seg(t, twe - .1, twe + .7) * (1 - seg(t, e + 1.8, e + 2.4));
     title('Neural networks are already clean.', 1100, 700, 76, '#FFF6E8', l1, { stroke: '#120C2A', strokeW: .12, alpha: al });
     title('We just have to learn how to read them.', 1100, 800, 64, '#FFD58A', l2, { stroke: '#120C2A', strokeW: .12, alpha: al });
-    const tk = seg(t, e + 1.2, e + 3), ck = seg(t, e + 3.4, e + 5);
+    const tk = seg(t, e + 2.4, e + 4.2), ck = seg(t, e + 4.6, e + 6.2);
     title('Neural Networks', 960, 300, 124, '#FFF6E8', tk, { stroke: '#120C2A', strokeW: .1, alpha: al });
-    title('Are Already Clean', 960, 440, 124, '#FFD58A', seg(t, e + 1.8, e + 3.4), { stroke: '#120C2A', strokeW: .1, alpha: al });
-    if (ck > 0) { letter('based on the essay by Nick Cammarata · Goodfire, 2026', 1130, 860, 46, '#F3E2BE', { face: 'hand', shadow: false, alpha: ck * al }); letter('already-clean.goodfire.com', 1130, 940, 44, '#FFD58A', { face: 'hand', shadow: false, alpha: seg(t, e + 4, e + 5.4) * al }); }
+    title('Are Already Clean', 960, 440, 124, '#FFD58A', seg(t, e + 3, e + 4.6), { stroke: '#120C2A', strokeW: .1, alpha: al });
+    if (ck > 0) { letter('based on the essay by Nick Cammarata · Goodfire, 2026', 1130, 860, 46, '#F3E2BE', { face: 'hand', shadow: false, alpha: ck * al }); letter('already-clean.goodfire.com', 1130, 940, 44, '#FFD58A', { face: 'hand', shadow: false, alpha: seg(t, e + 5.2, e + 6.6) * al }); }
     fade(fk, '#000000');
   }
 

@@ -1,4 +1,5 @@
-// ch01 A city of neurons · TILT-SHIFT TOY TOWN. A miniature town on a sunny table, seen through a real perspective
+// ch01 A city of neurons · TILT-SHIFT TOY TOWN. It opens at night, seen from high up: a field of lit windows, like the
+// galaxy; on "zoom all the way in" the camera dives to one lit house, and day comes up on "a little building in a town". A miniature town on a sunny table, seen through a real perspective
 // camera (so it has parallax as we fly over it), finished with a tilt-shift blur. A neuron is a little house whose
 // windows show the photos that light it up: a toy train carries photos past, and dogs make the dog house blaze. Layers
 // are rows of houses from the coast at the table's edge (pixels arrive) to the tall far rows (whole objects); a circuit
@@ -156,14 +157,26 @@
   // Clawd standing on the table at world (x, z)
   function tClawd(t, x, z, keys, extra = {}) { const [sx, sy, k] = P(x, 0, z); if (k <= 0) return; tourist(sx, sy, 8 * k, 'safari', { ...emotions(t, keys), view: 'q', ...extra }); return [sx, sy, k]; }
 
+  // night over the table: everything dims, and the lit windows glow like stars (the dog house brightest)
+  function nightfall(t, k, drawn) {
+    ctx.save(); resetMatrix(); ctx.globalAlpha = .84 * k; ctx.fillStyle = '#0B0F2A'; ctx.fillRect(0, 0, W, H); ctx.restore();
+    const wq = [P(-900, 1500, 3200), P(900, 300, 3200)]; for (let i = 0; i < 40; i++) dot(lerp(wq[0][0], wq[1][0], hash(i * 3.7)), lerp(wq[0][1], wq[1][1], hash(i * 5.3)), 1 + 1.5 * hash(i), '#FFFFFF', k * (.5 + .4 * Math.sin(t * 2 + i)));
+    HOUSES.forEach(q => {
+      const R = drawn[q.feat || q.key]; if (!R || !(q.lit < .45 || q.feat)) return; const dog = q.feat === 'dog', { fx, fy, fw, fh } = R;
+      if (dog) glow(fx + fw / 2, fy + fh / 2, fw * 2.2, '#FFC766', k * (.85 + .15 * Math.sin(t * 3)));
+      for (const u of [.14, .62]) { const wx = fx + fw * u, wy = fy + fh * .22, ww = fw * .24, wh = fh * .2; glow(wx + ww / 2, wy + wh / 2, Math.max(8, fw * (dog ? .5 : .3)), '#FFD27A', k * (dog ? 1 : .7)); ctx.save(); ctx.globalAlpha = k; ctx.fillStyle = '#FFE9A8'; ctx.fillRect(wx, wy, ww, wh); ctx.restore(); }
+    });
+  }
   // ---------- shot 1 · a neuron is a tiny detector; its windows show what lights it up ----------
   // train cars (photos); the car order is set so a dog reaches the dog house exactly on "lights up"
   const CARS = [V + 'pPool13', V + 'c5a94a', V + 'n282687', PE + 'large/0', V + 'c4d201c', PE + 'medium/0', V + 'n1158528', V + 'p10704', V + 'pTrain34', PE + 'large/4', V + 'c5a94c', V + 'n1070575', PE + 'medium/4', V + 'pCarX5', V + 'n132986', PE + 'large/2', V + 'p42708', PE + 'medium/2'];
   const isDog = im => im.includes('pose-everywhere') || im.includes('p10704');
   function detector(t, lt, dur) {
     const s0 = chapStart('ch01'), a = cs('nr_what'), tn = wt('nr_what', 'neuron'), tdet = wt('nr_what', 'detector'), tl = wt('nr_what', 'lights'), w0 = cs('nr_windows'), tsh = wt('nr_windows', 'showing'), tkeep = wt('nr_windows', 'keeping'), tbr = wt('nr_windows', 'brightest'), twin = wt('nr_windows', 'windows'), e = ce('nr_windows');
-    const D = FEAT.dog;
-    camKeys3(t, [[s0, 0, 112, 260, 80, 112], [s0 + .4, 0, 112, 260, 84, 115], [a + .8, 0, 110, 260, 560, 380], [tdet, 30, 100, 250, 600, 400], [tl + 1, 60, 100, 250, 640, 420], [tsh, 20, 90, 230, 760, 470], [tbr, 0, 100, 240, 700, 450], [e, -30, 100, 240, 660, 430]]);
+    const D = FEAT.dog, tz = wt('nr_what', 'zoom'), tbd = wt('nr_what', 'building'), ttn = wt('nr_what', 'town'), tso = wt('nr_what', 'So');
+    // night until "building": the town is a field of lights; the dive to the one lit house; day comes up on "town"
+    const night = 1 - ease(seg(t, tbd - .3, ttn + .9));
+    camKeys3(t, [[s0, 0, 0, 1150, 3300, 2300], [tz, 0, 0, 1050, 3000, 2150], [lerp(tz, tbd, .55), 0, 90, 270, 1100, 700], [tbd, 0, 112, 260, 420, 250], [tso + .4, 0, 110, 260, 560, 380], [tdet, 30, 100, 250, 600, 400], [tl + 1, 60, 100, 250, 640, 420], [tsh, 20, 90, 230, 760, 470], [tbr, 0, 100, 240, 700, 450], [e, -30, 100, 240, 660, 430]]);
     table(t);
     // train: a steady speed, then a blur of thousands of photos, then it slows again
     const v = 150, sp = t < tsh ? 0 : t < tbr + .6 ? Math.pow(seg(t, tsh, tsh + 1.4), 2) * 2400 * (1 - seg(t, tbr - .3, tbr + .6)) : 0;
@@ -175,7 +188,7 @@
     let fire = 0;
     for (let c = 1; c <= CARS.length * 3; c++) { const x = xh - c * 230, im = CARS[(c - 1) % CARS.length]; if (Math.abs(x) < 140 && isDog(im)) fire = Math.max(fire, 1 - Math.abs(x) / 140); }
     const cars = Array.from({ length: CARS.length * 3 }, (_, i) => CARS[i % CARS.length]);
-    const fill = ease(seg(t, tkeep + .4, twin + .2)), on = Math.max(t < a ? .9 * (1 - seg(t, s0 + .8, a - .5)) : fire, fill * (.75 + .25 * Math.sin(t * 4)));
+    const fill = ease(seg(t, tkeep + .4, twin + .2)), on = Math.max(t < ttn + 1.2 ? .95 * (1 - seg(t, ttn + .2, ttn + 1.2)) : fire, fill * (.75 + .25 * Math.sin(t * 4)));
     const drawn = town(t, q => q === D ? on : q.feat ? .15 : 0, { houseOpts: q => q === D ? { kWin: t < w0 ? 1 : t < tkeep + .4 ? 1 - seg(t, w0, w0 + .6) : Math.max(fill, t > twin ? 1 : 0) } : {} });
     // the train rides in front of everything
     if (sp > 300) { ctx.save(); ctx.globalAlpha = .9; train(t, xh, cars); ctx.restore(); const [, by] = P(0, 90, 120); for (let i = 0; i < 9; i++) { ctx.save(); ctx.globalAlpha = .5; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; const yy = by - 60 + i * 18, xx = (hash(i * 3) * W + t * 3000) % W; ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx + 180, yy); ctx.stroke(); ctx.restore(); } }
@@ -186,10 +199,11 @@
     if (hatOff > 0 && hatOff < 1) { const [sx, sy, k] = P(-280 + 600 * hatOff, 70 + 260 * Math.sin(hatOff * Math.PI), 80 - 40 * hatOff); ctx.save(); ctx.translate(sx, sy); ctx.rotate(hatOff * 9); hatOn('safari', 0, 0, 70 * k); ctx.restore(); }
     // the brightest photos fly from the train up into the windows
     if (t > tkeep && t < twin + .5 && drawn.dog) DOGS.forEach((im, i) => { const k = seg(t, tkeep + .4 + i * .7, tkeep + 1.3 + i * .7); if (k <= 0 || k >= 1) return; const R = drawn.dog, tx = R.fx + R.fw * (i % 2 ? .75 : .25), ty = R.fy + R.fh * (.2 + Math.floor(i / 2) * .3), [sx, sy] = P(i * 60 - 90, 100, 120), q = arcPt([sx, sy], [tx, ty], 160, easeInOut(k)); photoFlat(im, q[0] - 50, q[1] - 40, 100, 80, { border: 5, rot: (1 - k) * .5 }); });
+    if (night > 0) nightfall(t, night, drawn);
     if (drawn.dog) { const R = drawn.dog; hand('a neuron', R.fx + R.fw / 2, R.fy - R.fh * .62, 64, PAL.ink, seg(t, tn - .3, tn + .5) * (1 - seg(t, w0, w0 + .4)), { stroke: '#FFF6E2', strokeW: .14 }); }
     if (t > tsh - .2 && t < tbr + 1) title('a lot of pictures', 960, 160, 80, '#3A2A1A', seg(t, tsh - .2, tsh + .8) * (1 - seg(t, tbr + .4, tbr + 1)), { stroke: '#FFF6E2', strokeW: .1 });
     if (t > a - .3 && t < a + 4) title('Part I · the belief', 1120, 1000, 64, '#6E4FB0', seg(t, a - .2, a + .6) * (1 - seg(t, a + 3.2, a + 3.8)), { stroke: '#FFF6E2', strokeW: .12 });
-    if (t > tl - .2 && t < tl + 1.3) sfx('DING!', W / 2 + 200, 330, 64, PAL.berry, t - tl + .1, { life: 1.2 });
+    if (t > tl - .2 && t < tl + 1.3) sfx('DING!', W / 2 + 300, 560, 72, PAL.berry, t - tl + .1, { life: 1.2 });   // (low enough to sit in the sharp band, clear of the roofs)
     fxTiltShift(330, 820, 10);
   }
 

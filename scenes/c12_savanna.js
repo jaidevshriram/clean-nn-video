@@ -156,7 +156,7 @@
     const up = env(t, tw - .3, tk + 1.2, .35, .4);
     if (up > 0) { ctx.save(); ctx.beginPath(); ctx.rect(1300, 300, 600, 470); ctx.clip(); knotBeast(1560, 780 - 160 * up, 105, { hat: 'safari', look: [Math.sin(t * 3), -.2] }); ctx.restore(); for (let i = 0; i < 14; i++) { const x = 1470 + i * 14, h = 40 + 30 * hash(i); ctx.strokeStyle = mixCol('#8C6424', '#E8C27A', hash(i * 3)); ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, 780); ctx.quadraticCurveTo(x + 4, 780 - h * .6, x + Math.sin(t * 2 + i) * 6, 780 - h); ctx.stroke(); } }
     filmer(t, 640, 960, 13, [[CH, 'happy'], [a, 'thinking'], [tk + .1, 'surprised'], [tk + 1.4, 'suspicious']], { flip: false, aR: 1.1, armR: camProp });
-    { const ck = ease(seg(t, tk - .4, tk + .1)) * (1 - ease(seg(t, ce('hl_q') + .2, ce('hl_q') + .6))); if (ck > 0) letter('why not a knot?', 1560, 420, 64, '#FFF6E0', { face: 'hand', shadow: false, alpha: ck, stroke: '#3A2410', strokeW: .16 }); }
+    { const ck = ease(seg(t, tk - .4, tk + .1)) * (1 - ease(seg(t, Math.min(tk + .8, ce('hl_q') + .2), Math.min(tk + 1.3, ce('hl_q') + .6)))); if (ck > 0) letter('why not a knot?', 1560, 420, 64, '#FFF6E0', { face: 'hand', shadow: false, alpha: ck, stroke: '#3A2410', strokeW: .16 }); }
     frontGrass(t, 1000, 30);
     dust(t);
     camEnd();
@@ -176,7 +176,7 @@
     const P2 = t > tNx - .6 ? photoPost(OL + 'after-01', 2270, 940, 440, 330, popk(t, tNx - .6, .6)) : null;
     // the racers
     const go = seg(t, tWin - .1, tWin + 1.2), grow = easeOut(seg(t, tGo - .4, tSt)), starve = seg(t, tGo, tSt + .6);
-    const bs = lerp(.75, 1.05, grow), ms = lerp(1.45, 1.05, starve), mx = lerp(160, 900, easeOut(seg(t, tWin - .2, tWin + .7))), bx0 = lerp(-600, 260, easeOut(seg(t, tGz - .7, tGz + .5))), bx = lerp(bx0, 520, ease(go)) + lerp(0, 1200, easeInOut(seg(t, tNx - .2, tHe - .2)));
+    const bs = lerp(.75, 1.05, grow), ms = lerp(1.45, 1.05, starve), mx = t < tWin + .2 ? 160 : 960, dive = seg(t, tWin - .35, tWin - .05), tun = seg(t, tWin - .05, tWin + .35), pop2 = easeOut(seg(t, tWin + .35, tWin + .75)), bx0 = lerp(-600, 260, easeOut(seg(t, tGz - .7, tGz + .5))), bx = lerp(bx0, 520, ease(go)) + lerp(0, 1200, easeInOut(seg(t, tNx - .2, tHe - .2)));
     // the learning signal: light pouring from the photo into the circuit that explains more of it
     if (P1 && t > tPi - .6) {
       const kk = seg(t, tPi - .6, tPi) * (1 - seg(t, tNx, tNx + .8)), bx1 = bx + 200 * bs, by1 = 960 - 250 * bs;
@@ -193,8 +193,10 @@
     }
     // the meerkat's burrow
     { const bk = seg(t, tMe - .6, tMe - .2); if (bk > 0) { ctx.save(); ctx.globalAlpha = bk; ctx.fillStyle = '#6A4620'; ctx.beginPath(); ctx.ellipse(160, 966, 70, 16, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(160, 964, 40, 9, 0, 0, TAU); ctx.fill(); ctx.restore(); } }
-    const mUp = easeOut(seg(t, tMe - .5, tMe)), mHop = t > tWin - .2 && t < tWin + .7 ? Math.abs(Math.sin(t * 18)) * 20 : 0;
-    if (mUp > 0) { ctx.save(); if (t < tWin - .2) { ctx.beginPath(); ctx.rect(-400, 0, 3000, 966); ctx.clip(); } meerkat(mx, 966 + (1 - mUp) * 200 - mHop, ms, { sad: t > tSt - .3, pixel: '#7A9A4A' }); ctx.restore(); }
+    { const hk = seg(t, tWin - .1, tWin + .3); if (hk > 0) { ctx.save(); ctx.globalAlpha = hk; ctx.fillStyle = '#6A4620'; ctx.beginPath(); ctx.ellipse(960, 966, 70, 16, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(960, 964, 40, 9, 0, 0, TAU); ctx.fill(); ctx.restore(); } }
+    if (tun > 0 && tun < 1) for (let i = 0; i < 7; i++) { const u = tun - i * .06; if (u < 0 || u > 1) continue; dot(lerp(160, 960, u), 972, 22 - i * 2, '#8C6424', .8 - i * .1); }   // the tunnel's ripple of earth
+    const mUp = t < tWin - .35 ? easeOut(seg(t, tMe - .5, tMe)) : t < tWin + .35 ? 1 - easeIn(dive) : pop2;
+    if (mUp > 0) { ctx.save(); if (t < tWin + .75) { ctx.beginPath(); ctx.rect(-400, 0, 3000, 966); ctx.clip(); } meerkat(mx, 966 + (1 - mUp) * 200, ms, { sad: t > tSt - .3, pixel: '#7A9A4A' }); ctx.restore(); }
     if (t > tSt - .2 && t < tNx + 1) { const k = popk(t, tSt - .2, .4); ctx.save(); ctx.translate(mx + 20, 966 - 230 * ms); ctx.scale(backOut(k), backOut(k)); flat(ellPts(0, 0, 50, 26, 18), '#8A93A8'); flat(ellPts(-24, 6, 30, 18, 14), '#8A93A8'); for (let i = 0; i < 4; i++) { const f = frac(t * 1.5 + i / 4); ctx.strokeStyle = '#7FA6D8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-20 + i * 14, 24 + f * 40); ctx.lineTo(-22 + i * 14, 34 + f * 40); ctx.stroke(); } ctx.restore(); }
     if (bx0 > -480) beast(bx, 966, bs, t, { walk: t * (go > 0 && go < 1 ? 1.6 : (t > tNx - .2 && t < tHe - .2 ? 1.2 : .15)) });
     if (bs > .7 && t < tNx) { for (let i = 0; i < 6; i++) { const f = frac(t * .8 + i / 6); dot(bx + (hash(i) - .5) * 300 * bs, 966 - 280 * bs - f * 80, 5 * (1 - f), '#FFF2C8', 1 - f); } }
@@ -229,8 +231,8 @@
     for (let i = 0; i < 3; i++) { const x = -600 + frac(day * 3 + i / 3) * 3200; ctx.fillStyle = 'rgba(60,30,0,.14)'; ctx.beginPath(); ctx.ellipse(x, 820 + i * 60, 360, 50, 0, 0, TAU); ctx.fill(); }
     // the herds: each grows as newcomers arrive and join their own kind
     const grownN = Math.floor(lerp(2, 4.99, seg(t, a + .5, tEd)));
-    const gk = seg(t, tSa - .4, tSa + .2) * (1 - seg(t, e + .2, e + .6));
-    { const sa = 1 - gk; if (sa > 0) { ctx.save(); ctx.globalAlpha = sa; FAMS.forEach(([im1, im2, cx], f) => photoPost(im1, cx, 640, 230, 150, popk(t, a - .2 + f * .25, .6))); ctx.restore(); } }   // each herd's family, on a big sign
+    const gk = seg(t, wt('hl_ecology', 'yellow') - .45, wt('hl_ecology', 'yellow') - .15) * (1 - seg(t, e + .5, e + .8));
+    { const sa = 1 - seg(t, tSa - .4, tSa + .2) * (1 - seg(t, e + .5, e + .8)); if (sa > 0) { ctx.save(); ctx.globalAlpha = sa; FAMS.forEach(([im1, im2, cx], f) => photoPost(im1, cx, 640, 230, 150, popk(t, a - .2 + f * .25, .6))); ctx.restore(); } }   // each herd's family, on a big sign
     FAMS.forEach(([im1, im2, cx], f) => {
       const n = grownN;
       for (let i = n - 1; i >= 0; i--) {
@@ -247,7 +249,7 @@
     frontGrass(t, 1010, 30);
     camEnd();
     // time-lapse speed marker
-    letter('×1000', 1740, 170, 52, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, screen: true, alpha: .9 * (1 - seg(t, tSa - .6, tSa - .2)) });
+    letter('millions of photos', 1275, 150, 40, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, screen: true, alpha: .9 * (1 - seg(t, tSa - .6, tSa - .2)) });
     // the callback: the same growth as one neuron spreading, photo by photo
     if (gk > 0) { ctx.save(); ctx.globalAlpha = gk; ctx.fillStyle = 'rgba(20,12,4,.55)'; ctx.beginPath(); ctx.roundRect(330, 110, 1260, 250, 20); ctx.fill(); ctx.restore(); letter("one neuron's growth", 960, 140, 44, '#F3DDB0', { face: 'hand', shadow: false, alpha: gk, screen: true });
       GROW.forEach(([im, w, lab], i) => { const k = popk(t, wt('hl_ecology', w) - .3, .4) * gk; if (k <= 0) return; const x = 480 + i * 320; if (i) { ctx.save(); ctx.globalAlpha = gk; ctx.strokeStyle = '#FFE08A'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - 220, 245); ctx.lineTo(x - 108, 245); ctx.moveTo(x - 124, 232); ctx.lineTo(x - 108, 245); ctx.lineTo(x - 124, 258); ctx.stroke(); ctx.restore(); } ctx.save(); ctx.translate(x, 245); ctx.scale(backOut(k), backOut(k)); photoFlat(im, -90, -70, 180, 120, { border: 6, borderCol: '#F3DDB0', shadow: false }); ctx.restore(); letter(lab, x, 336, 36, '#FFF6E0', { face: 'hand', shadow: false, alpha: clamp(k), screen: true }); }); }
@@ -426,5 +428,5 @@
     docPost(t);
   }
 
-  shots([[CH, q], [cs('hl_race') - .3, race], [cs('hl_ecology') - .3, ecology], [cs('hl_rare') - .3, rare], [cs('hl_adversarial') - .3, adversarial], [cs('hl_umbrella') - .3, umbrella], [cs('hl_toy') - .3, toy]]);
+  shots([[CH, q], [cs('hl_race') - .3, race], [cs('hl_ecology') - .3, ecology], [cs('hl_rare') + .15, rare], [cs('hl_adversarial') - .3, adversarial], [cs('hl_umbrella') - .3, umbrella], [cs('hl_toy') - .3, toy]]);
 })();

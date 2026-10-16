@@ -160,7 +160,7 @@ function passStamp(num, name, x = 1720, y = 930, k = 1, o = {}) {
   ctx.save(); resetMatrix(); ctx.translate(x, y); ctx.rotate(o.rot ?? -.16); ctx.scale(s, s); ctx.globalAlpha = .88 * clamp(k * 2);
   ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke(); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, r - 12, 0, TAU); ctx.stroke();
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '900 20px sans-serif'; ctx.fillText('STOP', 0, -44); ctx.font = '900 64px serif'; ctx.fillText(String(num), 0, 2);
-  ctx.font = '800 17px sans-serif'; const words = name.toUpperCase(); ctx.fillText(words.length > 16 ? words.slice(0, 16) : words, 0, 48);
+  const words = name.toUpperCase(); let fs = 17; ctx.font = `800 ${fs}px sans-serif`; while (fs > 10 && ctx.measureText(words).width > 132) { fs -= 1; ctx.font = `800 ${fs}px sans-serif`; } ctx.fillText(words, 0, 48);   // shrink to fit inside the ring, never truncate
   // the ink is uneven: knock out a few specks
   ctx.globalCompositeOperation = 'destination-out'; for (let i = 0; i < 40; i++) { ctx.beginPath(); ctx.arc((hash(i * 3.1 + num) - .5) * 2 * r, (hash(i * 7.3 + num) - .5) * 2 * r, 1 + hash(i) * 3, 0, TAU); ctx.fill(); }
   ctx.restore();
