@@ -312,7 +312,7 @@
   const GRID10 = i => [578 + 70 + (i % 5) * 156, 520 + Math.floor(i / 5) * 160];
   function pressRound(t, lt, dur) {
     const a = cs('te_test'), tTest = wt('te_test', 'testable'), tWatch = wt('te_test', 'watch'), tSq = wt('te_test', 'squeeze'), tUnder = wt('te_test', 'pressure');
-    const s = cs('te_squeeze'), tLayer = wt('te_squeeze', 'layer'), tCurve = wt('te_squeeze', 'curve'), tCr = wt('te_squeeze', 'crushed'), tFour = wt('te_squeeze', 'four'), tTen = wt('te_squeeze', 'ten'), tNo = wt('te_squeeze', 'no'), tWay = wt('te_squeeze', 'around');
+    const s = cs('te_squeeze'), tLayer = wt('te_squeeze', 'layer'), tCurve = wt('te_squeeze', 'curve'), tCr = wt('te_squeeze', 'cut'), tFour = wt('te_squeeze', 'four'), tTen = wt('te_squeeze', 'ten'), tNo = wt('te_squeeze', 'no'), tWay = wt('te_squeeze', 'around');
     const tIf = wt('te_squeeze', 'If'), tDram = wt('te_squeeze', 'dramatic'), tCurves = wt('te_squeeze', 'curves'), tSpi = wt('te_squeeze', 'spirals'), tWeb = wt('te_squeeze', 'webs'), tTog = wt('te_squeeze', 'together');
     const r = cs('te_result'), tClean = wt('te_result', 'clean'), tCoarse = wt('te_result', 'coarser'), tLoops = wt('te_result', 'curves'), tTen2 = wt('te_result', 'ten'), tTwo = wt('te_result', 'Two'), tMany = wt('te_result', 'many');
     const tUnf = wt('te_result', 'Unfolding'), tHid = wt('te_result', 'hidden'), tNone = wt('te_result', 'none'), e = ce('te_result');
@@ -363,7 +363,7 @@
   const GRID13 = i => i < 7 ? [618 + i * 114, 470] : [675 + (i - 7) * 114, 606];
   function horizon(t, lt, dur) {
     const a = cs('te_last'), e = ce('te_last'), tLast = wt('te_last', 'last'), tMod = wt('te_last', 'modern'), tTh = wt('te_last', 'thousand'), tDown = wt('te_last', 'down'), tThir = wt('te_last', 'thirteen'), tSame = wt('te_last', 'Same', 1);
-    const tCo = wt('te_last', 'Coarser'), tNev = wt('te_last', 'never'), tPack = wt('te_last', 'packing'), tPaint = wt('te_last', 'paints'), tBr = wt('te_last', 'broader'), tBrush = wt('te_last', 'brush');
+    const tCo = wt('te_last', 'Coarser'), tNev = wt('te_last', 'not'), tPack = wt('te_last', 'packing'), tPaint = wt('te_last', 'paints'), tBr = wt('te_last', 'broader'), tBrush = wt('te_last', 'brush');
     stageBG();
     const [sx, sy] = shake(t, tDown + .05, 22);
     camKeys(t, [[a - .3, 960, 520, 1.15], [tTh, 960, 500, 1.25], [tDown + .2, 960, 480, 1.2], [tSame, 960, 500, 1.35], [tPack, 1100, 480, 1.15], [tPaint, 960, 500, 1.3], [tBrush + .6, 960, 540, 1.05], [e + 1, 960, 540, 1]].map(k => [k[0], k[1] + sx, k[2] + sy, k[3]]), .5);
@@ -404,8 +404,8 @@
   }
   function shutter(x, w, h, open) { const top = 800 - h, sh = h * (1 - easeInOut(open)); if (sh < 2) return; ctx.save(); ctx.beginPath(); ctx.rect(x - w / 2, top, w, sh); ctx.clip(); flat(rectPts(x - w / 2, top, w, h), '#B0203A'); ctx.strokeStyle = '#7A1026'; ctx.lineWidth = 3; for (let y = top + sh - 2; y > top; y -= 18) { ctx.beginPath(); ctx.moveTo(x - w / 2, y); ctx.lineTo(x + w / 2, y); ctx.stroke(); } ctx.restore(); txt('?', x, top + sh / 2, Math.min(w, h) * .45, '#FFD36B', { font: SERIF, weight: '900' }); }
   function sizes(t, lt, dur) {
-    const a = cs('te_sizes'), e = ce('te_sizes'), tTr = wt('te_sizes', 'trained'), tThree = wt('te_sizes', 'three'), tApart = wt('te_sizes', 'apart'), tSm = wt('te_sizes', 'smallest'), tCar = wt('te_sizes', 'car'), tBig = wt('te_sizes', 'biggest'), tDoz = wt('te_sizes', 'dozens');
-    const tTax = wt('te_sizes', 'taxis'), tVan = wt('te_sizes', 'vans'), tCon = wt('te_sizes', 'convertibles'), tViews = wt('te_sizes', 'views'), tLess = wt('te_sizes', 'Less'), tScr = wt('te_sizes', 'scrambled');
+    const a = cs('te_sizes'), e = ce('te_sizes'), tTr = wt('te_sizes', 'trained'), tThree = wt('te_sizes', 'three'), tApart = wt('te_sizes', 'apart'), tSm = wt('te_sizes', 'smallest'), tCar = wt('te_sizes', 'car'), tBig = wt('te_sizes', 'biggest'), tDoz = wt('te_sizes', 'specialists');
+    const tTax = wt('te_sizes', 'taxis'), tVan = wt('te_sizes', 'ambulances'), tCon = wt('te_sizes', 'convertibles'), tViews = wt('te_sizes', 'views'), tLess = wt('te_sizes', 'Less'), tScr = wt('te_sizes', 'scrambled');
     stageBG();
     camKeys(t, [[a - .3, 960, 540, 1], [tTr, 960, 520, 1.25], [tSm - .3, 700, 600, 1.9], [tCar + .6, 700, 600, 1.85], [tBig - .2, 1185, 520, 1.6], [tViews + .5, 1150, 520, 1.5], [tLess, 960, 520, 1.25], [e + 1, 960, 540, 1.05]], .5);
     contestants(t, { supLit: .3, knot: { look: [-1, 0], grin: false } });
@@ -445,8 +445,8 @@
   const RACK = i => [740 + i * 104, 470];
   function finale(t, lt, dur) {
     const a = cs('te_dict'), e = ce('te_dict'), tUnf = wt('te_dict', 'Unfolding'), tPieces = wt('te_dict', 'pieces'), tCopies = wt('te_dict', 'near-copies'), t88 = wt('te_dict', 'eighty-eight'), tAct = wt('te_dict', 'activity');
-    const tBlocks = wt('te_dict', 'blocks'), tLegs = wt('te_dict', 'legs'), tWebs = wt('te_dict', 'webs'), tReg = wt('te_dict', 'regrouped'), tLeaves = wt('te_dict', 'leaves'), tInWebs = wt('te_dict', 'webs', 1);
-    const tBase = wt('te_dict', 'baseball'), tUnd = wt('te_dict', 'understanding'), tNeur = wt('te_dict', 'neuron', 1), end = ce('te_dict');
+    const tBlocks = wt('te_dict', 'blocks'), tLegs = wt('te_dict', 'legs'), tWebs = wt('te_dict', 'webs'), tReg = wt('te_dict', 'regrouped'), tLeaves = wt('te_dict', 'different'), tInWebs = wt('te_dict', 'places');
+    const tBase = wt('te_dict', 'already'), tUnd = wt('te_dict', 'kept'), tNeur = wt('te_dict', 'neuron', 1), end = ce('te_dict');
     const bolt = end + .5;
     stageBG();
     camKeys(t, [[a - .3, 960, 540, 1], [tUnf, 960, 600, 1.3], [tCopies, 960, 580, 1.4], [t88 - .5, 960, 470, 1.3], [tAct + .6, 960, 540, 1.15], [tBlocks, 960, 630, 1.35], [tInWebs + .4, 960, 630, 1.35], [tBase - .3, 960, 470, 1.5], [tNeur + .2, 960, 500, 1.35], [end + .3, 960, 540, 1], [end + 4, 1050, 540, 1.02]], .5);

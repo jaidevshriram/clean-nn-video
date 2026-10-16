@@ -198,7 +198,7 @@
   const Qd = fn => (t, lt, dur) => { fn(t, lt, dur); qTag(t); };
 
   // ================= arrival: the taxi parks on a page; the city of words pops up =================
-  const A = { s: chapStart('ch10'), a: cs('cw_arrive'), tImg: wt('cw_arrive', 'Image'), tBut: wt('cw_arrive', 'but'), tLang: wt('cw_arrive', 'language'), tTalk: wt('cw_arrive', 'kind') };
+  const A = { s: chapStart('ch10'), a: cs('cw_arrive'), tImg: wt('cw_arrive', 'Image'), tBut: wt('cw_arrive', 'but'), tLang: wt('cw_arrive', 'language', 1), tTalk: wt('cw_arrive', 'kind') };
   const CITY = [[1080, 820, 130, 230, C.orange, 'once', 'peak'], [1250, 790, 120, 170, C.yellow, 'said', 'flat'], [1420, 830, 140, 270, C.blue, 'river', 'step'], [1590, 800, 120, 200, C.green, 'because', 'peak'], [1700, 860, 110, 150, C.pink, 'why', 'flat'], [1180, 930, 120, 140, C.lilac, 'if', 'peak']];
   function arriveShot(t, lt, dur) {
     const { s, a, tImg, tBut, tLang, tTalk } = A;
@@ -428,7 +428,7 @@
   }
 
   // ================= experts: a gatekeeper and specialist neighbourhoods; one is all dice and dragons =================
-  const R0 = { a: cs('cw_river'), tRiver: wt('cw_river', 'river'), tRes: wt('cw_river', 'residual'), tRead: wt('cw_river', 'read'), tWrite: wt('cw_river', 'write'), tWorr: wt('cw_river', 'worried'), tTang: wt('cw_river', 'tangle'), tPrac: wt('cw_river', 'practice'), tRead2: wt('cw_river', 'read', 1), tSq: wt('cw_river', 'squeezed'), tMess: wt('cw_river', 'messier'), tNev: wt('cw_river', 'never'), tKn: wt('cw_river', 'knotted') };
+  const R0 = { a: cs('cw_river'), tRiver: wt('cw_river', 'river'), tRes: wt('cw_river', 'residual'), tRead: wt('cw_river', 'read'), tWrite: wt('cw_river', 'write'), tWorr: wt('cw_river', 'worried'), tTang: wt('cw_river', 'tangle'), tPrac: wt('cw_river', 'far'), tRead2: wt('cw_river', 'read', 1), tSq: wt('cw_river', 'squeezed'), tMess: wt('cw_river', 'messier'), tNev: wt('cw_river', 'nothing'), tKn: wt('cw_river', 'knotted') };
   const RW = ['the', 'river', 'ran', 'and', 'she', 'said', 'why', 'if', 'so', 'once'];
   function riverShot(t, lt, dur) {
     const { a, tRiver, tRes, tRead, tWrite, tWorr, tTang, tPrac, tRead2, tSq, tMess, tNev, tKn } = R0;
@@ -474,7 +474,7 @@
   }
 
   // ================= attention: the courier service =================
-  const Q0 = { a: cs('cw_couriers'), tAtt: wt('cw_couriers', 'attention'), tCour: wt('cw_couriers', 'courier'), tNotes: wt('cw_couriers', 'notes'), tKnow: wt('cw_couriers', 'know'), tAnoth: wt('cw_couriers', 'another'), tMed: wt('cw_couriers', 'medical'), tHead: wt('cw_couriers', 'headache'), tSwell: wt('cw_couriers', 'swelling'), tBP: wt('cw_couriers', 'blood'), tOnePl: wt('cw_couriers', 'place', 1), tDiag: wt('cw_couriers', 'diagnosis') };
+  const Q0 = { a: cs('cw_couriers'), tAtt: wt('cw_couriers', 'attention'), tCour: wt('cw_couriers', 'courier'), tNotes: wt('cw_couriers', 'notes'), tKnow: wt('cw_couriers', 'know'), tAnoth: wt('cw_couriers', 'another'), tMed: wt('cw_couriers', 'medical'), tHead: wt('cw_couriers', 'headache'), tSwell: wt('cw_couriers', 'gather'), tBP: wt('cw_couriers', 'facts'), tOnePl: wt('cw_couriers', 'place', 1), tDiag: wt('cw_couriers', 'diagnosis') };
   const STREET = [[230, 'she'], [400, 'is'], [575, 'pregnant'], [760, 'with'], [920, 'a'], [1080, 'headache'], [1260, 'and'], [1430, 'swelling']];
   function couriersShot(t, lt, dur) {
     const { a, tAtt, tCour, tNotes, tKnow, tAnoth, tMed, tHead, tSwell, tBP, tOnePl, tDiag } = Q0;

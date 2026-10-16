@@ -138,7 +138,7 @@
 
   // ---------- shot 3 · humble about brains: perfect tools couldn't see it; a few electrodes never would ----------
   function brain(t, lt, dur) {
-    const a = cs('wm_brain'), thum = wt('wm_brain', 'humble'), tcat = wt('wm_brain', 'cat'), tperf = wt('wm_brain', 'perfect'), tsee = wt('wm_brain', 'see'), thb = wt('wm_brain', 'human'), tel = wt('wm_brain', 'electrodes'), tch = wt('wm_brain', 'chance'), e = ce('wm_brain');
+    const a = cs('wm_brain'), thum = wt('wm_brain', 'humble'), tcat = wt('wm_brain', 'cat'), tperf = wt('wm_brain', 'tools'), tsee = wt('wm_brain', 'see'), thb = wt('wm_brain', 'human'), tel = wt('wm_brain', 'electrodes'), tch = wt('wm_brain', 'chance'), e = ce('wm_brain');
     camKeys(t, [[a - .3, 960, 560, 1.15], [thum, 960, 540, 1.02], [tcat, 920, 540, 1.1], [tsee, 960, 540, 1.0], [thb, 1080, 480, 1.0], [tel, 1180, 470, 1.08], [e + .3, 1060, 520, 1.0]], .5);
     const front = rousseau(t, { clear: true, mx: 1560, my: 190, ...SKY, front: 5 });
     // the brain rises out of the leaves like a great pink fruit
@@ -160,7 +160,7 @@
 
   // ---------- shot 4 · the pond: AIs might want to understand themselves ----------
   function pond(t, lt, dur) {
-    const a = cs('wm_care'), tsaf = wt('wm_care', 'safety'), tthem = wt('wm_care', 'themselves'), task = wt('wm_care', 'asked'), thelp = wt('wm_care', 'Helping'), tleast = wt('wm_care', 'least'), e = ce('wm_care');
+    const a = cs('wm_care'), tsaf = wt('wm_care', 'safety'), tthem = wt('wm_care', 'themselves'), task = wt('wm_care', 'asked'), thelp = wt('wm_care', 'essay'), tleast = wt('wm_care', 'least'), e = ce('wm_care');
     camKeys(t, [[a - .3, 960, 600, 1.1], [tthem - .5, 930, 760, 1.55], [task + .5, 960, 740, 1.4], [thelp, 1050, 700, 1.25], [e + 1, 1000, 640, 1.1]], .5);
     const front = rousseau(t, { clear: true, mx: 1500, my: 230, sky0: '#F6C8A6', sky1: '#F8E8C0', front: 5 });
     // the pond: dark water with the sky in it, lily pads, ripples

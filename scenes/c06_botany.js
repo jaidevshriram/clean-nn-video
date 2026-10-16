@@ -365,7 +365,7 @@
   }
   function geology(t, lt, dur) {
     const a = cs('gr_geology'), e = ce('gr_geology'), tGeo = wt('gr_geology', 'geology'), tBr = wt('gr_geology', 'branch'), tCes = wt('gr_geology', 'Cesium'), tMaps = wt('gr_geology', 'maps');
-    const tEn = wt('gr_geology', 'enemy'), tRus = wt('gr_geology', 'Russian'), tPoem = wt('gr_geology', 'poem'), tWeird = wt('gr_geology', 'Weird'), tRand = wt('gr_geology', 'random');
+    const tEn = wt('gr_geology', 'enemy'), tRus = wt('gr_geology', 'Russian'), tPoem = wt('gr_geology', 'poem'), tWeird = wt('gr_geology', 'none'), tRand = wt('gr_geology', 'random');
     const dx = slide(t, lt, iy, ce('gr_iy') + .3);
     cam(t, [[a - .4, 560, 580, 1.15], [tCes, 680, 560, 1.12], [tMaps + .8, 720, 560, 1.12], [tEn + .2, 1350, 560, 1.12], [tPoem, 1420, 560, 1.12], [tWeird, 960, 560, .98], [e + 2, 960, 560, .96]], dx);
     plateFrame();

@@ -585,7 +585,7 @@
   }
 
   // ================= LEVEL 3 · WHISPERS (night) =================
-  const E0 = { a: cs('tv_weak'), tWh: wt('tv_weak', 'whispers'), tMil: wt('tv_weak', 'million'), tReg: wt('tv_weak', 'register'), t160: wt('tv_weak', 'sixty'), tSh: wt('tv_weak', 'shout'), c: cs('tv_cut'), tSil: wt('tv_cut', 'silence'), tNet: wt('tv_cut', 'network'), tBar: wt('tv_cut', 'barely'), tTie: wt('tv_cut', 'tie-breakers'), tTorn: wt('tv_cut', 'torn') };
+  const E0 = { a: cs('tv_weak'), tWh: wt('tv_weak', 'whispers'), tMil: wt('tv_weak', 'million'), tReg: wt('tv_weak', 'register'), t160: wt('tv_weak', 'sixty'), tSh: wt('tv_weak', 'peak'), c: cs('tv_cut'), tSil: wt('tv_cut', 'silence'), tNet: wt('tv_cut', 'network'), tBar: wt('tv_cut', 'barely'), tTie: wt('tv_cut', 'tie-breakers'), tTorn: wt('tv_cut', 'torn') };
   const WORDS = ['THE', 'OF', 'AND', 'SEA', 'RAN', 'BLUE', 'IF', 'CAT', 'SO', 'UP', 'TEA', 'A', 'LAMP', 'WAS', 'NOW', 'MAP'];
   const SCEN_E = scatter(71, 60, -6, 24, 1, 22, [[-6, 8.6, 24, 11.3], [13.6, 10, 15.4, 22], [1, 5, 4.4, 8.4], [10.6, 12.6, 13.6, 17.4], [15.6, 12.6, 18.6, 17.4], [4, 11.4, 6.4, 13.4]]);
   function weakShot(t, lt, dur) {

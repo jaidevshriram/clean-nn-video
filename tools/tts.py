@@ -44,9 +44,12 @@ def parse(path):
             body = m.group(2); pause = None
             pm = re.search(r'\(pause ([\d.]+)\)\s*$', body)
             if pm: pause = float(pm.group(1)); body = body[:pm.start()].strip()
+            # an inline "(pause s)" splits the line: each piece is voiced on its own and joined with that much silence
+            raw = re.sub(r'\{[^|}]*\|([^}]*)\}', r'\1', body)
+            body = re.sub(r'\s*\(pause [\d.]+\)\s*', ' ', body)
             display = re.sub(r'\{([^|}]*)\|[^}]*\}', r'\1', body)
             spoken = re.sub(r'\{[^|}]*\|([^}]*)\}', r'\1', body)
-            c = {'id': m.group(1), 'chapter': ch['id'], 'display': display, 'spoken': spoken, 'pause': pause}
+            c = {'id': m.group(1), 'chapter': ch['id'], 'display': display, 'spoken': spoken, 'raw': raw, 'pause': pause}
             cues.append(c); ch['cues'].append(c['id'])
     return chapters, cues
 
@@ -91,12 +94,19 @@ def elevenlabs(text, prev_text='', next_text=''):
     return (np.frombuffer(pcm, dtype='<i2').astype(np.float32) / 32768.0)
 
 def synth_cue(c, i):
-    key = hashlib.sha1(f"{args.provider}|{args.voice}|{args.speed}|{c['spoken']}".encode()).hexdigest()[:12]
+    key = hashlib.sha1(f"{args.provider}|{args.voice}|{args.speed}|{c['raw']}".encode()).hexdigest()[:12]
     path = os.path.join(CUE_DIR, f"{c['id']}.{key}.wav")
     if os.path.exists(path): return path
     if args.provider == 'elevenlabs':
         prev = cues[i - 1]['spoken'] if i else ''; nxt = cues[i + 1]['spoken'] if i + 1 < len(cues) else ''
-        a = trim(elevenlabs(c['spoken'], prev, nxt))
+        bits = re.split(r'\s*\(pause ([\d.]+)\)\s*', c['raw'])   # [text, gap, text, gap, text...]
+        texts, gaps = bits[0::2], [float(g) for g in bits[1::2]]
+        parts = []
+        for j, tx in enumerate(texts):
+            before = ' '.join([prev] + texts[:j]).strip(); after = ' '.join(texts[j + 1:] + [nxt]).strip()
+            parts.append(trim(elevenlabs(tx, before, after)))
+            if j < len(gaps): parts.append(np.zeros(int(gaps[j] * SR), np.float32))
+        a = np.concatenate(parts)
     else:
         parts = []
         for s in sentences(c['spoken']):

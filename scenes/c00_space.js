@@ -149,7 +149,7 @@
 
   // ---------- shot 2 · inside: billions of lights, signals down a maze of roads; each light is a neuron ----------
   function lights(t, lt, dur) {
-    const a = cs('open_city'), tb = wt('open_city', 'billions'), tp = wt('open_city', 'passing'), te = wt('open_city', 'Each'), tn = wt('open_city', 'neuron');
+    const a = cs('open_city'), tb = wt('open_city', 'millions'), tp = wt('open_city', 'passing'), te = wt('open_city', 'Each'), tn = wt('open_city', 'neuron');
     const B = BRIGHT[3], [bx, by] = starXY(B.r, B.q0, tn, 0);
     camPath(t, [[a - .3, -260, 120, 1.05], [tb, -120, 60, 1.25], [tp, 60, -10, 1.55], [te, bx * .8, by * .8, 1.9], [tn + .2, bx, by, 9], [ce('open_city') + .3, bx, by, 10.5]]);
     space(t);
