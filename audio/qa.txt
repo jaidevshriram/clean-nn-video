@@ -1,23 +1,35 @@
-fd_numbers  WER 0.26
-  script:  Same size, same data. Ninety-nine to a hundred percent of its last-layer neurons are easy to interpret.
-  heard:   Same size, same data. 99 to 100 % of its last layer neurons are easy to interpret.
+nr_hope  WER 0.12
+  script:  That was the hope of a field called mechanistic interpretability. Look inside. Read the parts. Understand the machine. A network whose parts you can read like that is what Nick calls clean.
+  heard:   That was the hope of a field called mechanistic interpretability. Look inside, read the parts, understand the machine. A network whose parts you can read like that is what Nick calls clean. Thank you for watching.
 
-gr_iy  WER 0.21
-  script:  It happens in language too. One neuron fired on the letters "eye wye", in words like Miyazaki. Then on "D I Y". Then on "do it yourself", which doesn't contain "eye wye" at all.
-  heard:   It happens in language too. One neuron fired on the letters IY in words like Miyazaki, then on DIY, then on Do It Yourself, which doesn't contain IY at all.
+hc_bigger  WER 0.13
+  script:  You might think: that's only because the model was small. A bigger model would separate dogs and cars. But Dino vee two, more than ten times larger and about ten years newer, still has generalized pose neurons. Every vision model Nick has looked at does. So the field's main example of superposition was really ordinary generalization, seen through a lazy painting.
+  heard:   You might think, that's only because the model was small. A bigger model would separate dogs and cars. But Dino V2, more than 10 times larger and about 10 years newer, still has generalized pose neurons. Every vision model Nick has looked at does. So the field's main example of superposition was really ordinary generalization, seen through a lazy painting. Thank you for watching.
 
-te_squeeze  WER 0.20
-  script:  So I took a layer famous for its curve detectors, and crushed it from four hundred and eighty neurons down to ten, with no way around. If superposition were real, this should be dramatic: curves, spirals and spider webs, crammed together.
-  heard:   So I took a layer famous for its curved detectors and crushed it from 480 neurons down to 10 with no way around. If superposition were real, this should be dramatic. Curves, spirals, and spiderwebs crammed together.
+fd_numbers  WER 0.19
+  script:  Same size, same data. Better tools alone took the old network from about five percent to about fifty. Retraining it with modern settings got it to about seventy. And in the new design, ninety-nine to a hundred percent of its last-layer neurons are easy to interpret.
+  heard:   Same size, same data. Better tools alone took the old network from about 5 % to about 50. Retraining it with modern settings got it to about 70. And in the new design, 99 to 100 % of its last layer neurons are easy to interpret.
 
-te_last  WER 0.15
-  script:  I did the same to the last district of a modern network: a thousand and twenty-four neurons down to thirteen. Same thing. Coarser, never scrambled. Under pressure, a network doesn't switch to packing. It just paints with a broader brush.
-  heard:   I did the same to the last district of a modern network. 1 ,024 neurons down to 13. Same thing. Coarser, never scrambled. Under pressure, a network doesn't switch to packing. It just paints with a broader brush.
+gr_iy  WER 0.17
+  script:  It happens in language models too. One neuron fired on the letters "eye wye", in words like Miyazaki. Then on "D I Y". Then on "do it yourself", which doesn't contain "eye wye" at all. It followed the meaning, not the letters.
+  heard:   It happens in language models, too. One neuron fired on the letters IY in words like Miyazaki, then on DIY, then on Do It Yourself, which doesn't contain IY at all. It followed the meaning, not the letters.
 
-sg_pr  WER 0.17
-  script:  I found one that fired on the letters "P R", and on strange strings of base sixty-four code, and on Bengali text. Finally, an arbitrary mixture! Then I decoded the code: words with "P R". I translated the Bengali: "P R". It was one idea all along, the letters P R, in whatever form they showed up.
-  heard:   I found one that fired on the letters PR and on strange strings of base -64 code and on Bengali text, finally an arbitrary mixture. Then I decoded the code, words with PR. I translated the Bengali PRR. It was one idea all along, the letters PR, in whatever form they showed up.
+te_squeeze  WER 0.13
+  script:  So Nick took a layer famous for its curve detectors, cut it from four hundred and eighty neurons down to ten, with no way around, and retrained it from scratch. If squeezing forced superposition, this should be dramatic: curves, spirals and spider webs, crammed together.
+  heard:   So Nick took a layer famous for its curve detectors, cut it from 480 neurons down to 10, with no way around, and retrained it from scratch. If squeezing forced superposition, this should be dramatic. Curves, spirals, and spider webs crammed together. other.
 
-cw_numbers  WER 0.22
-  script:  Question one: how many neurons can we actually read? In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under two percent. Today it's different. In a modern model, Kwen three, thirty-two B, about ninety percent of neurons have one main job. Seven percent have two related jobs. Only two to four percent we don't understand yet.
-  heard:   Question one, how many neurons can we actually read? In 2023, studies of small language models rated almost none of their neurons as understandable. My own project at OpenAI found under 2%. Today it's different. In a modern model, QEN332B, about 90 % of neurons have one main job. 7 % have two related jobs. Only 2 -4 % we don't understand yet.
+te_last  WER 0.14
+  script:  Nick did the same to the last district of a modern network: a thousand and twenty-four neurons down to thirteen. Same thing. Coarser, not scrambled. In these tests, under pressure, a network doesn't switch to packing. It just paints with a broader brush.
+  heard:   Nick did the same to the last district of a modern network, 1 ,024 neurons, down to 13. Same thing, coarser, not scrambled. In these tests, under pressure, a network doesn't switch to packing, it just paints with a broader brush.
+
+sg_pr  WER 0.15
+  script:  Nick found one that fired on the letters "P R", and on strange strings of base sixty-four, a way of writing computer data as text, and on Bengali text. Finally, it seemed, an arbitrary mixture! Then Nick decoded the code: words with "P R". And the Bengali, translated: "P R" again. It was one idea all along, the letters P R, in whatever form they showed up.
+  heard:   Nick found one that fired on the letters PR, and on strange strings of base -64, a way of writing computer data as text, and on Bengali text. Finally, it seemed, an arbitrary mixture. Then Nick decoded the code, words with PR, and the Bengali translated PR again. It was one idea all along, the letters PR, in whatever form they showed up.
+
+tv_weak  WER 0.15
+  script:  Remember where superposition retreated to: the weak signals. So what about those faint signals, the whispers? Run a hundred million words past one neuron in a language model, and almost all of them barely register. Only about a hundred and sixty reach even half its peak.
+  heard:   Remember where a superposition retreated to? The weak signals. So what about those faint signals, the whispers? Run 100 million words past one neuron in a language model, and almost all of them barely register. Only about 160 reach even half its peak.
+
+cw_numbers  WER 0.23
+  script:  Question one: how many neurons can we actually read? In 2023, studies of small language models rated almost none of their neurons as understandable. The project Nick started at OpenAI found under two percent. Today it's different. In early audits of a modern model, Kwen three, thirty-two B, Nick's team estimates about ninety percent of neurons have one main job. Seven percent have two related jobs. Only two to four percent aren't understood yet.
+  heard:   Question one, how many neurons can we actually read? In 2023, studies of small language models rated almost none of their neurons as understandable. The project Nix started at OpenAI found under 2%. Today, it's different. In early audits of a modern model, QEN332B, Nix team estimates about 90 % of neurons have one main job. 7 % have two related jobs. Only 2 -4 % aren't understood yet.
