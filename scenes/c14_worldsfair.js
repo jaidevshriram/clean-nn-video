@@ -12,7 +12,7 @@
   // a caption on a cream plate (so it reads over the robot crowd), in screen space
   function plateL(s, x, y, size, col, o = {}) {
     const a = (o.alpha ?? 1) * (o.reveal != null ? clamp(o.reveal * 3) : 1) * (o.pop != null ? clamp(o.pop * 2) : 1);
-    if (a > .01) { ctx.save(); resetMatrix(); ctx.font = `${size}px "Permanent Marker"`; const w = ctx.measureText(s).width + size * 1.1; ctx.globalAlpha = .92 * a; flat(rrPts(x - w / 2, y - size * .72, w, size * 1.44, size * .4), '#FFF6E0', { line: TEAL_D, lw: 5 }); ctx.restore(); }
+    if (a > .01) { ctx.save(); resetMatrix(); ctx.font = `${size}px "Permanent Marker"`; const tw = ctx.measureText(s).width, pad = size * .55, rv = o.reveal != null ? clamp(o.reveal) : 1; ctx.globalAlpha = .92 * a; flat(rrPts(x - tw / 2 - pad, y - size * .72, tw * rv + 2 * pad, size * 1.44, size * .4), '#FFF6E0', { line: TEAL_D, lw: 5 }); ctx.restore(); }
     letter(s, x, y, size, col, { face: 'marker', shadow: false, screen: true, ...o });
   }
   // poster layout in world units: A hero (the ch13 poster), B agents, C architectures, D the field, E beacons + garden
@@ -23,10 +23,11 @@
 
   // ---------- the poster's pieces ----------
   // an unprinted panel: blank paper with a pencil layout grid (nothing of it shows before its moment); it prints in as k goes 0 → 1 (a wipe of ink)
-  function panel(R, k, draw, t) {
+  function panel(R, k, draw, t, ghost = 0) {
     const [x, y, w, h] = R;
     ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
     ctx.fillStyle = PAPERC_; ctx.fillRect(x, y, w, h);
+    if (k < 1 && ghost > 0) { ctx.save(); ctx.globalAlpha = ghost; ctx.filter = 'grayscale(.85) sepia(.35)'; draw(x, y, w, h); ctx.restore(); ctx.fillStyle = 'rgba(241,227,198,.4)'; ctx.fillRect(x, y, w, h); }   // a faint proof of what will print here
     if (k < 1) { ctx.strokeStyle = 'rgba(120,100,70,.18)'; ctx.lineWidth = 2; for (let i = 1; i < 6; i++) { ctx.beginPath(); ctx.moveTo(x + i * w / 6, y); ctx.lineTo(x + i * w / 6, y + h); ctx.stroke(); ctx.beginPath(); ctx.moveTo(x, y + i * h / 6); ctx.lineTo(x + w, y + h * i / 6); ctx.stroke(); } }
     if (k > 0) { ctx.save(); ctx.beginPath(); const r = Math.hypot(w, h) * easeInOut(k); ctx.arc(x + w / 2, y + h / 2, r, 0, TAU); ctx.clip(); draw(x, y, w, h); ctx.restore(); }
     ctx.restore();
@@ -135,7 +136,7 @@
       flat([[x, y + h * .58], [x + w * .3, y + h * .52], [x + w * .7, y + h * .56], [x + w, y + h * .5], [x + w, y + h], [x, y + h]], '#7EA85A');
       flat([[x, y + h * .72], [x + w * .5, y + h * .66], [x + w, y + h * .7], [x + w, y + h], [x, y + h]], '#5E8A44');
       if (o.inner) o.inner(x, y, w, h);
-    }, t);
+    }, t, o.ghost || 0);
   }
   // E: four beacons on a hill, and a garden along the bottom
   function beaconsE(t, k, o = {}) {
@@ -147,35 +148,78 @@
       // the garden band at the bottom
       flat(rectPts(x, y + h * .86, w, h * .14), '#3E7A4A');
       for (let i = 0; i < 16; i++) { const gx = x + 40 + i * (w - 80) / 15, gy = y + h * .9, sw = Math.sin(t * 1.2 + i) * .08; ctx.save(); ctx.translate(gx, gy); ctx.rotate(sw); for (let j = 0; j < 3; j++) { ctx.save(); ctx.rotate((j - 1) * .6); flat(ellPts(0, -50, 16, 50, 16), ['#5EA85A', '#8AC86A', '#3E8A4A'][(i + j) % 3], { line: TEAL_D, lw: 2 }); ctx.restore(); } ctx.restore(); if (i % 3 === 1) { dot(gx, gy - 100, 16, ['#E8862A', '#C8402A', '#F2B04A'][i % 3]); dot(gx, gy - 100, 6, '#FFF6E0'); } if (i % 4 === 2) rLeaf(gx, gy - 40, 70, -1.2 + sw, 'heart', '#E8A02A'); }
-    }, t);
+    }, t, o.ghost || 0);
   }
   const BEAC = [['ONE PRINCIPLE', 'principle'], ['STUDYING WORKS', 'works'], ['IT COMPOUNDS', 'compounds'], ['MAYBE ENOUGH', 'maybe']];
+  // a searchlight tower: a tapering steel lattice on a footing, a gallery rail, and a lamp drum whose beam sweeps the sky
   function beacon(x, base, s, k, t, label, fadeOut = 0, ly = base + 70 * s) {
-    flat([[x - 40 * s, base], [x - 14 * s, base - 260 * s], [x + 14 * s, base - 260 * s], [x + 40 * s, base]], '#B9C0CE', { line: TEAL_D, lw: 4 });
-    flat(ellPts(x, base - 270 * s, 40 * s, 14 * s, 20), TEAL_D);
-    const L = clamp(k);
-    if (L > 0) { ctx.save(); ctx.globalAlpha = .35 * L; ctx.fillStyle = '#FFF2C8'; const a = -Math.PI / 2 + Math.sin(t * .8 + x) * .25; ctx.beginPath(); ctx.moveTo(x, base - 300 * s); ctx.lineTo(x + Math.cos(a - .12) * 1400, base - 300 * s + Math.sin(a - .12) * 1400); ctx.lineTo(x + Math.cos(a + .12) * 1400, base - 300 * s + Math.sin(a + .12) * 1400); ctx.closePath(); ctx.fill(); ctx.restore(); glow(x, base - 300 * s, 200 * s * L, '#FFE08A', L); }
-    dot(x, base - 300 * s, 30 * s, L > .5 ? '#FFE9A8' : '#6A6A7A'); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, base - 300 * s, 30 * s, 0, TAU); ctx.stroke();
-    if (L > 0 && fadeOut < 1) { const b = backOut(clamp(L * 1.5)); ctx.save(); ctx.globalAlpha *= 1 - fadeOut; ctx.translate(x, ly); ctx.scale(b, b); ctx.font = `900 ${30 * s}px ${SERIF}`; const hw = Math.max(130 * s, ctx.measureText(label).width / 2 + 18 * s); flat(rrPts(-hw, -34 * s, 2 * hw, 68 * s, 10 * s), RED, { line: TEAL_D, lw: 4 }); T(label, 0, 2, 30 * s, '#FFF6E0'); ctx.restore(); }
+    const L = clamp(k), hy = base - 300 * s, a = -Math.PI / 2 + Math.sin(t * .8 + x) * .25;
+    if (L > 0) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; const g = ctx.createRadialGradient(x, hy, 10, x, hy, 1500); g.addColorStop(0, `rgba(255,236,170,${.55 * L})`); g.addColorStop(.5, `rgba(255,226,150,${.22 * L})`); g.addColorStop(1, 'rgba(255,220,140,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x + Math.cos(a + Math.PI / 2) * 22 * s, hy + Math.sin(a + Math.PI / 2) * 22 * s); ctx.lineTo(x + Math.cos(a - .1) * 1500, hy + Math.sin(a - .1) * 1500); ctx.lineTo(x + Math.cos(a + .1) * 1500, hy + Math.sin(a + .1) * 1500); ctx.lineTo(x + Math.cos(a - Math.PI / 2) * 22 * s, hy + Math.sin(a - Math.PI / 2) * 22 * s); ctx.closePath(); ctx.fill(); ctx.restore(); glow(x, hy, 220 * s * L, '#FFE08A', L); }
+    flat(rrPts(x - 52 * s, base - 14 * s, 104 * s, 18 * s, 4 * s), '#6A6A7A', { line: TEAL_D, lw: 3 });
+    const lx = f => 40 * s * (1 - f) + 14 * s * f, ys = f => base - f * 250 * s;
+    ctx.strokeStyle = TEAL_D; ctx.lineWidth = 7 * s; ctx.lineJoin = 'round'; ctx.beginPath(); for (const sd of [-1, 1]) { ctx.moveTo(x + sd * lx(0), ys(0)); ctx.lineTo(x + sd * lx(1), ys(1)); } ctx.stroke();
+    ctx.strokeStyle = '#B9C0CE'; ctx.lineWidth = 4 * s; ctx.stroke();
+    ctx.strokeStyle = '#8A92A2'; ctx.lineWidth = 2.5 * s; ctx.beginPath(); for (let i = 0; i < 5; i++) { const f0 = i / 5, f1 = (i + 1) / 5; ctx.moveTo(x - lx(f0), ys(f0)); ctx.lineTo(x + lx(f1), ys(f1)); ctx.moveTo(x + lx(f0), ys(f0)); ctx.lineTo(x - lx(f1), ys(f1)); ctx.moveTo(x - lx(f1), ys(f1)); ctx.lineTo(x + lx(f1), ys(f1)); } ctx.stroke();
+    flat(rectPts(x - 34 * s, base - 262 * s, 68 * s, 10 * s), '#6A6A7A', { line: TEAL_D, lw: 3 });
+    ctx.strokeStyle = TEAL_D; ctx.lineWidth = 2.5 * s; ctx.beginPath(); ctx.moveTo(x - 34 * s, base - 262 * s); ctx.lineTo(x - 34 * s, base - 280 * s); ctx.lineTo(x + 34 * s, base - 280 * s); ctx.lineTo(x + 34 * s, base - 262 * s); ctx.stroke();
+    // the lamp drum, turned toward its beam
+    ctx.save(); ctx.translate(x, hy); ctx.rotate(a + Math.PI / 2); flat(rrPts(-30 * s, -16 * s, 60 * s, 40 * s, 8 * s), '#3A4A5A', { line: TEAL_D, lw: 3 }); flat(ellPts(0, -16 * s, 28 * s, 9 * s, 20), L > .5 ? '#FFF6D0' : '#8A8A9A', { line: TEAL_D, lw: 3 }); flat(rectPts(-6 * s, 24 * s, 12 * s, 16 * s), '#3A4A5A', { line: TEAL_D, lw: 2 }); ctx.restore();
+    if (L > 0 && fadeOut < 1 && label) { const b = backOut(clamp(L * 1.5)); ctx.save(); ctx.globalAlpha *= 1 - fadeOut; ctx.translate(x, ly); ctx.scale(b, b); ctx.font = `900 ${27 * s}px ${SERIF}`; const hw = ctx.measureText(label).width / 2 + 16 * s; flat(rrPts(-hw, -30 * s, 2 * hw, 60 * s, 10 * s), RED, { line: TEAL_D, lw: 4 }); T(label, 0, 2, 27 * s, '#FFF6E0'); ctx.restore(); }
   }
-  // the clever contraption: gears, pliers and a funnel that tries to take a network apart
+  // the clever contraption: a riveted steel frame on splayed legs carrying meshed gears, a hopper on top, a pressure
+  // gauge, and two levers on pivots ending in a knob and a pair of pliers; it strains, rattles and smokes
   function contraption(x, y, s, t, strain) {
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
-    flat(rectPts(-160, -40, 320, 40), '#8A6A4A', { line: TEAL_D, lw: 4 });
-    for (const [gx, gy, r, sp] of [[-90, -150, 70, 1], [20, -190, 50, -1.4], [100, -120, 40, 1.8]]) { ctx.save(); ctx.translate(gx, gy); ctx.rotate(t * sp * (1 - .8 * strain) + (strain > .6 ? Math.sin(t * 40) * .1 : 0)); const P = []; for (let i = 0; i < 24; i++) { const a = i / 24 * TAU, rr = i % 2 ? r : r * 1.18; P.push([Math.cos(a) * rr, Math.sin(a) * rr]); } flat(P, '#C99A45', { line: TEAL_D, lw: 3 }); dot(0, 0, r * .3, TEAL_D); ctx.restore(); }
-    flat([[-40, -300], [40, -300], [12, -230], [-12, -230]], '#B9C0CE', { line: TEAL_D, lw: 3 });
-    ctx.strokeStyle = TEAL_D; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(140, -60); ctx.lineTo(220, -140 + Math.sin(t * 6) * 10); ctx.moveTo(150, -40); ctx.lineTo(230, -100 - Math.sin(t * 6) * 10); ctx.stroke();
-    if (strain > .3) for (let i = 0; i < 6; i++) { const f = frac(t * .6 + i / 6); ctx.save(); ctx.globalAlpha = (strain - .3) * (1 - f); dot(-20 + Math.sin(i * 2) * 30 + f * 40, -260 - f * 160, 30 + 40 * f, '#8A8A90'); ctx.restore(); }
+    const ST = '#B9C0CE', STD = '#8A92A2', L = { line: TEAL_D, lw: 4 }, sh = strain > .6 ? Math.sin(t * 40) * 2 * (strain - .6) : 0;
+    ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.ellipse(0, 4, 190, 16, 0, 0, TAU); ctx.fill();
+    ctx.translate(sh, 0);
+    // legs, feet, beams and cross-bracing
+    for (const sd of [-1, 1]) { flat([[sd * 150, 0], [sd * 116, -270], [sd * 98, -270], [sd * 128, 0]], ST, L); flat(rrPts(sd * 139 - 28, -12, 56, 14, 4), STD, L); }
+    ctx.strokeStyle = STD; ctx.lineWidth = 8; ctx.beginPath(); ctx.moveTo(-122, -40); ctx.lineTo(108, -250); ctx.moveTo(122, -40); ctx.lineTo(-108, -250); ctx.stroke();
+    for (const by of [-276, -62]) { flat(rectPts(-138, by - 14, 276, 26), ST, L); for (let i = 0; i < 9; i++) dot(-122 + i * 30.5, by - 1, 3.5, TEAL_D); }
+    // meshed gears on axles, each with spokes, a hub and a bolt
+    for (const [gx, gy, r, sp] of [[-58, -168, 62, 1], [44, -196, 44, -1.4], [92, -118, 34, 1.8]]) {
+      ctx.save(); ctx.translate(gx, gy); ctx.rotate(t * sp * (1 - .8 * strain) + (strain > .6 ? Math.sin(t * 40) * .1 : 0));
+      const P = [], nT = Math.round(r / 6); for (let i = 0; i < nT; i++) { const a = i / nT * TAU, d = TAU / nT; for (const [da, rr] of [[0, r], [d * .18, r * 1.17], [d * .45, r * 1.17], [d * .63, r]]) P.push([Math.cos(a + da) * rr, Math.sin(a + da) * rr]); }
+      const G = flat(P, '#D6A94E', L); ctx.save(); ctx.clip(G); ctx.fillStyle = 'rgba(255,240,200,.25)'; ctx.beginPath(); ctx.arc(-r * .3, -r * .3, r * .8, 0, TAU); ctx.fill(); ctx.restore();
+      for (let k = 0; k < 4; k++) { ctx.save(); ctx.rotate(k / 4 * TAU + .4); flat(ellPts(r * .55, 0, r * .17, r * .13, 12), '#9A7430', { line: TEAL_D, lw: 2 }); ctx.restore(); }
+      dot(0, 0, r * .3, '#9A7430'); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, r * .3, 0, TAU); ctx.stroke(); dot(0, 0, r * .11, TEAL_D);
+      ctx.restore();
+    }
+    // the hopper on top
+    flat([[-50, -360], [50, -360], [16, -292], [-16, -292]], ST, L); flat(rrPts(-58, -372, 116, 16, 6), STD, L); flat(rectPts(-16, -294, 32, 22), STD, L);
+    // the pressure gauge, its needle climbing with the strain
+    dot(-86, -102, 24, '#FFF6E0'); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(-86, -102, 24, 0, TAU); ctx.stroke();
+    { const na = -Math.PI * .85 + strain * Math.PI * .75 + (strain > .6 ? Math.sin(t * 30) * .12 : 0); ctx.strokeStyle = RED; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-86, -102); ctx.lineTo(-86 + Math.cos(na) * 18, -102 + Math.sin(na) * 18); ctx.stroke(); dot(-86, -102, 4, TEAL_D); }
+    // two levers on pivots: a knob, and pliers that snap open and shut
+    const lv = Math.sin(t * 6) * (1 - .5 * strain);
+    for (const [py, len, a0, tipK] of [[-140, 120, -.55 + .14 * lv, 0], [-86, 130, -.18 - .12 * lv, 1]]) {
+      ctx.save(); ctx.translate(124, py); ctx.rotate(a0); flat(rrPts(-6, -7, len, 14, 6), STD, L);
+      if (!tipK) { dot(len, 0, 16, RED); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(len, 0, 16, 0, TAU); ctx.stroke(); dot(len - 5, -5, 4, '#FFD0C0'); }
+      else { const op = .2 + .2 * Math.abs(Math.sin(t * 7)); for (const sd of [-1, 1]) { ctx.save(); ctx.translate(len - 4, 0); ctx.rotate(sd * op); flat([[0, -5 * sd], [44, -2 * sd], [48, 6 * sd], [0, 6 * sd]], ST, { line: TEAL_D, lw: 3 }); ctx.restore(); } }
+      ctx.restore(); dot(124, py, 9, ORA_D); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(124, py, 9, 0, TAU); ctx.stroke();
+    }
     ctx.restore();
+    // smoke when it strains: overlapping puffs with a lit top and an outline, rising and spreading from the hopper
+    if (strain > .3) for (let i = 0; i < 7; i++) {
+      const f = frac(t * .45 + i / 7), a = clamp((strain - .3) * 1.6) * Math.sin(f * Math.PI), r = (18 + 46 * f) * s, sx = x + (6 * Math.sin(i * 2.1) + f * 70 + 20 * Math.sin(t * 1.3 + i)) * s, sy = y + (-380 - f * 260) * s;
+      if (a <= .01) continue; ctx.save(); ctx.globalAlpha = a; const C = new Path2D(); for (const [px, py, pr] of [[0, 0, 1], [-.7, .35, .7], [.7, .3, .75], [0, .45, .8], [.35, -.45, .6]]) { C.moveTo(sx + px * r + pr * r, sy + py * r); C.arc(sx + px * r, sy + py * r, pr * r, 0, TAU); }
+      ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(40,50,60,.55)'; ctx.stroke(C); ctx.fillStyle = lgrad(0, sy - r, 0, sy + r, [[0, '#D9DCE2'], [1, '#8A8E98']]); ctx.fill(C);
+      ctx.fillStyle = 'rgba(255,255,255,.4)'; ctx.beginPath(); ctx.ellipse(sx - r * .25, sy - r * .35, r * .35, r * .18, -.3, 0, TAU); ctx.fill(); ctx.restore();
+    }
   }
 
   // the whole poster, one call; o: which panels are printed / alive, extra inner drawings
   function poster(t, o = {}) {
     agentsB(t, o.b ?? 0, o.bAct ?? 0); archC(t, o.c ?? 0, o.cAct ?? 0);
-    fieldD(t, o.d ?? 0, { inner: o.dInner }); beaconsE(t, o.e ?? 0, { inner: o.eInner });
+    fieldD(t, o.d ?? 0, { inner: o.dInner, ghost: o.dGhost }); beaconsE(t, o.e ?? 0, { inner: o.eInner, ghost: o.eGhost });
     heroA(t, { alive: o.alive, flash: o.flash, inner: o.aInner });
   }
   function camRects(t, keys, drift = 1) { const v = kf(t, keys.map(k => [k[0], [k[1], k[2], k[3]]]), easeInOut), z = W / v[2]; camBegin(v[0] + v[2] / 2 + drift * 6 * Math.sin(t * .31), v[1] + v[2] * H / W / 2 + drift * 4 * Math.sin(t * .23 + 1), z); }
+  // a prop in Clawd's right hand, drawn in front of him (the q view paints that arm, and its armR hook, behind the body)
+  const inHand = (aR, prop, level = 1) => (u, sw) => { push(); translate((5 + .55 * clamp((Math.abs(aR) - .7) / .9)) * u, -4.5 * u); rotate(-aR); translate(2.2 * u, 0); rotate(aR * level); prop(u, sw); pop(); };
+  // half a lemon, cut face out, with a leaf: the bitter lesson, tasted
+  const lemon = (u, sw) => { flat(ellPts(u * .6, -u * .9, u * 1.5, u * 1.1, 22), '#F2D04A', { line: TEAL_D, lw: 2 }); flat(ellPts(u * .7, -u * .9, u * 1.05, u * .8, 20), '#FFF3A8', { line: '#D9B030', lw: 1.5 }); ctx.strokeStyle = '#E8C23A'; ctx.lineWidth = Math.max(1, u * .12); for (let i = 0; i < 6; i++) { const a = i / 6 * TAU; ctx.beginPath(); ctx.moveTo(u * .7, -u * .9); ctx.lineTo(u * .7 + Math.cos(a) * u * .9, -u * .9 + Math.sin(a) * u * .7); ctx.stroke(); } flat(ellPts(u * .2, -u * 2.1, u * .7, u * .3, 12, 0, -.5), '#5EA85A', { line: TEAL_D, lw: 1.5 }); };
   const visitor = (t, x, y, u, keys, o = {}) => tourist(x, y, u, 'helmet', { ...emotions(t, keys), view: 'q', ...o });
   // the robot crowd marching across the hero's ground
   function march(t, x, y, w, rows, k, o = {}) { for (let r = 0; r < rows; r++) for (let i = 0; i < 40; i++) { if (hash(i * 3.7 + r) > k) continue; const bx = x + frac((i * 50 + r * 25) / w + t * (o.speed ?? .02)) * w, by = y + r * 46; bot(bx, by, .9 + r * .18, t * 2 + i * .3, { clip: (i + r) % 3 === 0, lit: o.lit && (i + r) % 2 === 0 }); } }
@@ -184,7 +228,7 @@
   function lab(t, lt, dur) {
     const a = cs('lf_lab'), tLa = wt('lf_lab', 'laboratory'), tWa = wt('lf_lab', 'watching'), tLe = wt('lf_lab', 'learns'), tLb = wt('lf_lab', 'labeling'), tFi = wt('lf_lab', 'finding'), tTe = wt('lf_lab', 'testing'), tAg = wt('lf_lab', 'again', 0), tAi = wt('lf_lab', 'AI'), tSe = wt('lf_lab', 'sentences'), e = ce('lf_lab');
     const alive = seg(t, a - .5, a + 1);
-    camKeys(t, [[CH, 1920, 540, 1], [CH + 1.6, 1920, 540, 1], [CH + 2.5, 1540, 615, .88], [tLa - .7, 1550, 615, .88], [tLa + .3, 1920, 640, 1.25], [tWa, 1920, 560, 1.1], [tLb, 1980, 520, 1.3], [tTe, 1920, 540, 1.05], [e + .6, 1920, 540, 1.0]], alive * .5);
+    camKeys(t, [[CH, 1920, 540, 1], [CH + 1.6, 1920, 540, 1], [CH + 2.5, 1900, 560, 1.04], [tLa - .7, 1910, 560, 1.04], [tLa + .3, 1920, 640, 1.25], [tWa, 1920, 560, 1.1], [tLb, 1980, 520, 1.3], [tTe, 1920, 540, 1.05], [e + .6, 1920, 540, 1.0]], alive * .5);
     poster(t, { alive: alive > 0, aInner: (x, y, w, h) => {
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = TEAL_D; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * .42 + i * 110, 240 - i * 40, 46, alive * Math.sin(t + i) * .05, 0, TAU); ctx.stroke(); }
       const grow = seg(t, tWa - .4, tLe + .8);
@@ -205,7 +249,7 @@
     const a = cs('lf_plug'), tPi = wt('lf_plug', 'pieces'), tAg = wt('lf_plug', 'agents'), tMo = wt('lf_plug', 'Modern'), tBo = wt('lf_plug', 'Both'), tIn = wt('lf_plug', 'interpretability'), tSo = wt('lf_plug', 'So'), tPl = wt('lf_plug', 'plug'), e = ce('lf_plug');
     const bK = seg(t, tAg - 1.4, tAg - .2), cK = seg(t, tMo - 1.2, tMo + .7), join = easeInOut(seg(t, tSo - .2, tPl + .05)), surge = seg(t, tPl + .05, tPl + 1.4);
     camRects(t, [[t - lt, 960, 0, 1920], [tAg - .5, 0, 0, 1920], [tAg + .2, 0, 0, 1920], [tMo, 1920, 0, 1920], [tMo + 1.6, 1920, 0, 1920], [tBo, 30, 0, 3780], [tSo, 50, 0, 3740], [e + .6, 70, 0, 3700]], .4);
-    poster(t, { b: bK, bAct: bK, c: cK, cAct: cK, d: 0, e: 0, alive: true, flash: surge * (1 - surge) * 3, aInner: (x, y, w, h) => {
+    poster(t, { b: bK, bAct: bK, c: cK, cAct: cK, d: 0, e: 0, dGhost: .7 * seg(t, tBo - 1, tBo), eGhost: .7 * seg(t, tBo - 1, tBo), dInner: (x, y, w, h) => { for (let r = 0; r < 4; r++) for (let i = 0; i < 26; i++) bot(x + 860 + i * 52 + (r % 2) * 26, y + h * .6 + r * 56, 1 + r * .12, 0, {}); }, eInner: (x, y, w, h) => { BEAC.forEach((b_, i) => beacon(x + w * (.14 + i * .24), y + h * (.62 - Math.sin((i + .5) / 4 * Math.PI) * .05), 1.1, 0, t, '')); }, alive: true, flash: surge * (1 - surge) * 3, aInner: (x, y, w, h) => {
       for (let i = 0; i < 3; i++) { ctx.strokeStyle = TEAL_D; ctx.lineWidth = 5; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h * .42 + i * 110, 240 - i * 40, 46, Math.sin(t + i) * .05, 0, TAU); ctx.stroke(); }
       tower(x + w / 2, y + h * .82, TS, t, { floors: 5, lit: .4 + .6 * surge, labels: 1 });
       march(t, x + 60, y + h * .86, w - 120, 3, 1, { lit: surge > 0 });
@@ -224,7 +268,7 @@
     camEnd();
     if (t > tPl - .1 && t < tPl + 1.2) sfx('CLICK!', 960, 400, 90, RED, t - tPl, { stroke: '#FFF6E0', strokeW: .12 });
     if (t < tAg - 1.4) letter('the pieces already exist', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tPi - .5, tPi + .5) });
-    if (t > tBo - .3 && t < tSo) letter('both make interpretability easier', 960, 948, 72, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tBo - .3, tIn + .6) });
+    if (t > tBo - .3 && t < tSo) plateL('both make interpretability easier', 960, 900, 66, TEAL_D, { reveal: seg(t, tBo - .3, tIn + .6), alpha: 1 - seg(t, tSo - .4, tSo) });
     GRAIN = 1; PAPER = false;
   }
 
@@ -266,16 +310,16 @@
       contraption(x + 420, y + h * .78, 1.4, t, strain);
       const fieldK = seg(t, tSca - 1, tSca + .6);
       for (let r = 0; r < 7; r++) for (let i = 0; i < 26; i++) { if (hash(i * 7.1 + r * 3) > fieldK) continue; const bx = x + 860 + i * 52 + (r % 2) * 26, by = y + h * .6 + r * 56; bot(bx, by, 1 + r * .12, t * 2 + i + r, { clip: (i + r) % 3 === 0, lit: win > .5 || (i * r) % 5 === 0 }); }
-      if (win > 0) { glow(x + w * .72, y + h * .7, 700 * win, '#FFE08A', .6 * win); const k = backOut(win); ctx.save(); ctx.translate(x + w * .8 + 70, y + h * .43 - 30); ctx.scale(k, k); flat(starPts(0, 0, 120, .5, 12), RED, { line: TEAL_D, lw: 5 }); T('WINS', 0, 6, 54, '#FFF6E0'); ctx.restore(); }
+      if (win > 0) { glow(x + w * .72, y + h * .7, 700 * win, '#FFE08A', .6 * win); const k = backOut(win); ctx.save(); ctx.translate(x + w * .8 + 70, y + h * .43 - 30); ctx.scale(k, k); ctx.font = `900 54px ${SERIF}`; const br = ctx.measureText('WINS').width / 2 / .62 + 26; flat(starPts(0, 0, br, .66, 14), RED, { line: TEAL_D, lw: 5 }); flat(starPts(0, 0, br * .78, .8, 14), '#E0583E'); T('WINS', 0, 4, 54, '#FFF6E0'); ctx.restore(); }
       // the title band
       const tk = seg(t, tBi - .5, tBi + .3); if (tk > 0) { ctx.save(); ctx.translate(x + w / 2, y + 160); ctx.scale(backOut(tk), backOut(tk)); flat([[-560, -70], [560, -70], [520, 0], [560, 70], [-560, 70], [-520, 0]], TEAL, { line: TEAL_D, lw: 5 }); T('THE BITTER LESSON', 0, 4, 76, '#FFF6E0'); ctx.restore(); }
       if (t > tBi) T('— Rich Sutton', x + w / 2 + 380, y + 270, 44, RED, { font: KAL, weight: '700', alpha: seg(t, tBi, tBi + .5) });
       // the clever thing, named: a tag on "the clever thing", then what it is
-      { const ck = seg(t, tCl - .3, tCl + .2) * (1 - seg(t, tIn - .8, tIn - .4)); if (ck > 0) { const b = backOut(ck); ctx.save(); ctx.translate(x + 640, y + h * .78 - 470); ctx.rotate(-.06 + .03 * Math.sin(t * 2)); ctx.scale(b, b); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-60, 30); ctx.lineTo(-170, 130); ctx.stroke(); flat(rrPts(-120, -36, 240, 72, 12), '#FFF6E0', { line: TEAL_D, lw: 4 }); T('the clever thing', 0, 2, 34, TEAL_D, { font: KAL, weight: '700' }); ctx.restore(); } }
+      { const ck = seg(t, tCl - .3, tCl + .2) * (1 - seg(t, tIn - .8, tIn - .4)); if (ck > 0) { const b = backOut(ck); ctx.save(); ctx.translate(x + 640, y + h * .78 - 470); ctx.rotate(-.06 + .03 * Math.sin(t * 2)); ctx.scale(b, b); ctx.strokeStyle = TEAL_D; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-60, 30); ctx.lineTo(-170, 130); ctx.stroke(); ctx.font = `700 34px ${KAL}`; const hw = ctx.measureText('the clever thing').width / 2 + 24; flat(rrPts(-hw, -36, 2 * hw, 72, 12), '#FFF6E0', { line: TEAL_D, lw: 4 }); T('the clever thing', 0, 2, 34, TEAL_D, { font: KAL, weight: '700' }); ctx.restore(); } }
       if (t > tIn - .4) { const ak = seg(t, tIn - .4, tIn + .2); T('clever ways to', x + 700, y + h * .78 - 500, 40, TEAL_D, { font: KAL, weight: '700', alpha: ak }); T('take networks apart', x + 700, y + h * .78 - 454, 40, TEAL_D, { font: KAL, weight: '700', alpha: ak }); }
       // a lemon for the visitor: it really is bitter
       const lk = env(t, tBi - .2, tMa + .4, .3, .3);
-      visitor(t, x + 640, y + h * .9, 14, [[t - lt, 'thinking'], [tBi + .1, 'disgusted'], [tMa + .4, 'thinking'], [tBe, 'excited']], { aR: lerp(.3, 1.6, lk), armR: lk > .1 ? ((u, sw) => { flat(ellPts(u * 1.2, 0, u * 1.3, u * .9, 18), '#F2D04A', { line: TEAL_D, lw: 2 }); }) : null });
+      const lA = lerp(.3, 1.25, lk); visitor(t, x + 760, y + h * .9, 14, [[t - lt, 'thinking'], [tBi + .1, 'disgusted'], [tMa + .4, 'thinking'], [tBe, 'excited']], { aR: lA, draw: lk > .1 ? inHand(lA, lemon) : null });
     } });
     camEnd();
     if (t < tRi - .3) letter('the simple thing, at enormous scale,\nbeats the clever thing', 960, 200, 60, TEAL_D, { face: 'marker', shadow: false, screen: true, stroke: '#FFF6E0', strokeW: .12, reveal: seg(t, tSi - .3, tCl + .4) });
@@ -291,7 +335,7 @@
     const lx = lerp(ex + ew * .7, ex + ew * .5, ease(lf)) + Math.sin(lf * 9) * 60 * (1 - lf), ly = lerp(ey + eh * .82, ey + eh * .46, easeOut(lf)) + Math.sin(lf * 5) * 30;
     camKeys(t, [[t - lt, 1120, 1620, 1.0], [a + .5, 2080, 1560, .7], [a + 1.5, 3040, 1620, 1.2], [TB[3] + 1, 3040, 1620, 1.22], [leafT0, 3040, 1620, 1.22], [NEXT + 2.2, lx, ly, 3.4]], .3);
     poster(t, { b: 1, c: 1, d: 1, e: seg(t, a - .2, a + 1.1), alive: true, aInner: (x, y, w, h) => { tower(x + w / 2, y + h * .82, TS, t, { floors: 5, lit: 1, labels: 1 }); }, dInner: (x, y, w, h) => { for (let r = 0; r < 5; r++) for (let i = 0; i < 26; i++) bot(x + 860 + i * 52 + (r % 2) * 26, y + h * .6 + r * 56, 1 + r * .12, t * 2 + i + r, { lit: true }); contraption(x + 420, y + h * .78, 1.4, t, .9); }, eInner: (x, y, w, h) => {
-      BEAC.forEach(([lab], i) => { const bx = x + w * (.14 + i * .24), base = y + h * (.62 - Math.sin((i + .5) / 4 * Math.PI) * .05); beacon(bx, base, 1.1, seg(t, TB[i] - .4, TB[i] + .3), t, lab, ease(seg(t, leafT0 + .5, leafT0 + 1.1)), y + h * .62 + 77 - h * .05 * Math.sin(1.5 / 4 * Math.PI)); });
+      BEAC.forEach(([lab], i) => { const bx = x + w * (.14 + i * .24), base = y + h * (.62 - Math.sin((i + .5) / 4 * Math.PI) * .05); beacon(bx, base, 1.1, seg(t, TB[i] - .4, TB[i] + .3), t, lab, ease(seg(t, leafT0 - .3, leafT0 + .3)), y + h * .62 + 77 - h * .05 * Math.sin(1.5 / 4 * Math.PI)); });
       visitor(t, x + w * .5, y + h * .84, 11, [[t - lt, 'happy'], [TB[1], 'excited'], [TB[3], 'hopeful'], [leafT0 + .4, 'surprised']], { flip: lf > .3 });
     } });
     // the leaf from the garden, drifting loose toward the next world

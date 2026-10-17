@@ -155,7 +155,7 @@
     person(x, y, s, { col: '#EDEDED', key: 'c11ref', hat: 'cap', hatCol: '#1A1A1A', mood: o.mood || 'neutral', look: o.look ?? .6 });
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
     ctx.fillStyle = '#1A1A1A'; for (let i = 0; i < 4; i++) ctx.fillRect(-18 + i * 10, -76, 4, 38);
-    const ang = lerp(.4, -2.3, easeOut(card)), sx = 16, sy = -72, ex = sx + Math.cos(ang) * 46, ey = sy + Math.sin(ang) * 46;
+    const ang = lerp(.4, o.cardAng ?? -2.3, easeOut(card)), sx = 16, sy = -72, ex = sx + Math.cos(ang) * 46, ey = sy + Math.sin(ang) * 46;
     ctx.strokeStyle = PAL.ink; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
     if (card > .05) { ctx.save(); ctx.translate(ex, ey); ctx.rotate(ang + Math.PI / 2 + .2); flat(rrPts(-14, -44, 28, 40, 3), RED, { line: '#1A1A1A', lw: 2 }); ctx.restore(); }
     ctx.restore();
@@ -182,19 +182,21 @@
     pubLight(t, 0);
     if (spIn > 0 && spOff < 1) {
       const e = easeIn(spIn), cx = lerp(1500, BX, e), cy = lerp(1100, BY, e) - Math.sin(spIn * Math.PI) * 200 + easeIn(spOff) * 900, r = BR * lerp(.5, 1.32, e) * (1 + .06 * Math.exp(-(t - tSpHit) * 5) * Math.sin((t - tSpHit) * 24) * (t > tSpHit)), rot = spOff * 1.2;
-      ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
-      dot(14, 20, r, 'rgba(0,0,0,.35)'); dot(0, 0, r, '#F2D04A'); dot(-r * .12, -r * .12, r * .9, '#F7DE6A');
-      for (let i = 0; i < 40; i++) { const q = hash(i * 3.3) * TAU, d = Math.sqrt(hash(i * 7.1)) * r * .9; dot(Math.cos(q) * d, Math.sin(q) * d, 6 + 10 * hash(i), 'rgba(170,130,30,.55)'); }
+      // it drops off the board and fades as it falls, so it never slides under the lower third
+      const fa = 1 - easeIn(seg(spOff, .05, .4));
+      ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot); ctx.globalAlpha = fa;
+      dot(14, 20, r, 'rgba(0,0,0,.35)', fa); dot(0, 0, r, '#F2D04A', fa); dot(-r * .12, -r * .12, r * .9, '#F7DE6A', fa);
+      for (let i = 0; i < 40; i++) { const q = hash(i * 3.3) * TAU, d = Math.sqrt(hash(i * 7.1)) * r * .9; dot(Math.cos(q) * d, Math.sin(q) * d, 6 + 10 * hash(i), 'rgba(170,130,30,.55)', fa); }
       ctx.strokeStyle = '#8A6A1A'; ctx.lineWidth = 6; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke();
-      if (t > tMu - .5) { const k = seg(t, tMu - .5, tMu + .2); ctx.globalAlpha = k; txt('A MULTI-PURPOSE', 0, -40, 66 * r / (BR * 1.32), '#3A2410', { font: F, weight: '900' }); txt('LANGUAGE NEURON', 0, 40, 66 * r / (BR * 1.32), '#3A2410', { font: F, weight: '900' }); }
+      if (t > tMu - .5) { const k = seg(t, tMu - .5, tMu + .2); ctx.globalAlpha *= k; txt('A MULTI-PURPOSE', 0, -40, 66 * r / (BR * 1.32), '#3A2410', { font: F, weight: '900' }); txt('LANGUAGE NEURON', 0, 40, 66 * r / (BR * 1.32), '#3A2410', { font: F, weight: '900' }); }
       ctx.restore();
     }
     ctx.restore();
     // the referee (left) and the players
     const ref = seg(t, tSo - .3, tSo + .2);
-    referee(330, 1010, 2.7, t, ref * (1 - seg(t, ce('el_risk') + .2, ce('el_risk') + .6)), { mood: ref > .5 ? 'oops' : 'neutral' });
+    referee(330, 1010, 2.7, t, ref * (1 - seg(t, ce('el_risk') + .2, ce('el_risk') + .6)), { mood: ref > .5 ? 'oops' : 'neutral', cardAng: -1.3 });
     if (ref > 0 && t < tSo + 1.2) sfx('TWEET!', 470, 640, 64, '#FFFFFF', t - tSo, { stroke: '#1A1A1A', strokeW: .12 });
-    const kx = lerp(2150, 1230, easeOut(seg(t, tVa - 2.2, tVa - 1.2)));
+    const kx = lerp(2150, 1330, easeOut(seg(t, tVa - 2.2, tVa - 1.2)));
     if (kx < 2100) {
       const wind = seg(t, tSp - .5, tSp), rel = seg(t, tSp, tSp + .2);
       ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(kx, 1012, 120, 16, 0, 0, TAU); ctx.fill(); ctx.restore();
@@ -209,8 +211,8 @@
     camEnd();
     vignette(.35, '#0A0604');
     bug(t);
-    stampBanner(t, tSo + .1, 'NO SCORE · TOO VAGUE', 960, 210, { w: 980, size: 70 });
-    lower(t, tTe - .2, dur + CH + 5, 'TESTS AN EXPLANATION CAN FAIL', null, { size: 62, w: 1280 });
+    stampBanner(t, tSo + .1, 'NO SCORE · TOO VAGUE', 900, 290, { w: 980, size: 70 });
+    lower(t, tTe - .2, dur + CH + 5, 'TESTS AN EXPLANATION CAN FAIL', null, { size: 62, w: 1130, y: 930 });
   }
 
   // ---------- 2 · the blind test: split screen, two booths ----------
@@ -241,8 +243,12 @@
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
     flat(rectPts(-8, 0, 16, 90), '#3A3A44'); flat(ellPts(0, 92, 60, 12, 16), '#2A2A30');
     glow(0, -10, 150, '#FFE08A', .5 * fire);
-    dot(0, -10, 86, '#111');
-    for (let sg = 0; sg < 20; sg++) { const a0 = -Math.PI / 2 + (sg - .5) * TAU / 20; ctx.fillStyle = sg % 2 ? '#EDE2C2' : '#1A1A1A'; ctx.beginPath(); ctx.moveTo(0, -10); ctx.arc(0, -10, 72, a0, a0 + TAU / 20); ctx.closePath(); ctx.fill(); }
+    // a little copy of the pub board: same rings, colours and wires
+    dot(0, -10, 88, '#1A1412'); ctx.strokeStyle = '#5A4A3A'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -10, 88, 0, TAU); ctx.stroke();
+    const mring = (r0, r1, cA, cB) => { for (let sg = 0; sg < 20; sg++) { const a0 = -Math.PI / 2 + (sg - .5) * TAU / 20, a1 = a0 + TAU / 20; ctx.fillStyle = sg % 2 ? cB : cA; ctx.beginPath(); ctx.arc(0, -10, r1 * 70, a0, a1); ctx.arc(0, -10, r0 * 70, a1, a0, true); ctx.closePath(); ctx.fill(); } };
+    mring(0, 1, '#1A1A1A', '#EDE2C2'); mring(.9, 1, '#D2473F', '#3A8A4A'); mring(.54, .64, '#D2473F', '#3A8A4A');
+    ctx.strokeStyle = '#C9C9C9'; ctx.lineWidth = 1; for (const r of [.2, .54, .64, .9, 1]) { ctx.beginPath(); ctx.arc(0, -10, r * 70, 0, TAU); ctx.stroke(); }
+    for (let sg = 0; sg < 20; sg++) { const q = -Math.PI / 2 + (sg - .5) * TAU / 20; dot(Math.cos(q + TAU / 40) * 80, -10 + Math.sin(q + TAU / 40) * 80, 2.2, '#F3EEE0'); }
     dot(0, -10, 14, '#3A8A4A'); dot(0, -10, 7, fire > .5 ? '#FFE08A' : RED);
     if (!covered) SNIPS.forEach((sn, i) => { const wx = -125 + i * 125, wy = -170; flat(rrPts(wx - 58, wy - 30, 116, 60, 8), '#2A2340', { line: '#FFE08A', lw: 3 }); glow(wx, wy, 80, '#FFE08A', .3 * fire); txt(sn, wx, wy + 2, 28, '#FFF2C8', { font: '"Patrick Hand"', weight: '400' }); ctx.strokeStyle = 'rgba(255,224,138,.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(wx, wy + 30); ctx.lineTo(0, -80); ctx.stroke(); });
     if (covered) { ctx.save(); ctx.translate(112, 84); ctx.rotate(-lift * .9); ctx.translate(-112, -84); ctx.fillStyle = '#7A3A4A'; ctx.beginPath(); ctx.moveTo(-112, 84); ctx.quadraticCurveTo(-124, -120, 0, -125); ctx.quadraticCurveTo(124, -120, 112, 84); ctx.lineTo(80, 74); ctx.lineTo(40, 88); ctx.lineTo(0, 74); ctx.lineTo(-40, 88); ctx.lineTo(-80, 74); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#1A0A10'; ctx.lineWidth = 4; ctx.stroke(); txt('?', 0, -40, 90, '#F3D9C0', { font: F, weight: '900' }); ctx.restore(); }
@@ -257,8 +263,14 @@
   function blind(t, lt, dur) {
     const a = cs('el_blind'), tSt = wt('el_blind', 'studies'), tWr = wt('el_blind', 'writes'), tSe = wt('el_blind', 'second'), tSee = wt('el_blind', 'sees'), tNe = wt('el_blind', 'never'), tWr2 = wt('el_blind', 'writes', 1), tFi = wt('el_blind', 'fire'), e = ce('el_blind');
     // a dim pub behind the split screen
-    camKeys(t, [[lt + 0, 960, 540, 1.3]], 0); pubWall(); camEnd(); flash(.55, '#0A0604');
-    const open = easeOut(seg(lt, 0, .5)), x1 = lerp(-900, 70, open), x2 = lerp(W + 60, 990, open), y0 = 210, w = 860, h = 690;
+    camKeys(t, [[lt + 0, 960, 540, 1.3]], 0); pubWall(); camEnd();
+    // one opaque studio backdrop behind both booths (the pub board would otherwise peek between them)
+    const open = easeOut(seg(lt, 0, .5)), x1 = lerp(-900, 70, open), x2 = lerp(W + 60, 990, open), y0 = 210, w = 860, h = 660;
+    ctx.save(); ctx.globalAlpha = clamp(open * 1.6);
+    ctx.fillStyle = lgrad(0, 0, 0, H, [[0, '#101A44'], [.55, '#0A1234'], [1, '#060A20']]); ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 9; i++) { const q = -.5 + i * .13 + .02 * Math.sin(t * .4 + i); ctx.fillStyle = 'rgba(120,150,255,.035)'; ctx.beginPath(); ctx.moveTo(960, -200); ctx.lineTo(960 + Math.tan(q - .03) * 1400, H); ctx.lineTo(960 + Math.tan(q + .03) * 1400, H); ctx.closePath(); ctx.fill(); }
+    for (let i = 0; i < 26; i++) for (let j = 0; j < 3; j++) dot(40 + i * 72, 40 + j * 34, 3, '#3A64B8', .25 + .2 * Math.sin(t * 2 + i * .6 + j));
+    ctx.restore();
     const tube = seg(t, tSe - .5, tSee - .1);
     // booth 1: studies the neuron, writes the explanation
     booth(t, 0, x1, y0, w, h, { label: 'studies the neuron', draw: (bw, bh) => {
@@ -280,9 +292,12 @@
       if (t > tWr2 - .1) { const k = seg(t, tWr2 - .1, tWr2 + .3); dart(bw * .62 + 150, bh * .62 - 14, -.05, 1.2 * backOut(k)); }
     } });
     // the pneumatic tube between the booths carries the note
-    const TP = [[x1 + w - 120, y0 - 70], [x1 + w - 100, y0 - 140], [(x1 + w + x2) / 2, y0 - 175], [x2 + 100, y0 - 140], [x2 + 120, y0 - 70]], TC = through(TP, 10);
-    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#6A5A4A'; ctx.lineWidth = 44; ctx.beginPath(); TC.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.strokeStyle = 'rgba(190,215,235,.85)'; ctx.lineWidth = 34; ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 6; ctx.stroke(); ctx.restore();
-    for (const q of [TP[0], TP[4]]) flat(rrPts(q[0] - 30, q[1] - 6, 60, 22, 6), '#B08A4A', { line: '#3A2A1A', lw: 3 });
+    // a glass message tube that plugs into the top of each booth through a brass coupling, banded along its length
+    const TP = [[x1 + w - 120, y0 - 84], [x1 + w - 104, y0 - 140], [(x1 + w + x2) / 2, y0 - 172], [x2 + 104, y0 - 140], [x2 + 120, y0 - 84]], TC = through(TP, 10);
+    const tubePath = () => { ctx.beginPath(); TC.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); };
+    ctx.save(); ctx.lineCap = 'butt'; ctx.lineJoin = 'round'; tubePath(); ctx.strokeStyle = '#1E2440'; ctx.lineWidth = 40; ctx.stroke(); ctx.strokeStyle = 'rgba(150,185,215,.55)'; ctx.lineWidth = 32; ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 5; ctx.translate(-6, -7); ctx.stroke(); ctx.restore();
+    for (let i = 1; i < 6; i++) { const j = Math.round(i / 6 * (TC.length - 1)), p = TC[j], q = TC[Math.min(TC.length - 1, j + 1)], an = Math.atan2(q[1] - p[1], q[0] - p[0]); ctx.save(); ctx.translate(p[0], p[1]); ctx.rotate(an); flat(rrPts(-5, -23, 10, 46, 3), '#C9A15A', { line: '#3A2A1A', lw: 2 }); ctx.restore(); }
+    for (const q of [TP[0], TP[4]]) { flat(rrPts(q[0] - 30, q[1] - 10, 60, 24, 6), '#C9A15A', { line: '#3A2A1A', lw: 3 }); flat(rectPts(q[0] - 38, q[1] + 10, 76, 12), '#8A6A3A', { line: '#3A2A1A', lw: 3 }); }
     if (tube > 0 && tube < 1) { const p = TC[Math.floor(easeInOut(tube) * (TC.length - 1))]; ctx.save(); ctx.translate(p[0], p[1]); flat(rrPts(-34, -15, 68, 30, 14), '#FBF6EC', { line: '#3A2A1A', lw: 3 }); ctx.restore(); sfx('FWOOMP!', p[0], y0 - 100, 46, '#FFFFFF', t - (tSe - .5), { life: 1, stroke: '#1A1A1A', strokeW: .12 }); }
     if (t > tNe - .2 && t < tNe + 1.4) sfx('TWEET!', x2 + 300, y0 + 150, 60, '#FFFFFF', t - (tNe + .45), { stroke: '#1A1A1A', strokeW: .12 });
     // the sentence it writes, as a broadcast caption
@@ -387,10 +402,10 @@
   function orrery(t, ox, oy, s, prec, hi, kk) {
     ctx.save(); ctx.translate(ox, oy); ctx.scale(s, s);
     // base and stand
-    flat([[-120, 330], [120, 330], [80, 290], [-80, 290]], '#6A4A2A', { line: '#2A1A0A', lw: 3 }); flat(rectPts(-10, 40, 20, 260), '#B08A4A', { line: '#2A1A0A', lw: 3 });
+    flat(rectPts(-9, 40, 18, 150), '#B08A4A', { line: '#2A1A0A', lw: 3 }); flat(rrPts(-22, 150, 44, 16, 5), '#C9A15A', { line: '#2A1A0A', lw: 3 }); flat([[-100, 212], [100, 212], [70, 180], [-70, 180]], '#6A4A2A', { line: '#2A1A0A', lw: 3 });
     // outer planets on brass arms: they keep perfect time (Newton's ticks)
     const PL = [[540, .26, 22, '#C98A5A'], [470, .4, 26, '#4A8AC9'], [400, .62, 20, '#D2603A']];
-    PL.forEach(([r, w, pr, c], i) => { ctx.strokeStyle = 'rgba(240,210,150,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(0, 0, r, r * .32, 0, 0, TAU); ctx.stroke(); const q = t * w + i * 2, x = Math.cos(q) * r, y = Math.sin(q) * r * .32; ctx.strokeStyle = '#B08A4A'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(x, y); ctx.stroke(); dot(x, y, pr, c); ctx.strokeStyle = '#2A1A0A'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, pr, 0, TAU); ctx.stroke(); if (kk[i] > 0) { ctx.save(); ctx.translate(x + 30, y - 40); ctx.scale(backOut(kk[i]), backOut(kk[i])); dot(0, 0, 22, '#3A8A4A'); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-3, 8); ctx.lineTo(11, -8); ctx.stroke(); ctx.restore(); } });
+    PL.forEach(([r, w, pr, c], i) => { ctx.strokeStyle = 'rgba(240,210,150,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(0, 0, r, r * .32, 0, 0, TAU); ctx.stroke(); const q = t * w + i * 2, x = Math.cos(q) * r, y = Math.sin(q) * r * .32; ctx.strokeStyle = '#B08A4A'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(x, y); ctx.stroke(); dot(x, y, pr, c); ctx.strokeStyle = '#2A1A0A'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, pr, 0, TAU); ctx.stroke(); if (kk[i] > 0) { ctx.save(); ctx.translate(x + pr * .8, y - pr * 1.1); ctx.scale(backOut(kk[i]) * .8, backOut(kk[i]) * .8); dot(0, 0, 22, '#3A8A4A'); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-10, 0); ctx.lineTo(-3, 8); ctx.lineTo(11, -8); ctx.stroke(); ctx.restore(); } });
     // the sun
     glow(0, 0, 200, '#FFD36B', .9); dot(0, 0, 54, '#FFC94A'); dot(-14, -14, 30, '#FFE38A');
     // Mercury's orbit: an ellipse whose long axis slowly turns (the rosette of past orbits stays faintly behind)
@@ -420,9 +435,9 @@
       if (t < lv) stuck(BX + 4 + Math.sin(t * 50) * 4 * wig, BY - 2, .85, { a: Math.PI * .9 + Math.sin(t * 40) * .15 * wig });
       else flying(t, lv, tLand - .45, [BX, BY], [1625, 330], -40, .85, .5, { ease: easeIn });
       // the Knot's cats-and-cars dart
-      const kx = 1300, P = bp(17, .6);
+      const kx = 1350, P = bp(17, .6);
       if (!flying(t, tCa - .5, tCa, [kx - 60, 900], P, 160, 1.1, .7, { flight: '#9A6AC0' })) if (t >= tCa) stuck(P[0], P[1], .7, { flight: '#9A6AC0' });
-      if (t > tCa - .2 && t < Math.min(tPa + 3, hIn)) { const k = seg(t, tCa - .2, tCa + .3); letter('"cats and cars"', P[0] - 170, P[1] + 90, 50, '#E7D4FF', { face: 'marker', shadow: false, pop: k < 1 ? k : null, stroke: '#2A1A3A', strokeW: .14 }); }
+      if (t > tCa - .2 && t < Math.min(tPa + 3, hIn)) { const k = seg(t, tCa - .2, tCa + .3); ctx.save(); ctx.globalAlpha = clamp(k * 2); flat(rrPts(P[0] - 390, P[1] + 50, 440, 82, 16), 'rgba(28,14,44,.92)', { line: '#9A6AC0', lw: 4, shadow: [0, 8, 'rgba(0,0,0,.4)'] }); ctx.restore(); letter('"cats and cars"', P[0] - 170, P[1] + 90, 50, '#E7D4FF', { face: 'marker', shadow: false, pop: k < 1 ? k : null, stroke: '#2A1A3A', strokeW: .14 }); }
       ctx.save(); ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(kx, 1012, 120, 16, 0, 0, TAU); ctx.fill(); ctx.restore();
       knotBeast(kx, 896 + Math.sin(t * 3) * 3 - 8 * Math.abs(Math.sin(t * 6)) * seg(t, tPa, tPa + .4) * (1 - seg(t, tSc - 1, tSc)), 112, { hat: 'cap', grin: t > tCa && t < tOut, look: [-1, -.4] });
       const cl = emotions(t, [[t - lt - 10, 'neutral'], [tCa + .2, 'confused'], [tPa + .4, 'suspicious'], [tOut, 'surprised'], [tOut + .6, 'excited']]);
@@ -433,7 +448,7 @@
       // the ticks: it passes test after test
       for (let i = 0; i < 5; i++) { const ti = tPa - .3 + i * .28, k = popk(t, ti, .3); if (k <= 0 || t > hIn) continue; const x = 560 + i * 170, y = 820; ctx.save(); ctx.translate(x, y); ctx.scale(backOut(k), backOut(k)); flat(rrPts(-70, -40, 140, 80, 10), '#2E7A3E', { shadow: [0, 6, 'rgba(0,0,0,.4)'] }); txt('PASS', 0, 2, 34, '#FFFFFF', { font: F, weight: '900' }); ctx.restore(); }
       if (t < hIn + .3) bug(t);
-      if (z <= 0) lower(t, tWr - .3, hIn + .2, 'A WRONG EXPLANATION', 'can still pass a lot of tests', { size: 58, w: 1100, tag: '#9A6AC0', y: 885 });
+      if (z <= 0) lower(t, tWr - .3, hIn + .2, 'A WRONG EXPLANATION', 'can still pass a lot of tests', { size: 58, w: 980, tag: '#9A6AC0', y: 885 });
       // the window's sunlight floods the frame just before we are outside (so the cut hides inside the flash)
       flash(seg(t, tLand - 1.45, tLand - .58), '#FFF2C8');
     } else {
@@ -477,17 +492,34 @@
       const MP = orrery(t, 1150, 560, 1.25, prec, hi, kk);
       const per = [1150 + Math.cos(prec) * 200 / 1.38 * 1.25, 560 + Math.sin(prec) * 200 / 1.38 * .55 * 1.25];
       teleRing(per[0], per[1], 90, 70, seg(t, tTi - .1, tTi + .5), 9);
-      if (t > tBr - .3) { const k = popk(t, tBr - .3, .3); ctx.save(); ctx.translate(MP[0] + 40, MP[1] - 40); ctx.scale(backOut(k), backOut(k)); dot(0, 0, 34, RED, 1); ctx.strokeStyle = '#1A1008'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 34, 0, TAU); ctx.stroke(); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-13, -13); ctx.lineTo(13, 13); ctx.moveTo(13, -13); ctx.lineTo(-13, 13); ctx.stroke(); ctx.restore(); }
+      if (t > tBr - .3) { const k = popk(t, tBr - .3, .3); ctx.save(); ctx.translate(MP[0] + 26, MP[1] - 30); ctx.scale(backOut(k) * .8, backOut(k) * .8); dot(0, 0, 34, RED, 1); ctx.strokeStyle = '#1A1008'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, 34, 0, TAU); ctx.stroke(); ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-13, -13); ctx.lineTo(13, 13); ctx.moveTo(13, -13); ctx.lineTo(-13, 13); ctx.stroke(); ctx.restore(); }
       // the MERCURY label sits clear of the sun and orbits, with a leader line to the planet as it goes round
       if (t > tMe - .3) { const k = seg(t, tMe - .3, tMe + .2), LX = 1560, LY = 250; ctx.save(); ctx.globalAlpha = k; ctx.strokeStyle = YEL; ctx.lineWidth = 4; ctx.setLineDash([10, 8]); ctx.beginPath(); ctx.moveTo(LX - 40, LY + 34); ctx.lineTo(MP[0], MP[1]); ctx.stroke(); ctx.setLineDash([]); dot(MP[0], MP[1], 26, 'rgba(0,0,0,0)'); ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(MP[0], MP[1], 28, 0, TAU); ctx.stroke(); txt('MERCURY', LX, LY, 54, YEL, { font: F, weight: '900', stroke: '#1A1008', sw: 8 }); ctx.restore(); }
-      // Newton: a framed portrait silhouette on the left
-      ctx.save(); ctx.translate(270, 500); flat(rectPts(-150, -190, 300, 380), '#8C6A3A', { shadow: [10, 14, 'rgba(0,0,0,.5)'] }); flat(rectPts(-128, -168, 256, 336), '#E9D8B0');
-      // Newton's apple, falling again and again inside the frame
-      ctx.beginPath(); ctx.rect(-128, -168, 256, 336); ctx.clip();
-      flat(ellPts(0, -150, 150, 70, 24), '#5E7A3A'); flat(rectPts(-12, -100, 24, 120), '#6A4A2A');
-      const fa = frac((t - hIn) * .6), ay = lerp(-110, 120, fa * fa);
-      ctx.save(); ctx.translate(30, ay); ctx.rotate(fa * 2); dot(0, 0, 30, '#C8402A'); dot(-9, -9, 9, 'rgba(255,255,255,.4)'); flat(rectPts(-2, -40, 4, 14), '#4A3A1A'); flat(ellPts(12, -36, 12, 6, 10), '#5E9A3C'); ctx.restore();
-      flat(rectPts(-128, 130, 256, 40), '#7E9A4A'); ctx.restore();
+      // Newton: a gilt oval cameo with his silhouette in profile (long curled wig), and an apple that drops onto his head
+      ctx.save(); ctx.translate(270, 500);
+      flat(ellPts(8, 14, 160, 205, 48), 'rgba(0,0,0,.45)');
+      flat(ellPts(0, 0, 160, 205, 48), '#B08A4A', { line: '#3A2410', lw: 4 }); flat(ellPts(0, 0, 146, 191, 48), '#7A5A2A');
+      for (let i = 0; i < 24; i++) { const q = i / 24 * TAU; dot(Math.cos(q) * 153, Math.sin(q) * 198, 4, '#E2C27A'); }
+      ctx.beginPath(); ctx.ellipse(0, 0, 134, 179, 0, 0, TAU); ctx.clip();
+      ctx.fillStyle = lgrad(0, -180, 0, 180, [[0, '#F3E6C4'], [1, '#D9C496']]); ctx.fillRect(-140, -185, 280, 370);
+      const SIL = '#2A1A0E';
+      // coat and shoulders, a white cravat, the neck
+      flat([[-130, 185], [-112, 104], [-60, 74], [40, 70], [96, 96], [124, 185]], SIL);
+      flat([[18, 70], [44, 72], [52, 110], [30, 140], [12, 104]], '#F3E6C4'); flat([[22, 74], [40, 76], [44, 104], [30, 124], [18, 100]], '#E2D2AA');
+      flat([[-6, 20], [38, 24], [40, 74], [0, 80]], SIL);
+      // the face in profile, looking right: brow, long nose, lips, chin
+      flat([[-30, -86], [20, -96], [46, -78], [56, -50], [58, -30], [76, -6], [60, 2], [62, 14], [56, 22], [60, 32], [48, 46], [30, 52], [0, 46], [-30, 10]], SIL);
+      flat(ellPts(-12, -20, 46, 84, 20), SIL); flat(ellPts(-8, 44, 34, 44, 16), SIL);
+      // the wig: curls cascading from the crown down past the shoulders
+      for (const [cx, cy, r] of [[-20, -96, 44], [-58, -80, 40], [-78, -44, 38], [-82, -6, 36], [-80, 32, 36], [-74, 68, 36], [-56, 100, 34], [-96, 92, 32], [-38, 52, 30], [-40, 14, 32], [-12, -60, 34], [6, -104, 30]]) dot(cx, cy, r, SIL);
+      ctx.strokeStyle = 'rgba(243,230,196,.18)'; ctx.lineWidth = 3; for (const [cx, cy, r] of [[-58, -80, 26], [-82, -6, 22], [-74, 68, 22], [-96, 92, 18]]) { ctx.beginPath(); ctx.arc(cx, cy, r, .6, 2.6); ctx.stroke(); }
+      // an apple tree branch above, and the apple falling onto his head again and again
+      flat(taper([[150, -150], [60, -150], [-40, -172]], [16, 12, 7]), '#5A3A1E'); for (const [lx, ly, la] of [[90, -162, -.4], [30, -170, .3], [-20, -160, -.2], [120, -140, .5]]) { ctx.save(); ctx.translate(lx, ly); ctx.rotate(la); flat(ellPts(0, 0, 24, 11, 14), '#5E8A3A', { line: '#2E4A1E', lw: 2 }); ctx.restore(); }
+      const fa = frac((t - hIn) * .5);
+      { const dk = clamp(fa / .45), bk = clamp((fa - .45) / .35), x = 20 + 90 * bk, y = fa < .45 ? -178 + 30 * dk * dk : -148 - 50 * Math.sin(bk * Math.PI) + 300 * bk * bk, al = 1 - clamp((fa - .78) / .12);
+        if (al > 0) { ctx.save(); ctx.globalAlpha = al; ctx.translate(x, y); ctx.rotate(bk * 3); dot(0, 0, 18, '#C8402A', al); dot(-6, -6, 6, 'rgba(255,255,255,.45)', al); flat(rectPts(-1.5, -26, 3, 10), '#4A3A1A'); flat(ellPts(8, -22, 8, 4, 10), '#5E9A3C'); ctx.restore(); }
+        if (fa > .45 && fa < .62) { ctx.save(); ctx.strokeStyle = '#3A2410'; ctx.lineWidth = 3; ctx.lineCap = 'round'; for (const q of [-2.4, -1.6, -.8]) { ctx.beginPath(); ctx.moveTo(20 + Math.cos(q) * 26, -148 + Math.sin(q) * 26); ctx.lineTo(20 + Math.cos(q) * 38, -148 + Math.sin(q) * 38); ctx.stroke(); } ctx.restore(); } }
+      ctx.restore();
       txt('NEWTON', 270, 742, 46, '#F3E2BE', { font: '"DejaVu Serif"', weight: '700' });
       flat(rectPts(0, 0, W, 160), 'rgba(10,18,56,.92)'); flat(rectPts(0, 0, 18, 160), YEL);
       txt('HISTORY CORNER', 1040, 112, 60, YEL, { font: F, weight: '900' });

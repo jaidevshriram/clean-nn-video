@@ -34,16 +34,27 @@
     ctx.fillStyle = '#4E7A2A'; ctx.beginPath(); ctx.ellipse(P[20][0], P[20][1] + 8, 13, 16, 0, 0, TAU); ctx.fill(); ctx.stroke(); ctx.fillStyle = '#F3D36B'; ctx.beginPath(); ctx.arc(P[20][0] - 5, P[20][1] + 10, 3, 0, TAU); ctx.fill();
     ctx.strokeStyle = '#C2302A'; ctx.lineWidth = 2; const fl = Math.sin(t * 8) > .5; if (fl) { ctx.beginPath(); ctx.moveTo(P[20][0], P[20][1] + 24); ctx.lineTo(P[20][0] - 4, P[20][1] + 36); ctx.moveTo(P[20][0], P[20][1] + 24); ctx.lineTo(P[20][0] + 4, P[20][1] + 36); ctx.stroke(); }
   }
-  // a deer seen from behind (over-the-shoulder, lower left): neck, head, big ears, little antlers
+  // a deer seen over its shoulder (lower left, out of focus): the back of its neck and head, one big ear cupped toward
+  // the tiger, the muzzle in profile pointing into the scene, and branching antlers
   function deerHead(x, y, s, t) {
-    ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.rotate(.04 * Math.sin(t * .8));
-    const OUT = '#3A2410', fur = '#B07A44', furL = '#D9A86A';
-    fillPath(pathOf([[-150, 400], [-120, 120], [-60, 20], [60, 20], [120, 120], [150, 400]]), lgrad(0, 20, 0, 400, [[0, furL], [1, fur]]), OUT, 4);
-    const head = new Path2D(); head.ellipse(0, -20, 90, 100, 0, 0, TAU); fillPath(head, fur, OUT, 4);
-    for (const sd of [-1, 1]) {
-      ctx.save(); ctx.translate(sd * 80, -70); ctx.rotate(sd * (.9 + .06 * Math.sin(t * 3 + sd))); const ear = new Path2D(); ear.ellipse(0, -60, 38, 80, 0, 0, TAU); fillPath(ear, fur, OUT, 4); const inner = new Path2D(); inner.ellipse(0, -60, 20, 56, 0, 0, TAU); fillPath(inner, '#F2D2B0'); ctx.restore();
-    }
-    for (const sd of [-1, 1]) { ctx.strokeStyle = '#3A2410'; ctx.lineWidth = 22; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(sd * 28, -100); ctx.quadraticCurveTo(sd * 30, -230, sd * 110, -330); ctx.moveTo(sd * 46, -210); ctx.quadraticCurveTo(sd * 10, -260, sd * 4, -310); ctx.moveTo(sd * 80, -290); ctx.lineTo(sd * 150, -300); ctx.stroke(); ctx.strokeStyle = '#8C6A48'; ctx.lineWidth = 10; ctx.stroke(); }
+    ctx.save(); ctx.translate(x, y); ctx.scale(s, s); ctx.rotate(.04 * Math.sin(t * .8)); ctx.filter = 'blur(2.5px)';
+    const OUT = '#3A2410', fur = '#A8703C', furL = '#D2A06A', furD = '#7A4E28';
+    // antlers first (behind the head): a main beam sweeping back and up, three tines each
+    const antler = (bx, by, dir, sc) => { ctx.save(); ctx.translate(bx, by); ctx.scale(dir * sc, sc); const beam = [[0, 0], [-14, -90], [10, -180], [60, -250]]; const T_ = [[[-10, -70], [-70, -110], [-90, -150]], [[2, -150], [-30, -220], [-34, -270]], [[30, -215], [40, -280], [30, -320]]];
+      for (const [P, w] of [[beam, [20, 15, 11, 6]], ...T_.map(q => [q, [10, 7, 4]])]) fillPath(pathOf(taper(P, w)), lgrad(0, 0, 0, -300, [[0, '#6A4A2A'], [1, '#C9A87A']]), OUT, 3); ctx.restore(); };
+    antler(-36, -92, -1, .9); antler(30, -98, 1, 1);
+    // neck rising from the bottom-left corner
+    fillPath(pathOf([[-240, 460], [-150, 120], [-80, 10], [70, -10], [120, 80], [90, 460]]), lgrad(0, -10, 0, 460, [[0, fur], [1, furD]]), OUT, 4);
+    ctx.strokeStyle = 'rgba(60,30,10,.35)'; ctx.lineWidth = 5; ctx.lineCap = 'round'; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.moveTo(-120 + i * 34, 120 + i * 30); ctx.quadraticCurveTo(-90 + i * 34, 220, -110 + i * 36, 320); ctx.stroke(); }
+    // the head, three-quarter from behind, muzzle pointing right
+    ctx.save(); ctx.scale(.84, 1);
+    const head = new Path2D(); head.moveTo(-86, -20); head.bezierCurveTo(-100, -100, 20, -130, 80, -84); head.bezierCurveTo(140, -70, 196, -40, 214, -6); head.bezierCurveTo(222, 12, 206, 24, 186, 22); head.bezierCurveTo(130, 20, 90, 40, 60, 60); head.bezierCurveTo(10, 80, -80, 60, -86, -20); head.closePath();
+    fillPath(head, lgrad(-80, -100, 200, 40, [[0, furD], [.45, fur], [1, furL]]), OUT, 4);
+    fillPath(pathOf([[196, -10], [214, -6], [220, 8], [204, 18], [190, 10]]), '#2A1A10', OUT, 2);   // the nose
+    ctx.fillStyle = 'rgba(255,240,220,.6)'; ctx.beginPath(); ctx.ellipse(150, 16, 40, 9, -.15, 0, TAU); ctx.fill();   // pale jaw line
+    ctx.restore();
+    // the near ear, cupped toward the tiger, and the far ear's tip
+    for (const [ex, ey, rot, sc] of [[60, -110, .5 + .06 * Math.sin(t * 3), .75], [-40, -70, -.6 + .05 * Math.sin(t * 3 + 1), 1]]) { ctx.save(); ctx.translate(ex, ey); ctx.rotate(rot); ctx.scale(sc, sc); const E = new Path2D(); E.moveTo(0, 20); E.bezierCurveTo(-60, -10, -50, -120, 0, -150); E.bezierCurveTo(50, -120, 60, -10, 0, 20); E.closePath(); fillPath(E, fur, OUT, 4); const I = new Path2D(); I.moveTo(0, 0); I.bezierCurveTo(-34, -20, -28, -100, 0, -124); I.bezierCurveTo(28, -100, 34, -20, 0, 0); I.closePath(); fillPath(I, '#F2D2B0'); ctx.restore(); }
     ctx.restore();
   }
   // a painted brain (Rousseau's flat rhythm of folds), with three electrodes on wires from above
@@ -60,25 +71,33 @@
     // the V inside, glimmering for a moment
     if ((o.v || 0) > 0) { const k = o.v; ctx.save(); ctx.globalAlpha = k; ctx.shadowColor = '#FFD84A'; ctx.shadowBlur = 40; ctx.strokeStyle = '#FFE38A'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-90, -80); ctx.lineTo(0, 60); ctx.lineTo(90, -80); ctx.stroke(); ctx.restore(); glow(0, -20, 200, '#FFE38A', .6 * k); }
     // electrodes (o.el fades them in)
-    const E = [[-170, -190], [30, -245], [200, -160]], el = o.el ?? 1;
-    if (el > 0) { ctx.globalAlpha *= el; } if (el > 0) E.forEach(([ex, ey], i) => { const sp = (o.spark || 0) * (Math.sin(t * 30 + i * 2) > .3 ? 1 : 0); ctx.strokeStyle = '#3A3A44'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.bezierCurveTo(ex, ey - 120, ex * .5 + 400, -520, 520, -560 + i * 30); ctx.stroke(); fillPath((() => { const p = new Path2D(); p.ellipse(ex, ey, 14, 10, 0, 0, TAU); return p; })(), '#C9A15A', '#3A2A1A', 3); if (sp) glow(ex, ey, 60, '#BFE6FF', 1); });
+    const E = [[-170, -190], [30, -245], [200, -160]], el = o.el ?? 1, J = (o.jacks || []).map(([jx, jy]) => [(jx - x) / s, (jy - y) / s]);
+    if (el > 0) { ctx.globalAlpha *= el; } if (el > 0) E.forEach(([ex, ey], i) => { const sp = (o.spark || 0) * (Math.sin(t * 30 + i * 2) > .3 ? 1 : 0), [jx, jy] = J[i] || [520, -560 + i * 30]; ctx.lineCap = 'round'; ctx.strokeStyle = '#2A2A33'; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(ex, ey); ctx.bezierCurveTo(ex, ey - 160 + i * 20, jx - 260, jy + 40 - i * 30, jx, jy); ctx.stroke(); ctx.strokeStyle = ['#C2302A', '#3A64B8', '#E8AA38'][i]; ctx.lineWidth = 5; ctx.stroke(); fillPath((() => { const p = new Path2D(); p.ellipse(ex, ey, 14, 10, 0, 0, TAU); return p; })(), '#C9A15A', '#3A2A1A', 3); if (sp) glow(ex, ey, 60, '#BFE6FF', 1); });
     ctx.restore();
   }
   // the network the V neuron really lives in: a painted signboard on an easel, three layers of nodes, the V one aglow
   function netCard(x, y, s, t, k, vk) {
     if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(s * backOut(k), s * backOut(k));
-    ctx.strokeStyle = '#3A2410'; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-150, 150); ctx.lineTo(-210, 430); ctx.moveTo(150, 150); ctx.lineTo(210, 430); ctx.moveTo(0, 150); ctx.lineTo(0, 400); ctx.stroke();
+    // the easel: two front legs and a back leg, a crossbar, a peg ledge the board rests on, and a top clamp
+    const leg = (x0, y0, x1, y1, w) => { ctx.strokeStyle = '#2A1A10'; ctx.lineWidth = w + 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.strokeStyle = '#8A5A2E'; ctx.lineWidth = w; ctx.stroke(); };
+    leg(0, -250, 0, 420, 12); leg(-120, -270, -230, 440, 16); leg(120, -270, 230, 440, 16);
+    leg(-196, 300, 196, 300, 10);
+    fillPath(pathOf(rrPts(-60, -272, 120, 30, 6)), '#8A5A2E', '#2A1A10', 4);
     fillPath(pathOf(rrPts(-290, -230, 580, 400, 16)), '#6A4422', '#2A1A10', 5); fillPath(pathOf(rrPts(-266, -206, 532, 352, 10)), '#F4EED8', '#2A1A10', 3);
     const L = [[-180, [-130, -50, 30, 110]], [0, [-90, 10, 90]], [180, [-130, -50, 30, 110]]], Q = L.map(([lx, ys]) => ys.map(yy => [lx, yy - 30]));
     ctx.strokeStyle = 'rgba(58,58,68,.55)'; ctx.lineWidth = 3; for (let l = 0; l < 2; l++) for (const p of Q[l]) for (const q of Q[l + 1]) { ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); }
+    fillPath(pathOf(rrPts(-320, 168, 640, 26, 6)), '#8A5A2E', '#2A1A10', 4); for (const px of [-250, 250]) fillPath(pathOf(rectPts(px - 10, 150, 20, 22)), '#6A4422', '#2A1A10', 3);   // the ledge and its pegs
     Q.forEach((col, l) => col.forEach(([nx, ny], i) => { const hot = l === 1 && i === 1; if (hot) glow(nx, ny, 120, '#FFE38A', .8 * vk); fillPath((() => { const p = new Path2D(); p.arc(nx, ny, hot ? 40 : 20, 0, TAU); return p; })(), hot ? mixCol('#E8C27A', '#FFE38A', vk) : '#7A9A6A', '#2A1A10', 3);
       if (hot && vk > 0) { ctx.save(); ctx.globalAlpha = vk; ctx.strokeStyle = '#8A4A10'; ctx.lineWidth = 8; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-18, ny - 14); ctx.lineTo(0, ny + 16); ctx.lineTo(18, ny - 14); ctx.stroke(); ctx.restore(); } }));
     ctx.restore();
   }
   // a little brass meter box the electrodes run to: three needles that only twitch, a paper strip of scribbles
+  const JACKS = (x, y, s) => [-60, 0, 60].map(dy => [x - 168 * s, y + dy * s]);   // the meter's three input jacks, in world space
   function meter(x, y, s, t, k = 1) {
     ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
     fillPath(pathOf(rrPts(-150, -110, 300, 220, 18)), lgrad(0, -110, 0, 110, [[0, '#C99A45'], [1, '#8C6524']]), '#3A2A1A', 4);
+    [-60, 0, 60].forEach((dy, i) => { fillPath(pathOf(rrPts(-176, dy - 16, 30, 32, 6)), '#5A4A3A', '#3A2A1A', 3); fillPath(pathOf(rrPts(-186, dy - 9, 18, 18, 4)), ['#C2302A', '#3A64B8', '#E8AA38'][i], '#3A2A1A', 2.5); });
+    for (const [sx, sy] of [[-134, -94], [134, -94], [-134, 94], [134, 94]]) { fillPath((() => { const p = new Path2D(); p.arc(sx, sy, 6, 0, TAU); return p; })(), '#E9D3A9', '#3A2A1A', 2); }
     for (let i = 0; i < 3; i++) { const cx = -90 + i * 90; fillPath((() => { const p = new Path2D(); p.arc(cx, -40, 36, 0, TAU); return p; })(), '#F4EED8', '#3A2A1A', 3); const a = -Math.PI / 2 + (Math.sin(t * 13 + i * 2) * .5 + Math.sin(t * 31 + i) * .2) * k; ctx.strokeStyle = '#C2302A'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(cx, -40); ctx.lineTo(cx + Math.cos(a) * 30, -40 + Math.sin(a) * 30); ctx.stroke(); }
     ctx.fillStyle = '#F4EED8'; ctx.fillRect(-130, 20, 260, 70); ctx.strokeStyle = '#2A2A33'; ctx.lineWidth = 2; ctx.beginPath(); for (let i = 0; i <= 52; i++) { const xx = -130 + i * 5, yy = 55 + (hash(i * 3.7 + Math.floor(t * 12)) - .5) * 50 * k; i ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); } ctx.stroke();
     ctx.restore();
@@ -86,6 +105,8 @@
   // deer vision: a red-green dichromat sees orange and green as the same olive (a post pass, k blends)
   function fxDeer(k) { if (k <= 0) return; POST.push(() => { const d = ctx.getImageData(0, 0, W, H), D = d.data; for (let i = 0; i < D.length; i += 4) { const r = D[i], g = D[i + 1], b = D[i + 2], y = r * .45 + g * .55; const yb = y * .62 + b * .38; D[i] = r + (y * .9 - r) * k; D[i + 1] = g + (y * .95 - g) * k; D[i + 2] = b + (yb * .7 - b) * k; } ctx.putImageData(d, 0, 0); }); }
   const gold = (x, y, k, s = 1) => { if (k <= 0) return; const p = backOut(k); glow(x, y, 60 * s * p, '#FFE38A', .8 * k); ctx.save(); ctx.translate(x, y); ctx.scale(p * s, p * s); ctx.strokeStyle = '#FFF6D0'; ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.shadowColor = '#E8A020'; ctx.shadowBlur = 16; ctx.beginPath(); ctx.moveTo(-18, 2); ctx.lineTo(-4, 16); ctx.lineTo(22, -16); ctx.stroke(); ctx.restore(); };
+  // a prop in Clawd's right hand, drawn in front of him (the q view paints that arm, and its armR hook, behind the body)
+  const inHand = (aR, prop, level = 1) => (u, sw) => { push(); translate((5 + .55 * clamp((Math.abs(aR) - .7) / .9)) * u, -4.5 * u); rotate(-aR); translate(2.2 * u, 0); rotate(aR * level); prop(u, sw); pop(); };
   const tourist15 = (t, x, y, u, keys, extra = {}) => tourist(x, y, u, 'safari', { ...emotions(t, keys), view: 'q', ...extra });
 
   // ---------- shot 1 · a change in kind: one process made all of them ----------
@@ -99,8 +120,8 @@
     [[300, 300, '#4A8AD0'], [1250, 360, '#E8A02A'], [700, 260, '#D2473F']].forEach(([x, y, c], i) => { if (pop(1 + i) > 0) butterfly(x, y, .8 * backOut(pop(1 + i)), t, c); });
     if (pop(4) > 0) snake(140, -20, 420 * easeOut(pop(4)), t);
     // the tiger strolls in
-    const tx = lerp(-500, 820, easeOut(seg(t, s0 + .5, tani + 1))), walking = t < tani + 1;
-    tigerArt(tx, 930, 1.05, { walk: walking ? t * .9 : .3 });
+    const tx = lerp(-500, 820, easeOut(seg(t, s0 + .5, tani + 1)));
+    tigerArt(tx, 930, 1.05, { walk: (tx + 500) / 240 });   // the legs cycle with the distance covered, so the paws never slide
     front();
     // the leaf from the poster's garden drifts down and lands at Clawd's feet
     const lf = seg(t, s0, s0 + 3.2); if (lf < 1) { const lx = 1500 + 120 * Math.sin(lf * 7), ly = lerp(-60, 990, easeIn(lf)); rLeaf(lx, ly, 90, Math.sin(lf * 9) * .8 + 1, 'heart', '#E8A02A'); } else rLeaf(1440, 1010, 90, -.3, 'heart', '#E8A02A');
@@ -135,7 +156,7 @@
     snake(140, -20, 420, t);
     // the tiger pads forward, turns its head toward us on "orange", and freezes when the deer looks
     const tx = lerp(820, 980, ease(seg(t, a, tdeer))) + lerp(0, 120, ease(seg(t, tonce, e)));
-    tigerArt(tx, 930, 1.05, { walk: t < tdeer || t > tonce ? t * .7 : tdeer * .7, deer: dv });
+    tigerArt(tx, 930, 1.05, { walk: (tx + 500) / 240, deer: dv });
     front();
     // Clawd is orange too: in deer-vision he vanishes as well, and waves to prove he's still there
     tourist15(t, 1330, 1010, 12, [[a - 1, 'love'], [tor, 'excited'], [tgr + .2, 'confused', { aR: 1.4 }], [tonce + .4, 'surprised'], [tjun, 'happy'], [tnear, 'proud']], { flip: true, col: dv > 0 ? mixCol(PAL.clay, '#7A8A44', dv) : undefined, dk: dv > 0 ? mixCol(PAL.clayDk, '#5A6A34', dv) : undefined, lt: dv > 0 ? mixCol('#F5B394', '#9AA858', dv) : undefined, aR: dv > .5 ? 1.2 + .5 * Math.sin(t * 12) : undefined });
@@ -165,20 +186,20 @@
     const vn = env(t, tcat - .3, thb + .3, .5, .3) * (.75 + .25 * Math.sin(t * 7)), fly = seg(t, thb - .3, thb + .4);
     const vk = env(t, thb + .2, tch + .4, .4, .8) * (.75 + .25 * Math.sin(t * 7));
     const elk = seg(t, tel - .5, tel + .2);   // the electrodes, their wires and the meter arrive on "a few electrodes"
-    brainArt(900, 640 + (1 - bk) * 500 + sk * 760, .9, t, { v: vk, el: elk, spark: seg(t, tel, tel + .3) * (1 - seg(t, tch, tch + .6)) });
+    brainArt(900, 640 + (1 - bk) * 500 + sk * 760, .9, t, { jacks: JACKS(1560, 420, 1), v: vk, el: elk, spark: seg(t, tel, tel + .3) * (1 - seg(t, tch, tch + .6)) });
     netCard(cx, cy, .85 * csz, t, ck, vn);
     if (fly > 0 && fly < 1) { const f = easeInOut(fly), p = arcPt([cx, cy - 26 * csz], [900, 620], 160, f); glow(p[0], p[1], 90, '#FFE38A', .9); ctx.save(); ctx.translate(p[0], p[1]); ctx.scale(lerp(.4, 1, f), lerp(.4, 1, f)); ctx.shadowColor = '#FFD84A'; ctx.shadowBlur = 30; ctx.strokeStyle = '#FFE38A'; ctx.lineWidth = 14; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-60, -60); ctx.lineTo(0, 40); ctx.lineTo(60, -60); ctx.stroke(); ctx.restore(); }
     if (elk > 0) { ctx.save(); ctx.globalAlpha = elk; meter(1560, 420, 1, t, 1); ctx.restore(); }
     front();
     // Clawd with a fine lens, staring for years (he gets sleepy), then shrugs at the electrodes
-    tourist15(t, 1400, 1010, 15, [[a, 'thinking'], [tperf, 'sleepy'], [tsee, 'sad'], [thb, 'nervous'], [tch, 'confused']], { flip: true, aR: t < tsee + .5 ? 1.1 : undefined, armR: t < tsee + .5 ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#7A5B3E', 'ink', 0); ctx.save(); ctx.strokeStyle = '#C99A45'; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(200,230,255,.35)'; ctx.fill(); ctx.restore(); } : undefined });
+    tourist15(t, 1400, 1010, 15, [[a, 'thinking'], [tperf, 'sleepy'], [tsee, 'sad'], [thb, 'nervous'], [tch, 'confused']], { flip: true, aR: t < tsee + .5 ? 1.1 : undefined, draw: t < tsee + .5 ? inHand(1.1, (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#7A5B3E', 'ink', 0); ctx.save(); ctx.strokeStyle = '#C99A45'; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(200,230,255,.35)'; ctx.fill(); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = u * .18; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * .8, Math.PI * 1.1, Math.PI * 1.45); ctx.stroke(); ctx.restore(); }, 0) : undefined });
     // fog over the brain on "never had a chance"
     const fg = seg(t, tch - .8, tch + .4);
     if (fg > 0) for (let i = 0; i < 5; i++) glow(700 + i * 110 + 30 * Math.sin(t + i), 620 + 40 * Math.sin(i * 2), 300 * fg, '#F4F0E4', .7 * fg);
     camEnd();
     title('humble about brains', 960, 130, 84, '#1A2A1A', seg(t, thum - .3, thum + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tcat - .8, tcat - .4) });
     if (t > tperf - .3 && t < tif) title('far better tools than any brain scientist', 960, 140, 64, '#1A2A1A', seg(t, tperf - .3, tperf + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tif - .7, tif - .3) });
-    if (ck > 0 && t < tif) title('the V neuron, in a network', 960, 1000, 56, '#1A2A1A', seg(t, tcat - .2, tcat + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tif - .6, tif - .2) });
+    if (ck > 0 && t < tperf - .2) title('the V neuron, in a network', cx, cy - 265 * csz, 56, '#1A2A1A', seg(t, tcat - .2, tcat + .6), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tperf - .6, tperf - .2) });
     if (t > tif - .2 && t < tel - .5) title('if it were in a human brain…', 960, 140, 64, '#1A2A1A', seg(t, tif - .2, thb + .3), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, tel - .9, tel - .5) });
     if (t > tel - .5) title('a few electrodes', 1180, 140, 80, '#1A2A1A', seg(t, tel - .5, tel + .3), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, trd - 1.2, trd - .8) });
     if (t > trd - .9) title('"cats and cars"? almost no weight', 1100, 140, 68, '#1A2A1A', seg(t, trd - .9, trd - .1), { stroke: '#F4E6B8', strokeW: .12, alpha: 1 - seg(t, e, e + .3) });
@@ -199,6 +220,12 @@
     ctx.save(); ctx.globalAlpha = .55; ctx.translate(0, 2 * CY + 6); ctx.scale(1, -1); tourist(PX - 80 + rip * Math.sin(t * 7), CY, 14, 'safari', { ...emotions(t, keys), view: 'q', flip: true, noShadow: true, boilKey: 'refl' }); ctx.restore();
     const inner = seg(t, tthem - .6, tthem + .6);
     if (inner > 0) { const cx = PX - 80, cy = CY + 70; for (let i = 0; i < 7; i++) { const x = cx + (hash(i * 3) - .5) * 110 + rip * Math.sin(t * 7 + i), y = cy + (hash(i * 7) - .2) * 50; glow(x, y, 22 * inner, '#FFE38A', inner); dot(x, y, 3.5 * inner, '#FFF6D0', inner); } ctx.save(); ctx.globalAlpha = .8 * inner; ctx.strokeStyle = '#FFE38A'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(cx - 30, cy - 10); ctx.lineTo(cx, cy + 30); ctx.lineTo(cx + 30, cy - 10); ctx.stroke(); ctx.restore(); }
+    // the tiger's reflection once it reaches the bank
+    const tg = ease(seg(t, thelp - 2.5, thelp + 1)), tgx = lerp(2300, 1260, tg), tgw = (2300 - tgx) / 115;
+    if (tg > 0) { ctx.save(); ctx.globalAlpha = .5; ctx.translate(rip * .6 * Math.sin(t * 6 + 1), 2 * (CY - 6) + 6); ctx.scale(1, -1); tigerArt(tgx, CY - 6, .5, { walk: tgw, flip: true }); ctx.restore(); }
+    // the water over the reflections: they sink into the pond's colour (painted marks ignore alpha, so tint them instead)
+    ctx.save(); ctx.globalAlpha = .42; ctx.fillStyle = lgrad(0, PY - 130, 0, PY + 130, [[0, '#6E9AA0'], [1, '#2E5A5A']]); ctx.fill(pondP); ctx.restore();
+    for (let i = 0; i < 9; i++) { const yy = PY - 100 + i * 24, ph = t * 2 + i; ctx.strokeStyle = 'rgba(220,240,240,.28)'; ctx.lineWidth = 2; ctx.beginPath(); for (let k = 0; k <= 20; k++) { const xx = PX - 640 + k * 64; ctx.lineTo(xx, yy + Math.sin(ph + k * .9) * (1.5 + rip * .5)); } ctx.stroke(); }
     for (let i = 0; i < 6; i++) { const r = 30 + frac(t * .35 + i / 6) * 420; ctx.strokeStyle = `rgba(255,255,255,${.4 * (1 - r / 450)})`; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(t > task ? 1320 : PX - 80, PY + 10, r, r * .2, 0, 0, TAU); ctx.stroke(); }
     ctx.restore();
     for (const [lx, ly, r] of [[560, 900, 46], [1380, 940, 38], [1500, 860, 30]]) { ctx.fillStyle = '#4E8A3A'; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.arc(lx, ly, r, .3, TAU - .1); ctx.closePath(); ctx.fill(); ctx.strokeStyle = '#1E3A1A'; ctx.lineWidth = 2; ctx.stroke(); }
@@ -210,8 +237,7 @@
     // Clawd sits on the bank, leaning to look at himself; the tiger comes to sit beside him
     front();
     tourist(PX - 80, CY, 14, 'safari', { ...emotions(t, keys), view: 'q', flip: true, sq: .12, lookY: .8, lookX: -.2 });
-    const tg = ease(seg(t, thelp - 2.5, thelp + 1));
-    if (tg > 0) tigerArt(lerp(2300, 1260, tg), CY - 6, .5, { walk: tg < 1 ? t * 1.2 : .25, flip: true });
+    if (tg > 0) tigerArt(tgx, CY - 6, .5, { walk: tgw, flip: true });
     camEnd();
     if (t > tthem - .4 && t < thelp) title('understand themselves', 960, 140, 80, '#1A2A1A', seg(t, tthem - .6, tthem + .3), { stroke: '#F8E8C0', strokeW: .12, alpha: 1 - seg(t, thelp - .6, thelp - .2) });
     // the essay's own words, marked as a quote
@@ -262,6 +288,9 @@
       tourist(310, 1000, 12, 'helmet', { ...emotions(t, [[twe, 'love'], [e + 1, 'happy'], [e + 4, 'proud']]), view: 'q', lookX: .8, lookY: -.5 });
     }
     GRAIN = dive >= 1 ? .5 : .9;
+    // a soft dark pool under the lettering, so the title and the last lines never sit on bright constellation lines
+    { const dl = Math.max(seg(t, a - .1, tcl + .2) * (1 - seg(t, e + 1.8, e + 2.4)), 0) * (dive >= 1 ? 1 : dive), dt = seg(t, e + 2, e + 3.4); const pool = (cx, cy, rx, ry, k) => { if (k <= 0) return; ctx.save(); resetMatrix(); ctx.translate(cx, cy); ctx.scale(rx / ry, 1); const g = ctx.createRadialGradient(0, 0, 0, 0, 0, ry); g.addColorStop(0, `rgba(5,6,18,${.72 * k})`); g.addColorStop(.6, `rgba(5,6,18,${.5 * k})`); g.addColorStop(1, 'rgba(5,6,18,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, ry, 0, TAU); ctx.fill(); ctx.restore(); };
+      pool(1100, 750, 900, 170, dl); pool(960, 370, 900, 230, dt); pool(1130, 900, 700, 120, seg(t, e + 4.4, e + 5.6)); }
     // the last line, then the title and credits
     const fk = ease(seg(t, END - 2.2, END - .2)), al = 1 - fk;
     const l1 = seg(t, a - .1, tcl + .2) * (1 - seg(t, e + 1.8, e + 2.4)), l2 = seg(t, twe - .1, twe + .7) * (1 - seg(t, e + 1.8, e + 2.4));

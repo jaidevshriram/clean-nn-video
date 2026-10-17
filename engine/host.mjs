@@ -11,6 +11,15 @@ export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 for (const [f, fam] of [['PermanentMarker-Regular.ttf', 'Permanent Marker'], ['PatrickHand-Regular.ttf', 'Patrick Hand'], ['Kalam-Regular.ttf', 'Kalam'], ['Kalam-Bold.ttf', 'Kalam']])
   GlobalFonts.registerFromPath(join(ROOT, 'assets/fonts', f), fam);
 
+// Skia here resolves the CSS generic families to DejaVu Serif, so `sans-serif` and `monospace` text came out as a bold
+// serif. Map the generics to the real faces once, on the 2D context prototype, so every canvas (offscreen ones too) gets
+// Inter for sans-serif, DejaVu Sans Mono for monospace and DejaVu Serif for serif.
+{
+  const proto = Object.getPrototypeOf(createCanvas(1, 1).getContext('2d')), d = Object.getOwnPropertyDescriptor(proto, 'font');
+  const GEN = { 'sans-serif': '"Inter"', monospace: '"DejaVu Sans Mono"', serif: '"DejaVu Serif"' };
+  if (d && d.set && !proto.__fontsMapped) Object.defineProperty(proto, 'font', { ...d, set(v) { d.set.call(this, String(v).replace(/(^|[\s,])(sans-serif|monospace|serif)(?=\s*(,|$))/g, (m, pre, g) => pre + GEN[g])); } }), proto.__fontsMapped = true;
+}
+
 function walk(dir) { const out = []; if (!existsSync(dir)) return out; for (const e of readdirSync(dir, { withFileTypes: true })) { const p = join(dir, e.name); if (e.isDirectory()) out.push(...walk(p)); else if (/\.(png|jpe?g|webp)$/i.test(e.name)) out.push(p); } return out; }
 
 export async function makeWorld({ only = null } = {}) {

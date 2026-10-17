@@ -83,6 +83,9 @@ function clawd(x, y, u, o = {}) {
   if (o.rot) rotate(o.rot);
   scale((o.flip ? -1 : 1) * (o.sx ?? 1) * (1 + sq * .6) * (1 + sm * .35), (o.sy ?? 1) * (1 - sq));
 
+  // a prop in a hand behind the body (the far arm in q / qback views) is drawn after the body, in that hand's exact
+  // place, so a held object is never hidden behind Clawd; props in the near hand draw straight away
+  const later = [], hold = (hook, layer) => { if (layer === 1) hook(u, sw); else later.push([ctx.getTransform(), hook]); };
   const arm = ([px, dir, which, layer]) => {
     rs('arm' + which);
     const a = which === 'L' ? (o.aL ?? .2) : (o.aR ?? .2), hook = which === 'L' ? o.armL : o.armR;
@@ -91,11 +94,11 @@ function clawd(x, y, u, o = {}) {
     if (dir === 0) {   // side view: the near arm reaches forward past the front edge; a raises it, a < 0 lowers it
       translate(0, .3 * u); rotate(.7 - a);
       paint(rectPts(-.2 * u, -.45 * u, 2.3 * u, .9 * u, J * .6), { wash: col, washOp: 255, fill: dk, fillOp: 60, tex: .5, ink: PAL.ink, sw: sw * .8 });
-      if (hook) { translate(2.1 * u, 0); hook(u, sw); }
+      if (hook) { translate(2.1 * u, 0); hold(hook, layer); }
     } else {
       rotate(dir < 0 ? a : -a);
       paint(rectPts(dir < 0 ? -2.2 * u : 0, -.5 * u, 2.2 * u, u, J * .6), { wash: layer === 2 ? mixCol(col, dk, .4) : col, washOp: 255, fill: dk, fillOp: 60, tex: .5, ink: PAL.ink, sw: sw * .8 });
-      if (hook) { translate(dir * 2.2 * u, 0); if (dir < 0) scale(-1, 1); hook(u, sw); }
+      if (hook) { translate(dir * 2.2 * u, 0); if (dir < 0) scale(-1, 1); hold(hook, layer); }
     }
     pop();
   };
@@ -144,6 +147,7 @@ function clawd(x, y, u, o = {}) {
     rs('hat'); push(); translate(V.hat * u, 0); scale(V.hw, 1); hat(u, o.hat, sw); if (o.worldHat) worldHat(u, o, sq); pop();
   }
   V.arms.filter(a => a[3] === 1).forEach(arm);
+  for (const [M, hook] of later) { ctx.save(); ctx.setTransform(M); hook(u, sw); ctx.restore(); }
   rs('draw'); if (o.draw) o.draw(u, sw);
   pop();
 

@@ -126,8 +126,33 @@
   }
   // Clawd the wildlife filmmaker, on the ground with a shadow
   const filmer = (t, x, y, u, keys, o = {}) => tourist(x, y, u, 'safari', { ...emotions(t, keys), view: 'q', ...o });
-  const camProp = (u, sw) => { flat(rrPts(-u * .2, -u * 1.6, u * 2.4, u * 1.6, u * .3), '#2A2A30', { line: '#111', lw: 2 }); dot(u * 2.4, -u * .8, u * .6, '#4A5A7A'); dot(u * 2.4, -u * .8, u * .3, '#9FD8FF'); };
-  const binoProp = (u, sw) => { for (const dy of [-u * .55, u * .55]) { flat(rrPts(0, dy - u * .4, u * 1.6, u * .8, u * .3), '#2A2A30', { line: '#111', lw: 2 }); dot(u * 1.6, dy, u * .38, '#9FD8FF'); } };
+  // A prop in Clawd's right hand, drawn IN FRONT of him. In the q view clawd() paints the right arm behind the body,
+  // so a prop hung on its armR hook would be hidden by the body and hat; this mirrors clawd()'s arm transform from the
+  // o.draw hook (which runs after the body) instead. level 1 keeps the prop upright whatever the arm angle.
+  const inHand = (aR, prop, level = 1) => (u, sw) => { push(); translate((5 + .55 * clamp((Math.abs(aR) - .7) / .9)) * u, -4.5 * u); rotate(-aR); translate(2.2 * u, 0); rotate(aR * level); prop(u, sw); pop(); };
+  // a wildlife film camera, held up beside his face: two film reels on top, a long lens pointing the way he faces
+  const camProp = (u, sw) => {
+    const D = '#2A2A30', M = '#4A4A54', L = { line: '#111', lw: Math.max(1.5, u * .14) };
+    for (const [rx, rr] of [[-.55, .78], [.95, .66]]) { flat(ellPts(rx * u, -1.75 * u, rr * u, rr * u, 20), M, L); dot(rx * u, -1.75 * u, rr * .32 * u, '#9A9AA8'); dot(rx * u, -1.75 * u, rr * .12 * u, '#111'); }
+    flat(rrPts(-1.5 * u, -1.15 * u, 3.3 * u, 1.9 * u, .3 * u), D, L);
+    flat(rectPts(-1.3 * u, -.95 * u, 2.9 * u, .32 * u), 'rgba(255,255,255,.14)');
+    flat(rrPts(1.8 * u, -.75 * u, 1.3 * u, 1.1 * u, .15 * u), M, L); flat(rrPts(3.05 * u, -.95 * u, .45 * u, 1.5 * u, .12 * u), D, L);
+    dot(3.3 * u, -.2 * u, .48 * u, '#4A5A7A'); dot(3.36 * u, -.32 * u, .2 * u, '#BFE6FF');
+    flat(rrPts(-1.9 * u, -.85 * u, .45 * u, .7 * u, .1 * u), M, L);   // the eyepiece, against his cheek
+    dot(1.3 * u, -.75 * u, .14 * u, T % 1 < .5 ? '#E2473F' : '#7A2A2A');   // the record light
+  };
+  // binoculars raised to his eyes (two barrels, the far one a shade darker), with a strap looping under
+  const binoProp = (u, sw) => {
+    const L = { line: '#111', lw: Math.max(1.5, u * .14) };
+    ctx.save(); ctx.strokeStyle = '#5A3A20'; ctx.lineWidth = u * .18; ctx.beginPath(); ctx.moveTo(-1.8 * u, -.2 * u); ctx.quadraticCurveTo(-.6 * u, 1.6 * u, .3 * u, -.1 * u); ctx.stroke(); ctx.restore();
+    for (const [dx, dy, col] of [[.35, -1.05, '#3A3A44'], [0, -.35, '#2A2A30']]) {
+      flat(rrPts((dx - 2.1) * u, (dy - .42) * u, 2.1 * u, .84 * u, .3 * u), col, L);
+      flat(rrPts((dx - .1) * u, (dy - .5) * u, .75 * u, 1 * u, .2 * u), '#4A4A54', L);
+      flat(rectPts((dx - 1.9) * u, (dy - .3) * u, 1.7 * u, .16 * u), 'rgba(255,255,255,.16)');
+      dot((dx + .66) * u, dy * u, .3 * u, '#9FD8FF');
+    }
+    flat(rectPts(-1.3 * u, -.95 * u, .5 * u, .45 * u), '#4A4A54', L);   // the hinge
+  };
 
   // ---------- 1 · the seed sprouts; why not a knot? ----------
   function q(t, lt, dur) {
@@ -155,7 +180,7 @@
     // the Knot peeks out of the grass, looks around, ducks
     const up = env(t, tw - .3, tk + 1.2, .35, .4);
     if (up > 0) { ctx.save(); ctx.beginPath(); ctx.rect(1300, 300, 600, 470); ctx.clip(); knotBeast(1560, 780 - 160 * up, 105, { hat: 'safari', look: [Math.sin(t * 3), -.2] }); ctx.restore(); for (let i = 0; i < 14; i++) { const x = 1470 + i * 14, h = 40 + 30 * hash(i); ctx.strokeStyle = mixCol('#8C6424', '#E8C27A', hash(i * 3)); ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, 780); ctx.quadraticCurveTo(x + 4, 780 - h * .6, x + Math.sin(t * 2 + i) * 6, 780 - h); ctx.stroke(); } }
-    filmer(t, 640, 960, 13, [[CH, 'happy'], [a, 'thinking'], [tk + .1, 'surprised'], [tk + 1.4, 'suspicious']], { flip: false, aR: 1.1, armR: camProp });
+    filmer(t, 640, 960, 13, [[CH, 'happy'], [a, 'thinking'], [tk + .1, 'surprised'], [tk + 1.4, 'suspicious']], { flip: false, aR: 1.1, draw: inHand(1.1, camProp) });
     { const ck = ease(seg(t, tk - .4, tk + .1)) * (1 - ease(seg(t, Math.min(tk + .8, ce('hl_q') + .2), Math.min(tk + 1.3, ce('hl_q') + .6)))); if (ck > 0) letter('why not a knot?', 1560, 420, 64, '#FFF6E0', { face: 'hand', shadow: false, alpha: ck, stroke: '#3A2410', strokeW: .16 }); }
     frontGrass(t, 1000, 30);
     dust(t);
@@ -165,6 +190,17 @@
   }
 
   // ---------- 2–3 · the race to explain one photo; the broad one wins ----------
+  // a small rain cloud: overlapping puffs with a lit top and a shaded belly, an ink outline, and teardrop rain
+  function rainCloud(x, y, k, t) {
+    if (k <= 0) return; const b = backOut(k); ctx.save(); ctx.translate(x, y + 3 * Math.sin(t * 2)); ctx.scale(b, b);
+    for (let i = 0; i < 5; i++) { const f = frac(t * 1.4 + i / 5 + hash(i) * .3), dx = -32 + i * 16, dy = 22 + f * 52; ctx.save(); ctx.globalAlpha = 1 - f; flat([[dx, dy - 9], [dx + 4, dy], [dx, dy + 4], [dx - 4, dy]], '#7FA6D8', { line: '#3A5A88', lw: 1.5 }); ctx.restore(); }
+    const PUFF = [[-36, 6, 20], [-14, -8, 26], [14, -12, 24], [36, 2, 20], [0, 8, 26]], C = new Path2D();
+    PUFF.forEach(([px, py, r]) => { C.moveTo(px + r, py); C.arc(px, py, r, 0, TAU); }); C.rect(-36, 6, 72, 18);
+    ctx.lineWidth = 6; ctx.strokeStyle = '#4A5068'; ctx.lineJoin = 'round'; ctx.stroke(C);
+    ctx.fillStyle = lgrad(0, -36, 0, 24, [[0, '#C9D0DE'], [.55, '#9AA3B8'], [1, '#747D96']]); ctx.fill(C);
+    ctx.save(); ctx.clip(C); ctx.fillStyle = 'rgba(255,255,255,.45)'; for (const [px, py, r] of [[-16, -18, 12], [12, -22, 10]]) { ctx.beginPath(); ctx.ellipse(px, py, r, r * .55, -.3, 0, TAU); ctx.fill(); } ctx.restore();
+    ctx.restore();
+  }
   function race(t, lt, dur) {
     const a = cs('hl_race'), tPh = wt('hl_race', 'photo'), tLa = wt('hl_race', 'Labrador'), tTw = wt('hl_race', 'Two'), tRa = wt('hl_race', 'race'), tMe = wt('hl_race', 'meerkat'), tGz = wt('hl_race', 'grazer'), tWin = wt('hl_race', 'wins'), tHy = wt('hl_race', 'hyper-specific'), tPx = wt('hl_race', 'pixel'), tBr = wt('hl_race', 'broad'), tGr = wt('hl_race', 'green'), tFu = wt('hl_race', 'fur');
     const w0 = cs('hl_win'), tPi = wt('hl_win', 'picture'), tSi = wt('hl_win', 'signal'), tGo = wt('hl_win', 'grows'), tSt = wt('hl_win', 'starves'), tNx = wt('hl_win', 'next'), tHe = wt('hl_win', 'head'), e = ce('hl_win');
@@ -195,10 +231,11 @@
     { const bk = seg(t, tMe - .6, tMe - .2); if (bk > 0) { ctx.save(); ctx.globalAlpha = bk; ctx.fillStyle = '#6A4620'; ctx.beginPath(); ctx.ellipse(160, 966, 70, 16, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(160, 964, 40, 9, 0, 0, TAU); ctx.fill(); ctx.restore(); } }
     { const hk = seg(t, tWin - .1, tWin + .3); if (hk > 0) { ctx.save(); ctx.globalAlpha = hk; ctx.fillStyle = '#6A4620'; ctx.beginPath(); ctx.ellipse(960, 966, 70, 16, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#2A1A0A'; ctx.beginPath(); ctx.ellipse(960, 964, 40, 9, 0, 0, TAU); ctx.fill(); ctx.restore(); } }
     if (tun > 0 && tun < 1) for (let i = 0; i < 7; i++) { const u = tun - i * .06; if (u < 0 || u > 1) continue; dot(lerp(160, 960, u), 972, 22 - i * 2, '#8C6424', .8 - i * .1); }   // the tunnel's ripple of earth
+    // the grazer passes behind the meerkat's burrow, so the little one is never lost behind its legs
+    if (bx0 > -480) beast(bx, 966, bs, t, { walk: t * (go > 0 && go < 1 ? 1.6 : (t > tNx - .2 && t < tHe - .2 ? 1.2 : .15)) });
     const mUp = t < tWin - .35 ? easeOut(seg(t, tMe - .5, tMe)) : t < tWin + .35 ? 1 - easeIn(dive) : pop2;
     if (mUp > 0) { ctx.save(); if (t < tWin + .75) { ctx.beginPath(); ctx.rect(-400, 0, 3000, 966); ctx.clip(); } meerkat(mx, 966 + (1 - mUp) * 200, ms, { sad: t > tSt - .3, pixel: '#7A9A4A' }); ctx.restore(); }
-    if (t > tSt - .2 && t < tNx + 1) { const k = popk(t, tSt - .2, .4); ctx.save(); ctx.translate(mx + 20, 966 - 230 * ms); ctx.scale(backOut(k), backOut(k)); flat(ellPts(0, 0, 50, 26, 18), '#8A93A8'); flat(ellPts(-24, 6, 30, 18, 14), '#8A93A8'); for (let i = 0; i < 4; i++) { const f = frac(t * 1.5 + i / 4); ctx.strokeStyle = '#7FA6D8'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-20 + i * 14, 24 + f * 40); ctx.lineTo(-22 + i * 14, 34 + f * 40); ctx.stroke(); } ctx.restore(); }
-    if (bx0 > -480) beast(bx, 966, bs, t, { walk: t * (go > 0 && go < 1 ? 1.6 : (t > tNx - .2 && t < tHe - .2 ? 1.2 : .15)) });
+    if (t > tSt - .2 && t < tNx + 1) rainCloud(mx + 20, 966 - 230 * ms, popk(t, tSt - .2, .4), t);   // its own little rain cloud
     if (bs > .7 && t < tNx) { for (let i = 0; i < 6; i++) { const f = frac(t * .8 + i / 6); dot(bx + (hash(i) - .5) * 300 * bs, 966 - 280 * bs - f * 80, 5 * (1 - f), '#FFF2C8', 1 - f); } }
     // (Clawd sits this race out: the animals are the stars)
     frontGrass(t, 1010, 34);
@@ -249,7 +286,7 @@
     frontGrass(t, 1010, 30);
     camEnd();
     // time-lapse speed marker
-    letter('millions of photos', 1275, 150, 40, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, screen: true, alpha: .9 * (1 - seg(t, tSa - .6, tSa - .2)) });
+    { const ma = .9 * (1 - seg(t, tSa - .6, tSa - .2)) * (1 - clamp(gk * 3)); if (ma > 0) letter('millions of photos', 1690, 140, 40, '#FFF6E0', { face: 'marker', shadow: false, stroke: INK, strokeW: .14, screen: true, alpha: ma }); }   // in the corner, out of the captions' way
     // the callback: the same growth as one neuron spreading, photo by photo
     if (gk > 0) { ctx.save(); ctx.globalAlpha = gk; ctx.fillStyle = 'rgba(20,12,4,.55)'; ctx.beginPath(); ctx.roundRect(330, 110, 1260, 250, 20); ctx.fill(); ctx.restore(); letter("one neuron's growth", 960, 140, 44, '#F3DDB0', { face: 'hand', shadow: false, alpha: gk, screen: true });
       GROW.forEach(([im, w, lab], i) => { const k = popk(t, wt('hl_ecology', w) - .3, .4) * gk; if (k <= 0) return; const x = 480 + i * 320; if (i) { ctx.save(); ctx.globalAlpha = gk; ctx.strokeStyle = '#FFE08A'; ctx.lineWidth = 6; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x - 220, 245); ctx.lineTo(x - 108, 245); ctx.moveTo(x - 124, 232); ctx.lineTo(x - 108, 245); ctx.lineTo(x - 124, 258); ctx.stroke(); ctx.restore(); } ctx.save(); ctx.translate(x, 245); ctx.scale(backOut(k), backOut(k)); photoFlat(im, -90, -70, 180, 120, { border: 6, borderCol: '#F3DDB0', shadow: false }); ctx.restore(); letter(lab, x, 336, 36, '#FFF6E0', { face: 'hand', shadow: false, alpha: clamp(k), screen: true }); }); }
@@ -260,25 +297,67 @@
   }
 
   // ---------- 5 · rare things: the search, then one triceratops ----------
+  // a hollow log on its side: bark ridges, a knot, end grain with rings round the dark hollow, moss and a mushroom
+  function hollowLog(x0, cy, w, r, t) {
+    ctx.fillStyle = 'rgba(40,20,0,.25)'; ctx.beginPath(); ctx.ellipse(x0 + w / 2, cy + r - 2, w * .56, 12, 0, 0, TAU); ctx.fill();
+    const B = flat(rrPts(x0, cy - r, w, 2 * r, r * .9), null, { grad: [[0, '#8A6440'], [.45, '#6A4A2A'], [1, '#43301A']], gdir: [0, cy - r, 0, cy + r] });
+    ctx.save(); ctx.clip(B); ctx.lineCap = 'round';
+    for (let i = 0; i < 7; i++) { const yy = cy - r + 10 + i * (2 * r - 20) / 6; ctx.strokeStyle = i % 2 ? 'rgba(40,24,10,.55)' : 'rgba(150,110,70,.35)'; ctx.lineWidth = i % 2 ? 3 : 2; ctx.beginPath(); ctx.moveTo(x0 + 30, yy); for (let k = 1; k <= 8; k++) ctx.lineTo(x0 + 30 + k * (w - 40) / 8, yy + 4 * Math.sin(k * 1.7 + i * 2.1)); ctx.stroke(); }
+    ctx.restore(); ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.stroke(B);
+    flat(ellPts(x0 + w * .62, cy + 4, 15, 10, 16), '#4E341C', { line: INK, lw: 3 }); flat(ellPts(x0 + w * .62, cy + 4, 6, 4, 10), '#2A1A0A');
+    // the end grain, facing us on the left
+    flat(ellPts(x0 + r * .35, cy, r * .5, r, 24), '#C9A070', { line: INK, lw: 4 });
+    ctx.strokeStyle = 'rgba(120,80,40,.6)'; ctx.lineWidth = 2; for (const f of [.85, .7]) { ctx.beginPath(); ctx.ellipse(x0 + r * .35, cy, r * .5 * f, r * f, 0, 0, TAU); ctx.stroke(); }
+    flat(ellPts(x0 + r * .38, cy + 2, r * .3, r * .6, 20), '#1E1206', { line: '#3A2410', lw: 2 });
+    // moss along the top and a little mushroom by the far end
+    for (let i = 0; i < 9; i++) { const mx = x0 + 60 + i * 22 + 6 * Math.sin(i * 2.3), my = cy - r + 3; flat(ellPts(mx, my, 15 + 5 * hash(i * 3.1), 8 + 3 * hash(i), 12), i % 2 ? '#6E8A34' : '#87A040', { line: '#3A4A1A', lw: 1.5 }); }
+    for (let i = 0; i < 4; i++) { const gx = x0 + w - 30 + i * 9, h = 20 + 12 * hash(i * 5); ctx.strokeStyle = '#8C7A3A'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(gx, cy + r); ctx.quadraticCurveTo(gx + 3, cy + r - h * .6, gx + 5 * Math.sin(t * 1.5 + i), cy + r - h); ctx.stroke(); }
+    flat(rectPts(x0 + w - 44, cy + r - 22, 6, 22), '#F1E3C6', { line: INK, lw: 2 }); flat([[x0 + w - 58, cy + r - 20], [x0 + w - 41, cy + r - 36], [x0 + w - 24, cy + r - 20]], '#C2502A', { line: INK, lw: 2.5 }); dot(x0 + w - 45, cy + r - 26, 2.5, '#FFF6E0');
+  }
+  // a termite mound: lumpy clay tiers rising to chimneys, ridged, with dark vent holes
+  function termiteMound(x, base, s) {
+    ctx.save(); ctx.translate(x, base); ctx.scale(s, s);
+    ctx.fillStyle = 'rgba(40,20,0,.25)'; ctx.beginPath(); ctx.ellipse(0, 2, 110, 12, 0, 0, TAU); ctx.fill();
+    const M = new Path2D(); M.moveTo(-96, 0); M.bezierCurveTo(-98, -40, -80, -60, -70, -90); M.bezierCurveTo(-74, -120, -52, -140, -46, -170); M.bezierCurveTo(-44, -200, -30, -214, -22, -232); M.bezierCurveTo(-16, -250, 4, -256, 8, -236);
+    M.bezierCurveTo(12, -214, 20, -200, 28, -186); M.bezierCurveTo(36, -200, 52, -198, 54, -176); M.bezierCurveTo(56, -150, 64, -126, 72, -104); M.bezierCurveTo(88, -80, 96, -40, 98, 0); M.closePath();
+    fillPath(M, lgrad(-90, 0, 90, 0, [[0, '#C98A4A'], [.55, '#B0743A'], [1, '#8C5A2A']]), null);
+    ctx.save(); ctx.clip(M); ctx.lineCap = 'round';
+    for (let i = 0; i < 9; i++) { const yy = -20 - i * 26, hw = 100 - i * 9; ctx.strokeStyle = 'rgba(90,50,20,.45)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-hw, yy + 6); ctx.quadraticCurveTo(-hw * .3, yy - 6 + 4 * Math.sin(i), hw * .2, yy + 2); ctx.quadraticCurveTo(hw * .6, yy + 8, hw, yy - 2); ctx.stroke(); }
+    ctx.fillStyle = 'rgba(255,220,170,.22)'; ctx.beginPath(); ctx.ellipse(-40, -120, 22, 110, -.1, 0, TAU); ctx.fill();
+    ctx.restore(); ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.stroke(M);
+    for (const [hx, hy, r] of [[-30, -110, 11], [34, -150, 8], [-6, -200, 7], [46, -60, 9]]) { flat(ellPts(hx, hy, r, r * 1.2, 14), '#3A2010', { line: '#5A3418', lw: 2 }); }
+    ctx.restore();
+  }
+  // a kopje: stacked boulders in the savanna's clay and ochre, each with a lit top and a crack (it hides what climbs behind it)
+  const ROCKS = [[-170, -160, 120, 100, '#9A6A3A'], [10, -210, 150, 110, '#A87644'], [180, -150, 110, 95, '#8C5E34'], [-60, -120, 130, 90, '#B07C48'], [-230, -60, 110, 70, '#8C5E34'], [110, -70, 150, 80, '#9A6A3A'], [240, -50, 90, 60, '#7E5430'], [-80, -40, 120, 55, '#A87644']];
+  function kopje(x, base) {
+    ctx.fillStyle = 'rgba(40,20,0,.3)'; ctx.beginPath(); ctx.ellipse(x, base - 30, 300, 26, 0, 0, TAU); ctx.fill();
+    ROCKS.forEach(([bx, by, rx, ry, col], i) => {
+      const P = []; for (let k = 0; k < 22; k++) { const q = k / 22 * TAU, rr = 1 + .07 * Math.sin(q * 3 + i * 1.7) + .04 * Math.sin(q * 7 + i); P.push([x + bx + Math.cos(q) * rx * rr, base + by + Math.min(Math.sin(q) * ry * rr, ry * .72)]); }
+      const R = flat(P, col);
+      ctx.save(); ctx.clip(R); ctx.fillStyle = 'rgba(255,225,170,.28)'; ctx.beginPath(); ctx.ellipse(x + bx - rx * .25, base + by - ry * .45, rx * .7, ry * .45, -.2, 0, TAU); ctx.fill(); ctx.fillStyle = 'rgba(40,20,0,.22)'; ctx.beginPath(); ctx.ellipse(x + bx + rx * .3, base + by + ry * .55, rx * .9, ry * .45, 0, 0, TAU); ctx.fill(); ctx.restore();
+      ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.lineJoin = 'round'; ctx.stroke(R);
+      ctx.strokeStyle = 'rgba(40,20,0,.55)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(x + bx + rx * (.1 + .3 * hash(i)), base + by - ry * .5); ctx.lineTo(x + bx + rx * .2, base + by - ry * .1); ctx.lineTo(x + bx + rx * (.35 + .2 * hash(i * 3)), base + by + ry * .2); ctx.stroke();
+    });
+    for (let i = 0; i < 16; i++) { const gx = x - 300 + i * 40 + 10 * hash(i), h = 24 + 26 * hash(i * 3); ctx.strokeStyle = mixCol('#8C6424', '#E8C27A', hash(i * 7)); ctx.lineWidth = 3.5; ctx.beginPath(); ctx.moveTo(gx, base - 8); ctx.quadraticCurveTo(gx + 3, base - 8 - h * .6, gx + 6 * (hash(i) - .5), base - 8 - h); ctx.stroke(); }
+  }
   function rare(t, lt, dur) {
     const a = cs('hl_rare'), tHi = wt('hl_rare', 'hidden'), tOd = wt('hl_rare', 'odd'), tIn = wt('hl_rare', 'Instead'), tCo = wt('hl_rare', 'gathered'), tTr = wt('hl_rare', 'triceratops'), tSt = ce('hl_rare') + 1;
     // the search: Clawd with binoculars; odd hiding places are empty; then the triceratops rises over the kopje
     camKeys(t, [[t - lt, 300, 640, 1.25], [tHi, 520, 660, 1.3], [tOd + .6, 1100, 650, 1.25], [tIn, 1100, 600, 1.0], [tTr, 1150, 560, .95], [tSt, 1150, 560, .95]], .4);
     savanna(t, { sx: 1180, sy: 360 });
     // a hollow log and a termite mound: empty
-    flat(rrPts(440, 860, 300, 90, 40), '#6A4A2A', { line: INK, lw: 4 }); dot(460, 905, 38, '#2A1A0A'); dot(460, 905, 26, '#120A04');
-    flat([[880, 960], [920, 760], [960, 720], [1010, 780], [1040, 960]], '#B0743A', { line: INK, lw: 4 }); dot(955, 840, 16, '#3A2010');
+    hollowLog(440, 905, 300, 46, t); termiteMound(960, 962, 1);
     if (t > tHi + .3) sfx('empty', 540, 800, 64, '#FFF6E0', t - tHi - .3, { life: 1.6, stroke: INK, strokeW: .12 });
     if (t > tOd) sfx('empty', 960, 670, 64, '#FFF6E0', t - tOd, { life: 1.6, stroke: INK, strokeW: .12 });
-    // the kopje: a rock outcrop; the triceratops climbs into view against the sun
-    flat([[1260, 960], [1300, 760], [1420, 700], [1560, 720], [1660, 800], [1720, 960]], '#9A6A3A', { line: INK, lw: 4 }); flat([[1320, 780], [1420, 720], [1520, 740], [1460, 800]], '#B88450');
+    // the kopje: a pile of boulders; the triceratops climbs up behind its crest into the sun
     const rise = easeOut(seg(t, tCo - .6, tTr - .1)), lit = seg(t, tTr - .3, tTr + .4);
-    if (rise > 0) triceratops(1490, 720 + (1 - rise) * 260, .9, t, { im: rise > .6 ? AD + 'iv_clean' : null, lit });
-    ctx.fillStyle = '#9A6A3A'; ctx.beginPath(); ctx.moveTo(1250, 1000); ctx.lineTo(1290, 800); ctx.lineTo(1700, 820); ctx.lineTo(1740, 1000); ctx.fill();
-    ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1290, 800); ctx.lineTo(1700, 820); ctx.stroke();
+    if (rise > 0) triceratops(1490, 735 + (1 - rise) * 420, .9, t, { im: rise > .6 ? AD + 'iv_clean' : null, lit });
+    kopje(1490, 1000);
     // the neuron's window, held up big: one triceratops neuron
     if (lit > 0) { const k = backOut(popk(t, tTr - .3, .5)); ctx.save(); ctx.translate(1440, 300); ctx.rotate(-.03); ctx.scale(k, k); photoFlat(AD + 'iv_clean', -170, -115, 340, 230, { border: 12, borderCol: '#F3DDB0' }); ctx.restore(); }
-    filmer(t, 290, 980, 15, [[t - lt, 'thinking'], [tHi, 'confused'], [tIn, 'surprised'], [tTr, 'starstruck']], { aR: 1.2, armR: binoProp });
+    const bA = lerp(.5, -.45, ease(seg(t, tIn - .3, tIn + .4)));   // binoculars to his eyes, lowered when it appears
+    filmer(t, 290, 980, 15, [[t - lt, 'thinking'], [tHi, 'confused'], [tIn, 'surprised'], [tTr, 'starstruck']], { aR: bA, draw: inHand(bA, (u, sw) => { ctx.scale(1.45, 1.45); binoProp(u, sw); }) });
     frontGrass(t, 1010, 34);
     camEnd();
     caption(t, a + .2, tIn - .3, 'rare things: hidden somewhere odd?', 180);
@@ -307,16 +386,30 @@
     const pk = seg(t, tPa - .4, tFu + .2);
     if (pk > 0) { ctx.save(); ctx.beginPath(); ctx.rect(P.x, P.y, P.w * pk, P.h); ctx.clip(); photoFlat(AD + 'iv_adv', P.x, P.y, P.w, P.h, {}); ctx.restore(); }
     ctx.restore();
-    // the attack itself: a plain brush that paints the change across the print, then leaves
+    // the attack itself: an artist's brush that paints the change across the print, then leaves
     const bIn = seg(t, tPa - .8, tPa - .3) * (1 - seg(t, tSw - .4, tSw));
     if (bIn > 0) {
-      const bxp = P.x + P.w * pk, byp = P.y + P.h * (.5 + .35 * Math.sin(t * 9)), hx = bxp + 150 + (1 - bIn) * 400, hy = byp + 190;
-      ctx.save(); ctx.globalAlpha = bIn; ctx.lineCap = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 22; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(bxp + 30 + (1 - bIn) * 400, byp + 30); ctx.stroke(); ctx.strokeStyle = '#8C5A2A'; ctx.lineWidth = 14; ctx.stroke();
-      flat(rectPts(-10, -14, 24, 28).map(([x, y]) => [x + bxp + 22 + (1 - bIn) * 400, y + byp + 18]), '#B9B4A8', { line: INK, lw: 2 }); dot(bxp + 10 + (1 - bIn) * 400, byp + 6, 14, '#C27A3A');
+      const off = (1 - easeOut(bIn)) * 420, edge = tt => [P.x + P.w * seg(tt, tPa - .4, tFu + .2), P.y + P.h * (.5 + .35 * Math.sin(tt * 9))];
+      // the wet trail just behind the bristles, inside the print
+      ctx.save(); ctx.beginPath(); ctx.rect(P.x, P.y, P.w, P.h); ctx.clip(); for (let i = 1; i <= 12; i++) { const [ex, ey] = edge(t - i * .018); dot(ex - 4, ey, 11 - i * .5, '#C27A3A', .22 * (1 - i / 13) * bIn); } ctx.restore();
+      const [bx, by] = edge(t), ang = .62 + .08 * Math.sin(t * 9 + 1);
+      ctx.save(); ctx.globalAlpha = bIn; ctx.translate(bx + off, by + off * .4); ctx.rotate(ang);
+      ctx.fillStyle = 'rgba(40,20,0,.25)'; ctx.beginPath(); ctx.ellipse(160, 26, 150, 10, 0, 0, TAU); ctx.fill();
+      // handle: red lacquer over wood, tapering to a rounded end
+      const Hd = new Path2D(); Hd.moveTo(100, -12); Hd.quadraticCurveTo(170, -17, 250, -9); Hd.quadraticCurveTo(262, 0, 250, 9); Hd.quadraticCurveTo(170, 17, 100, 12); Hd.closePath();
+      fillPath(Hd, lgrad(0, -16, 0, 16, [[0, '#E0583E'], [.45, '#B8322A'], [1, '#7A1A16']]), INK, 3);
+      ctx.strokeStyle = 'rgba(255,230,210,.55)'; ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(112, -7); ctx.quadraticCurveTo(170, -11, 236, -5); ctx.stroke();
+      // ferrule: crimped metal with two bands
+      fillPath(pathOf([[52, -15], [102, -13], [102, 13], [52, 15]]), lgrad(0, -15, 0, 15, [[0, '#F2EEE4'], [.4, '#BDB8AC'], [1, '#6E6A62']]), INK, 3);
+      ctx.strokeStyle = 'rgba(40,30,20,.6)'; ctx.lineWidth = 2.5; for (const fx of [64, 92]) { ctx.beginPath(); ctx.moveTo(fx, -14); ctx.lineTo(fx, 14); ctx.stroke(); }
+      // bristles: a tuft that comes to the painting point, wet with the attack's paint
+      const Br = new Path2D(); Br.moveTo(54, -15); Br.quadraticCurveTo(22, -16, 2, -3); Br.quadraticCurveTo(-4, 0, 2, 3); Br.quadraticCurveTo(22, 16, 54, 15); Br.closePath();
+      fillPath(Br, '#D9B07A', INK, 3);
+      ctx.save(); ctx.clip(Br); ctx.fillStyle = lgrad(0, 0, 54, 0, [[0, '#9A4A1E'], [.5, '#C27A3A'], [.75, 'rgba(194,122,58,0)']]); ctx.fillRect(-6, -18, 62, 36); ctx.strokeStyle = 'rgba(90,50,20,.35)'; ctx.lineWidth = 1.5; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(52, i * 5); ctx.quadraticCurveTo(26, i * 4, 6, i * 1.2); ctx.stroke(); } ctx.fillStyle = 'rgba(255,240,210,.5)'; ctx.beginPath(); ctx.ellipse(22, -6, 12, 2.5, -.15, 0, TAU); ctx.fill(); ctx.restore();
       ctx.restore();
-      letter('the attack', P.x + P.w + 90, P.y + 20, 34, '#FFF6E0', { face: 'marker', shadow: false, alpha: bIn, stroke: INK, strokeW: .16 });
+      letter('the attack', P.x + P.w + 160, P.y + 30, 34, '#FFF6E0', { face: 'marker', shadow: false, alpha: bIn, stroke: INK, strokeW: .16 });
     }
-    filmer(t, 640, 990, 12, [[t - lt, 'neutral'], [a + 1, 'suspicious'], [tPa, 'surprised'], [tSw, 'scared'], [tRe + .6, 'excited']], { aR: 1.1, armR: camProp });
+    filmer(t, 640, 990, 12, [[t - lt, 'neutral'], [a + 1, 'suspicious'], [tPa, 'surprised'], [tSw, 'scared'], [tRe + .6, 'excited']], { aR: 1.1, draw: inHand(1.1, camProp) });
     frontGrass(t, 1020, 30);
     camEnd();
     caption(t, a + .1, tMa - .5, 'even attacks use the normal roads', 180);
@@ -389,9 +482,23 @@
     if (cb > 0) { const NX = [1365, 1495, 1625, 1755], ny = 540, gx = 1560, gy = 900 - 250 * .36; ctx.save(); ctx.globalAlpha = cb; ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(1320, ny - 50); ctx.lineTo(1800, ny - 50); ctx.stroke(); NX.forEach((x, i) => { const on = (i === 1 || i === 2) ? seg(t, tCo - .2 + i * .15, tCo + .3 + i * .15) : 0; ctx.beginPath(); ctx.moveTo(x, ny - 50); ctx.lineTo(x, ny - 32); ctx.stroke(); if (on > 0) { glow(x, ny, 100, '#FFE08A', on); ctx.save(); ctx.globalAlpha = cb * on * .5; ctx.fillStyle = '#FFE08A'; ctx.beginPath(); ctx.moveTo(x - 22, ny + 16); ctx.lineTo(x + 22, ny + 16); ctx.lineTo(gx + 30 * (i - 1.5), gy); ctx.closePath(); ctx.fill(); ctx.restore(); } dot(x, ny, 32, mixCol('#6A5A4A', '#FFE9A8', on)); ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, ny, 32, 0, TAU); ctx.stroke(); }); ctx.restore(); if (t > tCo + .4) glow(gx, gy - 40, 160, '#FFE08A', .7 * cb); }
     // birds riding on a back (everything relates to something)
     for (let i = 0; i < 3; i++) { const bx = 1560 - 40 + i * 30, by = 900 - 330 * .36 - 4 + Math.sin(t * 6 + i) * 3; dot(bx, by, 9, '#3A2A2A'); dot(bx + 8, by - 4, 5, '#3A2A2A'); }
-    // the zoo of strangers, on the left: concrete, fences, one identical grey animal per cage
-    ctx.fillStyle = '#CFCBC0'; ctx.fillRect(-500, -500, 1500, 1060); ctx.fillStyle = '#B9B4A8'; ctx.fillRect(-500, 560, 1500, 800);
-    ctx.fillStyle = '#A9A498'; for (let i = 0; i < 12; i++) ctx.fillRect(-500 + i * 130, 560, 4, 800);
+    // the zoo of strangers, on the left: a sterile lab room (tiled floor, panelled wall, strip lights), one identical
+    // grey animal per cage. Its open end is a thick doorway onto the living savanna.
+    ctx.fillStyle = lgrad(0, -300, 0, 560, [[0, '#E3DFD4'], [1, '#C9C4B7']]); ctx.fillRect(-500, -500, 1500, 1060);
+    ctx.fillStyle = 'rgba(120,114,100,.22)'; for (let i = 0; i < 6; i++) ctx.fillRect(-500 + i * 260, -500, 3, 1000);
+    flat(rectPts(-500, 452, 1500, 14), '#B4AE9F'); flat(rectPts(-500, 466, 1500, 6), 'rgba(80,76,66,.25)');
+    ctx.fillStyle = lgrad(0, 560, 0, 1150, [[0, '#BDB8AA'], [1, '#9C9688']]); ctx.fillRect(-500, 560, 1500, 800);
+    ctx.strokeStyle = 'rgba(90,86,76,.35)'; ctx.lineWidth = 2;
+    for (let i = 0; i < 9; i++) { const yy = 560 + Math.pow(i / 8, 1.6) * 520; ctx.beginPath(); ctx.moveTo(-500, yy); ctx.lineTo(1000, yy); ctx.stroke(); }
+    for (let i = -6; i < 14; i++) { const x0 = 480 + i * 70; ctx.beginPath(); ctx.moveTo(x0, 560); ctx.lineTo(480 + (x0 - 480) * 2.6, 1100); ctx.stroke(); }
+    flat(rectPts(-500, 548, 1500, 16), '#8E8A80', { line: '#5A5A60', lw: 2 });   // skirting board
+    // strip lights on the ceiling, with cold pools of light
+    for (const lx of [150, 690]) { ctx.save(); ctx.globalAlpha = .16; ctx.fillStyle = '#F4FAFF'; ctx.beginPath(); ctx.moveTo(lx - 120, 128); ctx.lineTo(lx + 120, 128); ctx.lineTo(lx + 300, 560); ctx.lineTo(lx - 300, 560); ctx.closePath(); ctx.fill(); ctx.restore(); flat(rectPts(lx - 2, 90, 4, 24), '#6A6A70'); flat(rrPts(lx - 140, 112, 280, 18, 6), '#7A7A82', { line: '#4A4A50', lw: 2 }); flat(rrPts(lx - 128, 126, 256, 10, 5), '#F4FAFF'); glow(lx, 134, 170, '#E8F4FF', .45); }
+    // the doorway out to the savanna: a deep concrete jamb with trim, its shadow falling on the grass beyond
+    ctx.fillStyle = lgrad(1060, 0, 1160, 0, [[0, 'rgba(40,30,10,.28)'], [1, 'rgba(40,30,10,0)']]); ctx.fillRect(1060, 300, 100, 800);
+    flat(rectPts(990, -500, 72, 1600), '#B2AC9E', { grad: [[0, '#CFCABD'], [.35, '#B2AC9E'], [1, '#8A8578']], gdir: [990, 0, 1062, 0] });
+    flat(rectPts(984, -500, 12, 1600), '#E9E6DE', { line: '#5A5A60', lw: 2 }); flat(rectPts(1056, -500, 10, 1600), '#6E6A60', { line: '#4A4A50', lw: 2 });
+    ctx.strokeStyle = 'rgba(70,66,58,.35)'; ctx.lineWidth = 2; for (let k = 0; k < 14; k++) { ctx.beginPath(); ctx.moveTo(998, -60 + k * 90); ctx.lineTo(1054, -60 + k * 90); ctx.stroke(); }
     // the worry was only strangers packed together: the cages flash
     const fl = env(t, tUn - .3, e + .4, .2, .3) * (.6 + .4 * Math.sin(t * 14));
     const pack = seg(t, tPa - .4, tPa + .6);
@@ -402,13 +509,14 @@
       ctx.strokeStyle = '#5A5A60'; ctx.lineWidth = 5; ctx.strokeRect(x, y - 180, cw - 10, 190); ctx.lineWidth = 2; for (let k = 1; k < 9; k++) { ctx.beginPath(); ctx.moveTo(x + k * (cw - 10) / 9, y - 180); ctx.lineTo(x + k * (cw - 10) / 9, y + 10); ctx.stroke(); }
     }
     if (t > tSt - .2 && t < tRe) for (let c = 0; c < 3; c++) sfx('…', 200 + c * 300, 450, 70, '#5A5A60', t - tSt - c * .15, { life: 1.6 });
-    // the boundary: a tall fence between the zoo and the savanna
-    ctx.strokeStyle = '#4A4A50'; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(1040, 400); ctx.lineTo(1040, 1100); ctx.stroke(); ctx.lineWidth = 3; for (let k = 0; k < 14; k++) { ctx.beginPath(); ctx.moveTo(1010, 420 + k * 50); ctx.lineTo(1070, 440 + k * 50); ctx.stroke(); }
-    flat(rectPts(540, 290, 480, 110), '#E9E6DE', { line: '#5A5A60', lw: 6 }); txt('TOY WORLD', 780, 349, 66, '#5A5A60', { font: '"Permanent Marker"', weight: '400' });
-    for (const lx of [120, 960]) { flat(rectPts(lx - 50, 110, 100, 20), '#8A8A90'); glow(lx, 140, 160, '#E8F4FF', .4); }
+    // the sign hangs from the ceiling on two chains; while Nick's reading is stamped on it, its own lettering dims
+    const sk = popk(t, tFe - .3, .35);
+    ctx.strokeStyle = '#5A5A60'; ctx.lineWidth = 3; ctx.setLineDash([6, 5]); for (const cx of [600, 960]) { ctx.beginPath(); ctx.moveTo(cx, 120); ctx.lineTo(cx, 292); ctx.stroke(); } ctx.setLineDash([]);
+    flat(rectPts(540, 290, 480, 110), '#E9E6DE', { line: '#5A5A60', lw: 6, shadow: [8, 10, 'rgba(40,40,40,.18)'] }); flat(rectPts(552, 302, 456, 86), 'rgba(0,0,0,0)', { line: '#9A9A9F', lw: 2 });
+    { ctx.save(); ctx.globalAlpha = 1 - .8 * clamp(sk * 2); txt('TOY WORLD', 780, 349, 66, '#5A5A60', { font: '"Permanent Marker"', weight: '400' }); ctx.restore(); }
     // Nick's reading, stamped on the sign: the packing is real, but it belongs to the toy world
-    const sk = popk(t, tFe - .3, .35); if (sk > 0) { ctx.save(); ctx.translate(800, 350); ctx.rotate(-.09); ctx.scale(lerp(1.5, 1, easeOut(sk)), lerp(1.5, 1, easeOut(sk))); ctx.globalAlpha = .9 * clamp(sk * 2); ctx.fillStyle = 'rgba(255,246,236,.75)'; ctx.fillRect(-280, -56, 560, 112); ctx.strokeStyle = '#C2302A'; ctx.lineWidth = 8; ctx.strokeRect(-280, -56, 560, 112); txt('REAL, BUT ONLY HERE', 0, 4, 44, '#C2302A', { font: '"Permanent Marker"', weight: '400' }); ctx.restore(); }
-    filmer(t, 1180, 1000, 13, [[t - lt, 'bored'], [tSt, 'sleepy'], [tRe, 'surprised'], [tRel, 'happy']], { flip: tRe > t, aR: 1.1, armR: camProp });
+    if (sk > 0) { ctx.save(); ctx.translate(790, 346); ctx.rotate(-.06); ctx.scale(lerp(1.5, 1, easeOut(sk)), lerp(1.5, 1, easeOut(sk))); ctx.globalAlpha = clamp(sk * 2); ctx.fillStyle = '#FFF6EC'; ctx.fillRect(-262, -50, 524, 100); ctx.strokeStyle = '#C2302A'; ctx.lineWidth = 8; ctx.strokeRect(-262, -50, 524, 100); ctx.lineWidth = 2.5; ctx.strokeRect(-250, -38, 500, 76); txt('REAL, BUT ONLY HERE', 0, 4, 44, '#C2302A', { font: '"Permanent Marker"', weight: '400' }); ctx.restore(); }
+    filmer(t, 1180, 968, 13, [[t - lt, 'bored'], [tSt, 'sleepy'], [tRe, 'surprised'], [tRel, 'happy']], { flip: tRe > t, aR: 1.1, draw: inHand(1.1, camProp) });
     frontGrass(t, 1020, 26, { seed: 3 });
     ctx.restore();
     // rising: the sky deepens, the curve of the world comes into view

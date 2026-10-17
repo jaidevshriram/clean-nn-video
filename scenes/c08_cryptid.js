@@ -41,15 +41,26 @@
   // the knot's true form: a loose ball of string with a trailing end
   function stringBall(x, y, r, k = 1) { if (k <= 0) return; ctx.save(); ctx.globalAlpha = k; ctx.strokeStyle = '#E0E0E0'; ctx.lineWidth = Math.max(2, r * .09); ctx.lineCap = 'round'; for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.ellipse(x + (hash(i) - .5) * r * .2, y + (hash(i * 2) - .5) * r * .2, r * (.75 + .25 * hash(i * 3)), r * (.45 + .3 * hash(i * 5)), hash(i * 7) * 3, 0, TAU); ctx.stroke(); } ctx.beginPath(); ctx.moveTo(x + r * .8, y + r * .2); ctx.bezierCurveTo(x + r * 1.6, y + r * .9, x + r * 2.2, y - r * .1, x + r * 2.8, y + r * .6); ctx.stroke(); ctx.restore(); }
   // Clawd's butterfly net (arm hook): swing 0..1 sweeps it
-  const net = (sw = 0) => (u, w) => { ctx.save(); ctx.rotate(-.4 + sw * 1.6); ctx.strokeStyle = '#8A7A6A'; ctx.lineWidth = u * .45; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 9, 0); ctx.stroke(); ctx.strokeStyle = '#DADADA'; ctx.lineWidth = u * .35; ctx.beginPath(); ctx.ellipse(u * 11.4, 0, u * 2.4, u * 1.6, 0, 0, TAU); ctx.stroke(); ctx.strokeStyle = 'rgba(230,230,230,.5)'; ctx.lineWidth = 1.5; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(u * 11.4 + i * u * .9, -u * 1.5 + Math.abs(i) * u * .2); ctx.quadraticCurveTo(u * 11.4 + i * u * .4, u * 3, u * 11.4, u * 4.2); ctx.stroke(); } ctx.restore(); };
+  const net = (sw = 0) => (u, w) => { ctx.save(); ctx.rotate(-.4 + sw * 1.6); ctx.strokeStyle = '#8A7A6A'; ctx.lineWidth = u * .45; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 9, 0); ctx.stroke(); ctx.fillStyle = 'rgba(230,230,230,.25)'; ctx.beginPath(); ctx.moveTo(u * 9, -u * .4); ctx.quadraticCurveTo(u * 9.6, u * 3.2, u * 11.4, u * 4.2); ctx.quadraticCurveTo(u * 13.2, u * 3.2, u * 13.8, -u * .4); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.ellipse(u * 11.4, 0, u * 2.4, u * 1.6, 0, 0, TAU); ctx.fill(); ctx.strokeStyle = '#1E1E1E'; ctx.lineWidth = u * 1.0; ctx.stroke(); ctx.strokeStyle = '#EDEDED'; ctx.lineWidth = u * .7; ctx.stroke(); ctx.strokeStyle = 'rgba(235,235,235,.75)'; ctx.lineWidth = Math.max(2, u * .16); for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(u * 11.4 + i * u * .9, -u * 1.5 + Math.abs(i) * u * .2); ctx.quadraticCurveTo(u * 11.4 + i * u * .4, u * 3, u * 11.4, u * 4.2); ctx.stroke(); } ctx.restore(); };
   // the SUPERPOSITION pennant (arm hook)
   const pennantOf = flipped => (u, w) => { ctx.save(); ctx.rotate(-.9); ctx.strokeStyle = '#8A7A6A'; ctx.lineWidth = u * .45; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 12, 0); ctx.stroke(); ctx.translate(u * 12, 0); ctx.rotate(Math.PI / 2 + .9 + .08 * Math.sin(T * 5)); flat([[0, 0], [u * 15, u * 1.6 + u * .4 * Math.sin(T * 6)], [0, u * 3.6]], '#5A5A5A', { line: '#DADADA', lw: 2 }); ctx.save(); ctx.translate(u * 5.6, u * 1.7); ctx.rotate(.1); if (!flipped) ctx.scale(-1, 1); txt('SUPERPOSITION', 0, 0, u * 1.25, '#F2F2F2', { font: SERIF, weight: '900' }); ctx.restore(); ctx.restore(); };
   const pennant = pennantOf(false), pennantF = pennantOf(true);
   // Clawd the believer: safari hat, headlamp beam
   function hunter(t, x, y, u, o) {
-    if (o.lamp !== false) { const dir = o.flip ? -1 : 1, a = (o.lampA ?? .05); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .22; ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.moveTo(x + dir * u * 2, y - u * 7.4); ctx.lineTo(x + dir * u * 70, y - u * 7.4 - u * 70 * Math.tan(a) - u * 16); ctx.lineTo(x + dir * u * 70, y - u * 7.4 - u * 70 * Math.tan(a) + u * 16); ctx.closePath(); ctx.fill(); ctx.restore(); glow(x + dir * u * 2, y - u * 7.4, u * 3, '#FFFFFF', .9); }
+    if (o.lamp !== false) { const dir = o.flip ? -1 : 1, a = (o.lampA ?? .05); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .5; ctx.fillStyle = lgrad(x, 0, x + dir * u * 70, 0, [[0, 'rgba(255,255,255,.95)'], [.45, 'rgba(255,255,255,.45)'], [1, 'rgba(255,255,255,0)']]); ctx.beginPath(); ctx.moveTo(x + dir * u * 2, y - u * 7.4); ctx.lineTo(x + dir * u * 70, y - u * 7.4 - u * 70 * Math.tan(a) - u * 16); ctx.lineTo(x + dir * u * 70, y - u * 7.4 - u * 70 * Math.tan(a) + u * 16); ctx.closePath(); ctx.fill(); ctx.restore(); glow(x + dir * u * 2, y - u * 7.4, u * 3, '#FFFFFF', .9); }
     tourist(x, y, u, 'safari', o);
-    if (o.bag) { const bx = x + (o.flip ? 3.2 : -3.2) * u, by = y - 3.4 * u; ctx.save(); ctx.strokeStyle = '#6A5A4A'; ctx.lineWidth = u * .35; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(x + (o.flip ? -2 : 2) * u, y - 7.6 * u); ctx.stroke(); ctx.restore(); flat(rrPts(bx - 1.8 * u, by, 3.6 * u, 3 * u, u * .6), '#7A6A5A', { line: '#2A2A2A', lw: 2 }); flat(rrPts(bx - 1.9 * u, by - .2 * u, 3.8 * u, 1.2 * u, u * .4), '#8A7A6A', { line: '#2A2A2A', lw: 2 }); }
+    if (o.bag) {
+      // a field satchel on a strap over his shoulder: body, a flap with a buckle (bagOpen 0..1 lifts it), stitching
+      const sd = o.flip ? 1 : -1, bx = x + sd * 3.2 * u, by = y - 3.4 * u, op = clamp(o.bagOpen || 0);
+      ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = '#1E1E1E'; ctx.lineWidth = u * .6; ctx.beginPath(); ctx.moveTo(bx - sd * 1.2 * u, by + .2 * u); ctx.quadraticCurveTo(x - sd * .5 * u, y - 7 * u, x - sd * 2 * u, y - 7.7 * u); ctx.stroke(); ctx.strokeStyle = '#7A6A5A'; ctx.lineWidth = u * .38; ctx.stroke(); ctx.restore();
+      flat(rrPts(bx - 1.9 * u, by, 3.8 * u, 3.1 * u, u * .7), '#7A6A5A', { line: '#1E1E1E', lw: 2.5 });
+      flat(rrPts(bx - 1.9 * u, by + 2.2 * u, 3.8 * u, .9 * u, u * .5), '#655748');
+      ctx.save(); ctx.strokeStyle = 'rgba(30,30,30,.55)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]); ctx.strokeRect(bx - 1.55 * u, by + .35 * u, 3.1 * u, 2.4 * u); ctx.restore();
+      ctx.save(); ctx.translate(bx, by + .1 * u); ctx.scale(1, 1 - 1.8 * op);
+      flat([[-2 * u, -.2 * u], [2 * u, -.2 * u], [2 * u, 1.1 * u], [1.2 * u, 1.7 * u], [-1.2 * u, 1.7 * u], [-2 * u, 1.1 * u]], op > .5 ? '#5E5244' : '#8C7C6A', { line: '#1E1E1E', lw: 2.5 });
+      flat(rrPts(-.35 * u, 1.1 * u, .7 * u, .8 * u, u * .15), '#BDBDBD', { line: '#1E1E1E', lw: 2 });
+      ctx.restore();
+    }
   }
   // a faster night-vision pass with the same look as fxNightVision (mono green, grain, scanlines, vignette, REC,
   // timecode, CAM label): compositing instead of a per-pixel loop, so a frame stays well under the render budget
@@ -173,7 +184,9 @@
     ctx.save(); ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 3; for (let yy = y - h + 26; yy < y; yy += 28) { ctx.beginPath(); ctx.moveTo(x - w / 2, yy); ctx.lineTo(x + w / 2, yy); ctx.stroke(); } ctx.restore();
     flat(rrPts(x - 40, y - 150, 80, 150, 6), '#2A2A2A');
     const n = wins.length, ww = (w - 60) / n - 20;
-    wins.forEach((f, i) => { const wx = x - w / 2 + 40 + i * (ww + 20), wy = y - h + 40, wh = h - 230; const lit = o.lit ? o.lit[i] : 1; flat(rectPts(wx - 8, wy - 8, ww + 16, wh + 16), '#2A2A2A'); flat(rectPts(wx, wy, ww, wh), lit > .05 ? mixCol('#3A3A3A', '#F4F0E0', lit) : '#2E2E2E'); if (lit > .05) { glow(wx + ww / 2, wy + wh / 2, ww * .9, '#FFFFFF', .5 * lit); ctx.save(); ctx.beginPath(); ctx.rect(wx, wy, ww, wh); ctx.clip(); ctx.globalAlpha = lit; f(wx, wy, ww, wh); ctx.restore(); } ctx.save(); ctx.strokeStyle = '#2A2A2A'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(wx + ww / 2, wy); ctx.lineTo(wx + ww / 2, wy + wh); ctx.stroke(); ctx.restore(); });
+    wins.forEach((f, i) => { const wx = x - w / 2 + 40 + i * (ww + 20), wy = y - h + 40, wh = h - 230; const lit = o.lit ? o.lit[i] : 1; flat(rectPts(wx - 8, wy - 8, ww + 16, wh + 16), '#2A2A2A'); flat(rectPts(wx, wy, ww, wh), lit > .05 ? mixCol('#3A3A3A', '#F4F0E0', lit) : '#2E2E2E'); // the mullions sit behind the lettering (a faint cross in the lit glass), so they never cut through the letters
+      ctx.save(); ctx.strokeStyle = lit > .05 ? mixCol('#2A2A2A', '#C8C4B8', .55 * lit) : '#2A2A2A'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(wx + ww / 2, wy); ctx.lineTo(wx + ww / 2, wy + wh); ctx.moveTo(wx, wy + wh * .5); ctx.lineTo(wx + ww, wy + wh * .5); ctx.stroke(); ctx.restore();
+      if (lit > .05) { glow(wx + ww / 2, wy + wh / 2, ww * .9, '#FFFFFF', .5 * lit); ctx.save(); ctx.beginPath(); ctx.rect(wx, wy, ww, wh); ctx.clip(); ctx.globalAlpha = lit; f(wx, wy, ww, wh); ctx.restore(); } });
   }
   const winPR = (x, y, w, h) => txt('pr', x + w / 2, y + h / 2, h * .55, INKD, { font: SERIF, weight: '700' });
   const winB64 = (x, y, w, h) => B64.forEach(([c], i) => txt(c, x + w / 2, y + h * (.25 + i * .25), w * .15, INKD, { font: MONO, weight: '700' }));
@@ -258,14 +271,14 @@
       }
     }, { bg: '#2A2A2A', roll: true });
     // the field meter: Clawd cranks the neuron up
-    const mx = 1560, my = 700; push(); translate(mx, my);
+    const mx = 1525, my = 700; push(); translate(mx, my);
     flat(rrPts(-110, -150, 220, 300, 24), '#3A3A40', { line: '#0A0A0A', lw: 4, shadow: [8, 10, 'rgba(0,0,0,.45)'] }); flat(rrPts(-86, -126, 172, 100, 10), '#E9E2D0');
     ctx.save(); ctx.strokeStyle = INKD; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, -40, 70, Math.PI * 1.15, Math.PI * 1.85); ctx.stroke(); const na = lerp(Math.PI * 1.2, Math.PI * 1.8, lerp(.15 + .05 * Math.sin(t * 7), .98, crank)); ctx.strokeStyle = '#D0302A'; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(0, -40); ctx.lineTo(Math.cos(na) * 66, -40 + Math.sin(na) * 66); ctx.stroke(); ctx.restore();
     for (let i = 0; i < 5; i++) { const on = crank * 5 > i + .2; dot(-60 + i * 30, 10, 10, on ? ['#7AE07A', '#B9E07A', '#FFD36B', '#FFB13B', '#FF5A3A'][i] : '#2A2A2A'); if (on) glow(-60 + i * 30, 10, 26, '#FFD36B', .5); }
     push(); translate(0, 80); rotate(-2.2 + crank * 3.4); flat(ellPts(0, 0, 38, 38, 18), '#8A847C', { line: '#0A0A0A', lw: 3 }); flat(rectPts(-5, -36, 10, 26), '#2A2A2A'); pop();
     pop();
     txt('NEURON', mx, my + 140, 26, '#E9E2D0', { font: MONO, weight: '700' });
-    viewer(t, [[a, 'neutral'], [tCom, 'confused'], [tCol, 'surprised'], [tSum, 'thinking'], [tTurn, 'determined'], [tHike, 'excited']], { x: 1720, view: 'q', flip: true, pose: { aL: .3 + (crank > 0 && crank < 1 ? .4 * Math.sin(t * 14) : 0) } });
+    viewer(t, [[a, 'neutral'], [tCom, 'confused'], [tCol, 'surprised'], [tSum, 'thinking'], [tTurn, 'determined'], [tHike, 'excited']], { x: 1690, view: 'q', flip: true, pose: { aL: .3 + (crank > 0 && crank < 1 ? .4 * Math.sin(t * 14) : 0) } });
     camEnd();
     lower8(t, tCom - .4, tTrack - .2, 'fires on random commas?');
     lower8(t, tTrack - .1, tSum - .4, 'it tracks Colorado');
@@ -434,23 +447,40 @@
     const loose = ease(seg(t, tAnd + .3, tMis + .1));
     const ks0 = 1, take = seg(t, tMis + .3, tMis + 1);
     const ks = lerp(150, 70, loose), kx = 1360, ky = lerp(800, 900, loose) + (1 - loose) * 4 * Math.sin(t * 30);
-    if (loose < .9) cryptid(t, kx, ky, ks, { look: [-1, .2], loose, hat: loose < .5, grin: false, alpha: 1 - seg(loose, .6, .9) });
-    if (loose > .6 && take <= 0) stringBall(kx, ky + 30, 40, seg(loose, .6, .9));
+    if (loose < .9) cryptid(t, kx, ky, ks, { look: [-1, .2], loose, hat: loose < .45, grin: false, alpha: 1 - seg(loose, .6, .9) });
+    // the party hat pops off as it unravels, tumbles in a short arc and lands in the leaves
+    { const hk = seg(loose, .45, .65), h0 = [kx, ky - .42 * lerp(150, 70, .45)], h1 = [kx + 120, GROUND + 20];
+      if (hk > 0) { const p = arcPt(h0, h1, 130, easeIn(hk)); ctx.save(); ctx.translate(p[0], p[1]); ctx.rotate(lerp(0, 2.2 * Math.PI + .35, ease(hk))); ctx.translate(-p[0], -p[1]); hatOn('party', p[0], p[1], lerp(103, 60, hk)); ctx.restore(); } }
+    // the string ball: Clawd flicks it up with the net and into his satchel
+    const BAG = [1150 - 3.2 * 13, GROUND + 60 - 3.4 * 13];   // the satchel's mouth once Clawd has crept up (see hunter())
     // the hidden car circuit: a car tucked in the knot's loops among dog neurons; when the knot comes loose, it drops out
     const tCar = wt('sg_evidence', 'car'), tDog = wt('sg_evidence', 'dog'), carK = seg(t, tCar - .3, tCar + .2), fall = seg(t, tAnd + .2, tMis + .3), dogK = seg(t, tDog - .5, tDog) * (1 - seg(t, tAnd + .2, tMis));
     for (let i = 0; i < 4; i++) { const [ox, oy] = [[-170, -70], [140, -20], [130, 145], [5, 185]][i], dx = kx + ox, dy = ky - 40 + oy + 6 * Math.sin(t * 3 + i), dk = clamp(dogK * 1.6 - i * .2); if (dk <= 0) continue; push(); translate(dx, dy); scale(dk, dk);
-      flat(ellPts(0, 0, 34, 30, 16), '#D8D8D8', { line: '#3A3A3A', lw: 3 }); for (const sx of [-1, 1]) flat(ellPts(sx * 30, 8, 11, 24, 10), '#9A9A9A', { line: '#3A3A3A', lw: 3 }); flat(ellPts(0, 14, 16, 12, 12), '#F0F0F0'); dot(0, 8, 6, '#2A2A2A'); dot(-11, -6, 4, '#2A2A2A'); dot(11, -6, 4, '#2A2A2A'); pop(); }
+      // a dog neuron: a shaggy head in the knot's fur-and-ink style, floppy ears, snout, shiny nose and eyes
+      for (let k = 0; k < 22; k++) { const q = k / 22 * TAU, r0 = 30, r1 = 38 + 5 * hash(k * 3 + i); inkLine([[Math.cos(q) * r0, Math.sin(q) * r0 * .9], [Math.cos(q + .12) * r1, Math.sin(q + .12) * r1 * .9]], 3, '#5A5A5A', 'ink', .5); }
+      flat(ellPts(0, 0, 34, 31, 18), '#D8D8D8', { line: '#2A2A2A', lw: 3 });
+      ctx.save(); ctx.strokeStyle = 'rgba(80,80,80,.5)'; ctx.lineWidth = 2; for (let k = 0; k < 5; k++) { ctx.beginPath(); ctx.moveTo(-14 + k * 7, -26); ctx.lineTo(-12 + k * 7, -18); ctx.stroke(); } ctx.restore();
+      for (const sx of [-1, 1]) { ctx.save(); ctx.translate(sx * 28, -10); ctx.rotate(sx * (.25 + .1 * Math.sin(t * 4 + i))); flat([[0, -6], [sx * 12, 0], [sx * 14, 26], [sx * 4, 34], [-sx * 4, 22]], '#8A8A8A', { line: '#2A2A2A', lw: 3 }); flat([[sx * 2, 0], [sx * 9, 4], [sx * 10, 24], [sx * 4, 28]], '#6E6E6E'); ctx.restore(); }
+      flat(ellPts(0, 13, 18, 13, 14), '#F2F2F2', { line: '#2A2A2A', lw: 2 }); flat(ellPts(0, 7, 7, 5, 10), '#1E1E1E'); dot(-2, 5, 2, '#FFFFFF');
+      ctx.save(); ctx.strokeStyle = '#2A2A2A'; ctx.lineWidth = 2.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 12); ctx.lineTo(0, 17); ctx.moveTo(-7, 20); ctx.quadraticCurveTo(0, 24, 7, 20); ctx.stroke(); ctx.beginPath(); ctx.moveTo(-17, -16); ctx.lineTo(-7, -14); ctx.moveTo(17, -16); ctx.lineTo(7, -14); ctx.stroke(); ctx.restore();
+      for (const sx of [-1, 1]) { dot(sx * 11, -6, 5, '#1E1E1E'); dot(sx * 11 - 1.5, -7.5, 1.8, '#FFFFFF'); }
+      pop(); }
     if (carK > 0 && t < tMis + 2) { const fy = 150 * fall * fall, cxr = kx + 20 + 30 * fall, cyr = ky - 30 + fy; push(); translate(cxr, cyr); rotate(.9 * fall); scale(carK * .9, carK * .9);
-      flat([[-70, 10], [-70, -14], [-40, -18], [-22, -42], [28, -42], [48, -18], [72, -12], [72, 10]], '#F2F2F2', { line: '#2A2A2A', lw: 4 }); flat([[-16, -36], [22, -36], [36, -18], [-28, -18]], '#7A7A7A');
-      for (const wx of [-40, 42]) { flat(ellPts(wx, 12, 15, 15, 14), '#2A2A2A'); flat(ellPts(wx, 12, 6, 6, 8), '#BDBDBD'); } pop();
+      // a little hatchback: two-tone body, two windows split by a pillar, a door seam, a headlight, bumpers and hubcaps
+      flat([[-70, 10], [-70, -14], [-40, -18], [-22, -42], [28, -42], [48, -18], [72, -12], [72, 10]], '#E6E6E6', { line: '#1E1E1E', lw: 4 });
+      flat([[-69, 10], [-69, -2], [71, -2], [71, 10]], '#B4B4B4');
+      flat([[-30, -18], [-17, -37], [2, -37], [2, -18]], '#6A6A6A', { line: '#1E1E1E', lw: 2.5 }); flat([[8, -18], [8, -37], [25, -37], [40, -18]], '#6A6A6A', { line: '#1E1E1E', lw: 2.5 });
+      ctx.save(); ctx.strokeStyle = 'rgba(255,255,255,.6)'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(-14, -33); ctx.lineTo(-20, -22); ctx.moveTo(14, -33); ctx.lineTo(10, -24); ctx.stroke();
+      ctx.strokeStyle = '#3A3A3A'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(5, -18); ctx.lineTo(5, 6); ctx.moveTo(-34, -18); ctx.lineTo(-38, 6); ctx.moveTo(-6, -8); ctx.lineTo(0, -8); ctx.moveTo(30, -8); ctx.lineTo(36, -8); ctx.stroke(); ctx.restore();
+      flat(rrPts(62, -10, 10, 7, 2), '#FFFFFF', { line: '#1E1E1E', lw: 2 }); flat(rrPts(-72, -10, 7, 7, 2), '#7A7A7A', { line: '#1E1E1E', lw: 2 });
+      flat(rrPts(-76, 4, 18, 8, 3), '#4A4A4A'); flat(rrPts(60, 4, 18, 8, 3), '#4A4A4A');
+      for (const wx of [-40, 42]) { flat(ellPts(wx, 12, 16, 16, 16), '#1E1E1E'); flat(ellPts(wx, 12, 8, 8, 10), '#C8C8C8', { line: '#4A4A4A', lw: 2 }); dot(wx, 12, 2.5, '#4A4A4A'); } pop();
       if (fall > .9 && t < tMis + 1) sfx('clunk', cxr + 40, cyr - 80, 40, '#FFFFFF', t - (tMis + .2), { face: 'marker' }); }
     // Clawd creeps up, nets it, and pockets the string
     const creep = ease(seg(t, cut, tAnd - .1)), cx = lerp(560, 1150, creep), sw = env(t, tAnd - .3, tAnd + .5, .25, .3);
-    const hold = take > 0 && take < .8 ? (u, w) => stringBall(u * 1.8, 0, u * 1.8, 1) : null;
-    hunter(t, cx, GROUND + 60, 13, { ...emotions(t, [[cut, 'determined'], [t19, 'suspicious'], [tAnd + .3, 'surprised'], [tMis + .3, 'smug']]), view: 'q', walk: creep > 0 && creep < 1 ? (t - cut) * 1.2 : undefined, aR: take > 0 ? (take < .45 ? lerp(.4, 1.3, take / .45) : lerp(1.3, -.8, (take - .45) / .35)) : .6 + 1.3 * sw, armR: take > 0 ? hold : net(sw), aL: .9, armL: pennant, lampA: .42, bag: true, boilKey: 'c8hunter' });
+    hunter(t, cx, GROUND + 60, 13, { ...emotions(t, [[cut, 'determined'], [t19, 'suspicious'], [tAnd + .3, 'surprised'], [tMis + .3, 'smug']]), view: 'q', walk: creep > 0 && creep < 1 ? (t - cut) * 1.2 : undefined, aR: take > 0 ? (take < .45 ? lerp(.6, 1.6, ease(take / .45)) : lerp(1.6, .5, ease((take - .45) / .45))) : .6 + 1.3 * sw, armR: net(take > 0 ? -.25 * Math.sin(Math.PI * take) : sw), aL: .9, armL: pennant, lampA: .42, bag: true, bagOpen: env(take, .45, .98, .15, .12), boilKey: 'c8hunter' });
+    if (loose > .6) { const bk = ease(seg(take, 0, .85)), p = arcPt([kx, ky + 30], [BAG[0], BAG[1] - 6], 70, bk), r = lerp(40, 13, bk) * (1 - seg(take, .82, .95)); if (r > .5) stringBall(p[0], p[1], r, seg(loose, .6, .9)); }
     if (take > .8 && take < 1) sfx('pocketed.', cx, GROUND - 260, 50, '#FFFFFF', (t - (wt('sg_evidence', 'mistake') + .3 + .56)), { face: 'marker' });
-    // the dropped party hat lies in the leaves
-    if (loose > .6) hatOn('party', kx + 120, GROUND + 20, 60);
     camEnd();
     fg(v7, [[150, 200], [2050, 220]]);
     const gk = seg(t, gl0, gl1), sw2 = seg(t, gl1 - .45, gl1 - .1);

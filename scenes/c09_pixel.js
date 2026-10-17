@@ -190,7 +190,8 @@
   function billboard(x, y, w, name, lit, k = 1, o = {}) {
     const h = w * (o.bAspect ?? .85), top = y - 22 - h;
     flat(rectPts(x - w * .32, y - 26, 7, 26), K.ink); flat(rectPts(x + w * .32 - 7, y - 26, 7, 26), K.ink);
-    if (lit > .02) glow(x, top + h / 2, w * 1.3, o.glowCol || '#FFE08A', .8 * lit);
+    // a lit screen gets a tight pixel halo round its frame (a soft glow quantises into a pale ghost on the roof)
+    if (lit > .02) { const hp = Math.round(6 + 6 * lit); flat(rectPts(x - w / 2 - 8 - hp, top - 8 - hp, w + 16 + 2 * hp, h + 16 + 2 * hp), mixCol(o.glowCol || '#FFE08A', K.ink, .55), { alpha: .7 * lit }); }
     const fr = lit > .3 ? (o.frameCol || K.gold) : K.slate;
     flat(rectPts(x - w / 2 - 8, top - 8, w + 16, h + 16), K.ink); flat(rectPts(x - w / 2 - 5, top - 5, w + 10, h + 10), fr);
     photoAt(name, x - w / 2, top, w, h, .7 + .3 * lit, { tint: lit < .2 ? [K.silver, .35 * (1 - lit / .2)] : null });
@@ -209,8 +210,11 @@
     if (lit > .02) glow((C[0] + D[0]) / 2, (C[1] + D[1]) / 2 + bh * .5, 220, '#6FB7FF', .8 * lit);
     if (b.photo && k > .4) {
       const cx = lerp(D[0], C[0], .5), cy = lerp(D[1], C[1], .5) + bh * .55, pw = Math.min(bh * 1.05, 150) * (b.pw ?? 1), ph = pw * .82;
-      flat(rectPts(cx - pw / 2 - 7, cy - ph / 2 - 7, pw + 14, ph + 14), K.ink); flat(rectPts(cx - pw / 2 - 4, cy - ph / 2 - 4, pw + 8, ph + 8), lit > .3 ? K.sky : K.slate);
-      photoAt(b.photo, cx - pw / 2, cy - ph / 2, pw, ph, .65 + .35 * lit, { tint: lit < .2 ? [K.silver, .35] : null });
+      // the screen hangs on the room's back wall, so it is sheared onto that isometric face like the windows are
+      ctx.save(); ctx.translate(cx, cy); ctx.transform(1, (C[1] - D[1]) / (C[0] - D[0]), 0, 1, 0, 0);
+      flat(rectPts(-pw / 2 - 7, -ph / 2 - 7, pw + 14, ph + 14), K.ink); flat(rectPts(-pw / 2 - 4, -ph / 2 - 4, pw + 8, ph + 8), lit > .3 ? K.sky : K.slate);
+      photoAt(b.photo, -pw / 2, -ph / 2, pw, ph, .65 + .35 * lit, { tint: lit < .2 ? [K.silver, .35] : null, n: 32 });
+      ctx.restore();
     }
   }
   // vehicles as little iso boxes. axis 'i' or 'j'; kind: taxi | amb | sports | car
@@ -609,7 +613,7 @@
     const mute = ease(seg(t, tSil, tSil + 1.4));
     // the crowd of words walking along the sidewalk, right past the neuron's door
     let flick = 0, blaze = 0;
-    const N = 30, sp = 2.4;
+    const N = 30, sp = 2.4, tags = [];
     for (let n = 0; n < N; n++) {
       const g = (t - a) * sp / 30 + n / N, u = frac(g), gen = Math.floor(g), i = -6 + u * 30, lane = 9.25 + (n % 3) * .25;
       const big = mute < .5 && (hash(n * 13.7 + gen * 5.1) > .985 || (t > tSh - 1.6 && t < tSh + .6 && Math.abs(i - 2.7 - (t - tSh) * sp) < .5));
@@ -617,9 +621,16 @@
       if (d < 1.6) { flick = Math.max(flick, (1 - d / 1.6) * .3 * (1 - mute)); if (big) blaze = Math.max(blaze, 1 - d / 1.6); }
       const [x, y] = iso(i, lane);
       ent(i + lane, () => walker(x, y, big ? K.gold : [K.silver, K.slate, K.teal, K.violet][n % 4], (t - a) * 2.4 + n * .37, 1.2));
-      if (d < 4.5) lab(WORDS[(n + gen * 3) % WORDS.length], x, y - 96, 4, big ? K.gold : K.silver, { fill: K.ink, edge: big ? K.gold : K.slate, k: clamp(1.2 - d / 4.5) * 1.5 });
+      if (d < 3) tags.push([d, WORDS[(n + gen * 3) % WORDS.length], x, y - 128 - (2 - n % 3) * 56, big]);
       if (d < 1.6 && !big && mute < .5) ent(i + lane + .1, () => { const [bx, by] = iso(2.7, 6.7); glow(bx, by - 120, 40, '#FFD58A', .25 * (1 - d / 1.6)); });
     }
+    // word tags: only the walkers nearest the door carry one (about six), each lane's tags on their own row so they
+    // stack instead of colliding (and clear the lamp heads); a tag fades when it nears another label on screen
+    const kf2 = popk(t, tTie - 1.6, .5), LABS = [[B[0] - 330, B[1] - 330, popk(t, tWh - .2, .4) * (1 - seg(t, c + .2, c + .6))], [...iso(12.1, 14.1).map((v, q) => v - (q ? 330 : 180)), kf2], [...iso(17.1, 14.1).map((v, q) => v + (q ? -330 : 180)), kf2]];
+    tags.forEach(([d, s, x, y, big]) => {
+      const near = Math.max(0, ...LABS.map(([lx, ly, lk]) => lk * (1 - seg(Math.hypot((x - lx) * .6, y - ly), 120, 220))));
+      const k = clamp((3 - d) / 1.2) * (1 - near); if (k > .02) lab(s, x, y, 4, big ? K.gold : K.silver, { fill: K.ink, edge: big ? K.gold : K.slate, k });
+    });
     // the neuron (it loves lighthouses): a faint flicker per word; it blazes for the rare one
     const lit = Math.max(flick, blaze, .3 * mute, Math.sin(Math.PI * seg(t, tSh - .2, tSh + 1.3)));   // muted: a steady glow, it just stops flickering
     ent(16, () => bld(1.5, 5.5, 2.4, 2.4, 160, K.navy, { lit, photo: NP + 'lighthouses-positive-1', bw: 150, roof: K.blue, dimWin: .85 }));
@@ -629,7 +640,7 @@
     lab('LIGHTHOUSE NEURON', B[0] - 330, B[1] - 330, 5, K.cyan, { k: popk(t, tWh - .2, .4) * (1 - seg(t, c + .2, c + .6)) });
     if (blaze > .3 || (sh > .05 && sh < .9)) lab('!!', B[0] + 210, B[1] - 250, 10, K.gold, { box: false });
     // the close call at the fork: husky or wolf?
-    const kf2 = popk(t, tTie - 1.6, .5), tipped = seg(t, tTie + .2, tTie + 1.1);
+    const tipped = seg(t, tTie + .2, tTie + 1.1);
     ent(13 + 13 + 4, () => bld(11, 13, 2.2, 2.2, 110, K.white, { k: kf2, lit: lerp(.9, .25, tipped), photo: NP + 'wolves-negative-1', bw: 130 }));
     ent(16 + 13 + 4, () => bld(16, 13, 2.2, 2.2, 110, K.slate, { k: kf2, lit: lerp(.25, .9, tipped), photo: NP + 'wolves-positive-1', bw: 130 }));
     if (kf2 > 0) { lab('HUSKY', ...iso(12.1, 14.1).map((v, q) => v - (q ? 330 : 180)), 6, K.white, { k: kf2 }); lab('WOLF', ...iso(17.1, 14.1).map((v, q) => v + (q ? -330 : 180)), 6, K.silver, { k: kf2 }); }

@@ -165,13 +165,29 @@ function lampOrb(x, y, r, im, k = 1) { glow(x, y, r * 2.4, '#FFD58A', .6 * k); c
 // a rubber-stamp impression in Clawd's passport: ring, stop number, world name. Drawn in screen space.
 function passStamp(num, name, x = 1720, y = 930, k = 1, o = {}) {
   if (k <= 0) return; const col = o.col || '#C2456A', r = 92, s = lerp(1.5, 1, easeOut(clamp(k))) * (o.scale || 1);
-  ctx.save(); resetMatrix(); ctx.translate(x, y); ctx.rotate(o.rot ?? -.16); ctx.scale(s, s); ctx.globalAlpha = .88 * clamp(k * 2);
-  ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke(); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, r - 12, 0, TAU); ctx.stroke();
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.font = '900 20px sans-serif'; ctx.fillText('STOP', 0, -44); ctx.font = '900 64px serif'; ctx.fillText(String(num), 0, 2);
-  const words = name.toUpperCase(); let fs = 17; ctx.font = `800 ${fs}px sans-serif`; while (fs > 10 && ctx.measureText(words).width > 132) { fs -= 1; ctx.font = `800 ${fs}px sans-serif`; } ctx.fillText(words, 0, 48);   // shrink to fit inside the ring, never truncate
-  // the ink is uneven: knock out a few specks
-  ctx.globalCompositeOperation = 'destination-out'; for (let i = 0; i < 40; i++) { ctx.beginPath(); ctx.arc((hash(i * 3.1 + num) - .5) * 2 * r, (hash(i * 7.3 + num) - .5) * 2 * r, 1 + hash(i) * 3, 0, TAU); ctx.fill(); }
-  ctx.restore();
+  // drawn on its own canvas first, so the worn-ink specks are knocked out of the stamp, never out of the frame behind it
+  const R = 2, N = (r + 14) * 2 * R, key = `${num}|${name}|${col}`;
+  STAMP_C ||= {}; let cv = STAMP_C[key];
+  if (!cv) {
+    cv = STAMP_C[key] = createCanvas(N, N); const c = cv.getContext('2d'); c.scale(R, R); c.translate(r + 14, r + 14);
+    c.strokeStyle = col; c.fillStyle = col; c.lineWidth = 5; c.beginPath(); c.arc(0, 0, r, 0, TAU * .999); c.stroke(); c.lineWidth = 2; c.beginPath(); c.arc(0, 0, r - 12, 0, TAU * .999); c.stroke();
+    c.textAlign = 'center'; c.textBaseline = 'middle'; c.font = '900 66px serif'; c.fillText(String(num), 0, 4);
+    // text set around the ring: STOP over the top, the stop's name under the bottom, both reading left to right
+    const arcText = (str, rad, top, size) => {
+      c.font = `800 ${size}px sans-serif`; const ch = [...str], ws = ch.map(q => c.measureText(q).width + size * .1), tot = ws.reduce((p, q) => p + q, 0);
+      // top: left to right means increasing angle from the top's left; bottom: left to right means decreasing angle
+      let a = top ? -Math.PI / 2 - tot / rad / 2 : Math.PI / 2 + tot / rad / 2;
+      ch.forEach((q, n) => { const da = ws[n] / rad, th = top ? a + da / 2 : a - da / 2;
+        c.save(); c.translate(Math.cos(th) * rad, Math.sin(th) * rad); c.rotate(top ? th + Math.PI / 2 : th - Math.PI / 2); c.fillText(q, 0, 0); c.restore();
+        a = top ? a + da : a - da; });
+    };
+    arcText('STOP', r - 34, true, 19);
+    let fs = 17; const nm = name.toUpperCase(); c.font = `800 ${fs}px sans-serif`; while (fs > 10 && c.measureText(nm).width > (r - 30) * Math.PI * .8) { fs -= 1; c.font = `800 ${fs}px sans-serif`; }
+    arcText(nm, r - 30, false, fs);
+    c.globalCompositeOperation = 'destination-out'; for (let q = 0; q < 46; q++) { c.beginPath(); c.arc((hash(q * 3.1 + num) - .5) * 2 * r, (hash(q * 7.3 + num) - .5) * 2 * r, 1 + hash(q) * 2.6, 0, TAU); c.fill(); }
+  }
+  ctx.save(); resetMatrix(); ctx.translate(x, y); ctx.rotate(o.rot ?? -.16); ctx.scale(s / R, s / R); ctx.globalAlpha = .9 * clamp(k * 2); ctx.drawImage(cv, -N / 2, -N / 2); ctx.restore();
 }
+let STAMP_C = null;
 // the 16 stops of the tour, named for the idea each covers (not the world it is drawn in), as [name, act]
 const STOPS = [['the question', 1], ['neurons', 1], ['the knot', 1], ['the cat & car case', 2], ['the hidden car', 2], ['better tools', 2], ['how they grow', 2], ['two theories', 2], ['a moving target', 2], ['gates & votes', 3], ['language models', 3], ['testing labels', 3], ["why it's clean", 3], ['what clean means', 4], ['AI scientists', 4], ['why it matters', 4]];

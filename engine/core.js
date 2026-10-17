@@ -410,19 +410,30 @@ function drawLetters(c) {
     c.font = `${wt}${L.size}px ${fam}`;
     c.textAlign = L.align || 'center'; c.textBaseline = 'middle';
     const lines = L.maxW ? wrapText(c, L.txt, L.maxW) : String(L.txt).split('\n'), lh = L.size * (L.lh || 1.15);
-    if (L.reveal != null && L.reveal < 1) {   // write-on: a clip that sweeps left to right (line by line)
-      const ws = lines.map(l => c.measureText(l).width), tot = ws.reduce((a, b) => a + b, 0) || 1; let left = L.reveal * tot;
-      const clip = new Path2D();
-      lines.forEach((ln, i) => { const w = ws[i], x0 = (c.textAlign === 'center' ? -w / 2 : c.textAlign === 'right' ? -w : 0), show = clamp(left, 0, w); left -= w;
-        if (show > 0) clip.rect(x0 - L.size * .2, (i - (lines.length - 1) / 2) * lh - L.size * .8, show + L.size * .25, L.size * 1.6); });
-      c.clip(clip);
-    }
-    lines.forEach((ln, i) => {
+    const paintLines = (cc) => lines.forEach((ln, i) => {
       const yy = (i - (lines.length - 1) / 2) * lh;
-      if (L.stroke) { c.lineJoin = 'round'; c.lineWidth = L.size * (L.strokeW || .14); c.strokeStyle = L.stroke; c.strokeText(ln, 0, yy); }
-      if (L.shadow !== false && (L.face || 'marker') === 'marker') { c.fillStyle = L.shadowCol || PAL.ink; c.globalAlpha = clamp(L.alpha ?? 1) * .9; c.fillText(ln, L.size * .04, yy + L.size * .05); c.globalAlpha = clamp(L.alpha ?? 1); }
-      c.fillStyle = L.color; c.fillText(ln, 0, yy);
+      if (L.stroke) { cc.lineJoin = 'round'; cc.lineWidth = L.size * (L.strokeW || .14); cc.strokeStyle = L.stroke; cc.strokeText(ln, 0, yy); }
+      if (L.shadow !== false && (L.face || 'marker') === 'marker') { cc.fillStyle = L.shadowCol || PAL.ink; const ga = cc.globalAlpha; cc.globalAlpha = ga * .9; cc.fillText(ln, L.size * .04, yy + L.size * .05); cc.globalAlpha = ga; }
+      cc.fillStyle = L.color; cc.fillText(ln, 0, yy);
     });
+    if (L.reveal != null && L.reveal < 1) {
+      // write-on with a soft, feathered leading edge (never a hard cut through a letter), and the whole word fading
+      // as it nears zero, so a title that leaves by un-writing dissolves instead of being chopped back letter by letter
+      if (L.reveal <= 0) { c.restore(); continue; }
+      const ws = lines.map(l => c.measureText(l).width), tot = ws.reduce((p, q) => p + q, 0) || 1, F = L.size * .9, M = c.getTransform();
+      const bw = Math.ceil(Math.max(...ws) + L.size * 1.2), bh = Math.ceil(lines.length * lh + L.size * 1.2), sc = Math.min(2, Math.max(1, Math.hypot(M.a, M.b)));
+      const tc = createCanvas(Math.max(2, Math.ceil(bw * sc)), Math.max(2, Math.ceil(bh * sc))), t2 = tc.getContext('2d');
+      const ox = c.textAlign === 'left' ? -bw / 2 + L.size * .6 : c.textAlign === 'right' ? bw / 2 - L.size * .6 : 0;
+      t2.scale(sc, sc); t2.translate(bw / 2 - ox, bh / 2); t2.font = c.font; t2.textAlign = c.textAlign; t2.textBaseline = 'middle';
+      paintLines(t2);
+      t2.globalCompositeOperation = 'destination-in';
+      let left = L.reveal * (tot + F * lines.length);
+      lines.forEach((ln, i) => { const w = ws[i], x0 = (c.textAlign === 'center' ? -w / 2 : c.textAlign === 'right' ? -w : 0), yy = (i - (lines.length - 1) / 2) * lh, edge = x0 + left - F;
+        let fill = 'rgba(0,0,0,0)'; if (left >= w + F) fill = 'rgba(0,0,0,1)'; else if (left > 0) { const g = t2.createLinearGradient(edge, 0, edge + F, 0); g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(1, 'rgba(0,0,0,0)'); fill = g; }
+        t2.fillStyle = fill; t2.fillRect(x0 - L.size * .6, yy - lh / 2 - L.size * .1, w + L.size * 1.2, lh + L.size * .2); left -= w + F; });
+      c.globalAlpha = clamp(L.alpha ?? 1) * easeInOut(clamp(L.reveal * 4));
+      c.drawImage(tc, -bw / 2 + ox, -bh / 2, bw, bh);
+    } else paintLines(c);
     c.restore();
   }
 }

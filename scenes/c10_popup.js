@@ -123,6 +123,18 @@
     ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = wdt * .3; ctx.setLineDash([14, 18]); ctx.lineDashOffset = -T * 60; ctx.stroke(); ctx.restore();
     if (col === C.gold) { const p = Cc[n - 1]; glow(p[0], p[1], 40, '#FFE08A', .7); }
   }
+  // a paper pull-tab: a slot cut into the page at (x, y) with a strip coming out of it to the right, a rounded
+  // finger-tab end and a printed arrow; k 0..1 pulls it out (at most 120 px more)
+  function pullTab(x, y, k, label = 'pull') {
+    const L = 150 + 120 * clamp(k), h = 34;
+    flat(rrPts(x - 10, y - 6, 20, h + 12, 6), 'rgba(40,24,16,.55)');   // the slot
+    cutout([[x, y], [x + L - h / 2, y], ...Array.from({ length: 9 }, (_, i) => { const q = -Math.PI / 2 + i / 8 * Math.PI; return [x + L - h / 2 + Math.cos(q) * h / 2, y + h / 2 + Math.sin(q) * h / 2]; }), [x, y + h]], C.red, { jag: 1, shadow: SH });
+    flat(rectPts(x, y + h - 6, L - h / 2, 4), 'rgba(0,0,0,.12)');
+    dot(x + L - h / 2, y + h / 2, 7, mixCol(C.red, C.ink, .45));
+    ps(label, x + 50, y + h / 2 + 1, 24, C.paper);
+    ctx.save(); ctx.strokeStyle = C.paper; ctx.lineWidth = 3.5; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; const ax = x + 92 + 10 * Math.sin(T * 4) * (1 - clamp(k)); ctx.beginPath(); ctx.moveTo(ax, y + h / 2); ctx.lineTo(ax + 30, y + h / 2); ctx.moveTo(ax + 20, y + h / 2 - 8); ctx.lineTo(ax + 30, y + h / 2); ctx.lineTo(ax + 20, y + h / 2 + 8); ctx.stroke(); ctx.restore();
+    flat(rectPts(x - 12, y - 8, 12, h + 16), C.paper2);   // the page lip in front of the slot, so the strip goes into the page
+  }
   // the lift-the-flap basement in front of a building: a hole on the page; the flap folds down toward us
   function flap(x, y, w, h, open, inner, col = C.navy) {
     const e = ease(open);
@@ -311,7 +323,7 @@
     placard(420, 900, '90%  one main job', C.gold, Math.min(popk(t, t90 - .1, .5), kout(lt, dur)), 44, { stick: 330 });
     placard(965, 920, '7%  two related jobs', C.paper2, Math.min(popk(t, t7 - .1, .5), kout(lt, dur)), 40, { stick: 350 });
     placard(1500, 900, '2–4%  not yet', C.grey, Math.min(popk(t, tOnly + .1, .5), kout(lt, dur)), 40, { stick: 330 });
-    clS(t, lt, dur, 1740, 990, [[tMod, 'thinking'], [t90, 'surprised'], [t90 + 1, 'excited'], [t7 + .5, 'happy'], [tOnly, 'thinking'], [tYet, 'determined']], { u: 7.5, flip: true });
+    clS(t, lt, dur, 1630, 990, [[tMod, 'thinking'], [t90, 'surprised'], [t90 + 1, 'excited'], [t7 + .5, 'happy'], [tOnly, 'thinking'], [tYet, 'determined']], { u: 7.5, flip: true });
     pageTurn(lt);
     camEnd();
     GRAIN = .8;
@@ -319,7 +331,7 @@
 
   // ================= the preeclampsia hub =================
   const M0 = { a: cs('cw_medical'), tFol: wt('cw_medical', 'follow'), tPreg: wt('cw_medical', 'pregnant'), tSym: wt('cw_medical', 'symptoms'), tFour: wt('cw_medical', 'four'), tConc: wt('cw_medical', 'concludes'), tPre: wt('cw_medical', 'preeclampsia'), tSw: wt('cw_medical', 'Switch'), tOff: wt('cw_medical', 'off'), tItch: wt('cw_medical', 'itching'), tDiff: wt('cw_medical', 'different'), tNext: wt('cw_medical', 'next'), tGuess: wt('cw_medical', 'guess') };
-  const SYMS = [[400, 870, 'pregnant', C.pink], [580, 960, 'headache', C.orange], [760, 850, 'high blood pressure', C.blue]];
+  const SYMS = [[470, 800, 'pregnant', C.pink], [720, 800, 'headache', C.orange], [670, 940, 'high blood pressure', C.blue]];   // two rows, ~40 px apart, clear of the bed
   const HUB = [[1120, 820], [1250, 860], [1150, 940], [1280, 960]];
   function medicalShot(t, lt, dur) {
     const { a, tFol, tPreg, tSym, tFour, tConc, tPre, tSw, tOff, tItch, tDiff, tNext, tGuess } = M0;
@@ -334,27 +346,27 @@
       cutout([[-50, -70], [-40, -112], [60, -104], [110, -70]], C.pink, { jag: 1.5, shadow: false }); cutout(ellPts(20, -112, 30, 22, 14), C.pink, { jag: 1, shadow: false });
       flat(rectPts(-84, -122, 4, 4), C.ink); flat(rectPts(-70, -122, 4, 4), C.ink);
     });
+    // threads from the symptoms to the hub: drawn first and tucked behind the cards' tops, so they never cross the lettering
+    SYMS.forEach(([x, y], n) => thread([[x + 40, y - 90], [lerp(x, 1120, .5), y - 230 - n * 24], [HUB[n % 4][0] - 20, HUB[n % 4][1] - 120]], Math.min(seg(t, tFour - .8 + n * .2, tFour + .4 + n * .2), ko) * (1 - ease(seg(off, .55, 1))), off > .5 ? C.grey : C.gold));   // switched off, they reel back in
     // symptoms pop up as folded tent cards
-    SYMS.forEach(([x, y, s, col], n) => { const k = Math.min(popk(t, tFol + .5 + n * .55, .5), ko); stand(x, y, k, 200, () => { ctx.font = `700 34px ${SERIF}`; const w = ctx.measureText(s).width + 50; cutout([[-w / 2, 0], [-w / 2 + 14, -96], [w / 2 - 14, -96], [w / 2, 0]], col, { jag: 2, shadow: SH }); ps(s, 0, -48, 34); if (n === 0) { ctx.save(); ctx.translate(0, -100); pp(.9, C.pink, { skin: '#E9C9A6' }); ctx.restore(); } }); });
-    // threads from the symptoms to the hub
-    SYMS.forEach(([x, y], n) => thread([[x + 60, y - 70], [lerp(x, 1120, .5), y - 200 - n * 30], [HUB[n % 4][0] - 20, HUB[n % 4][1] - 120]], Math.min(seg(t, tFour - .8 + n * .2, tFour + .4 + n * .2), ko), off > .5 ? C.grey : C.gold));
+    SYMS.forEach(([x, y, s, col], n) => { const k = Math.min(popk(t, tFol + .5 + n * .55, .5), ko); stand(x, y, k, 200, () => { ctx.font = `700 32px ${SERIF}`; const w = ctx.measureText(s).width + 46; cutout([[-w / 2, 0], [-w / 2 + 14, -96], [w / 2 - 14, -96], [w / 2, 0]], col, { jag: 2, shadow: SH }); ps(s, 0, -48, 32); if (n === 0) { ctx.save(); ctx.translate(0, -100); pp(.9, C.pink, { skin: '#E9C9A6' }); ctx.restore(); } }); });
     // the hub of four neurons; the pull-tab switches them off (they fold flat)
-    HUB.forEach(([x, y], n) => { const k = Math.min(kin(lt, x + 400), 1 - off * .97, ko), hot = on(t, tFour - .2 + n * .14, Infinity, .3); stand(x, y, k, 120, () => pb(120, 150, hot > .5 ? C.lilac : C.grey, { roof: 'peak', wins: [{}], lit: Math.max(hot * .5, on(t, tConc - .5)) * (1 - off), glowCol: '#FFD58A' }), { raw: off > 0 }); });
+    // (folded flat they would leave loose paper strips on the page, so once down they fade out)
+    HUB.forEach(([x, y], n) => { const k = Math.min(kin(lt, x + 400), 1 - off * .97, ko), hot = on(t, tFour - .2 + n * .14, Infinity, .3), ga = 1 - seg(off, .75, 1); if (ga <= 0) return; ctx.save(); ctx.globalAlpha = ga; stand(x, y, k, 120, () => pb(120, 150, hot > .5 ? C.lilac : C.grey, { roof: 'peak', wins: [{}], lit: Math.max(hot * .5, on(t, tConc - .5)) * (1 - off), glowCol: '#FFD58A' }), { raw: off > 0 }); ctx.restore(); });
     // the other neurons of the hospital district, standing by
     [[1640, 750, C.blue], [1780, 790, C.green], [1590, 975, C.yellow]].forEach(([x, y, col], n) => stand(x, y, Math.min(kin(lt, x), ko, 1 - seg(t, tItch - .8, tItch - .4) * (n === 0 ? 1 : 0) * 0), 110, () => pb(110, 130, col, { roof: n % 2 ? 'flat' : 'peak', wins: [{}, {}], cols: 2, winH: 30, lit: .15 })));
     // the conclusion: a scroll unrolls above the hub
     const kp = Math.min(popk(t, tPre - .4, .6), ko), drop = ease(seg(t, tOff, tOff + .8));
     if (kp > 0) { ctx.save(); ctx.translate(1200, 560 + 300 * drop * drop); ctx.rotate(.5 * drop); ctx.scale(backOut(kp), backOut(kp)); ctx.globalAlpha = 1 - drop; cutout(rectPts(-200, -50, 400, 100), C.gold, { jag: 2, shadow: SH }); cutout(ellPts(-200, 0, 16, 54, 12), mixCol(C.gold, C.ink, .2), { jag: 1, shadow: false }); cutout(ellPts(200, 0, 16, 54, 12), mixCol(C.gold, C.ink, .2), { jag: 1, shadow: false }); ps('preeclampsia', 0, 3, 48); ctx.restore(); }
     // the pull-tab at the page edge
-    const tab = ease(seg(t, tSw - .3, tSw + .4));
-    flat(rectPts(1500, 1010, 200 + 160 * tab, 30), C.red, { shadow: SH }); ps('pull', 1560 + 160 * tab, 1026, 26, C.paper);
+    pullTab(1290, 996, ease(seg(t, tSw - .3, tSw + .4)));
     // the next guess: a different building asks about itching
     const ki = Math.min(popk(t, tItch - .5, .55), ko);
     stand(1440, 880, ki, 280, () => pb(280, 240, C.teal, { roof: 'flat', sign: 'another condition', signSize: 30, wins: [{}, {}], cols: 2, lit: .7 }));
     bubble(1450, 500, 'any itching?', 46, Math.min(popk(t, tItch - .2, .5), ko), { tail: -40 });
     thread([[1200, 780], [1260, 640], [1360, 700]], Math.min(seg(t, tNext - .6, tNext + .3), ko), C.navy, 7);
     if (t > tNext - .4) heading('next guess', 1200, 830, 46, Math.min(seg(t, tNext - .4, tNext + .2), ko), C.navy);
-    clS(t, lt, dur, 1720, 1010, [[a, 'happy'], [tPreg, 'thinking'], [tPre, 'proud'], [tSw - .6, 'determined'], [tItch, 'surprised'], [tGuess, 'thinking']], { u: 7, flip: true, extra: { aL: t > tSw - .5 && t < tSw + .6 ? 1.3 : undefined } });
+    clS(t, lt, dur, 1600, 1010, [[a, 'happy'], [tPreg, 'thinking'], [tPre, 'proud'], [tSw - .6, 'determined'], [tItch, 'surprised'], [tGuess, 'thinking']], { u: 7, flip: true, extra: { aL: t > tSw - .5 && t < tSw + .6 ? 1.3 : undefined } });
     pageTurn(lt);
     camEnd();
     caps(t, [[tFol - .1, tPreg - .4, 'a line of reasoning, in plain neurons'], [tPreg - .3, t - lt + dur - .3, 'a pregnant patient']]);
@@ -401,7 +413,7 @@
   const D0 = { a: cs('cw_double'), tPl: wt('cw_double', 'plumbing'), tMul: wt('cw_double', 'multiply'), tSig: wt('cw_double', 'signals'), tBoth: wt('cw_double', 'both'), tNeg: wt('cw_double', 'negative'), tPos: wt('cw_double', 'positive'), tOpp: wt('cw_double', 'opposite'), tSep: wt('cw_double', 'Separate'), tCases: wt('cw_double', 'cases'), tNoise: wt('cw_double', 'noise'), tFrom: wt('cw_double', 'From'), tOut: wt('cw_double', 'out', 1) };
   function pipe(P, wdt, col = '#9AA7B8') { ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(40,24,16,.28)'; ctx.lineWidth = wdt; ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(p[0] + 6, p[1] + 9) : ctx.moveTo(p[0] + 6, p[1] + 9)); ctx.stroke(); ctx.strokeStyle = C.ink; ctx.lineWidth = wdt + 6; ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); ctx.strokeStyle = col; ctx.lineWidth = wdt; ctx.stroke(); ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = wdt * .25; ctx.beginPath(); P.forEach((p, i) => i ? ctx.lineTo(p[0], p[1] - wdt * .22) : ctx.moveTo(p[0], p[1] - wdt * .22)); ctx.stroke(); ctx.restore(); }
   function gauge(x, y, sign, k) { if (k <= 0) return; ctx.save(); ctx.translate(x, y); ctx.scale(backOut(k), backOut(k)); cutout(ellPts(0, 0, 50, 50, 24), C.cream, { jag: 1.5, shadow: SH }); ctx.strokeStyle = sign > 0 ? '#3A8A4A' : C.navy; ctx.lineWidth = 10; ctx.beginPath(); ctx.moveTo(-22, 0); ctx.lineTo(22, 0); if (sign > 0) { ctx.moveTo(0, -22); ctx.lineTo(0, 22); } ctx.stroke(); ctx.restore(); }
-  function drop(P, u, sign) { const Cc = through(P, 10), q = Cc[Math.floor(clamp(u) * (Cc.length - 1))]; glow(q[0], q[1], 40, sign > 0 ? '#BFE3A6' : '#9FC6FF', .9); cutout(ellPts(q[0], q[1], 16, 16, 12), sign > 0 ? '#8FCF7A' : C.blue, { jag: 1, shadow: false }); ctx.strokeStyle = C.ink; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(q[0] - 8, q[1]); ctx.lineTo(q[0] + 8, q[1]); if (sign > 0) { ctx.moveTo(q[0], q[1] - 8); ctx.lineTo(q[0], q[1] + 8); } ctx.stroke(); }
+  function drop(P, u, sign) { const Cc = through(P, 10), q = Cc[Math.floor(clamp(u) * (Cc.length - 1))]; glow(q[0], q[1], 56, sign > 0 ? '#BFE3A6' : '#9FC6FF', .9); cutout(ellPts(q[0], q[1], 22, 22, 16), sign > 0 ? '#8FCF7A' : C.blue, { jag: 1, shadow: [2, 3, 'rgba(40,24,16,.3)'], line: mixCol(sign > 0 ? '#8FCF7A' : C.blue, C.ink, .5), lw: 2.5 }); ctx.save(); ctx.strokeStyle = C.ink; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(q[0] - 11, q[1]); ctx.lineTo(q[0] + 11, q[1]); if (sign > 0) { ctx.moveTo(q[0], q[1] - 11); ctx.lineTo(q[0], q[1] + 11); } ctx.stroke(); ctx.restore(); }
   function doubleShot(t, lt, dur) {
     const { a, tPl, tMul, tSig, tBoth, tNeg, tPos, tOpp, tSep, tCases, tNoise, tFrom, tOut } = D0;
     library(t);
@@ -426,8 +438,10 @@
     // while it misfires, its real windows (joy, yay) go dark and the opposite ones (gloom, sob) light up blue
     // "from the outside, that looks like noise": the windows blink at random
     const nz = t > tFrom - .2 && t < tSep - .3, rl = n => hash(n * 7.3 + Math.floor(t * 6) * 3.1) > .5 ? 1 : 0;
-    const wGood = (w, n) => nz ? { s: w, lit: rl(n), col: rl(n) ? C.ink : '#8A8478' } : ({ s: w, lit: 1 - wrong, col: wrong > .5 ? '#8A8478' : C.ink, bg: wrong > .5 ? '#C9C3B6' : undefined }), wBad = (w, n) => nz ? { s: w, size: 25, lit: rl(n), col: rl(n) ? C.cream : C.navy, bg: rl(n) ? C.navy : undefined, glow: '#7EB5FF' } : ({ s: w, size: 25, lit: wrong, col: wrong > .5 ? C.cream : split > .5 ? '#A8A296' : C.navy, bg: wrong > .5 ? C.navy : undefined, glow: '#7EB5FF' });
-    stand(1480, 760, kb, 260, () => pb(260, 300, C.yellow, { roof: 'peak', sign: split > .5 ? 'glad · + × +' : 'glad', signSize: split > .5 ? 30 : 34, wins: [wGood('joy', 0), wGood('yay', 1), wBad('gloom', 2), wBad('sob', 3)], cols: 2, lit: nz ? .5 : wrong ? .2 : .5, glowCol: wrong ? '#7EB5FF' : '#FFD58A' }));
+    const wGood = (w, n) => nz ? { s: w, lit: rl(n), col: rl(n) ? C.ink : '#8A8478' } : ({ s: w, lit: 1 - wrong, col: wrong > .5 ? '#5E584C' : C.ink, bg: wrong > .5 ? '#C9C3B6' : undefined }), wBad = (w, n) => nz ? { s: w, size: 25, lit: rl(n), col: rl(n) ? C.cream : C.navy, bg: rl(n) ? C.navy : undefined, glow: '#7EB5FF' } : ({ s: w, size: 25, lit: wrong, col: wrong > .5 ? C.cream : split > .5 ? '#6E685C' : C.navy, bg: wrong > .5 ? C.navy : undefined, glow: '#7EB5FF' });
+    stand(1480, 760, kb, 260, () => { pb(260, 300, C.yellow, { roof: 'peak', sign: 'glad', signSize: 34, wins: [wGood('joy', 0), wGood('yay', 1), wBad('gloom', 2), wBad('sob', 3)], cols: 2, lit: nz ? .5 : wrong ? .2 : .5, glowCol: wrong ? '#7EB5FF' : '#FFD58A' });
+      // after the split its own case, + × +, gets a tag of its own up in the gable
+      if (split > .02) { ctx.save(); ctx.translate(0, -300 - 44); ctx.scale(backOut(split), backOut(split)); cutout(rrPts(-62, -22, 124, 44, 14), C.cream, { jag: 1, shadow: SH }); ps('+ × +', 0, 2, 30, C.ink); ctx.restore(); } });
     if (wrong > .5 && t > tOpp - .4 && t < tFrom - .2) stamp('opposite!', 1130, 430, tOpp - .3, t, { col: C.red, size: 80 });
     // after the split: the − × − case gets its own building
     const ks = Math.min(popk(t, tCases - .3, .6), ko);
@@ -468,14 +482,14 @@
       if (k <= 0) continue; ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.globalAlpha = k;
       ctx.scale(1.45, 1.45); cutout([[-50, -10], [50, -10], [36, 12], [-36, 12]], C.cream, { jag: 1, shadow: [3, 5, 'rgba(40,24,16,.3)'] }); flat([[4, -10], [4, -62], [44, -16]], C.paper2);
       // once the squeeze starts (done in an image network), the cargo turns from words into little photos
-      if (dam < 1) { ctx.save(); ctx.globalAlpha *= 1 - dam; ps(RW[q % RW.length], -20, -26, 26); ctx.restore(); }
+      if (dam < 1) { ctx.save(); ctx.globalAlpha *= 1 - dam; ps(RW[q % RW.length], -4, 1, 21); ctx.restore(); }   // the word is painted on the hull, clear of the banks' houses
       if (dam > 0) { ctx.save(); ctx.globalAlpha *= dam; ctx.translate(-24, -30); ctx.rotate(mess * (hash(q * 5.3) - .5) * 1.4); ctx.translate(24, 30); const I = img(RI[q]), sz = Math.min(I.width, I.height); flat(rectPts(-44, -50, 40, 40), C.cream); ctx.drawImage(I, (I.width - sz) / 2, (I.height - sz) / 2, sz, sz, -42, -48, 36, 36); ctx.restore(); }
       ctx.restore();
     }
     // read: a bucket on a string lowered from the "read" house; write: a boat dropped from the "write" house
     const rb = Math.sin(Math.PI * seg(t, tRead - .4, tRead + 1.2)), wb = seg(t, tWrite - .3, tWrite + .9);
-    if (rb > 0) { const bx = 360, by = lerp(640, ry(360) - 30, rb); inkLine([[330, 620], [bx, by - 30]], 1.5, C.ink, 'inkfine', 0); cutout([[bx - 22, by - 30], [bx + 22, by - 30], [bx + 16, by], [bx - 16, by]], C.gold, { jag: 1, shadow: false }); }
-    if (wb > 0 && wb < 1) { const bx = 620, by = lerp(620, ry(620), easeIn(wb)); cutout([[bx - 40, by - 8], [bx + 40, by - 8], [bx + 28, by + 10], [bx - 28, by + 10]], C.gold, { jag: 1, shadow: false }); }
+    if (rb > 0) { const bx = 360, by = lerp(740, ry(360) - 30, rb); inkLine([[340, 700], [bx, by - 30]], 1.5, C.ink, 'inkfine', 0); cutout([[bx - 22, by - 30], [bx + 22, by - 30], [bx + 16, by], [bx - 16, by]], C.gold, { jag: 1, shadow: false }); }
+    if (wb > 0 && wb < 1) { const bx = 620, by = lerp(720, ry(620), easeIn(wb)); cutout([[bx - 40, by - 8], [bx + 40, by - 8], [bx + 28, by + 10], [bx - 28, by + 10]], C.gold, { jag: 1, shadow: false }); }
     // the Knot tries to tie the river, and fails
     const kk = Math.min(on(t, tWorr - .4, tRead2 + .9, .4, .6), ko), shrink = ease(seg(t, tPrac - .2, tRead2 + .5));   // "So far it has been readable": the Knot gives up
     if (kk > 0) { ctx.save(); ctx.translate(1000, 760 - 60 * kk + 120 * shrink); ctx.scale(kk * lerp(1, .35, shrink), kk * lerp(1, .35, shrink)); knotP(0, 0, 120, { look: [0, 1], grin: t < tPrac }); ctx.restore(); }
@@ -538,7 +552,8 @@
         const cx = -w / 2 + 30 + (n % 2) * (w / 2), cy = -h + 40 + Math.floor(n / 2) * 240, ww = w / 2 - 60, wh = 200, L = on(t, wi.t0 - .3);
         flat(rectPts(cx - 6, cy - 6, ww + 12, wh + 12), mixCol(C.lilac, C.ink, .4)); flat(rectPts(cx, cy, ww, wh), L > .3 ? mixCol(C.cream, '#FFE9A0', L) : C.paper2);
         if (L > .3) glow(cx + ww / 2, cy + wh / 2, ww * .6, '#FFE08A', .3 * L);
-        ctx.save(); ctx.globalAlpha = .4 + .6 * L; txt(wi.s, cx + 18, cy + 84, wi.font === HANGUL ? 44 : wi.font === 'monospace' ? 32 : 38, C.ink, { font: wi.font || SERIF, weight: wi.font === HANGUL ? '400' : '700', align: 'left' }); ctx.restore();
+        ctx.save(); ctx.globalAlpha = .4 + .6 * L; const fs0 = wi.font === HANGUL ? 44 : wi.font === 'monospace' ? 32 : 38, fw = wi.font === HANGUL ? '400' : '700'; ctx.font = `${fw} ${fs0}px ${wi.font || SERIF}`; const fs = Math.min(fs0, fs0 * (ww - 64) / ctx.measureText(wi.s).width);   // fits clear of the held-back period
+        txt(wi.s, cx + 22, cy + 84, fs, C.ink, { font: wi.font || SERIF, weight: fw, align: 'left' }); ctx.restore();
         // the period that wants to come too early, held back
         if (t > tStop - .6) { const k2 = seg(t, tStop - .6, tStop), held = Math.sin(t * 6 + n) * 6; const px = cx + ww - 34, py = cy + 150 + held; flat(ellPts(px, py - 60 * (1 - k2), 13, 13, 12), C.ink); ctx.save(); ctx.translate(px + 30, py + 30); ctx.rotate(-.4); cutout(rrPts(-16, -40, 32, 60, 10), '#E9C9A6', { jag: 1, shadow: [2, 3, 'rgba(0,0,0,.2)'] }); ctx.restore(); }
       });
@@ -549,8 +564,8 @@
     const kc = Math.min(on(t, tConf - .3, tLooks + .8, .4, .8), ko);
     if (kc > 0) { ctx.save(); ctx.translate(1640, 470 + 300 * seg(t, tLooks, tLooks + .8)); ctx.scale(kc * lerp(1, .4, seg(t, tLooks, tLooks + .8)), kc * lerp(1, .4, seg(t, tLooks, tLooks + .8))); knotP(0, 0, 110, { grin: t < tLooks, look: [-1, 0] }); ctx.restore(); }
     // the pull-tab
-    if (ko > 0) { const tab = ease(seg(t, tRem - .3, tRem + .3)); flat(rectPts(1450, 1012, 180 + 160 * tab, 30), C.red, { shadow: SH }); ps('pull', 1500 + 160 * tab, 1028, 26, C.paper); }
-    clS(t, lt, dur, 1740, 1010, [[a, 'neutral'], [tConf, 'confused'], [tLooks, 'idea'], [tRem - .5, 'determined'], [tSoon, 'laugh'], [e + .3, 'surprised'], [e + 1.6, 'excited']], { u: 7, flip: true, extra: { aL: t > tRem - .5 && t < tRem + .5 ? 1.3 : undefined } });
+    if (ko > 0) { ctx.save(); ctx.globalAlpha = ko; pullTab(1290, 998, ease(seg(t, tRem - .3, tRem + .3))); ctx.restore(); }
+    clS(t, lt, dur, 1620, 1010, [[a, 'neutral'], [tConf, 'confused'], [tLooks, 'idea'], [tRem - .5, 'determined'], [tSoon, 'laugh'], [e + .3, 'surprised'], [e + 1.6, 'excited']], { u: 7, flip: true, extra: { aL: t > tRem - .5 && t < tRem + .5 ? 1.3 : undefined } });
     // the right page tears out and folds into a paper dart that flies off
     if (tear > 0) {
       const lift = easeOut(tear), fk = easeInOut(fold), fl = easeIn(fly);
