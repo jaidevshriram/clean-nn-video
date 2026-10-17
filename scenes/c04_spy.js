@@ -12,7 +12,7 @@
   const DX = i => 420 + i * 330, GY = 760;
 
   // Clawd in a cream spot (a Bass gun-barrel circle), so he never sinks into the black ground
-  function spy(x, y, u, hat, o = {}) { flat(ellPts(x, y - 4.6 * u, 8.2 * u, 8.2 * u, 30), CR); tourist(x, y, u, hat, o); }
+  function spy(x, y, u, hat, o = {}) { const sq = (o.sq || 0) + (o.take || 0); flat(ellPts(x + (o.dx || 0) * u, y + (o.dy || 0) * u - 5.2 * u * (1 - sq * .5), 9.4 * u * (1 + sq * .3), 9.4 * u * (1 - sq * .3), 36), CR); tourist(x, y, u, hat, o); }   // the spot follows his pose and holds the hat
   // ---------- cut-paper props ----------
   function serif(s, x, y, size, col, o = {}) { txt(s, x, y, size, col, { font: 'serif', weight: o.weight || '900', rot: o.rot, align: o.align }); }
   // police tape strung between two stakes on the ground: it unspools from the left stake (k 0..1), sags a little,
@@ -39,7 +39,7 @@
   // a sneaky car (orange, with a fake moustache); s scale; o.col, o.mous (moustache), o.flip
   function car(x, y, s, o = {}) {
     push(); translate(x, y); scale((o.flip ? -1 : 1) * s, s); rotate(o.rot || 0);
-    cutout([[-140, 0], [-112, -58], [-34, -98], [66, -98], [124, -50], [150, 0]], o.col || OR, { shadow: [6, 8, 'rgba(0,0,0,.35)'] });
+    cutout([[-140, 0], [-112, -58], [-34, -98], [66, -98], [124, -50], [150, 0]], o.col || OR, { shadow: [6, 8, 'rgba(0,0,0,.35)'], ...(o.line ? { line: o.line, lw: 4 / s } : {}) });
     cutout([[-70, -56], [-30, -84], [10, -84], [10, -56]], o.win || CR, { shadow: false }); cutout([[24, -56], [24, -84], [60, -84], [92, -56]], o.win || CR, { shadow: false });
     const sp = o.spin || 0;
     for (const wx of [-80, 92]) { cutout(ellPts(wx, 4, 34, 34, 12), BK, { shadow: false }); flat(rectPts(wx - 4 + 12 * Math.cos(sp), 0 + 12 * Math.sin(sp), 8, 8), '#555'); }
@@ -64,13 +64,26 @@
     if (o.lock) { flat(rrPts(-16, 16, 32, 26, 4), GD); ctx.save(); ctx.strokeStyle = GD; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(0, 16, 11, Math.PI, 0); ctx.stroke(); ctx.restore(); }
     pop();
   }
-  // a gloved spy hand reaching down from the top (Bass-style); grip 0..1 closes it
-  function glove(x, y, s, rot = 0) {
-    push(); translate(x, y); rotate(rot); scale(s);
-    cutout([[-50, -900], [50, -900], [46, -60], [-46, -60]], BK, { shadow: [6, 8, 'rgba(0,0,0,.3)'] });
-    cutout([[-64, -70], [64, -70], [70, 10], [40, 60], [-40, 60], [-70, 10]], BK, { shadow: false });
-    for (let i = 0; i < 4; i++) cutout(rrPts(-62 + i * 32, 30, 24, 70, 12), BK, { shadow: false });
-    flat(rectPts(-52, -110, 104, 22), CR);
+  // a gloved spy hand reaching down from the top (Bass-style). (x, y) = the knuckles (the finger roots); the sleeve runs
+  // up off frame. Charcoal leather with a black outline, a cream cuff stripe, a thumb, and four two-joint fingers that
+  // curl inward as grip goes 0 → 1. part: 'all' | 'hand' (sleeve + palm) | 'fingers'
+  const GLV = '#46464E', GLV2 = '#5A5A64';
+  function glove(x, y, s, grip = 0, part = 'all') {
+    push(); translate(x, y); scale(s);
+    if (part !== 'fingers') {
+      flat([[-46, -1500], [46, -1500], [50, -150], [-50, -150]], '#2A2A30', { line: BK, lw: 3 });                // the sleeve
+      flat(rrPts(-58, -170, 116, 40, 8), CR, { line: BK, lw: 3 });                                                // the cuff
+      flat([[-52, -132], [52, -132], [60, -40], [56, 0], [-56, 0], [-60, -40]], GLV, { line: BK, lw: 3 });       // the back of the hand
+      for (const kx of [-24, 0, 24]) flat(rrPts(kx - 2, -110, 4, 70, 2), GLV2);                                  // the stitching
+      push(); translate(54, -60); rotate(.5 + .9 * grip); flat(rrPts(-12, 0, 24, 62, 12), GLV, { line: BK, lw: 3 }); pop();   // the thumb
+    }
+    if (part !== 'hand') for (let i = 0; i < 4; i++) {
+      const fx = -42 + i * 28, L1 = [34, 40, 38, 30][i], L2 = [26, 30, 28, 22][i];
+      push(); translate(fx, -6); rotate((i - 1.5) * .04 + .35 * grip);
+      flat(rrPts(-12, 0, 24, L1 + 10, 11), GLV, { line: BK, lw: 3 });
+      translate(0, L1); rotate(1.25 * grip); flat(rrPts(-11, -4, 22, L2 + 6, 11), GLV2, { line: BK, lw: 3 });
+      pop();
+    }
     pop();
   }
   // the cut-paper Sketch Artist: easel, beret, palette; lazy 0..1 makes him lounge
@@ -139,8 +152,12 @@
     const kc = seg(t, tc - .7, tc + .9);
     if (kc > 0) {
       const Lx = 160, Rx = 1760, Y = 600;
-      ctx.save(); ctx.strokeStyle = CR; ctx.lineWidth = 16; ctx.lineCap = 'round';
-      for (let i = 0; i < 4; i++) { const k = clamp(kc * 1.6 - i * .15), p = [[Lx + 80, Y], [DX(i), Y - 150], [Rx - 80, Y]]; ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); const q = through(p, 10), n = Math.max(2, Math.round(q.length * k)); q.slice(0, n).forEach(r => ctx.lineTo(r[0], r[1])); ctx.stroke(); }
+      // the wiring: four roads fan out from the left car to the four lockers' roofs and four fan back in to the right car,
+      // each pair in its locker's colour with a black edge (in → out, drawn on as the circuit appears)
+      ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      const arc = (x0, y0, x1, y1, k) => { if (k <= 0) return; const cx = (x0 + x1) / 2, cy = Math.min(y0, y1) - 50 - Math.abs(x1 - x0) * .12, n = Math.max(2, Math.round(24 * k)); ctx.beginPath(); for (let j = 0; j <= n; j++) { const u = j / 24, a = (1 - u) * (1 - u), b = 2 * u * (1 - u), c = u * u; const x = a * x0 + b * cx + c * x1, y = a * y0 + b * cy + c * y1; j ? ctx.lineTo(x, y) : ctx.moveTo(x, y); } ctx.strokeStyle = BK; ctx.lineWidth = 15; ctx.stroke(); ctx.strokeStyle = HC[cur]; ctx.lineWidth = 8; ctx.stroke(); };
+      let cur = 0;
+      for (let i = 0; i < 4; i++) { cur = i; const k = clamp(kc * 1.6 - i * .15); arc(Lx + 60, Y - 70 + i * 16, DX(i) - 8, Y - 140, clamp(k * 2)); arc(DX(i) + 8, Y - 140, Rx - 60, Y - 70 + (3 - i) * 16, clamp(k * 2 - 1)); }
       ctx.restore();
       for (const [x, k0] of [[Lx, 0], [Rx, .55]]) { const k = popk(kc, k0, .3); if (k <= 0) continue; push(); translate(x, Y); scale(backOut(k)); cutout(rectPts(-80, -110, 160, 150), BL); car(0, 10, .45, { mous: false, col: OR }); pop(); }
       for (let i = 0; i < 4; i++) doghouse(DX(i), Y + 30, .62, HC[i], DOG[i], { k: popk(kc, .2 + i * .1, .35) });
@@ -155,8 +172,18 @@
     const k19 = popk(t, t19 - .25, .35) * (1 - seg(t, tm + .4, tm + .9));
     if (k19 > 0) { push(); translate(960, 250); scale(lerp(2.2, 1, easeOut(k19))); rotate(-.06); cutout(rectPts(-260, -100, 520, 200), BK); serif('2019', 0, 8, 170, OR); pop(); }
     // it became the field's main example: copies of the diagram flutter down everywhere
-    const km = seg(t, tm - .2, tm + 2.2);
-    for (let i = 0; i < 14; i++) { const k = seg(km, i * .05, i * .05 + .5); if (k <= 0) continue; const x = 100 + hash(i * 3.3) * 1720, y = lerp(-200, 120 + hash(i * 7) * 860, easeOut(k)), r = (hash(i) - .5) * .8 + (1 - k) * 2; push(); translate(x, y); rotate(r); cutout(rectPts(-80, -55, 160, 110), CR); ctx.save(); ctx.strokeStyle = BK; ctx.lineWidth = 4; for (let j = 0; j < 4; j++) { ctx.beginPath(); ctx.moveTo(-60, 0); ctx.quadraticCurveTo(-20 + j * 14, -30, 60, 0); ctx.stroke(); } ctx.restore(); dot(-60, 0, 9, OR); dot(60, 0, 9, OR); pop(); }
+    // (each copy is a little version of the real diagram, with a faint "Zoom In" header; they settle around the circuit,
+    // never on it or on the caption, and fade before the next shot)
+    const km = seg(t, tm - .2, tm + 2.2), kOut = 1 - seg(t, cs('hc_story') - .8, cs('hc_story') - .3);
+    const SPOT = [[150, 120], [420, 90], [700, 120], [1240, 110], [1520, 90], [1790, 130], [280, 330], [1660, 340], [560, 360], [1380, 360], [120, 800], [470, 830], [1450, 820], [1180, 850]];
+    for (let i = 0; i < 14; i++) {
+      const k = seg(km, i * .05, i * .05 + .5); if (k <= 0 || kOut <= 0) continue; const [x0, y0] = SPOT[i], x = x0 + 40 * Math.sin(k * 5 + i) * (1 - k), y = lerp(-200, y0, easeOut(k)), r = (hash(i) - .5) * .5 + (1 - k) * 2;
+      push(); translate(x, y); rotate(r); ctx.globalAlpha = kOut; cutout(rectPts(-80, -55, 160, 110), CR);
+      txt('Zoom In', 0, -40, 13, 'rgba(26,26,26,.45)', { font: 'serif', weight: '700' });
+      flat(rectPts(-72, -6, 18, 22), BL); flat(rectPts(54, -6, 18, 22), BL);
+      ctx.save(); ctx.lineCap = 'round'; for (let h = 0; h < 4; h++) { const hx = -33 + h * 22; ctx.strokeStyle = BK; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-54, 2 + (h - 1.5) * 3); ctx.quadraticCurveTo(hx, -34, 54, 2 + (h - 1.5) * 3); ctx.stroke(); flat([[hx - 8, 30], [hx - 8, 16], [hx, 8], [hx + 8, 16], [hx + 8, 30]], HC[h], { line: BK, lw: 1 }); } ctx.restore();
+      ctx.globalAlpha = 1; pop();
+    }
     if (km > .2) { serif("the field's main example", 960, 1000, 64, CR, { weight: '400' }); }
     spy(1780, 1000, 9, 'fedora', { ...emotions(t, [[a, 'suspicious'], [t19, 'surprised'], [tm + .5, 'happy']]), view: 'q', flip: true, boilKey: 'c4c' });
     camEnd();
@@ -169,13 +196,20 @@
     const tt = o.time ? o.time(t) : t;   // the rewind plays this backwards
     ground({ y0: 700, y1: 620 });
     camKeys(t, [[a - .2, 960, 560, .96], [tl, 1000, 600, 1.08], [tp + 1, 900, 560, 1.0]], .3);
+    // the fetch: a gloved hand reaches down BEHIND the locker (only its sleeve shows above the roof), its fingers appear in
+    // the open doorway, the car slides forward into them, they close, and hand and car lift out together over the roof
+    const gk = seg(tt, tp, tp + .7), gs = seg(tt, tp + .7, tp + 1.0), gg = ease(seg(tt, tp + .9, tp + 1.08)), gu = easeIn(seg(tt, tp + 1.08, tp + 1.9));
+    const GX = DX(1) + 4, gyk = lerp(-420, 752, easeOut(gk)) - 1150 * gu, carAt = () => car(GX - 4, gyk + lerp(70, 54, gg) + 8 * (1 - gs), lerp(.3, .4, ease(gs)), { mous: true, rot: .04 * gu, col: mixCol(BK, '#C2621C', .45 + .55 * gs), line: BK });
+    const fetch = gk > 0 && gu < 1;
+    if (fetch) { glove(GX, gyk, .62, gg, 'hand'); if (gs > 0) carAt(); glove(GX, gyk, .62, gg, 'fingers'); }
     for (let i = 0; i < 4; i++) doghouse(DX(i), GY, 1.1, HC[i], DOG[i], { door: i === 1 ? env(tt, tin - .2, tl - .1, .3, .3) + env(tt, tp + .3, tp + 1.4, .2, .2) : 0, lock: i === 1 && tt > tl && tt < tp + .3 });
-    // the car: tiptoes in from the left (hops), slips through the locker door, is fetched later by a glove
+    if (fetch) {   // what is inside the open doorway, drawn again clipped to it so it reads as being inside the locker
+      ctx.save(); const D = new Path2D(); rrPts(DX(1) - 44, GY - 4.4, 88, 70.4, 33).forEach((q, i) => i ? D.lineTo(q[0], q[1]) : D.moveTo(q[0], q[1])); D.closePath(); ctx.clip(D);
+      if (gs > 0) carAt(); glove(GX, gyk, .62, gg, 'fingers'); ctx.restore();
+    }
+    // the car: tiptoes in from the left (hops) and slips through the locker door
     const walk = seg(tt, a + .3, tin), bounce = Math.abs(Math.sin(tt * 9)) * 18 * (walk > 0 && walk < 1 ? 1 : 0);
-    const inside = tt >= tin + .1 && tt < tp + .9;
-    if (!inside && tt < tp + .9) { const x = lerp(-250, DX(1) - 30, ease(walk)), sh = seg(tt, tin - .1, tin + .1); car(x, GY + 40 - bounce, 1.05 * (1 - .6 * sh), { spin: tt * 6 }); }
-    const gk = seg(tt, tp, tp + .8), gu = seg(tt, tp + .8, tp + 1.8);
-    if (gk > 0) { const gy = lerp(-150, 760, easeOut(gk)) - lerp(0, 1100, easeIn(gu)); glove(DX(1), gy - 40, .9, .05); if (gk >= 1) car(DX(1) - 10, gy + 70, .6, { rot: .2 }); }
+    if (tt < tin + .1) { const x = lerp(-250, DX(1) - 30, ease(walk)), sh = seg(tt, tin - .1, tin + .1); car(x, GY + 40 - bounce, 1.05 * (1 - .6 * sh), { spin: tt * 6 }); }
     // labels
     if (o.labels !== false) {
       const kd = seg(tt, wt('hc_story', 'dog') - .3, wt('hc_story', 'dog') + .3);
@@ -198,7 +232,7 @@
     bg(OR); GRAIN = .8;
     camKeys(t, [[a - .2, 960, 560, 1.15], [tS - .3, 960, 540, 1.0], [tE, 980, 560, 1.0], [tn, 980, 560, 1.0], [tch, 960, 540, 1.0], [ce('hc_nudge') + .4, 960, 540, .98]], .3);
     // the hill of easiest paintings: a deep DOG valley, a shallower CAR valley over a ridge
-    const HX = 700, HY = 640, HW = 1240, P = hillPts(HX, HY, HW), cp = P[Math.round(.43 * 80)];
+    const HX = 700, HY = 640, HW = 1240, P = hillPts(HX, HY, HW), cp = P[Math.round(.19 * 80)];   // Clawd stands on the dog valley's left rim
     cutout(P.concat([[HX + HW, H + 200], [HX, H + 200]]), BK, { shadow: [0, -6, 'rgba(0,0,0,.2)'] });
     cutout([[-200, 700], [HX + 20, 610], [HX + 20, H + 200], [-200, H + 200]], BK, { shadow: false });
     // "lots of dog neurons": the dog valley is piled with little doghouses (that's why it is so deep); they clear for the nudge
@@ -206,18 +240,25 @@
     for (let i = 0; i < 12; i++) { const k = seg(kl, i / 18, i / 18 + .35); if (k <= 0) continue; const row = i < 6 ? 0 : i < 10 ? 1 : 2, c = row ? (row === 1 ? i - 6 : i - 10) : i, n = [6, 4, 2][row], x = HX + HW * .3 + (c - (n - 1) / 2) * 60, y = HY + 254 - row * 56 - (row ? 0 : Math.abs(c - 2.5) * 10); push(); translate(x, y); scale(.36 * backOut(k)); cutout([[-80, -40], [0, -120], [80, -40], [80, 60], [-80, 60]], i % 3 ? CR : RD, { shadow: false }); flat(rrPts(-24, 10, 48, 50, 20), BK); pop(); }
     // valley names on cream tags, and the rule of the hill
     const kv = popk(t, tS + .6, .4);
-    for (const [lab, u, dy] of [['dog', .3, -200], ['car', .77, -110]]) { if (kv <= 0) break; const q = P[Math.round(u * 80)]; push(); translate(q[0], q[1] + dy); scale(backOut(kv)); cutout(rectPts(-62, -32, 124, 64), CR); serif(lab, 0, 3, 46, BK); pop(); }
+    for (const [lab, u, dy] of [['dog', .34, -250], ['car', .77, -110]]) { if (kv <= 0) break; const q = P[Math.round(u * 80)]; push(); translate(q[0], q[1] + dy); scale(backOut(kv)); cutout(rectPts(-62, -32, 124, 64), CR); serif(lab, 0, 3, 46, BK); pop(); }
     const kh = seg(t, tS + .8, tS + 1.4);
     if (kh > 0) { ctx.globalAlpha = kh; serif('lower ground = an easier painting', 1180, 420, 46, BK, { weight: '400' }); ctx.globalAlpha = 1; }
-    // the paint ball rolls into the dog valley, again and again; after the nudge it goes over the ridge to cars
-    let u;
-    if (t < tn) { const rep = frac((t - tE + 1.2) / 1.6); u = t < tE - 1.2 ? .3 : lerp(.5, .3, easeIn(clamp(rep * 1.6))); }
-    else u = lerp(.52, .77, easeOut(seg(t, tn + .15, tn + 1.4)));
+    // the paint ball rolls into the dog valley, again and again. On "Nudge" Clawd's stick pushes it up out of the valley
+    // to the ridge (0.45 s), and from there it tips over and rolls down into the car valley
+    // (each new ball pops in on the ridge and rolls down; the one at the bottom shrinks away into the painting. The last
+    // one stays at the bottom for the nudge)
+    const tP0 = tn - .05, tP1 = tn + .6, C0 = tE - 1.2, cyc = tt => Math.floor((tt - C0) / 1.6), cLast = cyc(tP0) - (tP0 - (C0 + cyc(tP0) * 1.6) < 1.1 ? 1 : 0);
+    const pre = tt => { if (tt < C0) return [.3, 1]; const c = Math.min(cyc(tt), cLast), f = clamp((tt - C0 - c * 1.6) / 1.6); return [lerp(.5, .3, easeIn(clamp(f * 1.6))), c < cLast ? backOut(clamp(f * 7)) * (1 - ease(seg(f, .86, 1))) : (c ? backOut(clamp(f * 7)) : 1)]; };
+    const [u0] = pre(tP0);
+    let [u, bs] = t < tP0 ? pre(t) : [t < tP1 ? lerp(u0, .52, easeInOut(seg(t, tP0, tP1))) : lerp(.52, .77, easeInOut(seg(t, tP1 + .05, tP1 + 1.1))), 1];
     const j = Math.round(clamp(u) * 80), bp = P[j];
-    dot(bp[0], bp[1] - 34, 34, RD); dot(bp[0] - 10, bp[1] - 44, 9, '#F08A80');
-    // Clawd's nudge with a stick
-    const nk = env(t, tn - .5, tn + .5, .3, .3);
-    if (nk > 0) { ctx.save(); ctx.strokeStyle = '#7A5B3E'; ctx.lineWidth = 9; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cp[0] + 40, cp[1] - 50); ctx.lineTo(lerp(cp[0] + 60, bp[0] - 30, nk), lerp(cp[1] - 50, bp[1] - 34, nk)); ctx.stroke(); ctx.restore(); }
+    if (bs > .02) { dot(bp[0], bp[1] - 34 * bs, 34 * bs, RD); dot(bp[0] - 10 * bs, bp[1] - 44 * bs, 9 * bs, '#F08A80'); }
+    // Clawd's stick (held in his hand through the armR hook): it reaches the ball, pushes it while they touch, then lifts away
+    const nk = env(t, tn - .6, tn + 1, .35, .4), SX = cp[0] + 5 * 9, SY = cp[1] + 2 - 4.5 * 9, ul = clamp(u, .3, .42), lp = P[Math.round(ul * 80)];
+    const aim = [lp[0] - 30, lp[1] - 46];   // the ball's back, until it rolls out of reach (u .42), then where it left the stick
+    const aimDev = ctx.getTransform().transformPoint({ x: aim[0], y: aim[1] });
+    const aRs = nk > 0 ? -Math.atan2(aim[1] - SY, aim[0] - SX) * nk : undefined;
+    const stick = nk > 0 ? (uu, sw) => { const L = ctx.getTransform().inverse().transformPoint(aimDev), len = Math.min(220, Math.hypot(L.x, L.y)) * nk, q = Math.atan2(L.y, L.x); push(); rotate(q); flat(rrPts(-uu * .3, -5, len + uu * .3, 10, 5), '#8A6440', { line: BK, lw: 2.5 }); flat(ellPts(len, 0, 8, 8, 10), '#6A4A30', { line: BK, lw: 2 }); pop(); } : undefined;
     // the painter on the plateau at the left, painting the four portraits in turn
     const cur = clamp(Math.floor((t - tS) / 1.6), 0, 3), lazyK = env(t, tL - .3, tE - .2, .4, .4);
     artistCut(t, 330, 680, 1.05, { img: DOG[cur], k: frac((t - tS) / 1.6) * 1.2, lazy: lazyK, paint: t > tn ? BL : RD });
@@ -237,7 +278,7 @@
     const kr = seg(t, tr - .6, tr + .6);
     if (kr > .3) { ctx.globalAlpha = seg(kr, .3, .7); sans('real photos', HX + HW * .8, 540, 30, BK, { weight: '800' }); ctx.globalAlpha = 1; }
     for (let i = 0; i < 3; i++) { const k = popk(kr, i * .2, .4); if (k <= 0) continue; const x = HX + HW * (.7 + i * .1), y = 440 + (i - 1) * 14; push(); translate(x, y); rotate((i - 1) * .1); scale(backOut(k)); cutout(rectPts(-58, -48, 116, 96), CR); photoFlat(TV + ['positive-01', 'positive-07', 'positive-04'][i], -50, -40, 100, 80, {}); pop(); }
-    spy(cp[0], cp[1] + 2, 9, 'fedora', { ...emotions(t, [[a - .2, 'suspicious'], [tL, 'bored'], [tn - .8, 'determined'], [tn + 1.4, 'proud'], [tcar, 'excited']]), view: 'q', boilKey: 'c4c', aR: nk > 0 ? 1.2 : undefined });
+    spy(cp[0], cp[1] + 2, 9, 'fedora', { ...emotions(t, [[a - .2, 'suspicious'], [tL, 'bored'], [tn - .8, 'determined'], [tn + 1.4, 'proud'], [tcar, 'excited']]), view: 'q', boilKey: 'c4c', ...(nk > 0 ? { aR: aRs, armR: stick } : {}) });
     camEnd();
     const k1 = seg(t, tL - .3, tL + .3) * (1 - seg(t, tE - .5, tE - .1));
     if (k1 > 0) { ctx.globalAlpha = k1; serif('the artist gets lazy', 960, 1010, 70, CR, { weight: '400' }); ctx.globalAlpha = 1; }
@@ -271,8 +312,10 @@
       if (ka > 0) { push(); translate(x, 880); rotate(-.04); scale(backOut(ka)); cutout(rectPts(-150, -46, 300, 92), sw % 2 ? BL : CR); serif(sw % 2 ? 'a car' : 'a dog', 0, 4, 54, sw % 2 ? CR : BK); pop(); }
     });
     // Clawd turns his head to match each window's direction
-    const look = t > tf ? Math.floor((t - tf) * 1.2) % 2 : -1;
-    spy(960, 1010, 11, 'fedora', { ...emotions(t, [[a - .2, 'thinking'], [tf, 'neutral'], [tp, 'happy']]), view: look === 0 ? 'side' : 'front', flip: true, boilKey: 'c4c' });
+    // (each change of view is a drawn turn through the in-between q view: front ↔ facing left)
+    const nL = t > tf ? Math.floor((t - tf) * 1.2) : -1, tL0 = tf + nL / 1.2, hd = n => n < 0 ? 0 : n % 2 ? 0 : -.25;
+    const tv = nL < 0 ? { view: 'front', flip: true } : turn(t, tL0, tL0 + .22, hd(nL - 1), hd(nL));
+    spy(960, 1010, 11, 'fedora', { ...emotions(t, [[a - .2, 'thinking'], [tf, 'neutral'], [tp, 'happy']]), ...tv, boilKey: 'c4c' });
     camEnd();
     const kp = seg(t, tp - .3, tp + .3);
     if (kp > 0) { push(); translate(960, 142); rotate(-.03); scale(backOut(kp)); cutout(rectPts(-350, -55, 700, 110), BK); serif('POSE NEURONS', 0, 5, 74, OR); pop(); }
@@ -290,9 +333,17 @@
       // REWIND: the heist runs backwards, fast, with the film jumping
       const u = seg(t, rw0, rw1), st = cs('hc_story'), en = wt('hc_story', 'later') + 1.8, tt = lerp(en, st + .3, easeInOut(u));
       heist(t, lt, dur, { at: st, time: () => tt, labels: false });
-      const j = Math.floor(t * 24); push(); translate(0, (hash(j) - .5) * 14);
-      for (let i = 0; i < 3; i++) flat(rectPts(0, hash(j * 3 + i) * H, W, 4 + 6 * hash(j + i)), 'rgba(26,26,26,.35)');
-      pop();
+      // old film running backwards: the exposure flickers, vertical scratches and dust come and go, and the frame line
+      // (with its sprocket holes) rolls up through the picture
+      const j = Math.floor(t * 24), fl = hash(j * 1.3);
+      if (fl > .5) flash(.1 * (fl - .5) * 2, '#FFF4DC'); else fade(.12 * (.5 - fl) * 2, BK);
+      ctx.save(); ctx.lineCap = 'round';
+      for (let i = 0; i < 4; i++) { if (hash(Math.floor(t * 8) * 5 + i) < .35) continue; const x = W * hash(Math.floor(t * 8) * 3 + i * 7) + (hash(j + i) - .5) * 6, y0 = H * hash(j * 2 + i) * .4; ctx.strokeStyle = i % 2 ? 'rgba(243,226,190,.75)' : 'rgba(26,26,26,.6)'; ctx.lineWidth = 1.2 + 2 * hash(i + j); ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x + (hash(i * 9) - .5) * 14, y0 + H * (.5 + .5 * hash(j + i * 3))); ctx.stroke(); }
+      for (let i = 0; i < 9; i++) dot(W * hash(j * 7 + i * 11), H * hash(j * 5 + i * 3), 1.5 + 3 * hash(j + i), hash(i + j * 2) > .5 ? CR : BK, .7);
+      ctx.restore();
+      const fy = H - frac((t - rw0) * 1.3) * (H + 120) + 40;
+      flat(rectPts(0, fy - 22, W, 44), BK);
+      for (const sx of [0, W - 64]) { flat(rectPts(sx, 0, 64, H), 'rgba(26,26,26,.85)'); for (let i = -1; i < 9; i++) flat(rrPts(sx + 18, ((i * 130 + fy) % (H + 130)) - 40, 28, 40, 6), '#E9D9B8'); }
       push(); translate(1700, 150); for (const dx of [-60, 0]) cutout([[dx + 50, -50], [dx + 50, 50], [dx - 20, 0]], CR); pop();
       serif('there was never a heist', 960, 1000, 70, CR, { weight: '400' });
     }
@@ -327,16 +378,17 @@
     ground({ y0: 700, y1: 620 });
     camKeys(t, [[rw1, 820, 600, 1.0], [tsp, 1150, 560, .92], [e + .5, 1260, 540, .86]], .3);
     for (let i = 0; i < 4; i++) doghouse(DX(i) - 120, GY, .75, HC[i], i < 2 ? CAR[i] : DOG[i], { door: 0 });
-    const kx = seg(t, rw1, tk + .8), cx = lerp(-200, 1650, easeInOut(kx));
+    const kx = seg(t, rw1, tk + .8), cx = lerp(-200, 1470, easeInOut(kx));   // it parks just short of the fork
     // the branching car route
     const root = [1650, 950], tree = [];
     const kb = seg(t, tsp - .7, tsp + 1.4);
-    const grow = (p, ang, len, d, i0) => { if (d > 3) return; const k = clamp(kb * 4 - d); if (k <= 0) return; const q = [p[0] + Math.cos(ang) * len * k, p[1] + Math.sin(ang) * len * k]; tree.push([p, q, d]); if (k >= 1) { grow(q, ang - .45, len * .72, d + 1, i0 * 2); grow(q, ang + .45, len * .72, d + 1, i0 * 2 + 1); } };
-    grow(root, -Math.PI / 2 + .2, 300, 0, 0);
+    const SPR = [.62, .5, .42], LEN = [1, .85, .72];   // wide forks near the trunk, narrower at the top, so the 8 leaf tiles fan out
+    const grow = (p, ang, len, d, i0) => { if (d > 3) return; const k = clamp(kb * 4 - d); if (k <= 0) return; const q = [p[0] + Math.cos(ang) * len * k, p[1] + Math.sin(ang) * len * k]; tree.push([p, q, d]); if (k >= 1 && d < 3) { grow(q, ang - SPR[d], len * LEN[d], d + 1, i0 * 2); grow(q, ang + SPR[d], len * LEN[d], d + 1, i0 * 2 + 1); } };
+    grow(root, -Math.PI / 2 + .12, 260, 0, 0);
     ctx.save(); ctx.strokeStyle = CR; ctx.lineCap = 'round'; for (const [p, q, d] of tree) { ctx.lineWidth = 22 - d * 4; ctx.beginPath(); ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); ctx.stroke(); } ctx.restore();
     ctx.save(); ctx.strokeStyle = CR; ctx.lineWidth = 22; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-200, 950); ctx.lineTo(root[0], root[1]); ctx.stroke(); ctx.restore();
     const leaves = tree.filter(([, , d]) => d === 3);
-    leaves.forEach(([, q], i) => { const k = popk(t, tsp + .6 + i * .12, .35); if (k <= 0) return; push(); translate(q[0], q[1] - 40); scale(1.3 * backOut(k)); cutout(rectPts(-62, -52, 124, 104), [OR, RD, BL, CR][i % 4]); photoFlat(TV + 'positive-0' + (1 + i % 8), -54, -44, 108, 88, {}); pop(); });
+    leaves.forEach(([, q], i) => { const k = popk(t, tsp + .6 + i * .12, .35); if (k <= 0) return; push(); translate(q[0], q[1] - 34); scale(.98 * backOut(k)); cutout(rectPts(-62, -52, 124, 104), [OR, RD, BL, CR][i % 4]); photoFlat(TV + 'positive-0' + (1 + i % 8), -54, -44, 108, 88, {}); pop(); });
     car(cx, 950, .7, { spin: t * 8 });
     spy(320, 1000, 9, 'fedora', { ...emotions(t, [[rw1, 'surprised'], [tk, 'happy'], [tsp + 1, 'excited']]), view: 'q', boilKey: 'c4c' });
     camEnd();
@@ -356,26 +408,36 @@
     // the small model: our little district of four lockers, a dog and a car side by side
     doghouse(560, 800, .55, RD, DOG[2], {}); doghouse(760, 800, .55, BL, CAR[0], {});
     const kw = seg(t, tsep - .3, tsep + .4);
-    if (kw > 0) { flat(rectPts(655, 800 - 260 * kw, 10, 260 * kw), CR); sans('?', 660, 480, 80, BK); }
+    // a signpost planted between them asks the question: a black post, a cream board, a big "?"
+    if (kw > 0) { const ph = 250 * easeOut(kw), top = 800 - ph; flat(rectPts(654, top, 12, ph), BK); flat(rectPts(640, 790, 40, 12), BK);
+      const kb = backOut(seg(kw, .4, 1)); if (kb > 0) { push(); translate(660, top + 6); rotate(-.05); scale(kb); cutout(rrPts(-56, -112, 112, 104, 10), CR); flat(rrPts(-48, -104, 96, 88, 7), CR, { line: BK, lw: 3 }); sans('?', 0, -56, 78, BK); pop(); } }
     // DINOv2 rises behind: a giant cut-paper tower with pose windows
     const kD = easeOut(seg(t, td - .4, td + 1.2));
     if (kD > 0) {
-      const bx = 1350, by = 820, bw = 640, bh = 760 * kD;
-      cutout([[bx - bw / 2, by], [bx - bw / 2, by - bh], [bx, by - bh - 110 * kD], [bx + bw / 2, by - bh], [bx + bw / 2, by]], BK);
+      const bx = 1350, by = 820, bw = 640, bh = 760 * kD, top = by - bh;
+      // a cut-paper building: a black block with a charcoal side wing, a gable with a gold name plate, window frames, a door
+      cutout([[bx - bw / 2, by], [bx - bw / 2, top], [bx, top - 110 * kD], [bx + bw / 2, top], [bx + bw / 2, by]], BK);
+      flat([[bx + bw / 2 - 70, by], [bx + bw / 2 - 70, top + 6], [bx + bw / 2, top], [bx + bw / 2, by]], '#2C2C30');
+      flat(rectPts(bx - bw / 2 - 14, top - 8, bw + 28, 18), '#2C2C30', { line: BK, lw: 2 });
+      if (kD > .5) { const kp2 = backOut(seg(kD, .5, .9)); push(); translate(bx, top - 46 * kD); scale(kp2); cutout(rrPts(-120, -30, 240, 60, 8), GD); flat(rrPts(-111, -22, 222, 44, 6), GD, { line: BK, lw: 3 }); serif('DINOv2', 0, 3, 40, BK); pop(); }
+      if (kD > .8) { flat(rrPts(bx - 40, by - 86, 80, 86, 36), '#2C2C30', { line: CR, lw: 4 }); dot(bx + 22, by - 40, 5, GD); }
       if (kD > .8) for (let r = 0; r < 2; r++) for (let c = 0; c < 4; c++) {
         const i = r * 4 + c, x = bx - bw / 2 + 40 + c * 150, y = by - bh + 70 + r * 220, k = popk(t, tst - .4 + i * .12, .35);
         // the windows light up as soon as the tower stands (the photos arrive on "still has")
-        if (k < 1) { const kl = popk(t, td + 1 + i * .1, .3); if (kl > 0) flat(rectPts(x + 65 - 62, y + 80 - 78, 124, 156), mixCol(BK, GD, .8 * kl)); }
+        flat(rectPts(x + 65 - 69, y + 80 - 85, 138, 170), '#3A3A40');   // the window frame
+        if (k < 1) { const kl = popk(t, td + 1 + i * .06, .3); if (kl > 0) { flat(rectPts(x + 65 - 62, y + 80 - 78, 124, 156), mixCol(BK, GD, .85 * kl)); push(); translate(x + 65, y + 100); ctx.globalAlpha = kl; const SIL = mixCol(BK, '#6A4A10', .2);
+          if (r) { flat([[-48, 10], [-40, -10], [-16, -26], [16, -26], [36, -8], [50, 10]], SIL); for (const wx of [-26, 30]) dot(wx, 12, 9, BK); }
+          else { flat(ellPts(-2, -4, 30, 12, 18), SIL); flat(ellPts(32, -20, 12, 11, 14), SIL); flat(ellPts(43, -16, 9, 5, 10), SIL); flat([[24, -26], [30, -40], [34, -27]], SIL); for (const lx of [-26, -14, 12, 22]) flat(rrPts(lx - 3, 0, 7, 18, 3), SIL); flat([[-30, -8], [-46, -26], [-42, -28], [-26, -12]], SIL); }
+          ctx.globalAlpha = 1; pop(); } }
         if (k <= 0) continue;
         push(); translate(x + 65, y + 80); scale(backOut(k)); cutout(rectPts(-70, -86, 140, r ? 172 : 220), [OR, CR, RD, BL][c]); photoFlat(PE + 'dino/' + (c * 2 + r), -62, -78, 124, 156, {}); pop();
         // the dog and the car below it are one neuron: the same way of facing, shown in the strip between them
         if (r === 0) { const kq = popk(t, tst + .7 + c * .12, .3); if (kq > 0) { push(); translate(x + 65, y + 194); scale(backOut(kq)); if (c === 1) arrowCut(0, 0, -1, .3, BK, 1); else { flat(ellPts(0, 0, 19, 19, 20), BK); flat(ellPts(0, 0, 12, 12, 16), [OR, CR, RD, BL][c]); flat(ellPts(0, 0, 5, 5, 10), BK); } pop(); } }
       }
-      if (kD > .6) { serif('DINOv2', bx, by + 70, 90, CR); }
       const kpn = seg(t, tst + 1.1, tst + 1.6); if (kpn > 0 && kD > .8) { ctx.globalAlpha = kpn; serif('pose neurons', bx, by - 190, 64, GD); sans('one column = one neuron', bx, by - 125, 34, CR, { weight: '700' }); ctx.globalAlpha = 1; }
       const k10 = popk(t, t10 - .3, .35), ky = popk(t, ty - .3, .35);
-      if (k10 > 0) { push(); translate(bx - bw / 2 - 40, by - bh + 60); rotate(-.1); scale(backOut(k10)); cutout(ellPts(0, 0, 110, 110, 24), RD); serif('×10', 0, 0, 70, CR); pop(); }
-      if (ky > 0) { push(); translate(bx + bw / 2 + 20, by - bh + 20); rotate(.1); scale(backOut(ky)); cutout(ellPts(0, 0, 110, 110, 24), BL); serif('+10 yrs', 0, 0, 44, CR); pop(); }
+      if (k10 > 0) { push(); translate(bx - bw / 2 - 125, by - bh + 330); rotate(-.1); scale(backOut(k10)); cutout(ellPts(0, 0, 96, 96, 24), RD); serif('×10', 0, 0, 64, CR); pop(); }
+      if (ky > 0) { push(); translate(bx + bw / 2 + 125, by - bh + 150); rotate(.1); scale(backOut(ky)); cutout(ellPts(0, 0, 96, 96, 24), BL); serif('+10 yrs', 0, 0, 40, CR); pop(); }
     }
     // every vision model Nick has looked at: more towers pop up along the horizon, each flying a pose arrow
     const ke = seg(t, tev - .3, tdo + .3);

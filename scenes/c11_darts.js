@@ -111,8 +111,14 @@
   }
   // board shake on impact
   const thunk = (t, ti) => t > ti && t < ti + .4 ? Math.sin((t - ti) * 60) * 8 * (1 - (t - ti) / .4) : 0;
-  // a hand-held dart for Clawd's throwing arm (side view: the arm hook is at the arm tip)
-  const holdDart = (o = {}) => (u, sw) => { dart(u * 1.6, -u * .2, -.25, u / 34, o); };
+  // Clawd's overhand throw (side view, facing the board on his left): the arm cocks up behind his head, whips forward
+  // to the release at tRel and follows through low. The held dart is scaled to his hand and counter-rotated against the
+  // arm, so its point stays aimed at the board the whole time; throwTip() is where that point is at the release, which
+  // is where the flight starts.
+  const DS = 1 / 60, AREL = .55;
+  const throwArm = (t, tRel, rest = .4) => t < tRel - .75 ? rest : t < tRel - .16 ? lerp(rest, 2.5, ease(seg(t, tRel - .75, tRel - .16))) : t < tRel ? lerp(2.5, AREL, easeIn(seg(t, tRel - .16, tRel))) : t < tRel + .2 ? lerp(AREL, -.75, easeOut(seg(t, tRel, tRel + .2))) : lerp(-.75, rest, ease(seg(t, tRel + .45, tRel + 1)));
+  const holdDart = (a, aim) => (u, sw) => { const s = u * DS; ctx.save(); ctx.rotate(a - .7 + aim); dart(64 * s, 0, 0, s); ctx.restore(); };
+  const throwTip = (x, y, u, aim, dy = 0) => { const q = .7 - AREL, hx = 1.6 * u + Math.cos(q) * 2.1 * u, hy = -4.2 * u + Math.sin(q) * 2.1 * u; return [x - (hx + Math.cos(aim) * 64 * u * DS), y + dy * u + hy + Math.sin(aim) * 64 * u * DS]; };
 
   // ---------- broadcast graphics (screen space) ----------
   function bug(t, label = 'LIVE', sub = 'PUB DARTS · LEG 11') {
@@ -196,9 +202,9 @@
       if (wind > 0 && rel < 1) { ctx.save(); ctx.translate(kx - 40, 920 - 60 * wind); dot(0, 0, 60 * (1 - rel), '#F2D04A'); ctx.restore(); }
     }
     const cl = emotions(t, [[CH, 'happy'], [a + .3, 'suspicious'], [tThrow - .4, 'determined'], [tHit + .1, 'nervous'], [tHit + .9, 'smug'], [tSpHit, 'surprised'], [tSo + .2, 'laugh'], [tFa, 'thinking']]);
-    const wind = seg(t, tThrow - .45, tThrow), aL = t < tThrow ? lerp(.4, 2.6, ease(wind)) : lerp(2.6, .8, easeOut(seg(t, tThrow, tThrow + .15)));
-    tourist(1600, 1010, 20, 'party', { ...cl, view: 'side', flip: true, aL, armL: t < tThrow ? holdDart() : null, boilKey: 'c11c' });
-    flying(t, tThrow, tHit, [1470, 800], WD, 320, 1.3, .75);
+    const aL = throwArm(t, tThrow, cl.aL ?? .4);
+    tourist(1600, 1010, 20, 'party', { ...cl, view: 'side', flip: true, aL, armL: t < tThrow ? holdDart(aL, -.95) : null, boilKey: 'c11c' });
+    flying(t, tThrow, tHit, throwTip(1600, 1010, 20, -.95, cl.dy), WD, 40, DS * 20, .75);
     crowd(t, seg(t, tSo + .2, tSo + .5) * (1 - seg(t, tFa, tFa + .5)) * .6);
     camEnd();
     vignette(.35, '#0A0604');
@@ -303,8 +309,8 @@
   }
   function bull(t, lt, dur) {
     const a = cs('el_bull'), tOf = wt('el_bull', 'Often'), tFi = wt('el_bull', 'fire'), tTe = wt('el_bull', 'ten'), tWo = wt('el_bull', 'words'), tEx = wt('el_bull', 'explanation'), tCe = wt('el_bull', 'center'), e = ce('el_bull');
-    const tRel = tOf + .1, tHit = tFi - .05, fire = seg(t, tHit, tHit + .25) * (1 - .3 * seg(t, tHit + 1.5, tHit + 3));
-    const slow = t > tRel && t < tHit;
+    const tHit = tFi - .05, tRel = Math.max(a + .9, tHit - .85), fire = seg(t, tHit, tHit + .25) * (1 - .3 * seg(t, tHit + 1.5, tHit + 3));
+    const slow = t > tRel && t < tHit;   // the throw lands on "fire"; its slow-mo flight takes .85 s
     const tight = t >= tRel + .35 && t < tTe - .3;
     if (t < tRel + .35) camKeys(t, [[t - lt, 1150, 560, 1.0], [tRel + .35, 1100, 545, 1.0]], .5);
     else if (tight) camKeys(t, [[tRel + .35, 1000, 480, 1.25], [tHit, 900, 470, 1.4], [tTe - .3, 880, 470, 1.45]], .5);
@@ -315,14 +321,15 @@
     pubLight(t, fire);
     const P20 = bp(3, .6); stuck(P20[0], P20[1], .8, { paper: true, a: Math.PI * .86 });
     greyDarts(t, tTe - .3);
-    if (!flying(t, tRel, tHit, [1460, 790], [BX + 4, BY - 2], 260, 1.4, .85, { ease: x => x })) if (t >= tHit) stuck(BX + 4, BY - 2, .85);
+    const cl = emotions(t, [[t - lt - 1, 'determined'], [tRel + .2, 'excited'], [tHit + .3, 'starstruck'], [tTe, 'surprised'], [tCe - .3, 'excited']]);
+    if (!flying(t, tRel, tHit, throwTip(1580, 1010, 20, -.62, emotions(tRel, [[tRel - 2, 'determined']]).dy), [BX + 4, BY - 2], 60, DS * 20, .85, { ease: x => x })) if (t >= tHit) stuck(BX + 4, BY - 2, .85);
     if (fire > 0) for (let i = 0; i < 16; i++) { const f = seg(t, tHit, tHit + .9), q = i / 16 * TAU; dot(BX + Math.cos(q) * (40 + 360 * easeOut(f)), BY + Math.sin(q) * (40 + 360 * easeOut(f)), 9 * (1 - f), '#FFF2C8', 1 - f); }
     ctx.restore();
     // telestrator on the replay
     teleRing(BX, BY, 70, 64, seg(t, tEx - .1, tEx + .6), 10);
     teleLine([[BX + 90, BY - 50], [BX + 230, BY - 200], [BX + 420, BY - 240]], seg(t, tEx + .5, tEx + 1.0), 10);
-    const tw = seg(t, tRel - .9, tRel), cl = emotions(t, [[t - lt - 1, 'determined'], [tRel + .2, 'excited'], [tHit + .3, 'starstruck'], [tTe, 'surprised'], [tCe - .3, 'excited']]);
-    if (!tight) tourist(1580, 1010, 20, 'party', { ...cl, view: 'side', flip: true, aL: t < tRel ? lerp(.4, 2.6, ease(tw)) : (cl.aL ?? 1), armL: t < tRel ? holdDart() : null, boilKey: 'c11c' });
+    const aL = throwArm(t, tRel, cl.aL ?? .4);
+    if (!tight) tourist(1580, 1010, 20, 'party', { ...cl, view: 'side', flip: true, aL, armL: t < tRel ? holdDart(aL, -.62) : null, boilKey: 'c11c' });
     if (!tight) crowd(t, seg(t, tHit, tHit + .3) * (1 - seg(t, tTe, tTe + .6) * .8) + seg(t, tCe - .3, tCe));
     camEnd();
     if (slow) { POST.push(() => { ctx.fillStyle = 'rgba(10,20,60,.12)'; ctx.fillRect(0, 0, W, H); }); }

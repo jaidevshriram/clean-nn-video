@@ -60,13 +60,10 @@
     POST.push(() => { ctx.save(); ctx.font = `${bold ? 'bold ' : ''}${sz}px ${FONTS[face] || face}`; const w = ctx.measureText(txt).width + sz * 1.1, h = sz * 1.5; ctx.translate(x, y); ctx.scale(Math.max(.02, backOut(pk)), Math.max(.02, ease(clamp(pk * 1.6)))); ctx.globalAlpha = clamp(pk * 3); ctx.fillStyle = o.bg || PAPER; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.fillRect(-w / 2, -h / 2, w, h); ctx.strokeRect(-w / 2, -h / 2, w, h); ctx.lineWidth = 1; ctx.strokeRect(-w / 2 + 7, -h / 2 + 7, w - 14, h - 14); ctx.restore(); });
     if (tk > 0) letter(txt, x, y, sz, o.col || INK, { face, bold, reveal: tk, shadow: false });
   }
-  // Clawd stays in colour through the engraving (a soft hole in the pass around him), so he never sinks into the hatching
-  // (a tall ellipse from his feet to the top of the tallest hat, with a tight edge, so no muddy ring is left around him)
+  // Clawd stays in clean colour through the engraving: he is drawn in a POST after the engraving pass (with the shot's
+  // camera), so he sits crisply on top of it with no hole or ring around him. Call it after engrave()
   const scr = (x, y) => { const z = LAST_CAM ? LAST_CAM.zoom : 1; return LAST_CAM ? [(x - LAST_CAM.cx) * z + 960, (y - LAST_CAM.cy) * z + 540, z] : [x, y, 1]; };
-  const clawdHole = (x, y, s) => { const [sx, sy, z] = scr(x, y); return [sx, sy - 6.6 * s * z, 7.6 * s * z, 0, 8.4 * s * z]; };
-  // a hole for a loose hat in flight (x, y = the brim centre in world space; s = the hat size)
-  const hatHole = (x, y, s) => { const [sx, sy, z] = scr(x, y - s * .28); return [sx, sy, s * .62 * z, 0, s * .5 * z]; };
-
+  const afterEngrave = draw => { const C = { ...LAST_CAM }; POST.push(() => { camBegin(C.cx, C.cy, C.zoom, C.rot || 0); draw(); camEnd(); }); };
   // where a point of Clawd's body (body-local, in u) lands in the world, for the pose o given to clawd(); armTip finds his
   // hand, so a prop he works (the focus knob) can follow it exactly
   function bodyPt(x, y, u, o, bx, by) {
@@ -123,13 +120,36 @@
     paint(rectPts(x - w * .2, base - 12, w * .4, 14, 1), { wash: '#8A7A6A', ink: INK, sw: .8 });
     pop();
   }
-  // a crooked hanging sign
-  function crookedSign(x, y, ang, label, t) { boilSeed('cs' + x); push(); translate(x, y); rotate(ang + .05 * Math.sin(t * 1.7 + x)); inkLine([[-50, -40], [-40, 0]], 1.4, INK, 'inkfine', 0); inkLine([[50, -40], [40, 0]], 1.4, INK, 'inkfine', 0); paint(rectPts(-70, 0, 140, 44, 1), { wash: '#C9B48E', ink: INK, sw: .9 }); pop(); if (label) letter(label, x, y + 22, 26, INK, { face: 'serif', rot: ang, shadow: false }); }
+  // a crooked hanging sign: an iron bracket, two chains and a painted board with engraved serif lettering (drawn in the
+  // world, so the engraving pass hatches it like the rest of the street)
+  function crookedSign(x, y, ang, label, t, o = {}) {
+    boilSeed('cs' + x); const sz = o.size || 26;
+    ctx.save(); ctx.font = `bold ${sz}px serif`; const hw = Math.max(70, (label ? ctx.measureText(label).width : 100) / 2 + 22); ctx.restore();
+    // the bracket: a bar out from the wall with a scroll under it
+    push(); translate(x, y); rotate(ang * .25);
+    inkLine([[-hw - 14, -44], [hw + 10, -44]], 3, INK, 'ink', 0); inkLine([[-hw - 14, -22], [-hw + 26, -44]], 1.6, INK, 'inkfine', 0);
+    inkStroke(ellPts(-hw + 2, -32, 9, 9, 12).slice(2, 11), false, 1.4, INK, 'inkfine');
+    pop();
+    push(); translate(x, y); rotate(ang + .05 * Math.sin(t * 1.7 + x));
+    for (const sd of [-1, 1]) { for (let k = 0; k < 4; k++) paint(ellPts(sd * (hw - 22), -38 + k * 10, 3, 5.5, 8), { wash: null, ink: INK, sw: .8 }); }
+    paint(rrPts(-hw, 0, hw * 2, sz * 1.75, 5), { wash: o.col || '#C9B48E', ink: INK, sw: 1.1 });
+    paint(rrPts(-hw + 6, 6, hw * 2 - 12, sz * 1.75 - 12, 3), { wash: null, ink: INK, sw: .6 });
+    if (label) { ctx.save(); ctx.font = `bold ${sz}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = o.tcol || '#2A2018'; ctx.fillText(label, 0, sz * .9); ctx.restore(); }
+    pop();
+  }
+  // a gas lamp: a tapered cast-iron post on a stepped base, a ladder crossbar, and a glazed lantern with a cap and finial
   function gasLamp(x, base, k, lit, o = {}) {
-    if (k <= 0) return; const h = 230 * backOut(k); boilSeed('gl' + x);
-    inkLine([[x, base], [x, base - h]], 5, '#2A2420', 'ink', 0); paint(rectPts(x - 12, base - 10, 24, 12, 0), { wash: '#2A2420', ink: null });
-    paint([[x - 24, base - h - 46], [x + 24, base - h - 46], [x + 16, base - h], [x - 16, base - h]], { wash: lit > .5 ? '#FFE3A6' : '#B8A27A', ink: INK, sw: 1 });
-    paint([[x - 28, base - h - 46], [x, base - h - 66], [x + 28, base - h - 46]], { wash: '#2A2420', ink: INK, sw: .8 });
+    if (k <= 0) return; const h = 230 * backOut(k), IR = o.iron || '#2A2420'; boilSeed('gl' + x);
+    paint(rectPts(x - 15, base - 12, 30, 14, 0), { wash: IR, ink: INK, sw: .7 }); paint(rectPts(x - 10, base - 30, 20, 20, 0), { wash: IR, ink: INK, sw: .7 });
+    paint([[x - 7, base - 30], [x + 7, base - 30], [x + 4, base - h + 4], [x - 4, base - h + 4]], { wash: IR, ink: INK, sw: .7 });
+    inkLine([[x - 2, base - 34], [x - 1.5, base - h + 10]], .8, mixCol(IR, '#FFFFFF', .3), 'inkfine', 0);
+    paint(rectPts(x - 22, base - h + 26, 44, 5, 0), { wash: IR, ink: INK, sw: .6 });
+    for (const sd of [-1, 1]) paint(ellPts(x + sd * 22, base - h + 28, 3.5, 3.5, 8), { wash: IR, ink: null });
+    paint(rectPts(x - 12, base - h - 4, 24, 8, 0), { wash: IR, ink: INK, sw: .7 });
+    paint([[x - 24, base - h - 46], [x + 24, base - h - 46], [x + 16, base - h - 2], [x - 16, base - h - 2]], { wash: lit > .5 ? '#FFE3A6' : '#B8A27A', ink: INK, sw: 1 });
+    inkLine([[x, base - h - 46], [x, base - h - 2]], .9, IR, 'inkfine', 0);
+    paint([[x - 30, base - h - 46], [x, base - h - 66], [x + 30, base - h - 46]], { wash: IR, ink: INK, sw: .8 });
+    paint(ellPts(x, base - h - 70, 4.5, 4.5, 8), { wash: IR, ink: null });
     if (lit > 0) glow(x, base - h - 24, (o.r || 150), '#FFE3A6', .8 * lit);
   }
   function hoarding(x, y, txt_, k, o = {}) {
@@ -142,7 +162,6 @@
       for (let g = 0; g < 3; g++) inkLine([[px - 5 + g * 5, top + 20], [px - 5 + g * 5, gy - 14]], .5, '#2A2018', 'inkfine', 0);
       paint(rectPts(px - 20, gy - 12, 40, 14, 0), { wash: '#3E3026', ink: INK, sw: .9 });
     }
-    if (pk > .6) { const by = lerp(gy, y + bb + 60, pk); paint([[x - bw + 40, by + 8], [x - bw + 52, by - 6], [x + bw - 40, by + 120 - 6], [x + bw - 52, by + 120 + 8]].map(([px, py]) => [px, Math.min(gy - 20, py)]), { wash: '#4E3E32', ink: INK, sw: .9 }); }
     push(); translate(x, y + 120); scale(1, backOut(k) * (o.flip ?? 1)); translate(-x, -(y + 120));
     paint(rectPts(x - bw, y - 120, bw * 2, 120 + bb, 0), { wash: o.col || '#E9DCC0', ink: INK, sw: 1.8 });
     paint(rectPts(x - bw + 20, y - 100, bw * 2 - 40, 80 + bb, 0), { wash: null, ink: INK, sw: .7 });
@@ -151,6 +170,67 @@
       letter(txt_, x, y - 4, 130, o.tcol || '#8C2A1E', { face: 'serif', bold: true, shadow: false });
       if (o.sub) { const sz0 = o.big ? 72 : 36; ctx.save(); ctx.font = `${o.big ? 'bold ' : ''}${sz0}px serif`; const sw0 = ctx.measureText(o.sub).width; ctx.restore(); const sz = sz0 * Math.min(1, (bw * 2 - 60) / Math.max(1, sw0)); letter(o.sub, x, o.big ? y + 100 : y + 76, sz, INK, { face: 'serif', bold: !!o.big, shadow: false }); }
     }
+  }
+  // a little train on the viaduct: an engine (cab, boiler, funnel, a puff of steam) and three carriages, each with a window
+  // row, two wheels and a coupling. (tx, top) = the engine's front at rail level
+  function train(tx, top, dawn, t) {
+    boilSeed('c5train'); const eng = mixCol('#8C2A1E', '#E05A3A', dawn), car = mixCol('#3A5A7A', '#4A90C8', dawn), dk = mixCol('#2A2018', '#2A3440', dawn), win = mixCol('#E8D9A8', '#FFF1C4', dawn);
+    for (let c = 3; c >= 0; c--) {
+      const x0 = tx - 180 - c * 190, w = 180;
+      if (c < 3) paint(rectPts(x0 + w - 2, top - 26, 16, 6, 0), { wash: dk, ink: INK, sw: .6 });   // the coupling to the car in front
+      if (c) {
+        paint(rrPts(x0, top - 80, w, 64, 10), { wash: car, ink: INK, sw: 1.1 });
+        paint(rectPts(x0 - 4, top - 86, w + 8, 10, 0), { wash: dk, ink: INK, sw: .8 });
+        for (let i = 0; i < 4; i++) paint(rrPts(x0 + 14 + i * 41, top - 68, 30, 24, 4), { wash: win, ink: INK, sw: .7 });
+        inkLine([[x0 + 6, top - 34], [x0 + w - 6, top - 34]], .9, dk, 'inkfine', 0);
+      } else {
+        paint(rrPts(x0 + 62, top - 64, 118, 48, 20), { wash: eng, ink: INK, sw: 1.1 });                   // the boiler
+        for (const bx of [x0 + 96, x0 + 132]) inkLine([[bx, top - 63], [bx, top - 17]], .9, dk, 'inkfine', 0);
+        paint(rectPts(x0, top - 96, 68, 80, 0), { wash: eng, ink: INK, sw: 1.1 });                        // the cab
+        paint(rectPts(x0 - 6, top - 104, 80, 10, 0), { wash: dk, ink: INK, sw: .8 });
+        paint(rrPts(x0 + 14, top - 86, 40, 30, 4), { wash: win, ink: INK, sw: .7 });
+        paint([[x0 + 134, top - 64], [x0 + 158, top - 64], [x0 + 162, top - 104], [x0 + 130, top - 104]], { wash: dk, ink: INK, sw: .9 });   // the funnel
+        paint(rectPts(x0 + 126, top - 112, 40, 10, 0), { wash: dk, ink: INK, sw: .8 });
+        paint([[x0 + 178, top - 22], [x0 + 200, top - 4], [x0 + 172, top - 4]], { wash: dk, ink: INK, sw: .7 });   // the cowcatcher
+        for (let i = 0; i < 3; i++) { const f = frac(t * 1.4 + i / 3); paint(ellPts(x0 + 146 - 90 * f, top - 122 - 46 * f, 14 + 22 * f, 10 + 14 * f, 12), { wash: '#F4F2EE', washOp: 200 * (1 - f), ink: null }); }
+      }
+      for (const wx of [x0 + 34, x0 + w - 34]) { paint(ellPts(wx, top - 12, 15, 15, 14), { wash: dk, ink: INK, sw: .8 }); const q = -t * 9; inkLine([[wx + Math.cos(q) * 12, top - 12 + Math.sin(q) * 12], [wx - Math.cos(q) * 12, top - 12 - Math.sin(q) * 12]], .8, '#9A9088', 'inkfine', 0); }
+    }
+  }
+  // the architect's plan on an easel: the sheet unrolls down from its top batten (a curled roll travels down with the edge),
+  // with blueprint linework: a terrace elevation with arched windows over viaduct arches, a grid and dimension lines
+  function blueprint(x, y, k, dawn = 0) {
+    boilSeed('c5plan'); const ku = ease(k), bh = 400 * ku, LB = '#CFE3F5';
+    push(); translate(x, y);
+    // the easel: two splayed front legs, a back leg, a ledge
+    paint([[-250, -250], [-226, -250], [-170, 262], [-196, 262]], { wash: '#8A6440', ink: INK, sw: 1.1 });
+    paint([[226, -250], [250, -250], [196, 262], [170, 262]], { wash: '#8A6440', ink: INK, sw: 1.1 });
+    paint([[-10, -240], [10, -240], [70, 262], [50, 262]], { wash: '#6A4A30', ink: INK, sw: 1 });
+    paint(rectPts(-300, -226, 600, 16, 0), { wash: '#7A5634', ink: INK, sw: 1 });   // top batten
+    if (bh > 4) {
+      paint(rectPts(-290, -210, 580, bh, 0), { wash: '#2E5A8A', ink: INK, sw: 1.3, tex: .4 });
+      ctx.save(); ctx.beginPath(); ctx.rect(-290, -210, 580, bh); ctx.clip();
+      for (let i = 1; i < 12; i++) inkLine([[-290 + i * 48, -210], [-290 + i * 48, 190]], .4, '#6F95BE', 'inkfine', 0);
+      for (let i = 1; i < 8; i++) inkLine([[-290, -210 + i * 50], [290, -210 + i * 50]], .4, '#6F95BE', 'inkfine', 0);
+      // the elevation: a terrace of three houses over viaduct arches
+      for (let h = 0; h < 3; h++) {
+        const hx = -262 + h * 84;
+        inkStroke([[hx, 60], [hx, -60], [hx + 38, -96], [hx + 76, -60], [hx + 76, 60]], false, 1.6, LB, 'inkfine');
+        for (const [wx, wy] of [[hx + 12, -42], [hx + 46, -42], [hx + 12, 0], [hx + 46, 0]]) inkStroke([[wx, wy + 26], [wx, wy + 8], ...ellPts(wx + 9, wy + 8, 9, 9, 10).filter(q => q[1] <= wy + 8).sort((p, q) => p[0] - q[0]), [wx + 18, wy + 8], [wx + 18, wy + 26]], false, 1.1, LB, 'inkfine');
+      }
+      inkLine([[-272, 60], [-2, 60]], 2, LB, 'inkfine', 0);
+      for (let i = 0; i < 4; i++) { const ax = -262 + i * 66; inkStroke([[ax, 150], [ax, 110], ...ellPts(ax + 27, 110, 27, 30, 14).filter(q => q[1] <= 110).sort((p, q) => p[0] - q[0]), [ax + 54, 110], [ax + 54, 150]], false, 1.3, LB, 'inkfine'); }
+      inkLine([[-272, 76], [-2, 76]], 1.2, LB, 'inkfine', 0);
+      // dimension line under it
+      inkLine([[-262, 172], [-12, 172]], .9, LB, 'inkfine', 0); for (const dx of [-262, -12]) inkLine([[dx, 164], [dx, 180]], .9, LB, 'inkfine', 0);
+      // a divider down the middle, and the title rule
+      inkLine([[20, -150], [20, 170]], .8, LB, 'inkfine', 0); inkLine([[-250, -160], [250, -160]], 1.2, LB, 'inkfine', 0);
+      ctx.restore();
+    }
+    // the curled roll at the sheet's lower edge (it travels down as the sheet unrolls, then rests as a curl)
+    const ry = -210 + bh, rr = lerp(26, 9, ku);
+    paint(rrPts(-292, ry - rr, 584, rr * 2, rr), { grad: [[0, '#4A7AAE'], [.5, '#8CB2D8'], [1, '#22466E']], gdir: [0, ry - rr, 0, ry + rr], ink: INK, sw: 1.1, tex: .2 });
+    pop();
   }
   function street(t, o = {}) {
     layer('c5street' + (o.v || ''), () => {
@@ -222,15 +302,15 @@
     for (const tt of [tc - .2, tw + .5]) { const k = seg(t, tt, tt + .5); if (k > 0 && k < 1) glow(960, 500, 460 * k, '#FFF3C8', .8 * (1 - k)); }
     // the hat: one clean parabola off his head and back onto it, with a flip, at the second click
     const hu = seg(t, tw + .5, tw + 1.2), flying = hu > 0 && hu < 1;
-    tourist(cx, cy, 11, flying ? null : 'top', po);
-    let hh = null;
-    if (flying) {
-      const V = VIEWS[po.view], [hx, hy] = bodyPt(cx, cy, 11, po, V.hat, -8.05), yy = hy - 160 * 4 * hu * (1 - hu);
-      push(); translate(hx, yy - 30); rotate(-TAU * easeInOut(hu)); translate(-hx, -(yy - 30)); hatOn('top', hx, yy, 99); pop();
-      hh = hatHole(hx, yy, 99);
-    }
     camEnd();
-    { const z = LAST_CAM.zoom; engrave(-1e4, 160, [...(hh ? [hh] : []), clawdHole(cx, cy, 11), [(960 - LAST_CAM.cx) * z + 960, (500 - LAST_CAM.cy) * z + 540, 186 * z]]); }
+    { const z = LAST_CAM.zoom; engrave(-1e4, 160, [[(960 - LAST_CAM.cx) * z + 960, (500 - LAST_CAM.cy) * z + 540, 186 * z]]); }
+    afterEngrave(() => {
+      tourist(cx, cy, 11, flying ? null : 'top', po);
+      if (flying) {
+        const V = VIEWS[po.view], [hx, hy] = bodyPt(cx, cy, 11, po, V.hat, -8.05), yy = hy - 160 * 4 * hu * (1 - hu);
+        push(); translate(hx, yy - 30); rotate(-TAU * easeInOut(hu)); translate(-hx, -(yy - 30)); hatOn('top', hx, yy, 99); pop();
+      }
+    });
     // engraved plate under the lens: which stage of the story the lens is at, and the ingredient's name
     if (t > tn - .6) { const yr = ['first', 'then', 'later'][st]; letter(yr, 420, 560, 96, INK, { face: 'serif', bold: true, shadow: false, stroke: PAPER, strokeW: .12, pop: st ? seg(t, [0, tc - .2, tw + .5][st], [0, tc - .2, tw + .5][st] + .3) : null }); }
     const ks = seg(t, tn - .4, tn + .4) * (1 - seg(t, tT - .8, tT - .4));
@@ -250,7 +330,7 @@
       const x = HX(i), h = 470 + 90 * hash(i * 3), fx = Array.isArray(fix) ? fix[i] : fix, tilt = (hash(i * 9) - .5) * .16 * (1 - fx);
       const sh = o.shuffle ? Math.floor(t * 6 + i) : 0, imgs = fx > .5 ? CLEAN[i] : [0, 1, 2, 3].map(k => o.read > .5 && (i + k) % 2 === 0 ? CLEAN[i][k] : MIX[(i * 3 + k + sh) % MIX.length]);
       house(x, 900, 250, h, imgs, { key: 'c5d' + i, tilt, blur: (1 - fx) * 2.5 * (1 - (o.sharp || 0)), lit: lerp(.75, 1, fx), glow: o.glow ? o.glow * fx : 0, col: mixCol(['#4E4038', '#43383A', '#544638', '#463A34', '#4C4036'][i], ['#C8705A', '#5C8AB8', '#E0B04A', '#6AA27A', '#B86A9A'][i], fx * (o.colour ?? 0)) });
-      if (fx < .5) crookedSign(x + 90, 900 - h * .55, .35 + .2 * hash(i), null, t);
+      if (fx < .5) crookedSign(x + 70, 900 - h * .55, .3 + .15 * hash(i), ['To Let', 'No. 7', 'Rooms', 'No. 12', 'Lodgings'][i], t, { size: 22 });
     }
   }
 
@@ -261,7 +341,7 @@
     camKeys(t, [[a - .3, 700, 560, 1.2], [a + 3, 900, 560, 1.0], [t5 - .5, 1100, 520, 1.0], [st, 960, 520, .96], [e + .4, 960, 500, .94]], .4);
     district(t, 0, { shuffle: t > tcr - .3 && t < e });
     // the district sign, hanging crooked
-    crookedSign(560, 300, -.12, null, t);
+    crookedSign(560, 300, -.12, 'InceptionV1 · Mixed 5b', t, { size: 30, col: '#D8C49A' });
     // the handbill on the wall: "no interpretable neurons"
     const kb = popk(t, te - .4, .4);
     if (kb > 0) { boilSeed('c5bill'); push(); translate(1040, 420); rotate(.06); scale(backOut(kb)); paint(rectPts(-150, -110, 300, 220, 1), { wash: '#F2E8D2', ink: INK, sw: 1.2 }); pop(); }
@@ -280,9 +360,9 @@
       ctx.restore();
     }
     const em = emotions(t, [[a - .3, 'nervous'], [t5, 'sad'], [tk, 'scared'], [tcr, 'dizzy']]);
-    tourist(1420, 980, 10, 'top', { ...em, view: 'q', flip: true, boilKey: 'c5c' });
     camEnd();
-    engrave(-1e4, 160, [clawdHole(1420, 980, 10)]);
+    engrave(-1e4, 160, []);
+    afterEngrave(() => tourist(1420, 980, 10, 'top', { ...em, view: 'q', flip: true, boilKey: 'c5c' }));
     if (kb > 0) { const [sx, sy] = [(1040 - LAST_CAM.cx) * LAST_CAM.zoom + 960, (420 - LAST_CAM.cy) * LAST_CAM.zoom + 540], z = LAST_CAM.zoom; letter('NOTICE', sx, sy - 60 * z, 34 * z, INK, { face: 'serif', bold: true, shadow: false, rot: .06 }); letter('essentially no\ninterpretable\nneurons', sx, sy + 20 * z, 30 * z, INK, { face: 'serif', shadow: false, rot: .06, alpha: kb }); }
     const kl = seg(t, a + .2, a + 1.2) * (1 - seg(t, te - .8, te - .4));
     cap('InceptionV1 · the last district', kl, { size: 64 });
@@ -313,7 +393,7 @@
       const top = 380 + 520 * (1 - hk); boilSeed('c5via');
       paint(rectPts(-300, top, W + 600, 40, 1), { wash: mixCol('#8A6A56', '#E8E2D6', dawn), ink: INK, sw: 1.3 });
       for (let i = 0; i < 12; i++) { const x = -200 + i * 200; paint([[x, top + 40], [x + 40, top + 40], [x + 40, 900], [x, 900]], { wash: mixCol('#7A5A48', '#D8D0C2', dawn), ink: INK, sw: 1 }); inkStroke(ellPts(x + 120, top + 160, 80, 110, 20).filter(p => p[1] <= top + 160), false, 1, INK, 'inkfine'); }
-      if (hk >= 1) { const tx = frac((t - tr) * .12) * (W + 1400) - 700; boilSeed('c5train'); for (let c = 0; c < 4; c++) paint(rrPts(tx - c * 190, top - 80, 180, 80, 14), { wash: c ? mixCol('#3A5A7A', '#4A90C8', dawn) : mixCol('#8C2A1E', '#E05A3A', dawn), ink: INK, sw: 1.1 }); glow(tx + 180, top - 40, 120, '#FFE3A6', .6); }
+      if (hk >= 1) { const tx = frac((t - tr) * .12) * (W + 1400) - 700 + 180; train(tx, top, dawn, t); glow(tx + 10, top - 40, 120, '#FFE3A6', .6); }
     }
     // the houses: straighten as the wave passes; clean photos; colour after the wave
     const fixes = [0, 1, 2, 3, 4].map(i => t < tB - .2 ? clamp((front - (HX(i) - 480 - 300)) / 500) : clamp((front - ((HX(i) - 960) * .93 + 960)) / 240 + .5));
@@ -331,14 +411,37 @@
     const kp = seg(t, tC - .6, tC + .4) * (1 - seg(t, tr - 1.3, tr - .8));
     hoarding(1600, 250, cur[1], t < tW ? 1 - ease(clamp(kp * 1.5)) : t < tB - .2 ? 1 - seg(t, tW, tW + .4) : popk(t, tB - .2, .5), { big: 1, flip: Math.abs(Math.cos(fl * Math.PI)) * (fl < .5 ? 1 : 1), sub: cur[2], tcol: cur[1] === '99%' ? '#2E7A3A' : '#8C2A1E', col: mixCol('#E9DCC0', '#FFFFFF', dawn) });
     // the architect's plan: CONVNEXT blueprint unrolled on an easel
-    if (kp > 0) { boilSeed('c5plan'); push(); translate(560, 640); scale(1, ease(kp)); paint(rectPts(-300, -200, 600, 400, 1), { wash: '#2E5A8A', ink: INK, sw: 1.4 }); for (let i = 0; i < 6; i++) inkLine([[-260, -150 + i * 60], [260, -150 + i * 60]], .6, '#BFD8F0', 'inkfine', 0); pop(); }
+    if (kp > 0) blueprint(560, 640, kp, dawn);
     const lk = env(t, t50 - .7, t70 - .7, .4, .4) * old, lx = lerp(330, 1250, ease(seg(t, t50 - .5, t70 - .9))), ly = 560, lr = 300;
     if (lk > 0) { push(); translate(lx, ly); scale(backOut(clamp(lk * 1.2))); boilSeed('c5blens'); paint(rrPts(lr * .72, lr * .62, 70, 260, 26).map(([px, py]) => [px * .8 + py * .45, -px * .3 + py * .8]), { wash: '#5A3A22', ink: INK, sw: 1.2 }); inkStroke(ellPts(0, 0, lr, lr, 48), true, 26, '#C9A15A', 'ink'); inkStroke(ellPts(0, 0, lr + 14, lr + 14, 48), true, 2, INK, 'inkfine'); inkStroke(ellPts(0, 0, lr - 14, lr - 14, 48), true, 2, INK, 'inkfine'); pop(); }
     const em = emotions(t, [[a - .3, 'sad'], [tC, 'hopeful'], [tr, 'excited'], [tbe, 'starstruck'], [t99, 'happy']]);
-    tourist(1380, 980, 10, t > tC + .5 && t < tbe + .8 ? 'hard' : 'top', { ...em, view: 'q', flip: true, boilKey: 'c5c' });
+    // the hat swaps (top hat → hard hat for the works, and back after): the old hat is flicked off backwards with a spin,
+    // the new one drops onto his head, he squashes under it and a little puff of dust goes up
+    const po = { ...em, view: 'q', flip: true, boilKey: 'c5c' }, swaps = [[tC + .5, 'top', 'hard'], [tbe + .8, 'hard', 'top']];
+    let hatNow = 'top', loose = [];
+    for (const [ts, h0, h1] of swaps) {
+      if (t >= ts + .4) hatNow = h1;
+      if (t > ts - .25 && t < ts + .9) {
+        const tk = take(t, ts + .4, .7); po.sq = (po.sq || 0) + tk.sq; po.dy = (po.dy || 0) + tk.dy;
+        const fo = seg(t, ts - .25, ts + .3); if (fo > 0 && fo < 1) loose.push({ kind: h0, k: fo, off: true });
+        const fi = seg(t, ts, ts + .4); if (fi > 0 && fi < 1) loose.push({ kind: h1, k: fi, off: false });
+        if (t > ts - .25 && t < ts + .4) hatNow = null;
+        const pf = seg(t, ts + .4, ts + .9); if (pf > 0 && pf < 1) loose.push({ puff: pf });
+      }
+    }
     camEnd();
-    { const z = LAST_CAM.zoom, H0 = [clawdHole(1380, 980, 10)]; if (lk > .2) H0.unshift([(lx - LAST_CAM.cx) * z + 960, (ly - LAST_CAM.cy) * z + 540, (lr - 16) * z * clamp(lk * 1.2), 0]); engrave(front, 160, H0); }
-    if (kp > .5) { const z = LAST_CAM.zoom, sx = (560 - LAST_CAM.cx) * z + 960, sy = (640 - LAST_CAM.cy) * z + 540; letter('ConvNeXt', sx, sy - 70 * z, 76 * z, '#F2F6FA', { face: 'serif', bold: true, shadow: false }); const ks = seg(t, tsame - .2, tsame + .4); if (ks > 0) letter('same size', sx, sy + 30 * z, 46 * z, '#F2F6FA', { face: 'serif', shadow: false, alpha: ks }); const kq = seg(t, tpic - .5, tpic); if (kq > 0) letter('same pictures', sx, sy + 100 * z, 46 * z, '#F2F6FA', { face: 'serif', shadow: false, alpha: kq }); }
+    { const z = LAST_CAM.zoom, H0 = []; if (kp > 0) { const [x0, y0] = scr(560 - 300, 640 - 200), [x1, y1] = scr(560 + 300, 640 - 200 + 400 * ease(kp)); H0.push([x0, y0 - 12 * z, x1, y1 + 14 * z, 0, 'rect']); } if (lk > .2) H0.unshift([(lx - LAST_CAM.cx) * z + 960, (ly - LAST_CAM.cy) * z + 540, (lr - 16) * z * clamp(lk * 1.2), 0]); engrave(front, 160, H0); }
+    afterEngrave(() => {
+      tourist(1380, 980, 10, hatNow, po);
+      const [hx, hy] = bodyPt(1380, 980, 10, po, VIEWS.q.hat, -8.05);
+      for (const L of loose) {
+        if (L.puff) { for (let i = 0; i < 6; i++) { const q = Math.PI * (.9 + .24 * i), r = 44 + 46 * easeOut(L.puff); paint(ellPts(hx + Math.cos(q) * r, hy - 2 + Math.sin(q) * r * .4, 9 * (1 - L.puff) + 4, 7 * (1 - L.puff) + 3, 10), { wash: '#F2ECE0', washOp: 200 * (1 - L.puff), ink: null }); } continue; }
+        const k = L.k;
+        if (L.off) { const px = hx + 120 * k, py = hy - 150 * 4 * k * (1 - k) + 60 * k * k; ctx.save(); ctx.globalAlpha = 1 - seg(k, .6, 1); push(); translate(px, py - 25); rotate(2.4 * k); translate(-px, -(py - 25)); hatOn(L.kind, px, py, 90); pop(); ctx.restore(); }
+        else { const py = lerp(hy - 260, hy, easeIn(k)); push(); translate(hx, py - 25); rotate(.25 * (1 - k)); translate(-hx, -(py - 25)); hatOn(L.kind, hx, py, 90); pop(); }
+      }
+    });
+    if (kp > .5) { const [sx, sy, z] = scr(560, 640), ka = seg(kp, .5, .9); letter('ConvNeXt', sx, sy - 128 * z, 66 * z, '#F2F6FA', { face: 'serif', bold: true, shadow: false, alpha: ka }); const ks = seg(t, tsame - .2, tsame + .4) * ka; if (ks > 0) letter('same size', sx + 150 * z, sy + 10 * z, 40 * z, '#F2F6FA', { face: 'serif', shadow: false, alpha: ks }); const kq = seg(t, tpic - .5, tpic) * ka; if (kq > 0) letter('same pictures', sx + 150 * z, sy + 80 * z, 40 * z, '#F2F6FA', { face: 'serif', shadow: false, alpha: kq }); }
     const krc = seg(t, tr - .2, tr + .6) * (1 - seg(t, tl - .4, tl - .1));
     cap('residual connections', krc);
     const kln = seg(t, tl - .1, tl + .6) * (1 - seg(t, tbe - .8, tbe - .5));
@@ -357,29 +460,46 @@
     glow(1480, 560 - 80 * seg(t, a, tP + 3), 720, '#FFE0A0', .65 * sun); dot(1480, 560 - 80 * seg(t, a, tP + 3), 70, '#FFF2C8', .9);
     camKeys(t, [[a - .3, 960, 560, 1.0], [tu, 980, 540, 1.04], [tP, 960, 620, 1.02], [tP + 2.4, 960, 930, 1.9], [chapStart('ch06') + 2.2, 960, 940, 2.6]], .3);
     // the renovated district below, seen from the rooftop: far skyline, the viaduct with its train, the clean houses
-    push(); translate(960, 790); scale(.72); translate(-960, -900);
+    push(); translate(960, 952); scale(.72); translate(-960, -900);   // (the street itself is hidden behind the roof ridge)
     layer('c5mod2', () => { for (let i = 0; i < 12; i++) { const x = -200 + i * 200, h = 260 + 140 * hash(i * 5.7); paint(rectPts(x, 900 - h, 180, h, 1), { wash: ['#BFD3E6', '#D6C8E0', '#C8E0D2'][i % 3], ink: null, tex: .2 }); } }, { x: -300, y: -300, w: W + 600, h: H + 600, variants: 1 });
     boilSeed('c5via2'); paint(rectPts(-600, 380, W + 1200, 40, 1), { wash: '#E8E2D6', ink: INK, sw: 1.3 }); for (let i = 0; i < 16; i++) paint(rectPts(-560 + i * 200, 420, 40, 480, 0), { wash: '#D8D0C2', ink: INK, sw: 1 });
-    { const tx = frac(t * .1) * (W + 2400) - 1200; for (let c = 0; c < 4; c++) paint(rrPts(tx - c * 190, 300, 180, 80, 14), { wash: c ? '#4A90C8' : '#E05A3A', ink: INK, sw: 1.1 }); }
+    { const tx = frac(t * .1) * (W + 2400) - 1200 + 180; train(tx, 380, 1, t); }
     district(t, 1, { colour: 1, glow: .6 + .3 * Math.sin(t * 2) });
     for (let i = 0; i < 7; i++) gasLamp(80 + i * 300, 930, 1, 1, { r: 110 });
     paint(rectPts(-600, 930, W + 1200, 300, 1), { wash: '#C9D3DC', ink: INK, sw: 1 });
     pop();
-    // the rooftop in the foreground: slate roof, chimney pots, and a little roof garden
+    // haze between the rooftop and the street below, so the roof reads as high above it
+    { ctx.save(); const g = ctx.createLinearGradient(0, 700, 0, 950); g.addColorStop(0, 'rgba(244,228,206,0)'); g.addColorStop(1, 'rgba(244,228,206,.6)'); ctx.fillStyle = g; ctx.fillRect(-300, 700, W + 600, 260); ctx.restore(); }
+    // the rooftop in the foreground: a slate roof with a row of ridge tiles along its top (Clawd stands on the ridge), the
+    // eave and its iron gutter at the bottom, a brick chimney stack with two pots, and a little plank planter
     boilSeed('c5roof');
-    paint([[-300, 950], [W + 300, 930], [W + 300, H + 300], [-300, H + 300]], { grad: [[0, '#4A5260'], [1, '#2E343E']], gdir: [0, 930, 0, 1100], ink: INK, sw: 1.4 });
-    for (let r = 0; r < 6; r++) for (let c = 0; c < 22; c++) inkLine([[-260 + c * 110 + (r % 2) * 55, 975 + r * 30], [-200 + c * 110 + (r % 2) * 55, 975 + r * 30]], .7, '#232830', 'inkfine', 0);
-    paint(rectPts(180, 740, 150, 220, 1), { wash: '#B86A4E', ink: INK, sw: 1.3 }); for (const px of [205, 260]) paint(rectPts(px, 700, 40, 44, 1), { wash: '#C98A5A', ink: INK, sw: 1 });
-    for (let i = 0; i < 3; i++) { const f = frac(t * .25 + i / 3); paint(ellPts(225 + 30 * f + 10 * Math.sin(t + i), 680 - 160 * f, 18 + 30 * f, 14 + 24 * f, 14), { wash: '#F2F2F2', washOp: 160 * (1 - f), ink: null }); }
-    // the planter (the renovated park, in miniature) where the seed lands
-    paint(rectPts(780, 950, 360, 90, 1), { wash: '#9A6E48', ink: INK, sw: 1.3 }); paint(rectPts(790, 942, 340, 18, 1), { wash: '#6A4A30', ink: INK, sw: .9 });
-    for (let i = 0; i < 9; i++) { const gx = 800 + i * 38 + 10 * hash(i), gy = 946; if (Math.abs(gx - 960) < 40) continue; inkLine([[gx, gy], [gx - 5, gy - 22 - 10 * hash(i * 3)]], 1.4, '#3E7A34', 'ink', 0); inkLine([[gx + 6, gy], [gx + 10, gy - 16]], 1.2, '#3E7A34', 'ink', 0); }
+    const RY = x => lerp(950, 930, (x + 300) / (W + 600));
+    paint([[-300, 950], [W + 300, 930], [W + 300, 1062], [-300, 1066]], { grad: [[0, '#56606E'], [1, '#2E343E']], gdir: [0, 930, 0, 1066], ink: INK, sw: 1.4 });
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 22; c++) { const x0 = -260 + c * 110 + (r % 2) * 55, y0 = RY(x0) + 26 + r * 28; inkLine([[x0, y0], [x0 + 110, y0 - 1]], .8, '#232830', 'inkfine', 0); inkLine([[x0, y0], [x0, y0 + 28]], .6, '#232830', 'inkfine', 0); }
+    for (let c = 0; c < 44; c++) { const x0 = -300 + c * 56, y0 = RY(x0 + 28); paint([[x0, y0 + 8], ...ellPts(x0 + 28, y0 + 8, 28, 13, 12).filter(q => q[1] <= y0 + 8).sort((p, q) => p[0] - q[0]), [x0 + 56, y0 + 8], [x0 + 56, y0 + 16], [x0, y0 + 16]], { wash: c % 2 ? '#9A5A40' : '#A8644A', ink: INK, sw: .9 }); }
+    paint(rectPts(-300, 1060, W + 600, 10, 0), { wash: '#3E4650', ink: INK, sw: .8 });
+    paint(rrPts(-300, 1066, W + 600, 26, 13), { grad: [[0, '#5A626C'], [1, '#2A2E34']], gdir: [0, 1066, 0, 1092], ink: INK, sw: 1.1 });
+    for (let i = 0; i < 12; i++) paint(rectPts(-200 + i * 200, 1062, 8, 30, 0), { wash: '#22262C', ink: null });
+    // the chimney stack: brick courses, a stone band, two pots with collars, soot at the top
+    paint(rectPts(180, 760, 150, 200, 0), { wash: '#B86A4E', ink: INK, sw: 1.3 });
+    for (let r = 0; r < 9; r++) { const yy = 782 + r * 20; inkLine([[182, yy], [328, yy]], .7, '#7A3E2C', 'inkfine', 0); for (let c = 0; c < 4; c++) { const bx = 196 + c * 38 + (r % 2) * 19; if (bx < 326) inkLine([[bx, yy - 20], [bx, yy]], .6, '#7A3E2C', 'inkfine', 0); } }
+    paint(rectPts(170, 742, 170, 22, 0), { wash: '#D8C8B0', ink: INK, sw: 1.1 });
+    for (const px of [218, 290]) { paint([[px - 20, 742], [px + 20, 742], [px + 15, 692], [px - 15, 692]], { wash: '#C98A5A', ink: INK, sw: 1 }); paint(rectPts(px - 19, 684, 38, 10, 0), { wash: '#B0744A', ink: INK, sw: .9 }); paint(rectPts(px - 16, 676, 32, 9, 0), { wash: '#3A2E28', ink: INK, sw: .7 }); for (let k = 0; k < 3; k++) inkLine([[px - 10 + k * 9, 694], [px - 9 + k * 9, 706 + 8 * hash(k + px)]], 2.2, '#3A2E28', 'ink', 0); }
+    for (let i = 0; i < 3; i++) { const f = frac(t * .25 + i / 3); paint(ellPts(220 + 30 * f + 10 * Math.sin(t + i), 668 - 160 * f, 18 + 30 * f, 14 + 24 * f, 14), { wash: '#F2F2F2', washOp: 160 * (1 - f), ink: null }); }
+    // the planter (the renovated park, in miniature) where the seed lands: three planks on two corner posts, a soil line
+    paint(rectPts(780, 944, 360, 96, 0), { wash: '#9A6E48', ink: INK, sw: 1.3 });
+    for (let i = 1; i < 3; i++) inkLine([[782, 944 + i * 32], [1138, 944 + i * 32]], 1.2, '#5A3E26', 'inkfine', 0);
+    for (let i = 0; i < 3; i++) for (const nx of [800, 1120]) dot(nx, 960 + i * 32, 2.6, '#3A2A1A', 1);
+    for (let i = 0; i < 3; i++) for (let g = 0; g < 4; g++) inkLine([[830 + g * 80 + 20 * hash(i * 4 + g), 952 + i * 32 + 6 * hash(g)], [870 + g * 80 + 20 * hash(i * 4 + g), 952 + i * 32 + 6 * hash(g + 1)]], .6, '#7A5434', 'inkfine', .5);
+    for (const px of [772, 1132]) paint(rectPts(px, 936, 16, 106, 0), { wash: '#7A5434', ink: INK, sw: 1 });
+    paint(rectPts(790, 936, 340, 14, 0), { wash: '#5A3E28', ink: INK, sw: .9 });
+    for (let i = 0; i < 9; i++) { const gx = 800 + i * 38 + 10 * hash(i), gy = 940; if (Math.abs(gx - 960) < 40) continue; inkLine([[gx, gy], [gx - 5, gy - 22 - 10 * hash(i * 3)]], 1.4, '#3E7A34', 'ink', 0); inkLine([[gx + 6, gy], [gx + 10, gy - 16]], 1.2, '#3E7A34', 'ink', 0); }
     // Clawd polishes the lens (the microscope's brass lens, now clear glass)
     const pol = Math.sin(t * 9);
-    tourist(560, 945, 12, 'top', { ...emotions(t, [[a - .3, 'happy'], [tb, 'thinking'], [tu, 'proud'], [tre, 'love']]), view: 'q', aR: 1 + .3 * pol, armR: (u, sw) => { paint(ellPts(u * 1.8, 0, u * 2.2, u * 2.2, 22), { wash: '#C9A15A', ink: INK, sw }); paint(ellPts(u * 1.8, 0, u * 1.7, u * 1.7, 20), { wash: '#DCF0FA', ink: INK, sw: sw * .7 }); }, boilKey: 'c5c' });
+    tourist(560, 948, 12, 'top', { ...emotions(t, [[a - .3, 'happy'], [tb, 'thinking'], [tu, 'proud'], [tre, 'love']]), view: 'q', aR: 1 + .3 * pol, armR: (u, sw) => { paint(ellPts(u * 1.8, 0, u * 2.2, u * 2.2, 22), { wash: '#C9A15A', ink: INK, sw }); paint(ellPts(u * 1.8, 0, u * 1.7, u * 1.7, 20), { wash: '#DCF0FA', ink: INK, sw: sw * .7 }); }, boilKey: 'c5c' });
     if (t < tre + 1) for (let i = 0; i < 3; i++) { const f = frac(t * 1.5 + i / 3); glow(640 + 40 * Math.cos(i * 2), 835 - 30 * f, 16 * (1 - f), '#FFFFFF', 1 - f); }
     // the seed: drops from the sky into the planter and sprouts
-    const ts = tP - .2, fall = seg(t, ts, ts + 1), sprout = seg(t, ts + 1, ts + 2.6), SY = 948;
+    const ts = tP - .2, fall = seg(t, ts, ts + 1), sprout = seg(t, ts + 1, ts + 2.6), SY = 942;
     if (fall > 0 && fall < 1) { const sy = lerp(200, SY, easeIn(fall)); paint(ellPts(960 + 30 * Math.sin(fall * 6), sy, 9, 13, 12), { wash: '#8C5A2A', ink: INK, sw: .8 }); }
     if (sprout > 0) {
       const h = 90 * easeOut(sprout); boilSeed('c5sp');
@@ -391,7 +511,7 @@
     const k1 = seg(t, tb - .5, tlen + .3) * (1 - seg(t, tu - .6, tu - .2));
     // a memory of the old street behind the caption: sepia, sagging, seen through a smeared lens
     const gk = env(t, tb - .7, tu - .3, .35, .35);
-    if (gk > 0) { ctx.save(); ctx.globalAlpha = .92 * gk; const bx = 960, by = 300, bw = 820, bh = 290; ctx.beginPath(); ctx.rect(bx - bw / 2, by - bh / 2, bw, bh); ctx.clip(); ctx.fillStyle = '#D9CFBE'; ctx.fillRect(bx - bw / 2, by - bh / 2, bw, bh);
+    if (gk > 0) { ctx.save(); ctx.globalAlpha = .92 * gk; const bx = 960, by = 345, bw = 820, bh = 290; ctx.beginPath(); ctx.rect(bx - bw / 2, by - bh / 2, bw, bh); ctx.clip(); ctx.fillStyle = '#D9CFBE'; ctx.fillRect(bx - bw / 2, by - bh / 2, bw, bh);
       push(); translate(bx, by + bh / 2 - 20); scale(.44); translate(-830, -900); district(t, 0, {}); paint(rectPts(-300, 900, W + 600, 200, 1), { wash: '#6A6058', ink: INK, sw: 1 }); pop();
       ctx.globalCompositeOperation = 'color'; ctx.fillStyle = '#8A6A48'; ctx.fillRect(bx - bw / 2, by - bh / 2, bw, bh); ctx.globalCompositeOperation = 'source-over';
       fog(by + 60, 120, '#CFC6B8', .45);

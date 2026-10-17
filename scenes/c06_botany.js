@@ -163,8 +163,30 @@
     flat(ellPts(0, 0, 13, 10, 14), '#7A5233', { line: INK, lw: 2 });
     pop();
   }
-  // Clawd's watering can (armR hook); tip 0..1 tilts it
-  const can = tip => (u, sw) => { push(); rotate(-.2 - tip * .9); flat(rrPts(-u * .4, -u * 1.2, u * 2.6, u * 2.2, u * .3), '#7A8A94', { line: INK, lw: 2 }); flat([[u * 2.1, -u * .6], [u * 4.2, -u * 2.2], [u * 4.4, -u * 1.8], [u * 2.2, u * .1]], '#6A7A84', { line: INK, lw: 1.6 }); ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(u * .9, -u * 1.2, u * .9, Math.PI, TAU); ctx.stroke(); ctx.restore(); pop(); };
+  // where Clawd's hand is for a pose (body-local point → world), so a prop can be drawn exactly in it
+  function bodyPt(x, y, u, o, bx, by) {
+    const sq = (o.sq || 0) + (o.take || 0), sm = clamp(o.smear || 0), fx = (o.flip ? -1 : 1) * (o.sx ?? 1) * (1 + sq * .6) * (1 + sm * .35), fy = (o.sy ?? 1) * (1 - sq);
+    const px = bx * u * fx, py = by * u * fy, r = o.rot || 0, c = Math.cos(r), s = Math.sin(r);
+    return [x + (o.dx || 0) * u + px * c - py * s, y + (o.dy || 0) * u + px * s + py * c];
+  }
+  function armTip(x, y, u, o, which = 'R') {
+    const V = VIEWS[o.view] || VIEWS.front, A = V.arms.find(q => q[2] === which), a = which === 'L' ? (o.aL ?? .2) : (o.aR ?? .2);
+    const [px, dir] = A; let rx, ry, ang, len;
+    if (dir === 0) { rx = px; ry = -4.2; ang = .7 - a; len = 2.1; } else { rx = px + dir * .55 * clamp((Math.abs(a) - .7) / .9); ry = -4.5; ang = dir < 0 ? a : -a; len = 2.2 * (dir < 0 ? -1 : 1); }
+    return bodyPt(x, y, u, o, rx + Math.cos(ang) * len, ry + Math.sin(ang) * len);
+  }
+  // Clawd's watering can, gripped at the top of its handle (x, y). dir: -1 = spout to the left; tilt tips the spout down.
+  // Returns the spout's rose (where the water comes out) in world space
+  function canAt(x, y, u, dir, tilt) {
+    push(); translate(x, y); scale(dir, 1); rotate(tilt);
+    flat([[u * 1.1, u * 1.7], [u * 3.3, -u * .1], [u * 3.6, u * .3], [u * 1.3, u * 2.3]], '#6A7A84', { line: INK, lw: 1.6 });     // the spout
+    flat(rrPts(u * 3.1, -u * .6, u * .9, u * 1.1, u * .3), '#8A9AA4', { line: INK, lw: 1.4 });                              // the rose
+    flat(rrPts(-u * 1.4, u * .5, u * 2.8, u * 2.3, u * .35), '#7A8A94', { line: INK, lw: 2 });                              // the body
+    flat(rectPts(-u * 1.4, u * 1.05, u * 2.8, u * .25), '#5E6E78');
+    ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = Math.max(2, u * .32); ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(0, u * .5, u * .85, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke(); ctx.strokeStyle = '#7A8A94'; ctx.lineWidth = Math.max(1, u * .16); ctx.stroke(); ctx.restore();
+    const m = ctx.getTransform(), q = m.transformPoint({ x: u * 3.9, y: -u * .05 }); pop();
+    return ctx.getTransform().inverse().transformPoint(q);
+  }
   // a small spade (armR hook)
   const spade = (u, sw) => { ctx.save(); ctx.strokeStyle = '#6A4B30'; ctx.lineWidth = u * .45; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 4, u * 1.5); ctx.stroke(); ctx.restore(); flat([[u * 3.6, u * .9], [u * 5.6, u * 1.6], [u * 5, u * 3.4], [u * 3, u * 2.6]], '#9AA2AE', { line: INK, lw: 1.4 }); };
 
@@ -219,16 +241,21 @@
       ctx.save(); ctx.globalAlpha = ik; ctx.strokeStyle = SEPIA; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(ix, iy, ir, 0, TAU); ctx.stroke(); ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(ix, iy, ir + 10, 0, TAU); ctx.stroke(); ctx.restore();
       caption('fig. a · the seed, ×3', ix, iy + 290, ik, 48, INK);
     }
-    // the watering-can droplets
-    const wk = env(t, tRand + .3, tWatch - .1, .3, .3);
-    if (wk > 0) for (let i = 0; i < 10; i++) { const fph = frac(t * 1.8 + i / 10); dot(1028 - fph * 50, 838 + fph * 88, 4, '#5A86A8', wk * (1 - fph * .5)); }
-    // Clawd: looks up at the seed, waters it, then strolls aside to watch the plant grow
+    // Clawd: looks up at the seed, waters it (the can tips forward and the water comes out of its rose), sets it down on
+    // the soil beside him, then strolls aside to watch the plant grow
+    const wk = env(t, tRand + .3, tWatch - .1, .3, .3), down = ease(seg(t, tWatch - .1, tWatch + .4));
     const st = stroll(t, tRet + .5, tRet + 2.6, 1130, 1730, 11);
     const moods = [[c0, 'surprised'], [land + .2, 'happy'], [tRand + .2, 'determined'], [tWatch, 'excited'], [tRet + .4, 'happy'], [tYel, 'love'], [tYel + 1.5, 'surprised'], [tYel + 2.4, 'laugh'], [tTen, 'excited'], [tBro + .1, 'disgusted'], [tGone - .5, 'sad']];
-    const watering = t < tWatch + .4;
-    tourist(st.x, GROUND, 11, 'safari', { ...emotions(t, moods), view: watering ? 'q' : st.view, flip: watering ? true : t < tRet + .5 ? true : st.flip || t > tRet + 2.6, walk: st.walk > 0 && t < tRet + 2.6 ? st.walk : undefined, dy: st.dy, aR: watering ? .5 : undefined, armR: watering ? can(wk) : undefined, lookY: t < land ? -.9 : undefined, boilKey: 'c6c' });
-    // the can stays on the ground after he walks off
-    if (!watering) { push(); translate(1060, GROUND - 4); can(0)(9, 1); pop(); }
+    const holding = t < tWatch + .4;
+    const po = { ...emotions(t, moods), view: holding ? 'q' : st.view, flip: holding ? true : t < tRet + .5 ? true : st.flip || t > tRet + 2.6, walk: st.walk > 0 && t < tRet + 2.6 ? st.walk : undefined, dy: st.dy, lookY: t < land ? -.9 : undefined, boilKey: 'c6c' };
+    if (holding) Object.assign(po, { aR: lerp(.5, -.95, down), dy: lerp(po.dy || 0, 0, down), dx: lerp(po.dx || 0, 0, down), rot: lerp(po.rot || 0, 0, down), sq: lerp(po.sq || 0, 0, down), take: 0 });
+    tourist(st.x, GROUND, 11, 'safari', po);
+    // where the can is set down: under his lowered hand, standing on the soil
+    const [hx0] = armTip(1130, GROUND, 11, { view: 'q', flip: true, aR: -.95 }), CANY = GROUND - 2 - 2.8 * 10;
+    if (holding) {
+      const [hx, hy] = armTip(st.x, GROUND, 11, po), gy = lerp(hy, CANY, down * down), sp = canAt(hx, gy, 10, -1, 1.25 * wk);
+      if (wk > .05) for (let i = 0; i < 12; i++) { const f = frac(t * 2.2 + i / 12), j = hash(i * 3.1) - .5; dot(sp.x - 16 * f + j * 8 * f, sp.y + 8 + (GROUND - 6 - sp.y - 8) * f * f * .9, 3.5 + 1.5 * hash(i), '#5A86A8', wk * (1 - f * .4)); }
+    } else canAt(hx0, CANY, 10, -1, 0);
     labels(t, G);
     const step = kf(t, [[tRet, 0], [tYel, 1654], [tTen, 3753], [tDog, 7506], [tBro, 15012], [tGone, 30024]].map(([a, v]) => [a, [v]]), x => x)[0];
     counter(t, 330, 945, step, popk(t, tRet + .2, .5), t * (t < tGone ? 9 : .2));
@@ -337,14 +364,26 @@
     wordLeaf(400, 730, 330, -.55, [['iy', 1]], popk(t, tLet + .2, .6), { size: 72, fire: .8 * env(t, tLet + .2, tD + .3, .3, .5), sub: [['as in M', 0], ['iy', 1], ['azaki', 0]], subK: seg(t, tMiy - .4, tMiy + .2) });
     wordLeaf(1000, 665, 260, .38, [['d', 0], ['iy', 1]], popk(t, tD - .2, .6), { size: 70, fire: .8 * env(t, tD - .2, tDo + .3, .3, .5) });
     wordLeaf(1280, 585, 500, -.28, [['do it yourself', 0]], popk(t, tDo, .7), { size: 54, fire: .8 * env(t, tDo, e + 2, .3, .5) });
-    // Clawd checks the last leaf with a magnifying glass: no "iy" in it
-    const mg = seg(t, tYour + .1, tCon + .1), shrug = t > tAll - .2;
-    const mx = lerp(1720, 1440, ease(mg)) + (mg >= 1 && !shrug ? 90 * Math.sin((t - tCon) * 2.6) : 0), my = lerp(560, 490, ease(mg));
-    if (t > tYour) {
-      ctx.save(); ctx.strokeStyle = '#6A4B30'; ctx.lineWidth = 10; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(mx + 50, my + 56); ctx.lineTo(1680, 862); ctx.stroke(); ctx.restore();
-      ctx.save(); ctx.beginPath(); ctx.arc(mx, my, 76, 0, TAU); ctx.fillStyle = 'rgba(220,240,255,.25)'; ctx.fill(); ctx.lineWidth = 9; ctx.strokeStyle = '#8C6A3A'; ctx.stroke(); ctx.restore();
-    }
-    tourist(1740, GROUND, 10, 'safari', { ...emotions(t, [[a, 'neutral'], [tMiy, 'happy'], [tYour, 'thinking'], [tAll - .2, 'confused']]), view: 'q', flip: true, aR: t > tYour && !shrug ? .9 : undefined, boilKey: 'c6c5' });
+    // Clawd checks the last leaf with a magnifying glass: no "iy" in it. He stands on a botanist's step-ladder under the leaf;
+    // the glass is in his hand (armR hook): carried low, then raised and panned along the words, then lowered for the shrug
+    const LX = 1710, LTOP = GROUND - 240;
+    { boilSeed('c6lad'); const rail = (x0, x1) => flat([[x0 - 7, GROUND], [x0 + 7, GROUND], [x1 + 6, LTOP + 14], [x1 - 6, LTOP + 14]], '#9A7450', { line: INK, lw: 2 });
+      rail(LX - 72, LX - 50); rail(LX + 72, LX + 50);
+      for (let i = 1; i < 4; i++) { const yy = GROUND - i * 60, w = lerp(72, 50, (GROUND - yy) / 240); flat(rrPts(LX - w, yy - 5, w * 2, 10, 4), '#B08A60', { line: INK, lw: 1.6 }); }
+      flat(rrPts(LX - 66, LTOP, 132, 16, 4), '#8A6440', { line: INK, lw: 2 }); }
+    const mg = ease(seg(t, tYour - .3, tYour + .4)) * (1 - ease(seg(t, tAll - .3, tAll + .1))), scan = seg(t, tYour + .2, tCon + .1);
+    const gx = lerp(1640, 1420, .5 - .5 * Math.cos(scan * Math.PI * 2.2)), gy = 585 - (gx - 1280) * .288 - 6, GR = lerp(34, 62, mg);
+    const gDev = ctx.getTransform().transformPoint({ x: gx, y: gy });
+    const glass = (uu, sw) => {
+      // the glass's centre in arm space: carried (just past the hand) or on its target over the leaf
+      const L = ctx.getTransform().inverse().transformPoint(gDev), carry = { x: uu * 2.2 + GR, y: 0 };
+      let cx = lerp(carry.x, L.x, mg), cy = lerp(carry.y, L.y, mg);
+      const d = Math.hypot(cx, cy), q = Math.atan2(cy, cx), hl = Math.max(0, d - GR);
+      push(); rotate(q); flat(rrPts(-uu * .4, -uu * .32, hl + uu * .4, uu * .64, uu * .3), '#6A4B30', { line: INK, lw: 2 }); pop();
+      ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, GR, 0, TAU); ctx.fillStyle = 'rgba(220,240,255,.28)'; ctx.fill(); ctx.lineWidth = 10; ctx.strokeStyle = '#8C6A3A'; ctx.stroke(); ctx.lineWidth = 2; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx - GR * .3, cy - GR * .3, GR * .45, Math.PI * 1.05, Math.PI * 1.45); ctx.strokeStyle = 'rgba(255,255,255,.7)'; ctx.lineWidth = 4; ctx.stroke(); ctx.restore();
+    };
+    tourist(LX, LTOP, 10, 'safari', { ...emotions(t, [[a, 'neutral'], [tMiy, 'happy'], [tYour, 'thinking'], [tAll - .2, 'confused']]), view: 'q', flip: true, aR: lerp(-.5, .9 + .15 * Math.sin(scan * 14), mg), armR: glass, boilKey: 'c6c5' });
     camEnd();
     if (lt > .4) letter('Fig. IX · a language neuron', 960, 110, 56, INK, { face: 'marker', shadow: false, reveal: seg(lt, .5, 1.3), screen: true });
     if (t > tLang - .3) letter('it happens in language too', 960, 185, 52, INK, { face: 'hand', shadow: false, screen: true, reveal: seg(t, tLang - .3, tLang + .6), alpha: 1 - seg(t, tMiy + .5, tMiy + 1) });
@@ -395,9 +434,11 @@
   }
 
   // ---------- 6 · Specimen No. 1 is potted and wheeled off the plate (to the game show) ----------
-  function trolley(x, y, w, spin) {
+  // a plant trolley; its handle runs from the deck's back corner up to (hx, hy), where Clawd's hand grips it
+  function trolley(x, y, w, spin, hx, hy) {
     flat(rrPts(x - w / 2, y - 26, w, 22, 6), '#8C6A48', { line: INK, lw: 2 });
-    ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(x - w / 2 + 10, y - 20); ctx.lineTo(x - w / 2 - 40, y - 110); ctx.lineTo(x - w / 2 - 70, y - 110); ctx.stroke(); ctx.restore();
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = INK; ctx.lineWidth = 9; ctx.beginPath(); ctx.moveTo(x - w / 2 + 14, y - 18); ctx.lineTo(hx + 6, hy); ctx.stroke(); ctx.strokeStyle = '#8A8F96'; ctx.lineWidth = 4.5; ctx.stroke();
+    ctx.strokeStyle = INK; ctx.lineWidth = 14; ctx.beginPath(); ctx.moveTo(hx - 4, hy - 12); ctx.lineTo(hx + 8, hy + 12); ctx.stroke(); ctx.strokeStyle = '#3A2A1E'; ctx.lineWidth = 9; ctx.stroke(); ctx.restore();
     for (const wx of [x - w / 2 + 40, x + w / 2 - 40]) { flat(ellPts(wx, y + 8, 22, 22, 18), '#4A3A2A', { line: INK, lw: 2 }); ctx.save(); ctx.strokeStyle = '#C9B48E'; ctx.lineWidth = 2.5; for (let i = 0; i < 3; i++) { const q = spin + i * TAU / 3; ctx.beginPath(); ctx.moveTo(wx, y + 8); ctx.lineTo(wx + Math.cos(q) * 18, y + 8 + Math.sin(q) * 18); ctx.stroke(); } ctx.restore(); }
   }
   function pot(x, y, k) {
@@ -407,22 +448,24 @@
     pop();
   }
   function wheel(t, lt, dur) {
-    const a = ce('gr_geology'), go = a + .8, tag = a + .4, LIFT = 110;
+    const a = ce('gr_geology'), go = a + .15, tag = a + .3, LIFT = 110;
     const dx = slide(t, lt, geology, ce('gr_geology') - .1);
     cam(t, [[a, 960, 560, .9], [go + 2, 1060, 560, .88], [go + 5, 1200, 560, .88]], dx);
     plateFrame();
-    const mv = 520 * easeIn(seg(t, go, go + 2.4)) + 380 * Math.max(0, t - go - 2.4), X = 960 + mv, bob = t > go ? 3 * Math.abs(Math.sin(t * 9)) : 0;
+    const dg = Math.max(0, t - go), mv = dg < .5 ? 420 * dg * dg : 420 * (dg - .25), X = 960 + mv, bob = t > go ? 3 * Math.abs(Math.sin(t * 9)) : 0;   // (eases up to a steady push within half a second)
     push(); translate(X, GROUND - LIFT - bob); scale(.72); translate(-960, -GROUND);
     plant(t, { ...FULL, fire: { a: .3, b: .3, c: .3, d: .3, e: .3 } });
     pop();
-    // the pot rises up around the roots, a trolley under it
-    const pk = popk(t, a + .05, .5), PY = GROUND - LIFT + 120;
-    trolley(X, PY + 60 - bob, 460, mv / 22);
+    // the pot rises up around the roots, a trolley under it; Clawd (big enough to push it) grips the trolley's handle
+    const pk = popk(t, a + .05, .5), PY = GROUND - LIFT + 120, CY = PY + 90, CX = X - 360;
+    const po = { ...emotions(t, [[a, 'proud'], [go - .2, 'determined']]), view: 'side', flip: false, walk: t > go ? (t - go) * 2.4 : undefined, aL: .95, rot: t > go ? .1 * seg(t, go, go + .3) : 0, boilKey: 'c6c7' };
+    const [hx, hy] = armTip(CX, CY, 14, po, 'L');
+    trolley(X, PY + 60 - bob, 460, mv / 22, hx, hy);
     pot(X, PY - bob, pk);
     // the shipping tag: specimen no. 1
     if (t > tag) { const sw = Math.sin(t * 4) * .15 * Math.exp(-(t - tag)), k = popk(t, tag, .4); push(); translate(X - 130, PY - 150 - bob); rotate(.3 + sw); scale(backOut(k)); ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(-30, 50); ctx.stroke(); ctx.restore(); flat([[-90, 50], [30, 50], [30, 120], [-90, 120], [-110, 85]], '#F6EEDA', { line: INK, lw: 2 }); serif('No. 1', -36, 86, 38, RED, { bold: true }); pop(); }
     // Clawd pushes it off the plate, toward the stage
-    tourist(X - 330, GROUND - LIFT + 180, 10, 'safari', { ...emotions(t, [[a, 'proud'], [go - .2, 'determined']]), view: 'side', flip: false, walk: t > go ? (t - go) * 2.4 : undefined, aL: .1, rot: t > go ? .12 : 0, boilKey: 'c6c7' });
+    tourist(CX, CY, 14, 'safari', po);
     camEnd();
   }
 

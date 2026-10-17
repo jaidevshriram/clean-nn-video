@@ -6,6 +6,26 @@
 // is a lit route; the hope is to read it. It ends on a toy projector beaming onto a bedsheet in the town square (the
 // 1930s film opens inside that frame).
 (() => {
+  // lettering that writes on glyph by glyph (each letter pops up and fades in, so no clip ever slices through a letter)
+  // and leaves by fading (o.alpha), never by un-writing. k 0..1 is the entrance only. Shadows kit's title() / hand().
+  function writeOn(s, x, y, size, col, k, o = {}) {
+    if (k <= 0 || (o.alpha ?? 1) <= .01) return;
+    if (CAM && !o.screen) { [x, y] = toScreen(x, y); size *= CAM.zoom; o = { ...o, rot: (o.rot || 0) + CAM.rot }; }
+    const fam = { marker: '"Permanent Marker"', hand: '"Patrick Hand"', kalam: '"Kalam"' }[o.face || 'marker'] || o.face;
+    const G = [...String(s)], X = [];
+    ctx.save(); ctx.font = `${o.bold ? 'bold ' : ''}${size}px ${fam}`; const wAll = ctx.measureText(s).width; let pre = '';
+    for (const g of G) { const w0 = ctx.measureText(pre).width; pre += g; X.push((w0 + ctx.measureText(pre).width) / 2 - (o.align === 'left' ? 0 : wAll / 2)); } ctx.restore();
+    const n = G.length, sp = 2.5, rot = o.rot || 0, c = Math.cos(rot), sn = Math.sin(rot), a = o.alpha ?? 1;
+    const pass = stroke => G.forEach((g, i) => {
+      if (g === ' ') return; const kk = clamp((k * (n + sp) - i) / sp); if (kk <= 0) return;
+      const dy = (1 - easeOut(kk)) * size * .14, gx = x + c * X[i] - sn * dy, gy = y + sn * X[i] + c * dy;
+      letter(g, gx, gy, size, stroke ? 'rgba(0,0,0,0)' : col, { ...o, align: 'center', screen: true, reveal: undefined, pop: .25 + .75 * kk, alpha: a * ease(clamp(kk * 1.6)), stroke: stroke ? o.stroke : undefined, shadow: stroke ? false : o.shadow });
+    });
+    if (o.stroke) pass(true);
+    pass(false);
+  }
+  function title(s, x, y, size, col = PAL.ink, k = 1, o = {}) { writeOn(s, x, y, size, col, k, { shadow: false, ...o }); }
+  function hand(s, x, y, size, col = PAL.ink, k = 1, o = {}) { writeOn(s, x, y, size * (o.raw ? 1 : 1.2), col, k, { face: 'hand', ...o }); }
   const V = 'blog/raw/v-figure-10x/', PE = 'blog/raw/pose-everywhere/', C3 = 'blog/raw/crushed-3b-v3/', CX = 'blog/raw/crushed-3b/examples/', NP = 'blog/raw/negative-poles-v2/', CC = 'blog/raw/circuit-carousel/images/';
   const DOGS = [PE + 'large/0', PE + 'medium/0', PE + 'large/4', PE + 'medium/4'];
   const TOY = ['#E87A5A', '#F2C14E', '#7EB5D6', '#A4C97A', '#E8A0B4', '#F29A5A', '#9FB8E8'];
@@ -95,8 +115,12 @@
   }
   const roofTop = n => { const F = FEAT[n]; return P(F.x, F.h + (F.roof === 'gable' ? F.w * .42 : 0) + 30, F.z + F.d * .5); };
   // a glowing arc over the rooftops from one firing neuron to the next (k draws it on); pulses run along it when done
-  function arcLink(a, b, k, t) {
-    if (k <= 0) return; const A = roofTop(a), B = roofTop(b), M = [(A[0] + B[0]) / 2, Math.min(A[1], B[1]) - 120 - .25 * Math.abs(A[0] - B[0])], Cq = through([A, M, B], 16), n = Math.max(2, Math.round(Cq.length * ease(k)));
+  // (the rows line up nearly vertically on screen from here, so the arc bows out sideways, side = ±1, like a bridge
+  // seen from above, never folding into a hairpin)
+  function arcLink(a, b, k, t, side = 1) {
+    if (k <= 0) return; const A = roofTop(a), B = roofTop(b), dx = B[0] - A[0], dy = B[1] - A[1], d = Math.hypot(dx, dy) || 1, bow = .38 * d + 60;
+    const M1 = [lerp(A[0], B[0], .3) - dy / d * bow * side * .9, lerp(A[1], B[1], .3) + dx / d * bow * side * .9 - 30], M2 = [lerp(A[0], B[0], .7) - dy / d * bow * side * .9, lerp(A[1], B[1], .7) + dx / d * bow * side * .9 - 30];
+    const Cq = through([A, M1, M2, B], 14), n = Math.max(2, Math.round(Cq.length * ease(k)));
     ctx.save(); ctx.lineCap = 'round'; ctx.shadowColor = '#FFB020'; ctx.shadowBlur = 26; ctx.strokeStyle = '#FFC93A'; ctx.lineWidth = 22; ctx.beginPath(); Cq.slice(0, n).forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke(); ctx.shadowBlur = 0; ctx.strokeStyle = '#FFF6D0'; ctx.lineWidth = 7; ctx.stroke(); ctx.restore();
     if (k < 1) glow(Cq[n - 1][0], Cq[n - 1][1], 70, '#FFE38A', 1);
     else for (let i = 0; i < 2; i++) { const q = Cq[Math.floor(frac(t * .7 + i / 2) * (Cq.length - 1))]; glow(q[0], q[1], 50, '#FFFFFF', .9); }
@@ -141,17 +165,59 @@
     }
     return drawn;
   }
-  // the toy train on the beach rails: cars [im], head at x
+  // the toy train on the beach rails: cars [im], head at x. A tin steam engine (cowcatcher, boiler, dome, stack, cab
+  // with a roof, spoked drivers with a side rod that turns with the distance travelled) pulls flatcars, coupled bar to
+  // bar; each flatcar carries its photo upright in a wooden slot block, like a picture on a stand.
   function train(t, xHead, cars, o = {}) {
-    const z = 108;
+    const z = 108, INK_ = '#2A2340';
+    const wheel = (wx, wy, r, zz, ang, rim = '#2A2340') => {   // a spoked wheel in the side plane; returns its crank pin
+      const [px, py, k] = P(wx, wy, zz), R = r * k; dot(px, py, R, rim); dot(px, py, R * .78, '#9AA3B5'); dot(px, py, R * .22, rim);
+      ctx.save(); ctx.strokeStyle = rim; ctx.lineWidth = Math.max(1, R * .12); ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = ang + i * Math.PI / 3; ctx.moveTo(px, py); ctx.lineTo(px + Math.cos(a) * R * .76, py + Math.sin(a) * R * .76); } ctx.stroke(); ctx.restore();
+      return [px + Math.cos(ang) * R * .5, py + Math.sin(ang) * R * .5];
+    };
     for (let c = cars.length; c >= 0; c--) {
       const x = xHead - c * 230, L = c === 0 ? 170 : 190, x0 = x - L / 2, x1 = x + L / 2, col = c === 0 ? '#D2473F' : ['#3A64B8', '#F0BE46', '#6E9F58'][c % 3];
-      if (P(x1, 0, z)[0] < -300 || P(x0, 0, z)[0] > W + 300) continue;
-      poly([[x0, 14, z], [x1, 14, z], [x1, 14, z + 50], [x0, 14, z + 50]], mixCol(col, '#FFFFFF', .2));
-      poly([[x0, 14, z], [x1, 14, z], [x1, 40, z], [x0, 40, z]], col, { line: '#2A2340', lw: 2 * P(x, 0, z)[2] });
-      for (const wx of [x0 + 34, x1 - 34]) { const [px, py, k] = P(wx, 14, z); dot(px, py, 16 * k, '#2A2340'); dot(px, py, 6 * k, '#9AA3B5'); }
-      if (c === 0) { poly([[x0 + 20, 40, z + 10], [x0 + 90, 40, z + 10], [x0 + 90, 110, z + 10], [x0 + 20, 110, z + 10]], '#D2473F', { line: '#2A2340', lw: 2 * P(x, 0, z)[2] }); poly([[x0 + 110, 40, z + 10], [x1 - 10, 40, z + 10], [x1 - 10, 80, z + 10], [x0 + 110, 80, z + 10]], '#2A2340'); poly([[x1 - 50, 80, z + 20], [x1 - 26, 80, z + 20], [x1 - 26, 120, z + 20], [x1 - 50, 120, z + 20]], '#2A2340'); for (let i = 0; i < 4; i++) { const ph = frac(t * 1.4 + i / 4), [sx, sy, k] = P(x1 - 38 - ph * 60, 130 + ph * 90, z + 20); dot(sx, sy, (12 + 26 * ph) * k, '#FFFFFF', .7 * (1 - ph)); } }
-      else { const im = cars[c - 1]; if (!im) continue; const [px, py, k] = P(x - 60, 128, z + 20), [qx, qy] = P(x + 60, 44, z + 20); photoFlat(im, px, py, qx - px, qy - py, { border: 5 * k, shadow: false }); }
+      if (P(x1 + 60, 0, z)[0] < -300 || P(x0 - 60, 0, z)[0] > W + 300) continue;
+      const lw = 2 * P(x, 0, z)[2], ln = { line: INK_, lw }, ang = -x / 16;   // wheels roll with the distance travelled
+      // the coupler to the car in front: a bar with a knuckle at each end
+      if (c > 0) { const xa = x1 - 4, xb = x1 + 230 - (c === 1 ? 170 : 190) / 2 + 4 + (c === 1 ? -10 : 0); poly([[xa, 22, z + 24], [xb, 22, z + 24], [xb, 30, z + 24], [xa, 30, z + 24]], '#4A4A58', ln); for (const kx of [xa + 6, xb - 6]) { const [qx, qy, k] = P(kx, 26, z + 24); dot(qx, qy, 6 * k, '#2A2340'); } }
+      // deck: top and side, with a trim stripe
+      poly([[x0, 40, z], [x1, 40, z], [x1, 40, z + 50], [x0, 40, z + 50]], mixCol(col, '#FFFFFF', .25), c === 0 ? {} : ln);
+      poly([[x0, 14, z], [x1, 14, z], [x1, 40, z], [x0, 40, z]], col, ln);
+      poly([[x0 + 6, 30, z - .5], [x1 - 6, 30, z - .5], [x1 - 6, 34, z - .5], [x0 + 6, 34, z - .5]], mixCol(col, '#FFFFFF', .45));
+      if (c === 0) {
+        // cowcatcher at the front
+        const cw = poly([[x1, 40, z], [x1, 14, z], [x1 + 36, 4, z]], '#5A5A66', ln);
+        ctx.save(); ctx.strokeStyle = INK_; ctx.lineWidth = Math.max(1, lw * .6); for (let i = 1; i < 4; i++) { const a = P(x1 + 36 * i / 4, 4 + 10 * (1 - i / 4) * 0, z), b = P(x1, 14 + 26 * i / 4, z); ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); } ctx.restore();
+        // boiler: a cylinder, lit along its top, banded, with a dark smokebox at the front and a headlamp
+        const bz = z + 6;
+        poly([[x0 + 64, 40, bz], [x1 - 6, 40, bz], [x1 - 6, 96, bz], [x0 + 64, 96, bz]], '#C23A33', ln);
+        poly([[x0 + 64, 80, bz - .5], [x1 - 6, 80, bz - .5], [x1 - 6, 90, bz - .5], [x0 + 64, 90, bz - .5]], '#E8776A');
+        for (const bx of [x0 + 90, x0 + 125]) poly([[bx, 40, bz - 1], [bx + 6, 40, bz - 1], [bx + 6, 96, bz - 1], [bx, 96, bz - 1]], '#F0BE46');
+        poly([[x1 - 30, 40, bz - 1], [x1 - 6, 40, bz - 1], [x1 - 6, 96, bz - 1], [x1 - 30, 96, bz - 1]], '#3A3A46', ln);
+        { const [hx, hy, k] = P(x1 - 2, 102, bz); glow(hx, hy, 26 * k, '#FFE9A8', .7); dot(hx, hy, 7 * k, '#FFF6D8'); }
+        // dome and smokestack (flared cap), with puffs
+        { const [dx, dy, k] = P(x0 + 112, 96, bz); ctx.save(); ctx.fillStyle = '#F0BE46'; ctx.strokeStyle = INK_; ctx.lineWidth = lw; ctx.beginPath(); ctx.ellipse(dx, dy, 15 * k, 13 * k, 0, Math.PI, TAU); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); }
+        poly([[x1 - 44, 96, bz], [x1 - 28, 96, bz], [x1 - 26, 126, bz], [x1 - 46, 126, bz]], '#2A2340', ln);
+        poly([[x1 - 52, 126, bz], [x1 - 20, 126, bz], [x1 - 24, 136, bz], [x1 - 48, 136, bz]], '#3A3A46', ln);
+        for (let i = 0; i < 4; i++) { const ph = frac(t * 1.4 + i / 4), [sx, sy, k] = P(x1 - 36 - ph * 70, 146 + ph * 90, bz); dot(sx, sy, (12 + 26 * ph) * k, '#FFFFFF', .7 * (1 - ph)); }
+        // cab with a window and an overhanging roof
+        poly([[x0 + 4, 40, bz], [x0 + 66, 40, bz], [x0 + 66, 118, bz], [x0 + 4, 118, bz]], '#D2473F', ln);
+        poly([[x0 + 16, 78, bz - .5], [x0 + 54, 78, bz - .5], [x0 + 54, 108, bz - .5], [x0 + 16, 108, bz - .5]], '#FFE9A8', ln);
+        poly([[x0 - 6, 118, bz - 6], [x0 + 76, 118, bz - 6], [x0 + 76, 118, bz + 46], [x0 - 6, 118, bz + 46]], '#3A3A46', ln);
+        poly([[x0 - 6, 118, bz - 6], [x0 + 76, 118, bz - 6], [x0 + 76, 126, bz - 6], [x0 - 6, 126, bz - 6]], '#2A2340');
+        // drivers with a side rod, and a small leading wheel
+        const p1 = wheel(x0 + 46, 16, 19, z - 2, ang), p2 = wheel(x0 + 98, 16, 19, z - 2, ang); wheel(x1 - 22, 12, 12, z - 2, ang * 1.6);
+        ctx.save(); ctx.strokeStyle = '#C9CDD6'; ctx.lineCap = 'round'; ctx.lineWidth = Math.max(2, 5 * P(x, 0, z)[2]); ctx.beginPath(); ctx.moveTo(p1[0], p1[1]); ctx.lineTo(p2[0], p2[1]); ctx.stroke(); ctx.strokeStyle = INK_; ctx.lineWidth = Math.max(1, lw * .5); ctx.stroke(); ctx.restore();
+      } else {
+        for (const wx of [x0 + 34, x1 - 34]) wheel(wx, 14, 16, z - 2, ang);
+        const im = cars[c - 1]; if (!im) continue;
+        // the photo stands in a slot cut into a wooden block on the deck (the block's face hides the photo's foot)
+        poly([[x - 74, 52, z + 18], [x + 74, 52, z + 18], [x + 74, 52, z + 34], [x - 74, 52, z + 34]], '#C99A62', ln);
+        const [px, py, k] = P(x - 60, 132, z + 26), [qx, qy] = P(x + 60, 44, z + 26); photoFlat(im, px, py, qx - px, qy - py, { border: 5 * k, shadow: false });
+        poly([[x - 74, 40, z + 18], [x + 74, 40, z + 18], [x + 74, 52, z + 18], [x - 74, 52, z + 18]], '#A9784A', ln);
+        for (const sx of [x - 64, x + 64]) poly([[sx - 4, 52, z + 18], [sx + 4, 52, z + 18], [sx + 4, 70, z + 18], [sx - 4, 70, z + 18]], '#8A5E3A', ln);
+      }
     }
   }
   // Clawd standing on the table at world (x, z)
@@ -206,11 +272,38 @@
     // the brightest photos fly from the train up into the windows
     if (t > tkeep && t < twin + .5 && drawn.dog) DOGS.forEach((im, i) => { const k = seg(t, tkeep + .4 + i * .7, tkeep + 1.3 + i * .7); if (k <= 0 || k >= 1) return; const R = drawn.dog, tx = R.fx + R.fw * (i % 2 ? .75 : .25), ty = R.fy + R.fh * (.2 + Math.floor(i / 2) * .3), [sx, sy] = P(i * 60 - 90, 100, 120), q = arcPt([sx, sy], [tx, ty], 160, easeInOut(k)); photoFlat(im, q[0] - 50, q[1] - 40, 100, 80, { border: 5, rot: (1 - k) * .5 }); });
     if (night > 0) nightfall(t, night, drawn);
-    if (drawn.dog) { const R = drawn.dog; hand('a neuron', R.fx + R.fw / 2, R.fy - R.fh * .62, 64, PAL.ink, seg(t, tn - .3, tn + .5) * (1 - seg(t, w0, w0 + .4)), { stroke: '#FFF6E2', strokeW: .14 }); }
-    if (t > tsh - .2 && t < tbr + 1) title('a lot of pictures', 960, 160, 80, '#3A2A1A', seg(t, tsh - .2, tsh + .8) * (1 - seg(t, tbr + .4, tbr + 1)), { stroke: '#FFF6E2', strokeW: .1 });
-    if (t > a - .3 && t < a + 4) title('Part I · the belief', 1120, 1000, 64, '#6E4FB0', seg(t, a - .2, a + .6) * (1 - seg(t, a + 3.2, a + 3.8)), { stroke: '#FFF6E2', strokeW: .12 });
+    if (drawn.dog) { const R = drawn.dog; hand('a neuron', R.fx + R.fw / 2, R.fy - R.fh * .62, 64, PAL.ink, seg(t, tn - .3, tn + .5), { stroke: '#FFF6E2', strokeW: .14, alpha: 1 - seg(t, w0, w0 + .4) }); }
+    if (t > tsh - .2 && t < tbr + 1) title('a lot of pictures', 960, 160, 80, '#3A2A1A', seg(t, tsh - .2, tsh + .8), { stroke: '#FFF6E2', strokeW: .1, alpha: 1 - seg(t, tbr + .4, tbr + 1) });
+    if (t > a - .3 && t < a + 4) title('Part I · the belief', 1120, 1000, 64, '#6E4FB0', seg(t, a - .2, a + .6), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, a + 3.2, a + 3.8) });
     if (t > tl - .2 && t < tl + 1.3) sfx('DING!', W / 2 + 300, 560, 72, PAL.berry, t - tl + .1, { life: 1.2 });   // (low enough to sit in the sharp band, clear of the roofs)
     fxTiltShift(330, 820, 10);
+  }
+
+  // a small pixel cube at world (x, y, z) (its bottom-front-centre), size s: front, top and the side facing the camera
+  function pixCube(x, y, z, s, col) {
+    const a = x - s / 2, b = x + s / 2, L = { line: 'rgba(40,24,30,.55)', lw: Math.max(1, 1.4 * P(x, y, z)[2]) }, d = s * .6;   // (depth foreshortened a little: toy blocks read as cubes from up here)
+    if (C.x > b) poly([[b, y, z], [b, y, z + d], [b, y + s, z + d], [b, y + s, z]], mixCol(col, '#2A1A2A', .3), L);
+    else if (C.x < a) poly([[a, y, z], [a, y, z + d], [a, y + s, z + d], [a, y + s, z]], mixCol(col, '#2A1A2A', .3), L);
+    if (C.y > y + s) poly([[a, y + s, z], [b, y + s, z], [b, y + s, z + d], [a, y + s, z + d]], mixCol(col, '#FFFFFF', .35), L);
+    poly([[a, y, z], [b, y, z], [b, y + s, z], [a, y + s, z]], col, L);
+  }
+  // a big toy sand pail standing on the beach at (x, 0, z); tip 0..1 tips it over to the right about its base corner.
+  // Returns the world position of its mouth (where the cubes come out).
+  function pail(t, x, z, tip) {
+    const a = -1.95 * easeInOut(clamp(tip)) + .06 * Math.sin(t * 9) * Math.sin(Math.PI * clamp(tip)), ca = Math.cos(a), sa = Math.sin(a), px = x + 42;
+    const W_ = (u, v) => [px + (u - 42) * ca - v * sa, (u - 42) * sa + v * ca];   // local (u, v), pivot at the base's right corner
+    const Q = (pts, dz = 0) => pts.map(([u, v]) => { const [wx, wy] = W_(u, v); return [wx, wy, z + dz]; });
+    const L = { line: 'rgba(40,24,30,.8)', lw: Math.max(1.5, 2.6 * P(x, 0, z)[2]) };
+    ctx.save(); ctx.globalAlpha = .22; poly([[x - 50, 0, z], [x + 60 + 120 * clamp(tip), 0, z], [x + 60 + 120 * clamp(tip), 0, z + 60], [x - 50, 0, z + 60]], '#2A3A20'); ctx.restore();
+    // the inside of the mouth (seen past the rim when tipped), then the body, stripes, rim and handle
+    const rim = th => { const [wx, wy] = W_(58 * Math.cos(th), 118); return [wx, wy, z + 26 * Math.sin(th)]; };
+    poly(Array.from({ length: 20 }, (_, i) => rim(i / 20 * TAU)), '#7A2038', L);
+    poly(Q([[-42, 0], [42, 0], [58, 118], [-58, 118]]), '#E2476E', L);
+    poly(Q([[-47, 34], [47, 34], [50, 54], [-50, 54]], -.5), '#F2C14E');
+    poly(Q([[-60, 106], [60, 106], [60, 122], [-60, 122]], -1), '#F07890', L);
+    const H = Array.from({ length: 13 }, (_, i) => { const q = Math.PI * i / 12, [wx, wy] = W_(-56 * Math.cos(q), 118 + 70 * Math.sin(q)); return P(wx, wy, z - 2); });
+    ctx.save(); ctx.strokeStyle = '#3A3A46'; ctx.lineWidth = Math.max(2, 4 * P(x, 0, z)[2]); ctx.lineCap = 'round'; ctx.beginPath(); H.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke(); ctx.restore();
+    const [mx, my] = W_(0, 120); return { mx, my: Math.max(20, my), mz: z };
   }
 
   // ---------- shot 2 · layers are districts: the coast (pixels), then edges, textures, whole ideas; then a circuit ----------
@@ -239,18 +332,39 @@
       const Q = C_.slice(0, n).filter(p => p[1] < ROWZ(r) + 40 && p[1] >= ROWZ(r) - 300).map(p => P(p[0], 1, p[1]));
       if (Q.length > 1) { ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.shadowColor = '#FFC020'; ctx.shadowBlur = 24; ctx.strokeStyle = '#FFD84A'; ctx.lineWidth = Math.max(4, 22 * P(0, 0, (ROWZ(r) - 100))[2]); ctx.beginPath(); Q.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.stroke(); ctx.restore(); }
     } });
-    // the beach: pixel cubes falling into the sea and washing ashore
-    if (rain > 0) for (let i = 0; i < 140; i++) { const f = frac(t * .5 + hash(i)), x = -1300 + hash(i * 3.3) * 2600, z = -120 + hash(i * 5.1) * 140, y = lerp(700, 0, f); const [sx, sy, k] = P(x, y, z); const c = ['#E2476E', '#3A9C98', '#E8AA38', '#7B5CA8', '#8EC3E6', '#6E9F58'][i % 6]; ctx.save(); ctx.globalAlpha = rain * Math.min(1, (1 - f) * 4); flat(rectPts(sx - 20 * k, sy - 20 * k, 40 * k, 40 * k), c, { line: 'rgba(0,0,0,.25)', lw: 1 }); ctx.restore(); }
+    // the input arrives: a giant toy sand pail on the beach tips over and pours pixel cubes into the sea; they bob and
+    // wash up on the sand. Everything is drawn at its own depth (it all sits in front of the first row of houses).
+    const PB = pail(t, -380, 55, seg(t, tc - 1.3, tc - .7) - seg(t, ted - .2, ted + .5));
+    const PCOL = ['#E2476E', '#3A9C98', '#E8AA38', '#7B5CA8', '#8EC3E6', '#6E9F58'], N = 90, p0 = tc - .75, p1 = ted - .6, gone = 1 - seg(t, ted - .4, ted + .2);
+    const CUBES = [];
+    if (rain > 0 && gone > 0) for (let i = 0; i < N; i++) {
+      const L = lerp(p0, p1, (i + hash(i * 1.9) * .6) / N), tau = t - L; if (tau < 0) continue;
+      const vx = 100 + 420 * hash(i * 3.3), vz = -30 - 260 * hash(i * 2.1), vy = 200 + 220 * hash(i * 4.7), G_ = 900;
+      const tl_ = (vy + Math.sqrt(vy * vy + 2 * G_ * PB.my)) / G_;   // when it hits the water
+      let x, y, z;
+      if (tau < tl_) { x = PB.mx + vx * tau; z = PB.mz + vz * tau; y = PB.my + vy * tau - G_ / 2 * tau * tau; }
+      else { const d = tau - tl_, ashore = 1 - Math.exp(-d * .6); x = PB.mx + vx * tl_ + 10 * Math.sin(d * 1.3 + i); z = lerp(PB.mz + vz * tl_, 22 + 24 * hash(i * 6.1), ashore); y = 3 * Math.sin(d * 4 + i) * (1 - ashore); }
+      CUBES.push([x, y, z, 24 + 10 * hash(i * 8.3), PCOL[i % 6]]);
+    }
+    CUBES.sort((a, b) => b[2] - a[2]);
+    ctx.save(); ctx.globalAlpha = gone; CUBES.filter(c => c[2] >= 70).forEach(c => pixCube(...c)); ctx.restore();
     // the circuit: arcs of light hop over the rooftops, neuron to neuron
     // simple shapes near the coast, a whole idea on the horizon: curve hut → eye house → dog tower
-    [['curveA', 'eye'], ['eye', 'dogT']].forEach(([p, q], i) => arcLink(p, q, seg(t, c0 + 1 + i * 1.1, c0 + 2.1 + i * 1.1), t));
+    [['curveA', 'eye'], ['eye', 'dogT']].forEach(([p, q], i) => arcLink(p, q, seg(t, c0 + 1 + i * 1.1, c0 + 2.1 + i * 1.1), t, i ? -1 : 1));
     // reading the circuit: each neuron's best photo pops up on a short stalk right over its roof
-    ['curveA', 'eye', 'dogT'].forEach((n, i) => { const k = popk(t, tread + i * .5, .5); if (k <= 0) return; const [x, y] = roofTop(n), F = FEAT[n], bw = 112 * backOut(k), al = 1 - seg(t, e + .6, e + 1.2); ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = '#FFF6D0'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y - 36); ctx.stroke(); photoFlat(F.imgs[0], x - bw / 2, y - 36 - bw - 8, bw, bw, { border: 7 }); ctx.restore(); });
+    // (staggered out to the sides and up, on bent stalks, so the three photos never cover each other)
+    const STALK = { curveA: [-190, 30], eye: [200, 40], dogT: [-220, 0] };
+    ['curveA', 'eye', 'dogT'].forEach((n, i) => { const k = popk(t, tread + i * .5, .5); if (k <= 0) return; const [x, y] = roofTop(n), F = FEAT[n], [ox, oh] = STALK[n], bw = 112 * backOut(k), al = 1 - seg(t, e + .6, e + 1.2), px = x + ox * easeOut(k), py = y - oh - 40 * easeOut(k);
+      ctx.save(); ctx.globalAlpha = al; ctx.strokeStyle = '#FFF6D0'; ctx.lineWidth = 4; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x, py, px, py); ctx.stroke(); dot(x, y, 6, '#FFF6D0'); photoFlat(F.imgs[0], px - bw / 2, py - bw - 8, bw, bw, { border: 7 }); ctx.restore(); });
     if (false) { const C_ = through(route, 8), q = C_[Math.min(C_.length - 1, Math.round((C_.length - 1) * circK))], [sx, sy, k] = P(q[0], 0, q[1]); glow(sx, sy - 10 * k, 60 * k + 20, '#FFC766', 1); flat(rrPts(sx - 30 * k, sy - 22 * k, 60 * k, 22 * k, 6 * k), '#F0BE46', { line: '#3A2A1A', lw: 2 }); dot(sx - 18 * k, sy, 7 * k, '#2A2340'); dot(sx + 18 * k, sy, 7 * k, '#2A2340'); }
     // Clawd on the beach (seen from high up he's tiny), a pixel cube bonks him
     const bonk = wt('nr_layers', 'come');
     tClawd(t, 220, 70, [[a - 1, 'love'], [tly, 'excited'], [bonk + .25, 'dizzy'], [bonk + 2.2, 'happy'], [c0, 'excited']], { flip: true, lookX: -.4, lookY: -.6 });
-    if (t > bonk - .6 && t < bonk + .25) { const [sx, sy, k] = P(220, lerp(400, 70, seg(t, bonk - .6, bonk + .25)), 70); flat(rectPts(sx - 14 * k, sy - 14 * k, 28 * k, 28 * k), '#E2476E'); }
+    ctx.save(); ctx.globalAlpha = gone; CUBES.filter(c => c[2] < 70).forEach(c => pixCube(...c)); ctx.restore();
+    // one stray cube sails out of the pail and bonks him on the hat, then bounces off onto the sand
+    if (t > bonk - .7 && t < bonk + .8) { const f = seg(t, bonk - .7, bonk + .2), g = seg(t, bonk + .2, bonk + .8);
+      if (t < bonk + .2) pixCube(lerp(PB.mx, 220, f), lerp(PB.my, 80, f) + 260 * Math.sin(f * Math.PI), lerp(PB.mz, 70, f), 26, '#E2476E');
+      else pixCube(lerp(220, 330, g), 80 * Math.abs(Math.cos(g * Math.PI * 1.5)) * (1 - g), lerp(70, 60, g), 26, '#E2476E'); }
     // labels: the districts, in big hand lettering
     const lab = (s, ta, tb, y = 170) => title(s, 960, y, 84, '#3A2A1A', seg(t, ta - .2, ta + .8), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tb - .4, tb) });
     if (t < tc) lab('layers, like districts', tly, tc);
@@ -380,7 +494,7 @@
     });
     // the word the whole film is about
     if (t > tcl - .4) title('clean', 960, 200, 150, '#FFF6E2', seg(t, tcl - .3, tcl + .4), { stroke: '#3A2A1A', strokeW: .1, alpha: 1 - seg(t, end - .4, end + .2) });
-    if (t > tnw - .3 && t < tcl + .5) hand('a network you can read like that…', 960, 262, 60, '#3A2A1A', seg(t, tnw - .3, tnw + 1.2) * (1 - seg(t, tcl - .4, tcl)), { stroke: '#FFF6E2', strokeW: .14 });
+    if (t > tnw - .3 && t < tcl + .5) hand('a network you can read like that…', 960, 262, 60, '#3A2A1A', seg(t, tnw - .3, tnw + 1.2), { stroke: '#FFF6E2', strokeW: .14, alpha: 1 - seg(t, tcl - .4, tcl) });
     if (t < tlk) title('mechanistic interpretability', 960, 170, 80, '#3A2A1A', seg(t, tm - .3, tm + 1.2), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tlk - .6, tlk - .1) });
     if (t > tun + 1 && t < tun + 2.5) sfx('click!', P(30, 150, PZ)[0], P(30, 150, PZ)[1], 52, PAL.berry, t - tun - 1.1, { life: 1.1 });
     fxTiltShift(300, 820, 9);

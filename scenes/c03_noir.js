@@ -5,6 +5,26 @@
 // (nouns vs verbs); the police sketch artist who wanders down the cat route; CASE 1 SOLVED, and CASE FILE #2.
 // Everything is grey except gold: the V strokes (generalization) and, at the very end, the next case's cover art.
 (() => {
+  // lettering that writes on glyph by glyph (each letter pops up and fades in, so no clip ever slices through a letter)
+  // and leaves by fading (o.alpha), never by un-writing. k 0..1 is the entrance only. Shadows kit's title() / hand().
+  function writeOn(s, x, y, size, col, k, o = {}) {
+    if (k <= 0 || (o.alpha ?? 1) <= .01) return;
+    if (CAM && !o.screen) { [x, y] = toScreen(x, y); size *= CAM.zoom; o = { ...o, rot: (o.rot || 0) + CAM.rot }; }
+    const fam = { marker: '"Permanent Marker"', hand: '"Patrick Hand"', kalam: '"Kalam"' }[o.face || 'marker'] || o.face;
+    const G = [...String(s)], X = [];
+    ctx.save(); ctx.font = `${o.bold ? 'bold ' : ''}${size}px ${fam}`; const wAll = ctx.measureText(s).width; let pre = '';
+    for (const g of G) { const w0 = ctx.measureText(pre).width; pre += g; X.push((w0 + ctx.measureText(pre).width) / 2 - (o.align === 'left' ? 0 : wAll / 2)); } ctx.restore();
+    const n = G.length, sp = 2.5, rot = o.rot || 0, c = Math.cos(rot), sn = Math.sin(rot), a = o.alpha ?? 1;
+    const pass = stroke => G.forEach((g, i) => {
+      if (g === ' ') return; const kk = clamp((k * (n + sp) - i) / sp); if (kk <= 0) return;
+      const dy = (1 - easeOut(kk)) * size * .14, gx = x + c * X[i] - sn * dy, gy = y + sn * X[i] + c * dy;
+      letter(g, gx, gy, size, stroke ? 'rgba(0,0,0,0)' : col, { ...o, align: 'center', screen: true, reveal: undefined, pop: .25 + .75 * kk, alpha: a * ease(clamp(kk * 1.6)), stroke: stroke ? o.stroke : undefined, shadow: stroke ? false : o.shadow });
+    });
+    if (o.stroke) pass(true);
+    pass(false);
+  }
+  function title(s, x, y, size, col = PAL.ink, k = 1, o = {}) { writeOn(s, x, y, size, col, k, { shadow: false, ...o }); }
+  function hand(s, x, y, size, col = PAL.ink, k = 1, o = {}) { writeOn(s, x, y, size * (o.raw ? 1 : 1.2), col, k, { face: 'hand', ...o }); }
   const V = 'blog/raw/v-figure-10x/';
   const GRID = [V + 'p47742', V + 'c4d201c', V + 'p42708', V + 'c4d201d', V + 'c5a352d', V + 'pCarX5'];
   const VAP = [{ ax: .5, ay: .8, ty: .05, lx: .1, rx: .9 }, { ax: .5, ay: .95, ty: .42, lx: .14, rx: .86 }, { ax: .5, ay: .74, ty: .06, lx: .12, rx: .88 }, { ax: .5, ay: .96, ty: .3, lx: .12, rx: .88 }, { ax: .5, ay: .78, ty: .06, lx: .14, rx: .86 }, { ax: .52, ay: .9, ty: .45, lx: .3, rx: .78 }];
@@ -81,11 +101,15 @@
     // drops running down the glass
     for (let i = 0; i < 14; i++) { const x = WIN.x + 20 + hash(i * 5.1) * (WIN.w - 40), ph = frac(rt * (.15 + .2 * hash(i)) + hash(i * 2)), y = WIN.y + 130 + ph * (WIN.h - 140); dot(x, y, 3, '#E8E8F0', .5); ctx.save(); ctx.strokeStyle = 'rgba(232,232,240,.25)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + 1, y - 40 * ph); ctx.stroke(); ctx.restore(); }
   }
-  // light through the blinds: diagonal bands falling down-left from the window
+  // light through the blinds: bands falling down-left from the window that widen and fade with distance, with soft
+  // edges (a faint wide halo under each core); never over the window glass itself (o.win); weaker low down over the desk
   function blinds(t, a = .42, x0 = 760, o = {}) {
     ctx.save(); if (o.win) { const c = new Path2D(); c.rect(-400, -400, W + 800, H + 800); c.rect(WIN.x - 10, WIN.y - 10, WIN.w + 20, WIN.h + 20); ctx.clip(c, 'evenodd'); }
-    ctx.globalAlpha = a; ctx.fillStyle = '#E9E4D6'; const sw = 6 * Math.sin(t * .4);
-    for (let i = 0; i < 13; i++) { const xt = x0 + i * 72 + sw; ctx.beginPath(); ctx.moveTo(xt, -60); ctx.lineTo(xt + 34, -60); ctx.lineTo(xt + 34 - 760, 1160); ctx.lineTo(xt - 760, 1160); ctx.closePath(); ctx.fill(); }
+    const sw = 6 * Math.sin(t * .4), g = ctx.createLinearGradient(0, -60, 0, 1160);
+    g.addColorStop(0, 'rgba(233,228,214,1)'); g.addColorStop(.55, 'rgba(233,228,214,.7)'); g.addColorStop(1, 'rgba(233,228,214,.28)');
+    ctx.fillStyle = g;
+    for (const [grow, al] of [[16, .35], [0, 1]]) { ctx.globalAlpha = a * al;
+      for (let i = 0; i < 13; i++) { const xt = x0 + i * 72 + sw, spread = 18 + i * 1.5; ctx.beginPath(); ctx.moveTo(xt - grow * .5, -60); ctx.lineTo(xt + 30 + grow * .5, -60); ctx.lineTo(xt + 30 + spread + grow - 760, 1160); ctx.lineTo(xt - spread - grow - 760, 1160); ctx.closePath(); ctx.fill(); } }
     ctx.restore();
   }
   // the ragged tear on the wall; m 0..1 snaps it into a V
@@ -122,6 +146,28 @@
     if (k > .02) { glow(x + 5, 614, 90, '#FFFFFF', .9 * k); flat(ellPts(x + 5, 612, 108, 9, 18), '#FFFBEA', { alpha: k }); }
     flat(rectPts(x + 60, 610, 4, 60), '#1C1C20'); dot(x + 62, 674, 7, '#1C1C20');
   }
+  // the coat stand: a turned wooden pole on three splayed feet, curled hooks at the top, a belted trench coat hanging
+  // from one hook (collar, lapels, sleeves, buttons) and the fedora on the top knob
+  function coatRack(x, y) {
+    const L = { line: '#101012', lw: 3 };
+    for (const dx of [-62, 0, 58]) flat([[x - 5, y - 30], [x + 5, y - 30], [x + dx + 6, y], [x + dx - 6, y]], '#202024', L);
+    flat(rectPts(x - 6, 150, 12, y - 170), '#26262A', L); for (const yy of [150, 300, 470]) flat(ellPts(x, yy, 11, 6, 12), '#323238', L);
+    ctx.save(); ctx.strokeStyle = '#141418'; ctx.lineWidth = 6; ctx.lineCap = 'round';
+    for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x, 182); ctx.quadraticCurveTo(x + sd * 46, 176, x + sd * 46, 150); ctx.stroke(); } ctx.restore();
+    for (const sd of [-1, 1]) dot(x + sd * 46, 148, 6, '#3A3A40');
+    // the trench coat on the right hook: shoulders, flared skirt, sleeves, a belt and two rows of buttons
+    const cx = x + 30;
+    flat([[cx - 44, 196], [cx + 44, 196], [cx + 58, 330], [cx + 74, 560], [cx - 66, 560], [cx - 52, 330]], '#1E1E24', L);
+    flat([[cx - 44, 196], [cx - 62, 214], [cx - 70, 400], [cx - 50, 404], [cx - 44, 250]], '#18181C', L);
+    flat([[cx + 44, 196], [cx + 62, 214], [cx + 72, 400], [cx + 52, 404], [cx + 44, 250]], '#18181C', L);
+    flat([[cx - 26, 192], [cx, 186], [cx + 26, 192], [cx + 14, 300], [cx, 270], [cx - 14, 300]], '#303036', L);
+    flat([[cx, 270], [cx - 14, 300], [cx - 2, 330], [cx + 14, 300]], '#202024');
+    flat(rectPts(cx - 58, 372, 124, 18), '#2A2A30', L); flat(rectPts(cx - 6, 368, 20, 26), '#5A5A62', L);
+    for (const bx of [-18, 18]) for (const by of [320, 420, 470]) dot(cx + bx, by, 4, '#5A5A62');
+    inkLine([[cx, 394], [cx + 6, 556]], 1.4, '#141418', 'inkfine', 0);
+    // the fedora on the top knob
+    flat(ellPts(x, 142, 62, 12, 20), '#1C1C20', L); flat([[x - 36, 142], [x - 30, 102], [x - 10, 94], [x, 104], [x + 10, 94], [x + 30, 102], [x + 36, 142]], '#26262C', L); flat(rectPts(x - 35, 126, 70, 10), '#4A4A52');
+  }
   function office(t, rt, o = {}) {
     layer('c3office', () => {
       flat(rectPts(-200, -200, W + 400, 900), '#4A4A50');
@@ -147,9 +193,7 @@
     flat(rrPts(CX - 35, 720, 70, 80, 10), '#D8D4CA', { line: '#1A1A1E', lw: 3 }); flat(ellPts(CX, 722, 35, 8, 14), '#2A2420');
     ctx.save(); ctx.strokeStyle = 'rgba(240,240,240,.5)'; ctx.lineWidth = 6; ctx.lineCap = 'round'; for (let i = 0; i < 2; i++) { ctx.beginPath(); for (let s = 0; s < 12; s++) { const yy = 710 - s * 12, xx = CX - 13 + i * 26 + 9 * Math.sin(rt * 3 + s * .6 + i * 2); s ? ctx.lineTo(xx, yy) : ctx.moveTo(xx, yy); } ctx.stroke(); } ctx.restore();
     // the hat stand with the detective's trench coat (the detective himself is never seen)
-    flat(rectPts(1196, 160, 10, 470), '#18181C'); flat(ellPts(1201, 632, 60, 10, 14), '#18181C');
-    flat([[1170, 200], [1235, 200], [1262, 420], [1250, 560], [1150, 560], [1140, 420]], '#2C2C32', { line: '#141418', lw: 3 }); flat([[1185, 200], [1220, 200], [1206, 300]], '#1C1C20');
-    flat(ellPts(1201, 168, 70, 13, 18), '#1C1C20'); flat([[1160, 168], [1170, 118], [1201, 128], [1232, 118], [1242, 168]], '#26262C');
+    coatRack(1201, 632);
     const lt_ = Math.max(env(t, cs('cc_return') + .5, cs('cc_return') + .75, .05, .2), env(t, cs('cc_return') + 4.1, cs('cc_return') + 4.3, .04, .25));
     if (lt_ > 0) { ctx.save(); ctx.globalAlpha = .55 * lt_; ctx.fillStyle = '#FFFFFF'; ctx.fillRect(WIN.x, WIN.y, WIN.w, WIN.h); ctx.restore(); glow(WIN.x + WIN.w / 2, WIN.y + WIN.h / 2, 900, '#FFFFFF', .5 * lt_); }
     lamp(t, o.lamp ?? 1);
@@ -182,12 +226,12 @@
     vignette(.55, '#000000');
     // frozen time: a faint ring of stopped rain and the question
     const kq = seg(t, wt('cc_grid', 'what') - .3, wt('cc_grid', 'be') + .3);
-    if (kq > 0) letter('what ONE thing could this be?', 1000, 345, 64, CREAM, { face: 'marker', reveal: kq, shadow: false });
+    if (kq > 0) writeOn('what ONE thing could this be?', 1000, 345, 64, CREAM, kq, { face: 'marker', shadow: false });
     // time has passed, and the new neurons looked clean
-    const ky = seg(t, a - .1, a + .6) * (1 - seg(t, wt('cc_return', 'finding') - .5, wt('cc_return', 'finding') - .1));
-    if (ky > 0) letter('years later…', 1500, 300, 72, CREAM, { face: 'marker', reveal: ky, shadow: false, screen: true, stroke: '#141414', strokeW: .14 });   // screen space, clear of the arrival title
-    const kc = seg(t, wt('cc_return', 'surprisingly') - .3, wt('cc_return', 'clean') + .3) * (1 - seg(t, tc - .6, tc - .2));
-    if (kc > 0) letter('modern models: surprisingly clean', 960, 110, 64, CREAM, { face: 'marker', reveal: kc, shadow: false });
+    const ky = seg(t, a - .1, a + .6), kyO = 1 - seg(t, wt('cc_return', 'finding') - .5, wt('cc_return', 'finding') - .1);
+    if (ky > 0) writeOn('years later…', 1500, 300, 72, CREAM, ky, { face: 'marker', alpha: kyO, shadow: false, screen: true, stroke: '#141414', strokeW: .14 });   // screen space, clear of the arrival title
+    const kc = seg(t, wt('cc_return', 'surprisingly') - .3, wt('cc_return', 'clean') + .3), kcO = 1 - seg(t, tc - .6, tc - .2);
+    if (kc > 0) writeOn('modern models: surprisingly clean', 960, 110, 64, CREAM, kc, { face: 'marker', alpha: kcO, shadow: false });
     if (frz > 0) sfx('...', 1700, 600, 60, CREAM, t - q, { life: 1.6 });
     noir();
   }
@@ -216,10 +260,10 @@
     camEnd();
     vignette(.5, '#000000');
     const kt = seg(t, tv - .1, tv + .5);
-    if (kt > 0) letter('a V neuron', 960, 470, 96, GOLD, { face: 'marker', reveal: kt, shadow: false, stroke: '#141418', strokeW: .08 });
+    if (kt > 0) writeOn('a V neuron', 960, 470, 96, GOLD, kt, { face: 'marker', shadow: false, stroke: '#141418', strokeW: .08 });
     if (snap > 0 && snap < 1) sfx('SNAP!', TEAR[0] - 40, 560, 62, CREAM, (t - tv) * 1.2, { rot: -.12 });
     const kpt = seg(t, wt('cc_inputs', 'Pointed') - .2, wt('cc_inputs', 'up') + .2);
-    if (kpt > 0) letter('pointed things light it up', 960, 590, 56, CREAM, { face: 'marker', reveal: kpt, shadow: false, stroke: '#141418', strokeW: .1 });
+    if (kpt > 0) writeOn('pointed things light it up', 960, 590, 56, CREAM, kpt, { face: 'marker', shadow: false, stroke: '#141418', strokeW: .1 });
     noir();
   }
 
@@ -267,7 +311,7 @@
     camEnd();
     vignette(.55, '#000000');
     const kp = 1 - seg(t, tf - .8, tf - .5);   // carried over from the previous shot, already written
-    if (kp > 0) letter('pointed things light it up', 960, 980, 52, CREAM, { face: 'marker', reveal: kp, shadow: false });
+    if (kp > 0) writeOn('pointed things light it up', 960, 980, 52, CREAM, 1, { face: 'marker', alpha: kp, shadow: false });
     noir();
   }
 
@@ -330,17 +374,17 @@
     camEnd();
     vignette(.4, '#000000');
     if (t > toff && t < toff + .8) sfx('click', 860, 470, 54, CREAM, t - toff);
-    const kb = seg(t, wt('cc_round', 'switches') - .2, wt('cc_round', 'switches') + .5) * (1 - seg(t, tR - .7, tR - .3));
-    if (kb > 0) letter('what switches it OFF', 1100, 980, 54, CREAM, { face: 'marker', reveal: kb, shadow: false });
-    const kr = seg(t, tR - .2, tR + .4) * (1 - seg(t, top - .5, top - .1));
-    if (kr > 0) letter('round things', 1300, 980, 74, CREAM, { face: 'marker', reveal: kr, shadow: false });
+    const kb = seg(t, wt('cc_round', 'switches') - .2, wt('cc_round', 'switches') + .5), kbO = 1 - seg(t, tR - .7, tR - .3);
+    if (kb > 0) writeOn('what switches it OFF', 1100, 980, 54, CREAM, kb, { face: 'marker', alpha: kbO, shadow: false });
+    const kr = seg(t, tR - .2, tR + .4), krO = 1 - seg(t, top - .5, top - .1);
+    if (kr > 0) writeOn('round things', 1300, 980, 74, CREAM, kr, { face: 'marker', alpha: krO, shadow: false });
     // not the V's opposite: what the V is told apart from. A gold V beside a cream O
     const kv = seg(t, top - .3, top + .3);
     if (kv > 0) {
       goldLine([[930, 900], [1000, 1030], [1070, 900]], kv, 12);
       letter('vs', 1170, 965, 60, CREAM, { face: 'marker', shadow: false, alpha: kv });
       ctx.save(); ctx.setLineDash([]); ctx.globalAlpha = kv; ctx.strokeStyle = CREAM; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(1330, 965, 64, -Math.PI / 2, -Math.PI / 2 + TAU * Math.min(kv, .999)); ctx.stroke(); ctx.restore();
-      const ka = seg(t, tap - .5, tap + .3); if (ka > 0) letter('told apart', 1620, 965, 64, CREAM, { face: 'marker', reveal: ka, shadow: false });
+      const ka = seg(t, tap - .5, tap + .3); if (ka > 0) writeOn('told apart', 1620, 965, 64, CREAM, ka, { face: 'marker', shadow: false });
     }
     noir();
   }
@@ -367,13 +411,15 @@
     tourist(push_ > 0 && push_ < 1 ? cx : push_ >= 1 ? 1700 : 1700, 1040, 12, 'fedora', { ...em, view: push_ > 0 && push_ < 1 ? 'side' : 'q', flip: push_ < .5, walk: push_ > 0 && push_ < 1 ? t * 3 : undefined, boilKey: 'c3c' });
     camEnd();
     vignette(.55, '#000000');
-    const kn = seg(t, tn - .3, tn + .6) * (1 - seg(t, ts - .8, ts - .4));
-    if (kn > 0) letter('never about cats or cars', 960, 1010, 64, CREAM, { face: 'marker', reveal: kn, shadow: false });
+    const kn = seg(t, tn - .3, tn + .6), knO = 1 - seg(t, ts - .8, ts - .4);
+    if (kn > 0) writeOn('never about cats or cars', 960, 1010, 64, CREAM, kn, { face: 'marker', alpha: knO, shadow: false });
     const ks = seg(t, ts - .3, ts + .4);
-    if (ks > 0) letter("it's a shape", 960, 1000, 100, GOLD, { face: 'marker', reveal: ks, shadow: false, stroke: '#141418', strokeW: .08 });
+    if (ks > 0) writeOn("it's a shape", 960, 1000, 100, GOLD, ks, { face: 'marker', shadow: false, stroke: '#141418', strokeW: .08 });
     noir();
   }
 
+  // the typewriter's face (a real typewriter face, not the generic monospace) and its keyboard rows
+  const TYPE = '"Courier 10 Pitch"', KEYS = ['1234567890-', 'QWERTYUIOP:', 'ASDFGHJKL;.', 'ZXCVBNM,'];
   // 6 · the typewriter: SUSPECTS: CATS, CARS (nouns) is struck out; a neuron is a verb: POINTED, NOT ROUND
   function typewriter(t, lt, dur) {
     const a = cs('cc_noun'), tAI = wt('cc_noun', 'AI'), tB = wt('cc_noun', 'But'), tpass = wt('cc_noun', 'passing'), e = ce('cc_noun');
@@ -388,6 +434,9 @@
     let nLines = 0, cur = [];
     L.forEach(([t0, t1, s], i) => { if (t < t0) return; nLines = i + 1; const n = Math.floor(s.length * seg(t, t0, t1)); cur[i] = s.slice(0, n); });
     const col = nLines ? cur[nLines - 1].length : 0;
+    // the key being struck now: the last character typed on the current line, and how far down it is (1 → 0 per char)
+    const press = { ch: null, k: 0, n: 0 };
+    L.forEach(([t0, t1, s_]) => { if (t < t0 || t > t1) return; const f = s_.length * seg(t, t0, t1), n = Math.floor(f), c_ = s_[Math.max(0, n - 1)]; if (n > 0 && c_ !== ' ') { press.ch = c_.toUpperCase(); press.k = 1 - frac(f); press.n = n; } });
     // carriage return: the paper rolls up a line and the carriage slides back over .4 s (never a one-frame jump)
     const cw = 30.4, ret = i => easeInOut(seg(t, L[i][0] - .4, L[i][0]));
     let scroll = 0, carX = -col * cw + 300;
@@ -396,11 +445,13 @@
     const roll = seg(t, a + .2, a + 1.2);
     if (fly < .25) {
       const py = 610 - 260 * ease(roll) - scroll, pfly = fly / .25;
+      // (clipped at the roller: the sheet feeds out of the machine, it never hangs down past it)
+      ctx.save(); if (pfly <= 0) { ctx.beginPath(); ctx.rect(-400, -400, W + 800, 596 + 400); ctx.clip(); }
       push(); translate(960 + carX * 0, -500 * easeIn(pfly));
       flat(rectPts(-380 + carX + 0, py - 120, 760, 760), '#EDE9DF', { shadow: [8, 10, 'rgba(0,0,0,.35)'] });
-      cur.forEach((s, i) => { if (!s) return; txt(s, -340 + carX, py + 30 + i * 86, 50, '#1A1A1E', { font: 'monospace', align: 'left', weight: '700' }); });
-      if (t > tB) { const sk = seg(t, tB, tB + .6); ctx.save(); ctx.strokeStyle = '#1A1A1E'; ctx.lineWidth = 7; ctx.beginPath(); ctx.moveTo(-350 + carX, py + 116); ctx.lineTo(-350 + carX + 640 * sk, py + 116 + 4 * Math.sin(sk * 9)); ctx.stroke(); ctx.restore(); }
-      pop();
+      cur.forEach((s, i) => { if (!s) return; txt(s, -340 + carX, py + 30 + i * 86, 50, '#1A1A1E', { font: TYPE, align: 'left', weight: '700' }); });
+      if (t > tB) { const sk = seg(t, tB, tB + .6), sl = L[1][2].length * cw + 20; ctx.save(); ctx.strokeStyle = '#1A1A1E'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(-350 + carX, py + 116); ctx.lineTo(-350 + carX + sl * sk, py + 116 + 4 * Math.sin(sk * 9)); ctx.stroke(); ctx.restore(); }
+      pop(); ctx.restore();
     }
     // the typewriter body (the carriage slides with the typing)
     push(); translate(960, 0);
@@ -408,7 +459,18 @@
     flat(rrPts(-440 + carX, 576, 880, 46, 20), '#2E2E34', { line: '#101012', lw: 3 }); flat(ellPts(-450 + carX, 599, 26, 34, 16), '#26262C'); flat(ellPts(450 + carX, 599, 26, 34, 16), '#26262C'); flat(rectPts(-500 + carX, 590, 50, 12), '#3A3A42');
     flat([[-420, 650], [420, 650], [500, 940], [-500, 940]], '#222228', { line: '#0E0E10', lw: 4 });
     flat([[-380, 660], [380, 660], [400, 700], [-400, 700]], '#3A3A42');
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 11 - (r === 3 ? 3 : 0); c++) { const kx = -400 + r * 22 + c * 76 + (r === 3 ? 76 : 0), ky = 730 + r * 52, hit = nLines && cur[nLines - 1] && hash(Math.floor(t * 14) * 7 + c + r * 11) > .93 && t < (L[nLines - 1][1]) ? 5 : 0; flat(ellPts(kx + 30, ky + 18 + hit, 26, 20, 16), '#14141A'); flat(ellPts(kx + 30, ky + 14 + hit, 22, 16, 16), '#CFCBC0', { line: '#0E0E10', lw: 2 }); }
+    // the keys: round caps with a chrome rim and a letter, each on a stem down into the basket; the key for the letter
+    // being typed goes down (and Clawd's arm with it)
+    flat([[-360, 700], [360, 700], [372, 712], [-372, 712]], '#141418');
+    const keyAt = (r, c) => [-400 + r * 22 + c * 76 + (r === 3 ? 76 : 0) + 30, 744 + r * 52, KEYS[r][c]];
+    for (let r = 3; r >= 0; r--) for (let c = 0; c < KEYS[r].length; c++) { const [kx, ky, ch_] = keyAt(r, c), dn = ch_ === press.ch ? 7 * press.k : 0; ctx.save(); ctx.strokeStyle = '#0E0E10'; ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(kx, ky + dn); ctx.lineTo(kx - (kx * .06), 704); ctx.stroke(); ctx.strokeStyle = '#4A4A52'; ctx.lineWidth = 2; ctx.stroke(); ctx.restore(); }   // stems first, so no stem crosses a cap
+    for (let r = 0; r < 4; r++) for (let c = 0; c < KEYS[r].length; c++) {
+      const [kx, ky, ch_] = keyAt(r, c), dn = ch_ === press.ch ? 7 * press.k : 0;
+      flat(ellPts(kx, ky + 6 + dn, 27, 21, 18), '#0A0A0C');
+      flat(ellPts(kx, ky + dn, 26, 20, 18), '#B8B4AA', { line: '#0E0E10', lw: 2 });
+      flat(ellPts(kx, ky - 1 + dn, 20, 15, 16), '#1C1C20');
+      txt(ch_, kx, ky + dn, 20, '#E6E2D8', { font: TYPE, weight: '700' });
+    }
     flat(rrPts(-250, 940, 500, 34, 10), '#14141A');
     pop();
     // the next neuron down the road: a little house on the shelf; the paper plane flies to it and lands at its door
@@ -423,15 +485,16 @@
     // Clawd types (and blushes at "AI assistants")
     const typing = L.some(([t0, t1]) => t > t0 && t < t1);
     const em = emotions(t, [[a - .2, 'determined'], [tAI - .1, 'shy'], [wt('cc_noun', 'love') + .9, 'determined'], [tB, 'surprised'], [L[2][0] + .3, 'idea'], [L[3][0], 'determined'], [tpass, 'proud']]);
-    const ty = typing ? { aL: .3 + .6 * Math.abs(Math.sin(t * 17)), aR: .3 + .6 * Math.abs(Math.cos(t * 17)) } : {};
-    tourist(1620, 900, 14, 'fedora', { ...em, ...ty, view: t > tAI - .1 && t < wt('cc_noun', 'love') + .9 ? 'front' : 'q', flip: true, boilKey: 'c3c' });
+    // he stands at the machine's front right corner and hunts and pecks: each struck key dips one arm onto the keys
+    const ty = typing ? { aL: press.n % 2 ? .45 - .5 * press.k : .45, aR: press.n % 2 ? .45 : .45 - .5 * press.k } : {};
+    tourist(1430, 975, 15, 'fedora', { ...em, ...ty, view: t > tAI - .1 && t < wt('cc_noun', 'love') + .9 ? 'front' : 'q', flip: true, boilKey: 'c3c' });
     // dings at the end of lines
     L.forEach(([, t1]) => { if (t > t1 && t < t1 + 1) sfx('ding!', 1500, 560, 50, CREAM, t - t1); });
     if (fly > 0 && fly < .6) sfx('zip!', 1200, 300, 54, CREAM, (t - tpass) * 1.3);
     camEnd();
     vignette(.55, '#000000');
     const kp = seg(t, tpass - .2, tpass + .5);
-    if (kp > 0) letter('...and passing that on', 960, 120, 64, CREAM, { face: 'marker', reveal: kp, shadow: false });
+    if (kp > 0) writeOn('...and passing that on', 960, 120, 64, CREAM, kp, { face: 'marker', shadow: false });
 
     noir();
   }
@@ -463,7 +526,19 @@
     // goes down the cat route and adds the cat's whiskers
     const rew = seg(t, tE - .9, tE - .1), redo = seg(t, tE, tE + 1.2), cat = seg(t, tc + .2, tc + 1.6);
     const showFirst = rew < 1 ? seg(t, tp - .4, tf + .4) * (1 - ease(rew)) : 0;
-    artist(t, 470, 990, 1.85, { img: rew < 1 ? V + 'fv-pointed' : V + 'gen-pointed-old', k: rew < 1 ? showFirst : redo, img2: V + 'fv-pointed', k2: rew < 1 ? 0 : cat, paintCol: '#CFCBC0' });
+    artist(t, 470, 990, 1.85, { img2: V + 'fv-pointed', k2: rew < 1 ? 0 : cat, paintCol: '#CFCBC0' });
+    // the portrait appears where the brush has been (dabs along the brush's own path), not as a wipe; then the brush and
+    // the end of the arm are drawn again on top, so the hand stays over the paint it is laying down
+    { const im = rew < 1 ? V + 'fv-pointed' : V + 'gen-pointed-old', p0 = rew < 1 ? tp - .4 : tE, p1 = rew < 1 ? tf + .4 : tE + 1.2, al = rew < 1 ? 1 - ease(rew) : 1;
+      const brush = q => [170 + 170 * (.5 + .5 * Math.sin(q * 3)), -330 + 70 * Math.sin(q * 2.3)];
+      if (t > p0 && al > 0 && cat < 1) {
+        push(); translate(470, 990); scale(1.85);
+        const prog = seg(t, p0, p1), I = img(im), sz = Math.min(I.width, I.height), clip = new Path2D();
+        if (prog >= 1) clip.rect(140, -410, 220, 220);
+        else for (let q = p0; q <= t; q += 1 / 48) { const [bx, by] = brush(q), r = 26 + 120 * Math.pow(seg(q, p0, p1), 2); clip.moveTo(bx + r, by + 30); clip.arc(bx, by + 30, r, 0, TAU); }
+        ctx.save(); ctx.globalAlpha *= al; ctx.beginPath(); ctx.rect(140, -410, 220, 220); ctx.clip(); ctx.clip(clip); ctx.drawImage(I, (I.width - sz) / 2, (I.height - sz) / 2, sz, sz, 140, -410, 220, 220); ctx.restore();
+        const [bx, by] = brush(t); inkLine([[110, -250], [bx - 24, by + 26]], 5, '#8C8A9A', 'ink', .4); inkLine([[bx - 24, by + 26], [bx, by]], 3.4, '#7A5B3E', 'ink', 0); paint(ellPts(bx, by, 7, 7, 8), { wash: '#CFCBC0', ink: null });
+        pop(); } }
     // canvas rect in world coords (artist local 140..360, -410..-190, scaled 1.85 about (470, 990))
     const s = 1.85, cx0 = 470 + 140 * s, cy0 = 990 - 410 * s, cw = 220 * s;
     if (t > tw1 - .3 && t < tE - .9) { const rk = seg(t, tw1 - .3, tw1 + .3); ctx.save(); ctx.strokeStyle = '#141418'; ctx.lineWidth = 9; ctx.setLineDash([22, 12]); ctx.beginPath(); ctx.ellipse(cx0 + cw * .5, cy0 + cw * .66, cw * .32, cw * .16, 0, 0, TAU * rk); ctx.stroke(); ctx.restore(); }
@@ -476,12 +551,12 @@
     tourist(1520, 975, 12, 'fedora', { ...em, view: 'q', flip: true, boilKey: 'c3c' });
     camEnd();
     vignette(.55, '#000000');
-    const kf2 = seg(t, tf - .2, tf + .5) * (1 - seg(t, tE - 1.2, tE - .8));
-    if (kf2 > 0) letter('feature visualization', 760, 110, 66, CREAM, { face: 'marker', reveal: kf2, shadow: false });
-    const ke = seg(t, tE - .2, tE + .5) * (1 - seg(t, tw2 - 1, tw2 - .6));
-    if (ke > 0) letter('the easiest route', 760, 110, 66, CREAM, { face: 'marker', reveal: ke, shadow: false });
+    const kf2 = seg(t, tf - .2, tf + .5), kf2O = 1 - seg(t, tE - 1.2, tE - .8);
+    if (kf2 > 0) writeOn('feature visualization', 760, 110, 66, CREAM, kf2, { face: 'marker', alpha: kf2O, shadow: false });
+    const ke = seg(t, tE - .2, tE + .5), keO = 1 - seg(t, tw2 - 1, tw2 - .6);
+    if (ke > 0) writeOn('the easiest route', 760, 110, 66, CREAM, ke, { face: 'marker', alpha: keO, shadow: false });
     const kw = seg(t, tw2 - .3, tw2 + .4);
-    if (kw > 0) letter('whiskers included', 760, 110, 66, CREAM, { face: 'marker', reveal: kw, shadow: false });
+    if (kw > 0) writeOn('whiskers included', 760, 110, 66, CREAM, kw, { face: 'marker', shadow: false });
     noir();
   }
 
@@ -496,7 +571,7 @@
     if (fk > 0) {
       push(); translate(860, 860); rotate(-.05); scale(backOut(fk)); translate(-860, -860);
       flat(rrPts(505, 700, 330, 50, 10), '#A8A090'); flat(rrPts(500, 720, 720, 330, 10), '#B8B0A0', { shadow: [10, 14, 'rgba(0,0,0,.4)'] });
-      txt('CASE 1 · CAT & CAR', 670, 726, 28, '#1A1A1E', { font: 'monospace', weight: '700' });
+      txt('CASE 1 · CAT & CAR', 670, 726, 28, '#1A1A1E', { font: '"Courier 10 Pitch"', weight: '700' });
       polaroid(GRID[0], 590, 770, 220, 190, -.07); polaroid(GRID[1], 900, 780, 220, 190, .06);
       // one V across both: one thing
       goldLine([[620, 790], [860, 1000], [1110, 790]], seg(t, to - .3, to + .6), 10);
@@ -533,12 +608,12 @@
     }
     camEnd();
     vignette(.5, '#000000');
-    const kl = seg(t, tg - .3, tg + .7) * (1 - seg(t, t2 - .6, t2 - .2));
-    if (kl > 0) letter("a grouping isn't noise — it's a clue", 960, 140, 62, CREAM, { face: 'marker', reveal: kl, shadow: false });
-    const k1 = seg(t, wt('cc_lesson', 'one', 0) - .2, wt('cc_lesson', 'one', 0) + .4) * (1 - seg(t, tg - .7, tg - .3));
-    if (k1 > 0) letter('one thing we have no word for yet', 960, 140, 58, CREAM, { face: 'marker', reveal: k1, shadow: false });
-    const ks = seg(t, wt('cc_lesson', 'small') - .3, wt('cc_lesson', 'ones') + .2) * (1 - seg(t, tg - .7, tg - .3));
-    if (ks > 0) letter('…or a small family of related ones', 960, 215, 46, CREAM, { face: 'marker', reveal: ks, shadow: false });
+    const kl = seg(t, tg - .3, tg + .7), klO = 1 - seg(t, t2 - .6, t2 - .2);
+    if (kl > 0) writeOn("a grouping isn't noise — it's a clue", 960, 140, 62, CREAM, kl, { face: 'marker', alpha: klO, shadow: false });
+    const k1 = seg(t, wt('cc_lesson', 'one', 0) - .2, wt('cc_lesson', 'one', 0) + .4), k1O = 1 - seg(t, tg - .7, tg - .3);
+    if (k1 > 0) writeOn('one thing we have no word for yet', 960, 140, 58, CREAM, k1, { face: 'marker', alpha: k1O, shadow: false });
+    const ks = seg(t, wt('cc_lesson', 'small') - .3, wt('cc_lesson', 'ones') + .2), ksO = 1 - seg(t, tg - .7, tg - .3);
+    if (ks > 0) writeOn('…or a small family of related ones', 960, 215, 46, CREAM, ks, { face: 'marker', alpha: ksO, shadow: false });
     noir();
   }
 

@@ -193,15 +193,36 @@
     const cardK = seg(t, r0 - .2, r0 + .8) * (1 - seg(t, tim - 1.5, tim - .4));
     camKeys(t, [[r0, 960, 560, 1.05], [tim, 960, 560, 1.05], [tfam, 860, 560, 1.18], [tstr, 900, 560, 1.1]], .5);
     backdrop(t);
-    const HX = [360, 760, 1160, 1560];
-    HX.forEach((x, i) => hoseHouse(x, 890, 250, 300, { imgs: [], sq: .04 * beat(t + i * .2) + (i === 0 ? .08 * env(t, tfam + .2, tfam + 1.5, .2, .6) * Math.sin(t * 14) : 0), mood: i === 0 && t > tfam ? 'grin' : 'smile', col: '#D8D3C6' }));
-    // 16 people march in; then the four bowler hats file into house 0 (they shrink through the door)
+    const HX = [360, 760, 1160, 1560], HSQ = i => .04 * beat(t + i * .2) + (i === 0 ? .08 * env(t, tfam + .2, tfam + 1.5, .2, .6) * Math.sin(t * 14) : 0);
+    // the bowler family files into house 0: each walks up to its door, hops into the grinning door-mouth and is gone;
+    // then their faces turn up in its windows
+    const fam = k => seg(t, tfam - 1.1 + k * .3, tfam + .1 + k * .3), home = clamp((t - tfam - .35) * 2.5);
+    HX.forEach((x, i) => {
+      hoseHouse(x, 890, 250, 300, { imgs: [], sq: HSQ(i), mood: i === 0 && t > tfam - 1 ? 'grin' : 'smile', col: '#D8D3C6' });
+      // window-eyes: lit, empty, with pupils that follow the crowd (house 0's fill with the family once they are home)
+      const w = 250, h = 300, sq = HSQ(i), ew = w * .26, eh = h * .3, ey = -h * .72 + eh / 2, look = clamp((960 - x) / 900 + .3 * Math.sin(t * .7 + i), -1, 1);
+      push(); translate(x, 890); scale(1 + sq, 1 - sq);
+      for (const sd of [-1, 1]) { const ex = sd * w * .2, pk = i === 0 ? backOut(clamp(home * 2 - (sd > 0 ? .6 : 0))) : 0;
+        fillS('#F4F1E8', () => ctx.ellipse(ex, ey, ew / 2, eh / 2, 0, 0, TAU), 7);
+        ctx.save(); ctx.beginPath(); ctx.ellipse(ex, ey, ew / 2 - 4, eh / 2 - 4, 0, 0, TAU); ctx.clip();
+        ctx.strokeStyle = '#BDB6A6'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(ex, ey - eh / 2); ctx.lineTo(ex, ey + eh / 2); ctx.moveTo(ex - ew / 2, ey + 4); ctx.lineTo(ex + ew / 2, ey + 4); ctx.stroke();
+        if (pk > 0) { const fy = ey + eh * .55 - eh * .45 * pk; fillS('#333', () => ctx.arc(ex, fy, ew * .3, 0, TAU), 4); fillS('#EEE', () => ctx.ellipse(ex, fy + 6, ew * .2, ew * .15, 0, 0, TAU), 0); fillS(INK, () => ctx.ellipse(ex, fy - ew * .3, ew * .3, 5, 0, 0, TAU), 3); fillS(INK, () => ctx.ellipse(ex, fy - ew * .32, ew * .19, ew * .17, 0, Math.PI, TAU), 3); for (const e2 of [-7, 7]) { ctx.fillStyle = INK; ctx.beginPath(); ctx.ellipse(ex + e2, fy - 4, 3.5, 5, 0, 0, TAU); ctx.fill(); } }
+        else { ctx.fillStyle = INK; ctx.beginPath(); ctx.ellipse(ex + look * ew * .2, ey + eh * .08, ew * .13, eh * .14, 0, 0, TAU); ctx.fill(); ctx.fillStyle = '#FFF'; ctx.beginPath(); ctx.arc(ex + look * ew * .2 - 4, ey + eh * .02, 3.5, 0, TAU); ctx.fill(); }
+        ctx.restore(); }
+      pop();
+    });
+    // 16 people march in; then the four bowler hats file into house 0
     for (let j = 0; j < 4; j++) for (let k = 0; k < 4; k++) {
       const id = k * 4 + j, x0 = -200 - id * 110, xA = 260 + id * 92;
-      let x = lerp(x0, xA, easeOut(seg(t, tim - .4 + id * .04, tmore + 1.6 + id * .04))), y = 1010 + (id % 2) * 24, s = .42, vis = 1;
-      if (j === 0) { const k2 = seg(t, tfam - .9 + k * .25, tfam + .2 + k * .25); x = lerp(x, HX[0], easeInOut(k2)); y = lerp(y, 880, easeInOut(k2)); s = lerp(.42, .2, easeIn(k2)); vis = k2 < 1 ? 1 : 0; }
-      const moving = t > tim - .4 + id * .04 && t < tmore + 1.6 + id * .04;
-      if (vis) hoseGuy(x, y, s, { hat: JOB[j], col: JCOL[j], walk: moving ? t * 2.2 + id * .3 : null, mood: 'happy', armUp2: moving ? null : .2 * beat(t + id) });
+      let x = lerp(x0, xA, easeOut(seg(t, tim - .4 + id * .04, tmore + 1.6 + id * .04))), y = 1010 + (id % 2) * 24, s = .42, al = 1, walking = false, inDoor = 0;
+      if (j === 0) { const k2 = fam(k);
+        if (k2 > 0 && k2 < .7) { const u = easeInOut(k2 / .7); x = lerp(x, HX[0] + 10, u); y = lerp(y, 905, u); s = lerp(.42, .34, u); walking = true; }
+        else if (k2 >= .7) { const u = (k2 - .7) / .3; x = HX[0] + 10 - 10 * u; y = lerp(905, 852, easeOut(u)) - 46 * Math.sin(u * Math.PI); s = lerp(.34, .14, easeOut(u)); al = 1 - easeIn(seg(u, .6, 1)); inDoor = ease(seg(u, .3, .6)); } }
+      const moving = walking || (t > tim - .4 + id * .04 && t < tmore + 1.6 + id * .04);
+      // stepping in: seen only through the door-mouth (and below the house), so the lower lip hides the legs as they go in
+      const guy = () => hoseGuy(x, y, s, { hat: JOB[j], col: JCOL[j], walk: moving ? t * 2.2 + id * .3 : null, mood: 'happy', armUp2: moving ? null : .2 * beat(t + id), flip: walking && x > HX[0] + 10 });
+      if (al > .01 && inDoor < 1) { ctx.save(); ctx.globalAlpha = al * (1 - inDoor); guy(); ctx.restore(); }
+      if (al > .01 && inDoor > 0) { const h = 300, w = 250, c = new Path2D(); c.rect(-400, 890, W + 800, 400); c.moveTo(HX[0] - w * .2, 890 - h * .28); c.quadraticCurveTo(HX[0], 890 - h * .02, HX[0] + w * .2, 890 - h * .28); c.closePath(); ctx.save(); ctx.globalAlpha = al * inDoor; ctx.clip(c); guy(); ctx.restore(); }
     }
     if (t > tfam - .2) { const k = seg(t, tfam + .4, tfam + 1); for (let i = 0; i < 3; i++) if (k > 0 && k < 1) paint(heartPtsC(HX[0] + (i - 1) * 50, 520 - k * 140, 22), { wash: '#FFF', ink: INK, sw: 1.4 }); }
     tourist(1820, 1030, 9, 'top', { ...emotions(t, [[r0, 'happy'], [tmore, 'surprised'], [tfam + .3, 'love']]), view: 'q', flip: true });
@@ -247,17 +268,18 @@
       const who = sh ? jB : jA, prev = sh ? jA : jB;
       ctx.save(); ctx.beginPath(); ctx.rect(c.x - 10, c.y - 140, 320, 345); ctx.clip();
       if (t >= tnev && fr < dur_) { const u = fr / dur_; hoseGuy(lerp(c.x + 150, c.x - 120, u), c.y + 185, .45, { hat: JOB[prev], col: JCOL[prev], walk: t * 4, flip: true }); hoseGuy(lerp(c.x + 420, c.x + 150, u), c.y + 185, .45, { hat: JOB[who], col: JCOL[who], walk: t * 4 }); }
-      else lying(bx, by, who);
       const packed = t > tpack && [1, 8, 10].includes(i) ? clamp((t - tpack) * 2 - (i % 3) * .3) : 0;   // a few get packed: rare
-      if (packed > 0) { ctx.save(); ctx.globalAlpha = 1; lying(bx - 10, by - 40 * packed, (who + 1) % 4, { mood: 'ouch', sq: .1 * Math.sin(t * 9 + i) }); lying(bx + 20, by - 80 * packed, (who + 3) % 4, { mood: 'ouch', sq: .1 * Math.sin(t * 9 + i + 2) }); ctx.restore(); }
+      // packed: three strangers squeezed upright shoulder to shoulder in one bed, squashed thin, elbowing
+      if (packed > 0 && !(t >= tnev && fr < dur_)) { const sl = easeOut(packed); [[-1, (who + 1) % 4], [0, who], [1, (who + 3) % 4]].forEach(([sd, j]) => { const k = sd ? sl : 1; if (k <= .01) return; hoseGuy(c.x + 150 + sd * 82 * k, c.y + 178, .34, { hat: JOB[j], col: JCOL[j], mood: sd ? 'ouch' : 'sad', sq: -.16 - .04 * Math.sin(t * 9 + i + sd), lean: sd * .12 * Math.sin(t * 7 + i), armUp: -.5, armUp2: -.5 }); }); }
+      else if (!(t >= tnev && fr < dur_)) lying(bx, by, who);
       ctx.restore();
-      if (!(t >= tnev && fr < dur_) && (i + sh) % 2 === 0) txt('z', c.x + 250, c.y + 40 - 10 * Math.sin(t * 3 + i), 40, INK, { font: 'serif' });
+      if (!(t >= tnev && fr < dur_) && !packed && (i + sh) % 2 === 0) txt('z', c.x + 250, c.y + 40 - 10 * Math.sin(t * 3 + i), 40, INK, { font: 'serif' });
     });
     // the demo: a stranger with a suitcase waits at the door while the first one sleeps
     if (t < tnev + .1) { const c = CAPS[5]; hoseGuy(c.x + 360, c.y + 200, .45, { hat: 'chef', col: '#AAA', flip: true, mood: 'happy', armUp: -.3, armUp2: .1 + .1 * Math.sin(t * 6), prop: () => { fillS('#555', () => ctx.rect(70, -110, 50, 40), 4); } }); }
     // the rare collision: two strangers in one doorway, BONK
     const bonks = [tbump, tcol + .4];
-    bonks.forEach(tb => { const k = seg(t, tb - .5, tb); if (t < tb - .5 || t > tb + 1.6) return; const c = CAPS[5], x = c.x + 150; hoseGuy(x - 200 + 170 * easeIn(k), c.y + 168, .5, { hat: 'sailor', col: '#777', walk: k < 1 ? t * 4 : null, mood: k < 1 ? 'happy' : 'ouch', lean: k >= 1 ? -.3 : 0 }); hoseGuy(x + 200 - 170 * easeIn(k), c.y + 168, .5, { hat: 'chef', col: '#AAA', walk: k < 1 ? t * 4 : null, mood: k < 1 ? 'happy' : 'ouch', flip: true, lean: k >= 1 ? .3 : 0 }); if (t > tb) { paint(starPts(x, c.y + 40, 120, .45, 10), { wash: '#FFFFFF', ink: INK, sw: 2 }); txt('BONK!', x, c.y + 40, 70, INK, { font: 'serif', weight: '900', rot: -.15 }); bonkStars(x, c.y - 30, t); } });
+    bonks.forEach(tb => { const k = seg(t, tb - .5, tb); if (t < tb - .5 || t > tb + 1.6) return; const c = CAPS[5], x = c.x + 150; hoseGuy(x - 200 + 170 * easeIn(k), c.y + 168, .5, { hat: 'sailor', col: '#777', walk: k < 1 ? t * 4 : null, mood: k < 1 ? 'happy' : 'ouch', lean: k >= 1 ? -.3 : 0 }); hoseGuy(x + 200 - 170 * easeIn(k), c.y + 168, .5, { hat: 'chef', col: '#AAA', walk: k < 1 ? t * 4 : null, mood: k < 1 ? 'happy' : 'ouch', flip: true, lean: k >= 1 ? .3 : 0 }); if (t > tb) { const bk = backOut(clamp((t - tb) * 6)); paint(starPts(x, c.y + 88, 80 * bk, .5, 10), { wash: '#FFFFFF', ink: INK, sw: 2 }); txt('BONK!', x, c.y + 88, 46 * bk, INK, { font: 'serif', weight: '900', rot: -.15 }); bonkStars(x, c.y + 12, t, .8); } });
     // the clock
     const kx = 960, ky = 95; fillS('#F4F1E8', () => ctx.arc(kx, ky, 70, 0, TAU), 6); ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(kx, ky); ctx.lineTo(kx + Math.cos(ang * 6) * 55, ky + Math.sin(ang * 6) * 55); ctx.moveTo(kx, ky); ctx.lineTo(kx + Math.cos(ang) * 36, ky + Math.sin(ang) * 36); ctx.stroke();
     for (const sx of [760, 1160]) { fillS(day ? '#F4F1E8' : '#555', () => ctx.rect(sx - 60, 40, 120, 110), 6); if (day) fillS('#FFF', () => ctx.arc(sx, 95, 30, 0, TAU), 4); else { fillS('#DDD', () => ctx.arc(sx, 95, 30, 0, TAU), 4); fillS('#555', () => ctx.arc(sx + 14, 88, 26, 0, TAU), 0); } }
@@ -290,6 +312,31 @@
     oldFilm(t);
   }
 
+  // the Unfolding Machine, dressed for this world (machine() draws the box, funnel, treads and belt; this adds the rest).
+  // In machine-local units: body x -220..220, y -400..-60; belt out of the right side at y -120.
+  // machineBack: the side and top faces, so it is a box with depth, not a flat card.
+  function machineBack(t) {
+    fillS('#8E887C', () => { ctx.moveTo(214, -396); ctx.lineTo(300, -444); ctx.lineTo(300, -104); ctx.lineTo(214, -62); ctx.closePath(); }, 6);
+    fillS('#C9C3B5', () => { ctx.moveTo(-206, -398); ctx.lineTo(214, -398); ctx.lineTo(300, -444); ctx.lineTo(-120, -444); ctx.closePath(); }, 6);
+    ctx.strokeStyle = INK; ctx.lineWidth = 3; for (let i = 1; i < 4; i++) { const y = -396 + i * 80; ctx.beginPath(); ctx.moveTo(214, y + 4); ctx.lineTo(300, y - 40); ctx.stroke(); }
+  }
+  // a toothed gear: pitch radius r, n teeth, turned to angle a
+  function gearPath(cx, cy, r, n, a) { ctx.moveTo(cx + Math.cos(a) * (r - 8), cy + Math.sin(a) * (r - 8)); for (let k = 0; k < n; k++) { const q = a + k / n * TAU, d = TAU / n; for (const [f, rr] of [[.0, r - 8], [.18, r + 9], [.5, r + 9], [.68, r - 8], [1, r - 8]]) ctx.lineTo(cx + Math.cos(q + f * d) * rr, cy + Math.sin(q + f * d) * rr); } ctx.closePath(); }
+  // machineFront: a window of three meshing gears (each turns the next, alternate ways), rivets, a pressure gauge whose
+  // needle shivers, feed rollers at the funnel's neck, and the output chute with a rubber-strip flap over the belt
+  function machineFront(t, on, feed) {
+    fillS('#3A3A3A', () => ctx.rect(-196, -322, 392, 144), 5);
+    const w = t * 2.2 * on, n = 12;
+    [[-120, 1], [0, -1], [120, 1]].forEach(([gx, dir], i) => { fillS(['#DDD', '#AAA', '#DDD'][i], () => gearPath(gx, -250, 52, n, dir * w + (i === 1 ? Math.PI / n : 0)), 4); fillS('#555', () => ctx.arc(gx, -250, 13, 0, TAU), 3); ctx.strokeStyle = INK; ctx.lineWidth = 4; for (let k = 0; k < 3; k++) { const q = dir * w + k * TAU / 3; ctx.beginPath(); ctx.moveTo(gx + Math.cos(q) * 14, -250 + Math.sin(q) * 14); ctx.lineTo(gx + Math.cos(q) * 36, -250 + Math.sin(q) * 36); ctx.stroke(); } });
+    for (let i = 0; i < 7; i++) for (const sx of [-204, 204]) fillS('#BDB6A6', () => ctx.arc(sx, -370 + i * 48, 5, 0, TAU), 2);
+    const nd = -2.3 + 1.6 * on + .15 * Math.sin(t * 23) + .1 * Math.sin(t * 7);
+    fillS('#F4F1E8', () => ctx.arc(150, -362, 28, 0, TAU), 5); ctx.strokeStyle = INK; ctx.lineWidth = 2; for (let k = 0; k <= 6; k++) { const q = -Math.PI * .85 + k / 6 * Math.PI * .7 * 1.4; ctx.beginPath(); ctx.moveTo(150 + Math.cos(q) * 20, -362 + Math.sin(q) * 20); ctx.lineTo(150 + Math.cos(q) * 26, -362 + Math.sin(q) * 26); ctx.stroke(); }
+    ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(150, -362); ctx.lineTo(150 + Math.cos(nd) * 22, -362 + Math.sin(nd) * 22); ctx.stroke(); fillS(INK, () => ctx.arc(150, -362, 4, 0, TAU), 0);
+    for (const sd of [-1, 1]) { fillS('#777', () => ctx.arc(sd * 52, -408, 20, 0, TAU), 4); ctx.strokeStyle = INK; ctx.lineWidth = 3; const q = sd * t * 6 * (feed > 0 && feed < 1 ? 1 : .2); ctx.beginPath(); ctx.moveTo(sd * 52 - Math.cos(q) * 16, -408 - Math.sin(q) * 16); ctx.lineTo(sd * 52 + Math.cos(q) * 16, -408 + Math.sin(q) * 16); ctx.stroke(); }
+    fillS('#555', () => { ctx.moveTo(200, -200); ctx.lineTo(282, -200); ctx.lineTo(300, -178); ctx.lineTo(300, -150); ctx.lineTo(200, -150); ctx.closePath(); }, 5);
+    for (let k = 0; k < 5; k++) { const sx = 214 + k * 18, sway = 6 * Math.sin(t * 5 + k); fillS('#2A2A2A', () => { ctx.moveTo(sx - 7, -150); ctx.lineTo(sx + 7, -150); ctx.lineTo(sx + 7 + sway, -122); ctx.lineTo(sx - 7 + sway, -122); ctx.closePath(); }, 2); }
+  }
+
   // ---------- shot 6 · the Unfolding Machine: a sparse autoencoder unrolls the knot into a long list of pieces ----------
   function unfold(t, lt, dur) {
     const m0 = cs('kn_machine'), tun = wt('kn_machine', 'unfold'), tsp = wt('kn_machine', 'sparse'), tap = wt('kn_machine', 'apart'), tlist = wt('kn_machine', 'list'), tstudy = wt('kn_machine', 'study'), tUM = wt('kn_machine', 'Unfolding'), e = ce('kn_machine');
@@ -300,9 +347,12 @@
     // the knot gets pulled into the funnel, unravelling as it goes
     if (eat < 1) { const kx = lerp(1250, mx, easeIn(eat)), ky = lerp(470, 870 - 560 * .9, easeIn(eat)); ctx.save(); ctx.translate(kx, ky); ctx.scale(1 - .7 * eat, 1 + .4 * eat * Math.sin(t * 9)); knotBeast(0, 0, 230, { col: '#DDD', dark: '#222', grin: eat < .2, look: [-1, .4], loose: .6 * eat, hat: eat < .3 ? 'top' : null }); ctx.restore(); }
     ctx.save(); ctx.translate(0, 0); push(); translate(mx, 900); scale(1 + chug, 1 - chug); translate(-mx, -900);
-    CAM = null; machineL(t, mx, 900, .9, { on: 1, belt: seg(t, tap, tap + .6), mouth: .7 + .3 * Math.sin(t * 6), items: [i => { const im = MIX[i % MIX.length], I = img(im), s = Math.min(I.width, I.height); flat(rrPts(-46, -100, 92, 100, 10), '#F4F1E8', { line: INK, lw: 4 }); ctx.save(); ctx.beginPath(); ctx.rect(-36, -90, 72, 72); ctx.clip(); ctx.drawImage(I, (I.width - s) / 2, (I.height - s) / 2, s, s, -36, -90, 72, 72); ctx.restore(); }] });
-    // its name plate, painted on at "Think of it as an Unfolding Machine"
-    const pk = popk(t, tUM - .2, .4); if (pk > 0) { push(); translate(mx, 900); scale(.9); translate(0, -150); scale(backOut(pk)); fillS('#2A2A2A', () => ctx.rect(-205, -36, 410, 72), 6); txt('UNFOLDING MACHINE', 0, 3, 27, '#EEE', { font: 'serif', weight: '900' }); pop(); }
+    push(); translate(mx, 900); scale(.9); machineBack(t); pop();
+    // (one piece every other belt slot: well spaced, and big enough to read)
+    CAM = null; machineL(t, mx, 900, .9, { on: 1, belt: seg(t, tap, tap + .6), mouth: .7 + .3 * Math.sin(t * 6), items: [i => { if (i % 2) return; const im = MIX[(i / 2) % MIX.length], I = img(im), s = Math.min(I.width, I.height); flat(rrPts(-60, -138, 120, 132, 12), '#F4F1E8', { line: INK, lw: 5, shadow: [4, 6, 'rgba(0,0,0,.3)'] }); ctx.save(); ctx.beginPath(); ctx.rect(-48, -126, 96, 96); ctx.clip(); ctx.drawImage(I, (I.width - s) / 2, (I.height - s) / 2, s, s, -48, -126, 96, 96); ctx.restore(); ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.strokeRect(-48, -126, 96, 96); }] });
+    push(); translate(mx, 900); scale(.9); machineFront(t, 1, eat); pop();
+    // its name plate, painted on at "Think of it as an Unfolding Machine" (the machine's only label)
+    const pk = popk(t, tUM - .2, .4); if (pk > 0) { push(); translate(mx, 900); scale(.9); translate(0, -150); scale(backOut(pk)); fillS('#2A2A2A', () => ctx.rect(-200, -40, 400, 80), 6); ctx.strokeStyle = '#BDB6A6'; ctx.lineWidth = 3; ctx.strokeRect(-188, -28, 376, 56); for (const sx of [-178, 178]) fillS('#BDB6A6', () => ctx.arc(sx, 0, 5, 0, TAU), 2); txt('UNFOLDING MACHINE', 0, 3, 25, '#EEE', { font: 'serif', weight: '900' }); pop(); }
     pop(); ctx.restore();
     // steam whistle puffs
     for (let i = 0; i < 3; i++) { const ph = frac(t * .9 + i / 3); fillS('#F4F1E8', () => ctx.arc(mx + 160 + ph * 80, 900 - 470 * .9 - ph * 220, 20 + 40 * ph, 0, TAU), 4); }
@@ -310,7 +360,6 @@
     // Clawd studies the pieces with a magnifier
     const cw = stroll(t, tlist, tstudy, 2000, 1560, 10);
     tourist(cw.x, 1040, 10, 'top', { ...emotions(t, [[m0, 'surprised'], [tun + .5, 'excited'], [tstudy, 'thinking']]), view: t < tstudy ? 'side' : 'q', flip: true, walk: t > tlist && t < tstudy ? t * 2.4 : undefined, aR: t > tstudy ? 1.1 : undefined, armR: t > tstudy ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#555', 'ink', 0); ctx.save(); ctx.strokeStyle = INK; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.restore(); } : undefined });
-    hoseTag('THE UNFOLDING MACHINE', mx + 130, 650, 600, -250, seg(t, tUM - .3, tUM + .2), 56);   // the plain name, big, when it is said
     camEnd();
     decoCard([['A SPARSE AUTOENCODER', 92, -20], ['a second model', 50, 70]], seg(t, tsp - .5, tsp) * (1 - seg(t, tap - .4, tap)), { y: 300, h: 320, w: 1300 });
     if (t > e - .75) irisClose(seg(t, e - .75, cs('kn_both') - .2), 1100, 640);
@@ -326,11 +375,17 @@
     fillS('#888', () => ctx.rect(700, 820, 300, 90), 6); txt('SOAP', 850, 865, 40, INK, { font: 'serif', weight: '900' });
     for (let i = 0; i < 5; i++) { const x = 1150 + i * 140, ch = Math.max(0, Math.sin(t * 6 + i)); hoseGuy(x, 1000 + (i % 2) * 20, .5, { hat: JOB[i % 4], col: JCOL[i % 4], flip: true, armUp: t > tcase ? .5 + .5 * ch : 0, armUp2: t > tcase ? .5 + .5 * ch : .2, mood: t > tcase ? 'wow' : 'happy', sq: .05 * ch }); }
     // the believer (years ago): hands up for superposition, then hugging a plush knot
-    const hug = seg(t, tbel - .2, tbel + .4);
-    hoseGuy(850, 820, .95, { col: '#444', hat: 'cap', armUp: hug > 0 ? lerp(1.2, -.2, hug) : 1 + .1 * Math.sin(t * 8), armUp2: hug > 0 ? lerp(1.2, -.2, hug) : .9 + .1 * Math.sin(t * 8 + 1), mood: 'happy', sq: .04 * beat(t) });
-    if (hug > 0) { knotBeast(850, 640, 90 * hug, { col: '#EEE', dark: '#333', grin: true }); for (let i = 0; i < 3; i++) { const k = frac(t * .8 + i / 3); paint(heartPtsC(850 + (i - 1) * 60, 560 - k * 160, 20), { wash: '#FFF', ink: INK, sw: 1.2 }); } }
-    // the placard
-    if (hug <= 0) { ctx.save(); ctx.translate(1040, 420 + 10 * Math.sin(t * 8)); ctx.rotate(.06); fillS('#777', () => ctx.rect(-8, 0, 16, 220), 4); fillS('#F4F1E8', () => ctx.rect(-230, -120, 460, 140), 6); txt('SUPERPOSITION!', 0, -50, 52, INK, { font: 'serif', weight: '900' }); ctx.restore(); }
+    // before: he waves the SUPERPOSITION! placard, its stick gripped in his right glove, so it rides that arm's bob;
+    // on "believed" he lowers the sign and hugs a plush knot to his chest, gloves wrapped round it
+    const hug = seg(t, tbel - .2, tbel + .4), up1 = hug > 0 ? lerp(1.2, .32, ease(hug)) : 1 + .1 * Math.sin(t * 8), up2 = hug > 0 ? lerp(.9, .32, ease(hug)) : .9 + .1 * Math.sin(t * 8 + 1);
+    hoseGuy(850, 820, .95, { col: '#444', hat: 'cap', armUp: up1, armUp2: up2, mood: 'happy', sq: .04 * beat(t), prop: () => {
+      if (hug < 1) { const gx = 104, gy = -96 - up2 * 110; ctx.save(); ctx.globalAlpha *= 1 - ease(hug); ctx.translate(gx, gy); ctx.rotate(.08 + .05 * Math.sin(t * 8 + 1) + .9 * ease(hug));
+        fillS('#8A8070', () => ctx.rect(-9, -250, 18, 290), 4); fillS('#F4F1E8', () => ctx.rect(-120, -400, 460, 150), 6); txt('SUPERPOSITION!', 110, -323, 52, INK, { font: 'serif', weight: '900' });
+        fillS('#FFF', () => ctx.ellipse(0, 0, 22, 18, 0, 0, TAU), 5); ctx.restore(); }   // (the glove again, over the stick: he grips it)
+      if (hug > 0) { const ks = 78 * backOut(hug); knotBeast(0, -112, ks, { col: '#EEE', dark: '#333', grin: true, look: [.2, -.3] });
+        for (const sd of [-1, 1]) fillS('#FFF', () => ctx.ellipse(sd * 86, -96 - (sd < 0 ? up1 : up2) * 110 + 4, 22, 18, sd * .4, 0, TAU), 5); }   // gloves wrapped round the plush
+    } });
+    if (hug > 0) for (let i = 0; i < 3; i++) { const k = frac(t * .8 + i / 3); paint(heartPtsC(850 + (i - 1) * 70, 520 - k * 160, 20), { wash: '#FFF', ink: INK, sw: 1.2 }); }
     // who it is, and that the idea was his: a light bulb pops over the cap on "first proposed it"
     hoseTag('NICK', 850, 560, -230, -90, seg(t, Math.max(tnk, b0 + .3) - .2, Math.max(tnk, b0 + .3) + .3) * (1 - seg(t, tbel - .5, tbel - .1)), 48);
     const bk = popk(t, tfst - .2, .35) * (1 - seg(t, tbel - .3, tbel)); if (bk > 0) { ctx.save(); ctx.translate(850, 470); ctx.scale(backOut(bk), backOut(bk)); for (let i = 0; i < 8; i++) { const q = i / 8 * TAU; ctx.strokeStyle = INK; ctx.lineWidth = 6; ctx.beginPath(); ctx.moveTo(Math.cos(q) * 62, Math.sin(q) * 62 - 10); ctx.lineTo(Math.cos(q) * 84, Math.sin(q) * 84 - 10); ctx.stroke(); } fillS('#FFF', () => ctx.arc(0, -10, 44, 0, TAU), 6); fillS('#888', () => ctx.rect(-20, 30, 40, 26), 5); ctx.restore(); }
@@ -344,18 +399,22 @@
     decoCard([['NICK BELIEVED IT', 92, 0]], seg(t, tbel - .2, tbel + .3), { y: 150, h: 170, w: 900 });
     oldFilm(t);
     // the reel jams and burns: a hole melts out from the frame's middle (drawn after the grey pass, so it glows orange)
-    const burn = seg(t, e + .1, end + .5);
-    if (burn > 0) POST.push(() => filmBurn(t, burn));
+    // the hole is about a third of the frame when the next world starts to open out of its middle (the seam's portal),
+    // and keeps creeping while it does, so the frame is never one blank colour
+    const burn = seg(t, e + .1, end + 1.6);
+    if (burn > 0) POST.push(() => filmBurn(t, burn, e + .1, end));
   }
-  function filmBurn(t, k) {
-    const cx = 1010, cy = 520, r = lerp(10, 1500, easeIn(k)), n = 40;
+  function filmBurn(t, k, t0, end) {
+    const cx = 1010, cy = 520, r = t < end ? lerp(10, 380, easeOut(seg(t, t0, end))) : 380 + 260 * easeIn(seg(t, end, end + 1.6)), n = 40;
     const P = []; for (let i = 0; i < n; i++) { const a = i / n * TAU, rr = r * (1 + .25 * Math.sin(i * 3.1 + t * 4) + .15 * hash(i * 7.7)); P.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr * .85]); }
     const path = pathOf(P);
     ctx.save(); ctx.lineJoin = 'round';
     ctx.strokeStyle = 'rgba(120,60,10,.55)'; ctx.lineWidth = 120; ctx.stroke(path);
     ctx.strokeStyle = '#E8822A'; ctx.lineWidth = 34; ctx.shadowColor = '#FFB040'; ctx.shadowBlur = 40; ctx.stroke(path);
     ctx.strokeStyle = '#FFF2C8'; ctx.lineWidth = 8; ctx.stroke(path); ctx.shadowBlur = 0;
-    ctx.clip(path); ctx.fillStyle = '#FFF8E8'; ctx.fillRect(0, 0, W, H);
+    // inside: the projector's lamp shining straight through, hot white at the centre, amber at the scorched edge
+    ctx.clip(path); const fl = .9 + .1 * hash(Math.floor(t * 24)), g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 1.1); g.addColorStop(0, '#FFFFFF'); g.addColorStop(.45, `rgba(255,244,214,${fl})`); g.addColorStop(1, '#F0A050'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'lighter'; for (let i = 0; i < 10; i++) { const a = i / 10 * TAU + t * .4; ctx.fillStyle = 'rgba(255,230,180,.12)'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a - .06) * r * 1.4, cy + Math.sin(a - .06) * r * 1.4); ctx.lineTo(cx + Math.cos(a + .06) * r * 1.4, cy + Math.sin(a + .06) * r * 1.4); ctx.closePath(); ctx.fill(); }
     ctx.restore();
   }
 

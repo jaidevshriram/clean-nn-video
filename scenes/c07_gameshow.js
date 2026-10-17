@@ -25,7 +25,7 @@
   }
   const R = 'blog/raw/', V = R + 'v-figure-10x/', RM = R + 'roadmap/', C3 = R + 'crushed-3b-v3/', CE = R + 'crushed-3b/examples/', CL = R + 'crushed-last-layer/images/';
   const TV = R + 'tiny-vehicles/', CP = R + 'car-path-distinctions/', NP = R + 'negative-poles-v2/', NO = R + 'neuron-overflow/';
-  const GX = 330, SX = 1590, FLOOR = 820;
+  const GX = 330, SX = 1590, FLOOR = 820, SEAT = 1570;   // SEAT: Clawd's front-row seat, right of the lower-third band
   const GOLD = '#E8AA38', GOLDLT = '#FFD36B', VIO = '#B45CA8', VIOLT = '#E9B0E0', CREAM = '#FFF6D0', RED = '#B0203A', DARK = '#1A0A2A', SERIF = '"Liberation Serif"';
   const FLOPPY = [RM + 'ear-large-hanging', V + 'c5a317c', RM + 'ear-medium-head-side', V + 'n750219', RM + 'ear-small-general-dog', V + 'p10704'];
   const CURVES = ['324', '330', '340', '342', '343', '349', '379', '385', '388', '406'].map(n => C3 + 'curve-' + n);
@@ -88,9 +88,12 @@
   // a broadcast lower third
   function lower(t, a, b, s, col = GOLD, o = {}) {
     const k = env(t, a, b, .35, .3); if (k <= 0) return;
-    const x = lerp(-900, 0, easeOut(seg(t, a, a + .45))), y = o.y ?? 900, w = o.w ?? Math.max(700, s.length * 34 + 160);
+    // (it sits low, in the broadcast band, and never runs past x 1400, so Clawd's front-row seat on the right stays clear;
+    // long lines shrink to fit)
+    ctx.save(); let sz = o.size || 60; ctx.font = `${sz}px ${FONTS.marker}`; const tw = ctx.measureText(s).width; ctx.restore(); sz = Math.min(sz, sz * 1080 / Math.max(1, tw));
+    const x = lerp(-900, 0, easeOut(seg(t, a, a + .45))), y = o.y ?? 1000, w = o.w ?? Math.min(1300, Math.max(700, tw * sz / (o.size || 60) + 220));
     ctx.save(); ctx.globalAlpha = k; flat([[x + 120, y - 58], [x + 120 + w, y - 58], [x + 80 + w, y + 58], [x + 80, y + 58]], DARK, { shadow: [8, 8, 'rgba(0,0,0,.4)'] }); flat([[x + 80, y - 58], [x + 140, y - 58], [x + 100, y + 58], [x + 40, y + 58]], col); ctx.restore();
-    letter(s, x + 180, y + 2, o.size || 60, CREAM, { face: 'marker', shadow: false, align: 'left', alpha: k * seg(t, a + .35, a + .5), screen: true });   // the words wait until the bar has slid in
+    letter(s, x + 180, y + 2, sz, CREAM, { face: 'marker', shadow: false, align: 'left', alpha: k * seg(t, a + .35, a + .5), screen: true });   // the words wait until the bar has slid in
   }
   // round card: a starburst banner swooping in (screen space)
   function roundCard(t, a, s1, s2) {
@@ -106,17 +109,25 @@
   function audience(t, cheer = 0) {
     for (let i = 0; i < 24; i++) {
       const x = -60 + i * 88, row = i % 2, y = 1050 + row * 22 + (cheer > 0 ? -18 * cheer * Math.abs(Math.sin(t * 7 + i)) : -3 * Math.abs(Math.sin(t * 1.5 + i)));
-      if (Math.abs(x - 960) < 70) continue;
+      if (Math.abs(x - SEAT) < 70) continue;
       if (cheer > .2) { ctx.save(); ctx.strokeStyle = '#140818'; ctx.lineWidth = 14; ctx.lineCap = 'round'; for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x + sd * 30, y - 20); ctx.lineTo(x + sd * (40 + 10 * Math.sin(t * 9 + i)), y - 20 - 70 * cheer); ctx.stroke(); } ctx.restore(); }
       dot(x, y - 60, 30, '#140818'); flat(rrPts(x - 40, y - 34, 80, 90, 30), '#140818');
     }
   }
-  // Clawd in the front row with his APPLAUSE sign; up 0..1 raises it
-  const sign = up => (u, sw) => { ctx.save(); ctx.rotate(-.1 + .1 * Math.sin(T * 8) * up); ctx.strokeStyle = '#6A4B30'; ctx.lineWidth = u * .5; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * 7, 0); ctx.stroke(); ctx.translate(u * 9.5, 0); ctx.rotate(Math.PI / 2); flat(rrPts(-u * 7, -u * 2.2, u * 14, u * 4.4, u * .6), up > .5 ? '#FFE9A0' : '#F6EEDA', { line: DARK, lw: 2.5 }); if (up > 0) txt('APPLAUSE', 0, 0, u * 2.2, RED, { font: SERIF, weight: '900' }); ctx.restore(); };   // (resting in his lap, face down)
+  // Clawd in the front row with his APPLAUSE sign, always in his hand (armR hook). At rest (up 0) it hangs low, face
+  // down; raising it (up → 1) swings it up on its stick and flips it over to show APPLAUSE
+  const sign = up => (u, sw) => {
+    const e = ease(clamp(up)), L = lerp(2.2, 7, e), off = lerp(4.2, 9.5, e), fl = clamp((up - .25) / .5), face = fl > .5;
+    ctx.save(); ctx.rotate(lerp(1.15, -.1, e) + .1 * Math.sin(T * 8) * e);
+    ctx.strokeStyle = '#6A4B30'; ctx.lineWidth = u * .5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(u * L, 0); ctx.stroke();
+    ctx.translate(u * off, 0); ctx.rotate(Math.PI / 2); ctx.scale(Math.max(.04, Math.abs(Math.cos(fl * Math.PI))), 1);
+    flat(rrPts(-u * 7, -u * 2.2, u * 14, u * 4.4, u * .6), face ? (up > .6 ? '#FFE9A0' : '#F6EEDA') : '#D9CDB4', { line: DARK, lw: 2.5 });
+    if (face) txt('APPLAUSE', 0, 0, u * 2.2, RED, { font: SERIF, weight: '900' }); else { ctx.strokeStyle = 'rgba(90,60,30,.35)'; ctx.lineWidth = 2; for (let i = -2; i <= 2; i++) { ctx.beginPath(); ctx.moveTo(-u * 6, i * u * .7); ctx.lineTo(u * 6, i * u * .7); ctx.stroke(); } }
+    ctx.restore();
+  };
   function clawdSeat(t, keys, up = 0) {
-    if (up > .3) glow(960, 900, 120, GOLDLT, .4 * up);
-    if (up < .15) { push(); translate(1030, 1070); rotate(-Math.PI / 2 + .2); sign(0)(8, 1); pop(); }
-    tourist(960, 1066, 9, 'party', { ...emotions(t, keys), view: 'front', aR: lerp(-.4, 1.45, up), armR: up >= .15 ? sign(up) : undefined, boilKey: 'c7clawd' });
+    if (up > .3) glow(SEAT, 900, 120, GOLDLT, .4 * up);
+    tourist(SEAT, 1066, 9, 'party', { ...emotions(t, keys), view: 'front', aR: lerp(-.4, 1.45, ease(clamp(up))), armR: sign(up), boilKey: 'c7clawd' });
   }
 
   // ---------- contestants ----------
@@ -197,8 +208,9 @@
     if (ok > 0) for (const [sd, col] of [[-1, GOLD], [1, VIO]]) { push(); translate(960 + sd * 90, 560); scale(sd * backOut(ok), backOut(ok)); flat([[0, -22], [150, -22], [150, -52], [230, 0], [150, 52], [150, 22], [0, 22]], col, { line: DARK, lw: 4, shadow: [5, 6, 'rgba(0,0,0,.35)'] }); pop(); }
     // Clawd pushes the cart in, then hops down into the front row
     const jk = seg(t, arrive + .5, arrive + 1.6);
-    if (t < arrive + .5) tourist(cx - 190, CY + 70, 10, 'party', { ...feel('determined', t), view: 'side', walk: t * 2.4, rot: .1, boilKey: 'c7clawd' });
-    else if (jk < 1) { const p = arcPt([GX - 190, CY + 70], [960, 1066], 220, ease(jk)); tourist(p[0], p[1], lerp(10, 9, jk), 'party', { ...feel('excited', t), view: 'side', sq: -.15, boilKey: 'c7clawd' }); }
+    // (he carries his APPLAUSE sign the whole way, face down in his near hand; two hops take him across to his seat)
+    if (t < arrive + .5) tourist(cx - 190, CY + 70, 10, 'party', { ...feel('determined', t), view: 'side', walk: t * 2.4, rot: .1, aL: -.5, armL: sign(0), boilKey: 'c7clawd' });
+    else if (jk < 1) { const MID = [(GX - 190 + SEAT) / 2, 1040], p = jk < .5 ? arcPt([GX - 190, CY + 70], MID, 200, ease(jk * 2)) : arcPt(MID, [SEAT, 1066], 160, ease(jk * 2 - 1)), sq = Math.abs(jk - .5) < .04 ? .18 : -.15; tourist(p[0], p[1], lerp(10, 9, jk), 'party', { ...feel('excited', t), view: 'side', sq, aL: -.5, armL: sign(0), boilKey: 'c7clawd' }); }
     audience(t, env(t, arrive, arrive + 2.4, .3, .8) + .8 * env(t, tExp, tExp + 2, .2, .8));
     if (jk >= 1) clawdSeat(t, [[arrive + 1.6, 'excited'], [tMix, 'thinking'], [tOpp, 'surprised']], env(t, arrive + 1.6, tExp + 1.2, .3, .4));
     camEnd();
@@ -310,12 +322,15 @@
   function slam(t, at, x = 960, y = 760) { const k = seg(t, at, at + 1.1); if (k <= 0 || k >= 1) return; for (let i = 0; i < 18; i++) { const a = Math.PI + hash(i * 3.3) * Math.PI, r = 80 + 420 * easeOut(k) * (.5 + hash(i)); dot(x + Math.cos(a) * r * (hash(i) > .5 ? 1 : -1), y + Math.sin(a) * r * .25 - 30 * k, 18 * (1 - k) + 4, '#E9DDF0', .7 * (1 - k)); } }
   const shake = (t, at, amt = 18) => { const k = Math.exp(-5 * Math.max(0, t - at)) * (t > at ? 1 : 0); return shakeXY(t, amt * k); };
   // the prediction: a tile crammed with curves, spirals and webs
-  const jumble = (w, h, k) => (ww, hh) => { flat(rectPts(-ww / 2, -hh / 2, ww, hh), '#F3E8F6'); ctx.save(); ctx.lineWidth = 3; ctx.lineCap = 'round';
-    if (k[0] > 0) for (let i = 0; i < 6; i++) { ctx.strokeStyle = ['#B0203A', '#3A64B8', '#7B4FB5'][i % 3]; ctx.beginPath(); ctx.arc(-ww * .2 + hash(i) * ww * .4, -hh * .2 + hash(i * 2) * hh * .4, 18 + i * 6, hash(i * 3) * 6, hash(i * 3) * 6 + 2.6 * k[0]); ctx.stroke(); }
-    if (k[1] > 0) { ctx.strokeStyle = '#2A7A4A'; ctx.beginPath(); for (let i = 0; i < 80 * k[1]; i++) { const q = i * .25, r = i * .7; i ? ctx.lineTo(ww * .15 + Math.cos(q) * r, -hh * .1 + Math.sin(q) * r) : ctx.moveTo(ww * .15, -hh * .1); } ctx.stroke(); }
-    if (k[2] > 0) { ctx.strokeStyle = '#3A2A2A'; ctx.lineWidth = 1.6; for (let i = 0; i < 8; i++) { const q = i / 8 * TAU; ctx.beginPath(); ctx.moveTo(-ww * .15, hh * .15); ctx.lineTo(-ww * .15 + Math.cos(q) * 60 * k[2], hh * .15 + Math.sin(q) * 60 * k[2]); ctx.stroke(); } for (let r = 1; r < 4; r++) { ctx.beginPath(); for (let i = 0; i <= 8; i++) { const q = i / 8 * TAU, rr = r * 18 * k[2]; i ? ctx.lineTo(-ww * .15 + Math.cos(q) * rr, hh * .15 + Math.sin(q) * rr) : ctx.moveTo(-ww * .15 + rr, hh * .15); } ctx.stroke(); } }
+  // the knot's prediction, drawn into a tile: curves, spirals and webs all crammed on top of each other (bold, dark ink)
+  const jumble = (w, h, k) => (ww, hh) => { flat(rectPts(-ww / 2, -hh / 2, ww, hh), '#F6EEF8'); const S = ww / 200; ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    if (k[0] > 0) for (let i = 0; i < 11; i++) { ctx.strokeStyle = ['#9A1530', '#1E3E8A', '#4A2A8A'][i % 3]; ctx.lineWidth = 6 * S; ctx.beginPath(); ctx.arc((-.36 + hash(i) * .72) * ww, (-.3 + hash(i * 2) * .6) * hh, (16 + (i % 4) * 10) * S, hash(i * 3) * 6, hash(i * 3) * 6 + 2.8 * k[0]); ctx.stroke(); }
+    if (k[1] > 0) for (const [sx, sy, d] of [[.2, -.12, 1], [-.28, .2, -1]]) { ctx.strokeStyle = '#1F5A36'; ctx.lineWidth = 5 * S; ctx.beginPath(); for (let i = 0; i < 60 * k[1]; i++) { const q = d * i * .27, r = i * .75 * S; i ? ctx.lineTo(ww * sx + Math.cos(q) * r, hh * sy + Math.sin(q) * r) : ctx.moveTo(ww * sx, hh * sy); } ctx.stroke(); }
+    if (k[2] > 0) for (const [wx, wy, R] of [[-.12, .12, 62], [.3, .2, 44]]) { const cx = ww * wx, cy = hh * wy; ctx.strokeStyle = '#2A1A22'; ctx.lineWidth = 3.4 * S; for (let i = 0; i < 8; i++) { const q = i / 8 * TAU; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(q) * R * S * k[2], cy + Math.sin(q) * R * S * k[2]); ctx.stroke(); } for (let r = 1; r < 4; r++) { ctx.beginPath(); for (let i = 0; i <= 8; i++) { const q = i / 8 * TAU, rr = r * R / 3.4 * S * k[2]; i ? ctx.lineTo(cx + Math.cos(q) * rr, cy + Math.sin(q) * rr) : ctx.moveTo(cx + rr, cy); } ctx.stroke(); } }
     ctx.restore(); };
-  function bubble(x, y, w, h, k, tx, ty) { if (k <= 0) return; push(); translate(x, y); scale(backOut(k)); flat(ellPts(0, 0, w, h, 30), '#FFFFFF', { line: DARK, lw: 4, shadow: [6, 8, 'rgba(0,0,0,.35)'] }); pop(); dot(lerp(x, tx, .6), lerp(y, ty, .6) + 40, 18 * k, '#FFFFFF'); dot(lerp(x, tx, .8), lerp(y, ty, .8) + 30, 11 * k, '#FFFFFF'); }
+  // a thought bubble; its trail of three shrinking puffs runs from the bubble's lower right to the thinker's head (tx, ty)
+  function bubble(x, y, w, h, k, tx, ty) { if (k <= 0) return; push(); translate(x, y); scale(backOut(k)); flat(ellPts(0, 0, w, h, 30), '#FFFFFF', { line: DARK, lw: 4, shadow: [6, 8, 'rgba(0,0,0,.35)'] }); pop();
+    const sx = x + w * .72, sy = y + h * .72; [[.28, 17], [.58, 12], [.84, 8]].forEach(([f, r]) => { const kk = clamp(k * 3 - f * 2); if (kk > 0) flat(ellPts(lerp(sx, tx, f), lerp(sy, ty, f), r * kk, r * kk, 14), '#FFFFFF', { line: DARK, lw: 3 }); }); }
   const GRID10 = i => [578 + 70 + (i % 5) * 156, 520 + Math.floor(i / 5) * 160];
   function pressRound(t, lt, dur) {
     const a = cs('te_test'), tTest = wt('te_test', 'testable'), tWatch = wt('te_test', 'watch'), tSq = wt('te_test', 'squeeze'), tUnder = wt('te_test', 'pressure');
@@ -350,7 +365,7 @@
     if (fan > 0 && pour < 1) { const [tx, ty] = GRID10(1); CURVES.forEach((im, i) => { const q = Math.PI + (i + .5) / 10 * Math.PI, hx = tx + Math.cos(q) * 230, hy = ty - 40 + Math.sin(q) * 200, k = popk(t, tTen2 - .9 + i * .04, .3), u = easeIn(pour); tile(lerp(hx, tx, u), lerp(hy, ty, u), 56, 56, im, 1, { s: backOut(k) * (1 - .7 * u) }); }); }
     // the knot's prediction: curves, spirals and webs crammed together
     const bk = popk(t, tIf - .2, .5) * (1 - seg(t, r - .3, r + .1));
-    if (bk > 0) { bubble(1300, 300, 230, 170, bk, SX, 380); if (bk > .6) { tile(1300, 310, 200, 150, null, 1, { draw: jumble(200, 150, [seg(t, tIf + .3, tCurves + .4), seg(t, tSpi - .2, tSpi + .6), seg(t, tWeb - .3, tWeb + .5)]), frame: VIO }); } }
+    if (bk > 0) { bubble(1270, 312, 212, 152, bk, SX - 60, 400); if (bk > .6) { tile(1270, 312, 280, 200, null, 1, { draw: jumble(280, 200, [seg(t, tIf + .3, tCurves + .4), seg(t, tSpi - .2, tSpi + .6), seg(t, tWeb - .3, tWeb + .5)]), frame: VIO }); } }
     // the Unfolding Machine sniffs along the tiles and comes back with nothing
     if (t > tUnf - .6) { const mk = seg(t, tUnf - .6, tUnf + .8), mx = lerp(-200, 560, easeOut(mk)) + (t > tUnf + .8 ? 420 * ease(seg(t, tUnf + .8, tNone - .2)) : 0) + 10 * Math.sin(t * 6); machineL(t, mx, 955, .45, { on: 1, mouth: .4 + .4 * Math.abs(Math.sin(t * 5)) }); if (t > tNone - .3) { const bk = popk(t, tNone - .3, .4), tBr = wt('te_result', 'broad'); push(); translate(mx + 190, 880); scale(1.25 * backOut(bk));
         // the basket: no hidden curve detectors, only broad, bunched-up versions of the same shapes
@@ -390,11 +405,23 @@
     contestants(t, { knot: { look: [-1, -.2], grin: false, sq: .25 * env(t, tDown, tDown + .6, .1, .4) }, buzz: env(t, tBrush + .3, tBrush + 1.8, .1, .5), supLit: .3 });
     if (t < tSame - .4) tinyTray(t, 1024, 64, 420, plateY, 'c7t1024', HZ, popk(t, a + .2, .6));
     else HZ.forEach((im, i) => { const [x, y] = GRID13(i), lk = popk(t, tSame - .4 + i * .04, .4); tile(x, y, 100, 100, im, 1, { s: .2 + .8 * backOut(lk), lit: .5 * env(t, tCo - .3, e + 2, .3, .4) }); const kl = seg(t, tCo - .4, tCo + .3); if (kl > 0) { ctx.save(); ctx.globalAlpha = kl; flat(rrPts(x - 52, y + 50, 104, 24, 6), DARK); ctx.restore(); } });
-    // the broad brush sweeps a single gold stroke across the clean tiles
-    const bk = seg(t, tPaint - .3, tBrush + .2);
-    if (bk > 0) { const bx = lerp(420, 1500, easeInOut(bk)); ctx.save(); ctx.globalAlpha = .45; ctx.fillStyle = GOLD; ctx.beginPath(); ctx.moveTo(560, 440); for (let i = 0; i <= 20; i++) { const x = lerp(560, Math.min(1380, bx), i / 20); ctx.lineTo(x, 430 + 8 * Math.sin(i * 1.7)); } for (let i = 20; i >= 0; i--) { const x = lerp(560, Math.min(1380, bx), i / 20); ctx.lineTo(x, 660 + 8 * Math.sin(i * 1.3)); } ctx.closePath(); if (bx > 570) ctx.fill(); ctx.restore(); if (bk < 1) { push(); translate(bx, 545); rotate(-.15); flat(rrPts(-20, -520, 40, 420, 10), '#8C5A3A', { line: DARK, lw: 3 }); flat(rrPts(-60, -110, 120, 60, 8), '#B9C0CE', { line: DARK, lw: 3 }); flat([[-70, -50], [70, -50], [80, 120], [-80, 120]], GOLD, { line: DARK, lw: 3 }); pop(); } }
+    // the broad brush sweeps a single gold stroke across the clean tiles: a bristly stroke that shows for a moment and clears
+    const bk = seg(t, tPaint - .3, tBrush + .2), bx = lerp(420, 1500, easeInOut(bk)), sa = .82 * (1 - ease(seg(t, tBrush + .25, tBrush + .95)));
+    if (bk > 0 && sa > 0 && bx > 570) { boilSeed('c7stroke'); const x1 = Math.min(1380, bx), N = 26;
+      ctx.save(); ctx.globalAlpha = sa; ctx.fillStyle = GOLD; ctx.beginPath(); ctx.moveTo(560, 440);
+      for (let i = 0; i <= N; i++) ctx.lineTo(lerp(560, x1, i / N), 432 + 10 * Math.sin(i * 1.7) + 8 * hash(i * 3));
+      for (let k = 0; k <= 8; k++) ctx.lineTo(x1 + 8 * Math.sin(k * 2.3) - 10 * hash(k), lerp(432, 662, k / 8));
+      for (let i = N; i >= 0; i--) ctx.lineTo(lerp(560, x1, i / N), 662 + 10 * Math.sin(i * 1.3) - 8 * hash(i * 5));
+      for (let k = 8; k >= 0; k--) ctx.lineTo(560 - 14 * hash(k + 9), lerp(432, 662, k / 8)); ctx.closePath(); ctx.fill();
+      // bristle streaks: darker and lighter lines along the stroke, ragged at both ends
+      ctx.lineCap = 'round'; for (let j = 0; j < 22; j++) { const y = lerp(440, 654, j / 21), st = 560 + 30 * hash(j * 7), en = x1 - 40 * hash(j * 3); if (en <= st) continue; ctx.strokeStyle = j % 3 ? 'rgba(160,110,20,.45)' : 'rgba(255,240,180,.5)'; ctx.lineWidth = 2 + 3 * hash(j); ctx.beginPath(); ctx.moveTo(st, y); ctx.lineTo(en, y + 3 * Math.sin(j)); ctx.stroke(); }
+      ctx.restore(); }
     press(t, 0, plateY, cnt, {});
     slam(t, tDown + .05);
+    // the brush itself rides on a stage rig: a cable from the fly tower holds it, in front of the press frame
+    if (bk > 0 && bk < 1) { const sw = -.18 + .1 * Math.sin(bk * Math.PI), dip = 30 * Math.sin(bk * Math.PI);
+      ctx.save(); ctx.strokeStyle = '#1A1020'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(bx + 40, -300); ctx.lineTo(bx - Math.sin(sw) * 420, 545 + dip - Math.cos(sw) * 420); ctx.stroke(); ctx.restore();
+      push(); translate(bx, 545 + dip); rotate(sw); flat(rrPts(-14, -430, 28, 330, 10), '#8C5A3A', { line: DARK, lw: 3 }); flat(rrPts(-24, -440, 48, 22, 6), '#B9C0CE', { line: DARK, lw: 2 }); flat(rrPts(-60, -110, 120, 60, 8), '#B9C0CE', { line: DARK, lw: 3 }); flat([[-70, -50], [70, -50], [80, 120], [-80, 120]], GOLD, { line: DARK, lw: 3 }); ctx.save(); ctx.strokeStyle = 'rgba(140,90,20,.6)'; ctx.lineWidth = 2; for (let i = 0; i < 9; i++) { ctx.beginPath(); ctx.moveTo(-60 + i * 15, -44); ctx.lineTo(-68 + i * 17, 116); ctx.stroke(); } ctx.restore(); pop(); }
     // gag: a flick of gold paint lands on the knot
     if (splat > 0) { const p = arcPt([1450, 500], [SX + 20, 430], 160, splat); if (splat < 1) dot(p[0], p[1], 14, GOLD); else { flat(starPts(SX + 20, 430, 26, .55, 7), GOLD); } }
     clawdSeat(t, [[a, 'determined'], [tDown, 'scared'], [tSame, 'happy'], [tBrush, 'laugh']], env(t, tBrush + .4, e + 2, .3, .4));
@@ -418,7 +445,7 @@
     for (let i = 0; i < Math.round((w + h) / 40); i++) { const u = i / Math.round((w + h) / 40), p = u < w / (w + h) ? [x - w / 2 - 8 + u * (w + h) / w * (w + 16), top - 8] : [x + w / 2 + 8, top - 8 + (u - w / (w + h)) * (w + h)]; dot(p[0], p[1], 5, Math.floor(T * 6 + i) % 2 && lit ? CREAM : '#C98A2A'); }
     return top;
   }
-  function shutter(x, w, h, open) { const top = 800 - h, sh = h * (1 - easeInOut(open)); if (sh < 2) return; ctx.save(); ctx.beginPath(); ctx.rect(x - w / 2, top, w, sh); ctx.clip(); flat(rectPts(x - w / 2, top, w, h), '#B0203A'); ctx.strokeStyle = '#7A1026'; ctx.lineWidth = 3; for (let y = top + sh - 2; y > top; y -= 18) { ctx.beginPath(); ctx.moveTo(x - w / 2, y); ctx.lineTo(x + w / 2, y); ctx.stroke(); } ctx.restore(); txt('?', x, top + sh / 2, Math.min(w, h) * .45, '#FFD36B', { font: SERIF, weight: '900' }); }
+  function shutter(x, w, h, open) { const top = 800 - h, sh = h * (1 - easeInOut(open)); if (sh < 2) return; ctx.save(); ctx.beginPath(); ctx.rect(x - w / 2, top, w, sh); ctx.clip(); flat(rectPts(x - w / 2, top, w, h), '#B0203A'); ctx.strokeStyle = '#7A1026'; ctx.lineWidth = 3; for (let y = top + sh - 2; y > top; y -= 18) { ctx.beginPath(); ctx.moveTo(x - w / 2, y); ctx.lineTo(x + w / 2, y); ctx.stroke(); } ctx.globalAlpha *= 1 - seg(open, 0, .5); txt('?', x, top + sh - h / 2, Math.min(w, h) * .45, '#FFD36B', { font: SERIF, weight: '900' }); ctx.restore(); }   // (the '?' is painted on the shutter: it rolls up with it and fades)
   const cartTile = (w, h) => { flat(rectPts(-w / 2, -h / 2, w, h), '#BFE0F0'); flat(rectPts(-w / 2, h * .25, w, h * .25), '#9AC86A'); flat([[-w * .4, -h * .05], [w * .3, -h * .05], [w * .26, h * .18], [-w * .36, h * .18]], '#A8763E', { line: DARK, lw: 2 }); ctx.save(); ctx.strokeStyle = DARK; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(w * .3, h * .02); ctx.lineTo(w * .46, -h * .08); ctx.stroke(); ctx.restore(); flat(ellPts(-w * .08, h * .22, w * .15, w * .15, 14), '#6A4A2A', { line: DARK, lw: 2 }); dot(-w * .08, h * .22, 3, DARK); };
   function sizes(t, lt, dur) {
     const a = cs('te_sizes'), e = ce('te_sizes'), tTr = wt('te_sizes', 'trained'), tThree = wt('te_sizes', 'three'), tApart = wt('te_sizes', 'apart'), tSm = wt('te_sizes', 'smallest'), tCar = wt('te_sizes', 'car'), tBig = wt('te_sizes', 'biggest'), tDoz = wt('te_sizes', 'specialists');
@@ -441,21 +468,28 @@
       pop();
       letter(lab, x, 800 - h - 60, 44, CREAM, { face: 'marker', shadow: false, alpha: edgeA(x, 800 - h - 60, lab.length * 30, 50), reveal: seg(t, tThree - .4 + i * .3, tThree + i * .3) });
     });
-    if (t > tCar - .2) { const ea = edgeA(690, 470, 260, 60); if (ea > 0) { push(); translate(690, 462); const k = popk(t, tCar - .2, .4); scale(backOut(k)); ctx.globalAlpha = ea; flat(rrPts(-125, -28, 250, 56, 12), GOLD, { line: DARK, lw: 3 }); ctx.globalAlpha = 1; pop(); letter('1 broad car', 690, 463, 32, DARK, { face: 'marker', shadow: false, pop: popk(t, tCar - .2, .4), alpha: ea }); } }
+    if (t > tCar - .2) { const ea = edgeA(690, 836, 260, 60); if (ea > 0) { push(); translate(690, 830); const k = popk(t, tCar - .2, .4); scale(backOut(k)); ctx.globalAlpha = ea; flat(rrPts(-125, -28, 250, 56, 12), GOLD, { line: DARK, lw: 3 }); ctx.globalAlpha = 1; pop(); letter('1 broad car', 690, 831, 32, DARK, { face: 'marker', shadow: false, pop: popk(t, tCar - .2, .4), alpha: ea }); } }
     clawdSeat(t, [[a, 'thinking'], [tBig, 'surprised'], [tViews, 'excited'], [tLess + .5, 'proud']], env(t, tScr - .4, e + 2, .3, .4));
     audience(t, .8 * env(t, tDoz, tDoz + 1.4, .2, .6) + env(t, tScr, e + 2, .3, .4));
     camEnd();
     roundCard(t, a - .2, 'ROUND 3', 'size');
-    lower(t, tThree - .3, tSm - .3, 'same network · 300× apart in size', GOLD, { y: 985 });
-    lower(t, tSm - .2, tBig - .3, 'smallest: one broad car neuron', GOLD, { y: 985 });
-    lower(t, tBig - .2, tLess - .3, 'biggest: taxis, ambulances, convertibles…', GOLD, { y: 985, size: 54 });
-    lower(t, tLess - .2, e + 1.2, 'less room: broader, not scrambled', GOLD, { y: 985 });
-    if (t > tDoz && t < tDoz + 1.2) sfx('OOOH!', 620, 330, 80, CREAM, t - tDoz, { face: 'marker' });
+    lower(t, tThree - .3, tSm - .3, 'same network · 300× apart in size', GOLD, {});
+    lower(t, tSm - .2, tBig - .3, 'smallest: one broad car neuron', GOLD, {});
+    lower(t, tBig - .2, tLess - .3, 'biggest: taxis, ambulances, convertibles…', GOLD, { size: 54 });
+    lower(t, tLess - .2, e + 1.2, 'less room: broader, not scrambled', GOLD, {});
+    if (t > tDoz && t < tDoz + 1.2) sfx('OOOH!', 330, 210, 80, CREAM, t - tDoz, { face: 'marker' });   // (clear of the door labels)
     scoreBug(t, 1);
   }
 
   // ---------- 7 · Final round: the machine's pieces match single neurons; the knot bolts ----------
-  const spiderLegs = (w, h) => { flat(rectPts(-w / 2, -h / 2, w, h), '#E9E2D0'); ctx.save(); ctx.strokeStyle = '#2A1A1A'; ctx.lineWidth = 5; ctx.lineCap = 'round'; for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.moveTo(-w * .3, -h * .3 + i * h * .2); ctx.quadraticCurveTo(0, -h * .45 + i * h * .2, w * .3, -h * .2 + i * h * .2); ctx.stroke(); } ctx.restore(); };
+  // a "spider legs" neuron: the edge of a spider's body at one side and four jointed legs reaching out from it, each
+  // bent at the knee and ending in a small foot
+  const spiderLegs = (w, h) => { flat(rectPts(-w / 2, -h / 2, w, h), '#E9E2D0'); const bx = -w * .5; ctx.save(); ctx.fillStyle = '#2A1A1A'; ctx.beginPath(); ctx.ellipse(bx, 0, w * .2, h * .3, 0, -Math.PI / 2, Math.PI / 2); ctx.fill();
+    ctx.strokeStyle = '#2A1A1A'; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    [-.27, -.09, .09, .27].forEach((fy, i) => { const y0 = fy * h * .9, kx = bx + w * (.36 + .04 * (i % 2)), ky = y0 - h * (.16 - .04 * Math.abs(fy) * 3), fx = bx + w * (.82 - .06 * Math.abs(i - 1.5)), fy2 = y0 + h * (.12 + .1 * fy);
+      ctx.lineWidth = w * .05; ctx.beginPath(); ctx.moveTo(bx + w * .16, y0 * .7); ctx.lineTo(kx, ky); ctx.lineTo(fx, fy2); ctx.stroke();
+      ctx.lineWidth = w * .03; ctx.beginPath(); ctx.moveTo(fx, fy2); ctx.lineTo(fx + w * .05, fy2 + h * .03); ctx.stroke(); dot(kx, ky, w * .03, '#2A1A1A'); });
+    ctx.restore(); };
   const web = (w, h) => { flat(rectPts(-w / 2, -h / 2, w, h), '#2A3A4A'); ctx.save(); ctx.strokeStyle = '#E9EEF6'; ctx.lineWidth = 1.6; for (let i = 0; i < 8; i++) { const q = i / 8 * TAU; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.cos(q) * w * .48, Math.sin(q) * h * .48); ctx.stroke(); } for (let r = 1; r < 5; r++) { ctx.beginPath(); for (let i = 0; i <= 8; i++) { const q = i / 8 * TAU, rr = r * .11; i ? ctx.lineTo(Math.cos(q) * w * rr, Math.sin(q) * h * rr) : ctx.moveTo(w * rr, 0); } ctx.stroke(); } ctx.restore(); };
   const spider = (x, y, s) => { ctx.save(); ctx.strokeStyle = '#1A1010'; ctx.lineWidth = 2.5 * s; for (let i = 0; i < 4; i++) for (const sd of [-1, 1]) { ctx.beginPath(); ctx.moveTo(x, y); ctx.quadraticCurveTo(x + sd * 14 * s, y - 10 * s + i * 6 * s, x + sd * 22 * s, y - 2 * s + i * 8 * s); ctx.stroke(); } ctx.fillStyle = '#1A1010'; ctx.beginPath(); ctx.ellipse(x, y, 7 * s, 9 * s, 0, 0, TAU); ctx.fill(); ctx.restore(); };
   const onLeaf = (w, h) => { flat(rectPts(-w / 2, -h / 2, w, h), '#CFE3B0'); flat(ellPts(0, 0, w * .42, h * .28, 18), '#5E9A4C', { line: '#2E5A2A', lw: 2 }); spider(0, 0, w / 90); };
@@ -510,7 +544,7 @@
     lower(t, tReg - .2, tTool - .6, 'pieces: the same blocks, regrouped', GOLD);
     lower(t, tTool - .3, end + .2, 'it kept finding neurons already there', GOLD);
     if (t > end - .1) { const k = popk(t, end - .1, .5); letter('WINNER!', GX, 230, 96, GOLDLT, { face: 'marker', stroke: DARK, strokeW: .12, pop: k, rot: -.08 + .03 * Math.sin(t * 6) }); }
-    if (t > tLeaves - .3 && t < tLeaves + 1.2) sfx('eek!', 960, 1000, 60, CREAM, t - tLeaves + .3, { face: 'marker' });
+    if (t > tLeaves - .3 && t < tLeaves + 1.2) sfx('eek!', 1700, 880, 60, CREAM, t - tLeaves + .3, { face: 'marker' });   // (clear of the lower third)
     if (t > bolt - .2 && t < bolt + 1.2) sfx('ZOOM!', SX + 120, 300, 90, VIOLT, t - bolt + .2, { face: 'marker' });
     scoreBug(t, 1);
   }
