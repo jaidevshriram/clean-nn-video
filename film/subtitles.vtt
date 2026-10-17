@@ -1,0 +1,1495 @@
+WEBVTT
+
+00:01.200 --> 00:04.920
+Every time you ask an AI a question, something happens inside it that nobody fully
+
+00:04.920 --> 00:06.277
+understands.
+
+00:06.727 --> 00:10.647
+Inside, it's a bit like a galaxy: millions of tiny lights,
+
+00:10.647 --> 00:16.667
+flickering on and off, passing signals to each other along threads of light.
+
+00:16.667 --> 00:17.934
+Each light is a neuron.
+
+00:18.384 --> 00:22.084
+For years, many of the people who study these networks believed they were knotted.
+
+00:22.084 --> 00:27.224
+Not arranged into meaningful patterns, like constellations,
+
+00:27.224 --> 00:32.644
+but tangled. Ideas with nothing in common, crammed into the same lights,
+
+00:32.644 --> 00:36.772
+simply because they fit. There wasn't room to give every idea its own light.
+
+00:37.222 --> 00:40.262
+And if that were true, there'd be only one way to understand an AI:
+
+00:40.262 --> 00:44.530
+tear the knot apart first, and study the pieces.
+
+00:44.980 --> 00:49.460
+The researcher Nick Cammarata spent most of a decade on this question.
+
+00:49.460 --> 00:52.320
+In a recent essay, Nick argues that the field got it wrong.
+
+00:52.320 --> 00:57.320
+It was never a knot. Researchers just didn't know how to read the constellations
+
+00:57.320 --> 00:58.120
+yet.
+
+00:58.394 --> 01:01.571
+This video walks through that essay, and how Nick came to think so.
+
+01:02.571 --> 01:07.251
+It comes in four parts. First, the story everyone believed.
+
+01:07.251 --> 01:11.811
+Then we reopen the evidence, case by case. Then,
+
+01:11.811 --> 01:16.714
+how networks really work. And finally, what it all means.
+
+01:20.714 --> 01:26.074
+Part one: the story everyone believed. Let's zoom all the way in to a single light
+
+01:26.074 --> 01:30.474
+from that galaxy, and picture it as a little building in a town.
+
+01:30.474 --> 01:34.834
+So, what is a neuron in an AI? It's simpler than it sounds.
+
+01:34.834 --> 01:37.974
+A neuron is a tiny detector. It looks at what's coming in,
+
+01:37.974 --> 01:40.354
+and if it sees something it cares about, it lights up.
+
+01:40.354 --> 01:45.736
+We'll start with AIs that look at pictures, because pictures are easy to show.
+
+01:46.186 --> 01:48.966
+So you can find out what a neuron cares about by showing it a lot of pictures,
+
+01:48.966 --> 01:51.706
+and keeping the ones that make it light up brightest.
+
+01:51.706 --> 01:57.506
+Those pictures end up in its windows. A neuron's windows show what lights it up
+
+01:57.506 --> 01:58.306
+most.
+
+01:58.333 --> 02:00.313
+An image network is built in layers, like districts.
+
+02:00.313 --> 02:03.513
+Near the coast, the edge of the city where the pixels come in,
+
+02:03.513 --> 02:08.413
+neurons detect simple things: edges, curves, colors.
+
+02:08.413 --> 02:13.353
+Further inland, textures and eyes and wheels. And on the horizon,
+
+02:13.353 --> 02:18.404
+in the last district, whole ideas: dogs, cars, ladybugs.
+
+02:18.854 --> 02:21.594
+Neurons pass signals to each other along roads,
+
+02:21.594 --> 02:25.434
+and a chain of neurons working together is called a circuit.
+
+02:25.434 --> 02:29.174
+If you can read the neurons and the circuits, you can start to understand what the
+
+02:29.174 --> 02:30.736
+network is actually doing.
+
+02:31.186 --> 02:36.026
+That was the hope of a field called mechanistic interpretability.
+
+02:36.026 --> 02:40.926
+Look inside. Read the parts. Understand the machine.
+
+02:40.926 --> 02:44.563
+A network whose parts you can read like that is what Nick calls clean.
+
+02:47.963 --> 02:51.431
+But there was a problem. Some neurons didn't seem to make any sense.
+
+02:51.881 --> 02:57.121
+The most famous one was in an older image model called InceptionV1.
+
+02:57.121 --> 03:00.141
+It lit up for cat faces. And for the fronts of cars.
+
+03:00.141 --> 03:06.510
+Cats and cars. What do those have in common?
+
+03:06.960 --> 03:12.260
+Researchers called these neurons polysemantic: one neuron,
+
+03:12.260 --> 03:17.160
+many unrelated meanings. And there was worse. In the last district of that same
+
+03:17.160 --> 03:19.810
+network, almost nothing made sense at all.
+
+03:20.260 --> 03:23.900
+The leading explanation was called superposition.
+
+03:23.900 --> 03:28.400
+Here's the idea. Imagine a city with far more people than houses.
+
+03:28.400 --> 03:32.760
+The houses are neurons. The people are ideas the network needs to keep track of.
+
+03:32.760 --> 03:34.520
+You could give similar people a house together,
+
+03:34.520 --> 03:39.840
+a family. Or you could do something stranger: put total strangers in the same house,
+
+03:39.840 --> 03:41.496
+as long as they're never home at the same time.
+
+03:41.946 --> 03:44.526
+Strangers rarely bump into each other, so it mostly works.
+
+03:44.526 --> 03:48.546
+And if a network were short on neurons, superposition said,
+
+03:48.546 --> 03:52.686
+that's exactly what it would do: pack unrelated things together,
+
+03:52.686 --> 03:54.783
+because they rarely collide.
+
+03:55.233 --> 03:59.533
+That would be terrible news. Because if neurons are packed with strangers,
+
+03:59.533 --> 04:02.844
+then what shares a neuron tells you nothing. The city would be a knot.
+
+04:03.294 --> 04:04.794
+So the field built a new kind of tool to unfold it:
+
+04:04.794 --> 04:10.494
+a second model, called a sparse autoencoder, trained to take the network apart and
+
+04:10.494 --> 04:15.014
+rebuild it as a long list of cleaner pieces, which you'd study instead of the
+
+04:15.014 --> 04:17.790
+original. Think of it as an Unfolding Machine.
+
+04:18.240 --> 04:22.860
+And Nick was in the thick of it, helping make the case for superposition.
+
+04:22.860 --> 04:25.040
+Nick was one of the people who first proposed it,
+
+04:25.040 --> 04:27.233
+and believed it for years.
+
+04:34.633 --> 04:39.373
+Part two: the evidence. That was the story everyone believed:
+
+04:39.373 --> 04:43.493
+neurons packed with strangers, and a machine to pull them apart.
+
+04:43.493 --> 04:46.853
+But the knot story rested on a few famous cases.
+
+04:46.853 --> 04:49.332
+So let's reopen them, one at a time.
+
+04:50.132 --> 04:54.312
+Years later, after many months studying neurons in modern image and language models,
+
+04:54.312 --> 04:58.992
+and finding them surprisingly clean, Nick went back to the original crime scenes:
+
+04:58.992 --> 05:03.618
+the famous cases the knot story was built on. Starting with the cat and car neuron.
+
+05:04.068 --> 05:06.168
+Nick had looked at its pictures hundreds of times.
+
+05:06.168 --> 05:12.668
+This time, Nick tried something new: spending a few seconds asking,
+
+05:12.668 --> 05:14.787
+what one thing could this be?
+
+05:15.237 --> 05:18.097
+And then it was obvious. It isn't a cat and car neuron.
+
+05:18.097 --> 05:19.200
+It's a V neuron.
+
+05:19.650 --> 05:23.430
+Pointed things make it light up. Look at the roads leading into it,
+
+05:23.430 --> 05:26.230
+from the neurons that feed it: they come from a flame,
+
+05:26.230 --> 05:29.630
+the jets of water from a fireboat, and fox faces.
+
+05:29.630 --> 05:31.875
+All V-shaped.
+
+05:32.325 --> 05:36.045
+And look at what switches it off. Round things.
+
+05:36.045 --> 05:41.725
+A tennis ball. A clock. A snail shell. It isn't the opposite of the V.
+
+05:41.725 --> 05:43.903
+It's what the V is being told apart from.
+
+05:44.353 --> 05:48.213
+Bullet train noses. The triangle of balls on a pool table.
+
+05:48.213 --> 05:51.713
+It fires for those too. It was never about cats or cars.
+
+05:51.713 --> 05:52.513
+It's a shape.
+
+05:52.750 --> 05:58.390
+Here's a useful trick from the essay: try explaining a neuron without any nouns.
+
+05:58.390 --> 06:04.570
+People, and AI assistants, love describing neurons as lists of nouns:
+
+06:04.570 --> 06:08.870
+cats, cars. But a neuron is often better described as a verb.
+
+06:08.870 --> 06:12.830
+It's not naming what it sees. It's making a distinction:
+
+06:12.830 --> 06:17.483
+pointed, not round. And passing that on to the neurons further down the road.
+
+06:17.933 --> 06:22.193
+Why didn't anyone see it before? The neuron's portrait was painted by a technique
+
+06:22.193 --> 06:26.913
+called feature visualization. Think of it as a Sketch Artist:
+
+06:26.913 --> 06:28.753
+it paints the picture a neuron would like best.
+
+06:28.753 --> 06:34.753
+And this portrait had cat whiskers in it. That's because the artist follows the
+
+06:34.753 --> 06:38.213
+easiest route to make the neuron light up, and once it finds the cat route,
+
+06:38.213 --> 06:42.612
+it paints everything that route brings, whiskers included.
+
+06:43.062 --> 06:47.442
+So the first lesson: a neuron that seems to mean two or three things is often one
+
+06:47.442 --> 06:51.282
+thing we haven't found the word for yet, or a small family of related ones.
+
+06:51.282 --> 06:55.048
+The grouping isn't noise. It's a clue.
+
+06:59.048 --> 07:03.368
+The second crime scene was the original superposition circuit itself.
+
+07:03.368 --> 07:08.548
+Nick found it in 2019, and with Chris Olah read it as superposition.
+
+07:08.548 --> 07:11.566
+It became the example the paper Zoom In used to introduce the idea.
+
+07:12.016 --> 07:14.576
+It looked like a car signal was being hidden inside a group of dog neurons,
+
+07:14.576 --> 07:18.916
+as if the dogs were a secret storage locker, where the car could be stored and
+
+07:18.916 --> 07:25.068
+picked up later. Strangers sharing a house: exactly what superposition predicts.
+
+07:25.518 --> 07:27.018
+But look at how Nick and Chris saw those neurons:
+
+07:27.018 --> 07:31.818
+through the Sketch Artist, the same tool that painted the cat whiskers.
+
+07:31.818 --> 07:34.878
+And deep in this network, the artist gets lazy.
+
+07:34.878 --> 07:38.284
+There are lots of dog neurons, so the easiest painting is usually a dog.
+
+07:38.734 --> 07:42.694
+Nudge the artist even slightly toward the routes that real pictures take,
+
+07:42.694 --> 07:44.354
+so it paints things that look like real photos,
+
+07:44.354 --> 07:50.911
+and the portraits change. Two of those "dog" neurons are actually car neurons.
+
+07:51.361 --> 07:53.041
+And the other two respond to cars and dogs alike,
+
+07:53.041 --> 07:56.461
+for one shared reason: which way they're facing.
+
+07:56.461 --> 07:58.670
+They're pose neurons.
+
+07:59.120 --> 08:01.760
+It turns out the network has more than a hundred of these pose neurons,
+
+08:01.760 --> 08:06.780
+each one clean. And nothing was hiding. The car signal wasn't stored in the dogs.
+
+08:06.780 --> 08:10.998
+It kept going, splitting into more and more specific car neurons.
+
+08:11.448 --> 08:14.028
+You might think: that's only because the model was small.
+
+08:14.028 --> 08:19.148
+A bigger model would separate dogs and cars. But DINOv2,
+
+08:19.148 --> 08:22.328
+more than ten times larger and about ten years newer,
+
+08:22.328 --> 08:29.628
+still has generalized pose neurons. Every vision model Nick has looked at does.
+
+08:29.628 --> 08:37.008
+So the field's main example of superposition was really ordinary generalization,
+
+08:37.008 --> 08:38.609
+seen through a lazy painting.
+
+08:42.609 --> 08:45.509
+Both cases came down to the tools. And the story of this field,
+
+08:45.509 --> 08:49.689
+as Nick tells it, is mostly a story of discovering that what was under the
+
+08:49.689 --> 08:55.024
+microscope was better than anyone thought. The microscope just wasn't tuned right.
+
+08:55.474 --> 08:58.674
+The first portraits of neurons, the Sketch Artist's early paintings,
+
+08:58.674 --> 09:04.934
+were noisy, psychedelic smears. Then researchers added one ingredient,
+
+09:04.934 --> 09:09.294
+called transformation robustness, which means the picture still has to work when
+
+09:09.294 --> 09:12.674
+it's nudged or turned a little, and the same neurons came out crisp.
+
+09:12.674 --> 09:15.541
+Later, a few small tweaks let researchers see much deeper.
+
+09:15.991 --> 09:19.311
+But the worst place of all was the third case: the last district of InceptionV1,
+
+09:19.311 --> 09:24.731
+the cat and car network. Here, almost nothing looked interpretable.
+
+09:24.731 --> 09:30.971
+One researcher, Liv Gorton, said there were essentially no interpretable neurons
+
+09:30.971 --> 09:34.417
+there at all. Nick would have guessed maybe five percent.
+
+09:34.867 --> 09:37.787
+And the leading explanation was the knot again:
+
+09:37.787 --> 09:42.591
+too many ideas, too few neurons, so they got crammed in at random.
+
+09:43.041 --> 09:45.561
+But here's the thing. Take a more modern network design,
+
+09:45.561 --> 09:49.021
+called a ConvNeXt, with the same number of parameters,
+
+09:49.021 --> 09:51.481
+so the same size, and trained on the same pictures.
+
+09:51.481 --> 09:54.381
+The only real differences are engineering upgrades,
+
+09:54.381 --> 10:00.081
+like residual connections and layer normalization.
+
+10:00.081 --> 10:01.638
+And the last district is beautiful.
+
+10:02.088 --> 10:06.888
+Same size, same data. Better tools alone took the old network from about five
+
+10:06.888 --> 10:11.768
+percent to about fifty. Retraining it with modern settings got it to about seventy.
+
+10:11.768 --> 10:17.328
+And in the new design, ninety-nine to a hundred percent of its last-layer neurons
+
+10:17.328 --> 10:18.725
+are easy to interpret.
+
+10:19.175 --> 10:22.495
+The old network wasn't packing strangers together.
+
+10:22.495 --> 10:26.395
+It was a district built badly, seen through a dirty lens.
+
+10:26.395 --> 10:30.655
+Upgrades made by people who had no interest in interpretability at all made it
+
+10:30.655 --> 10:31.455
+readable.
+
+10:35.408 --> 10:39.068
+But even that messy last district of the old network wasn't random.
+
+10:39.068 --> 10:41.225
+To see that, you have to watch a neuron grow.
+
+10:41.675 --> 10:45.975
+Nick retrained the old network from scratch and watched one neuron form.
+
+10:45.975 --> 10:48.875
+It started out lighting up on fields of yellow flowers,
+
+10:48.875 --> 10:50.764
+in photos that sometimes had a dog in them.
+
+10:51.214 --> 10:54.134
+Then it grew along each part of those photos. Toward other green,
+
+10:54.134 --> 10:57.714
+round things, like tennis balls and fruit. Toward dogs,
+
+10:57.714 --> 11:02.566
+without any flowers. Then into broccoli, until the flowers were nearly gone.
+
+11:03.016 --> 11:07.616
+In the modern network, the same kind of neuron reached for the balls and the fruit
+
+11:07.616 --> 11:10.896
+early on, then let them go, and stayed on the fields.
+
+11:10.896 --> 11:15.716
+The better design kept it focused. The old one let it wander,
+
+11:15.716 --> 11:19.305
+but every step of the wandering made sense.
+
+11:19.755 --> 11:25.055
+Nick calls this recursive generalization. An earlier paper Nick worked on,
+
+11:25.055 --> 11:31.275
+Multimodal Neurons, first spotted it. A neuron generalizes along one direction,
+
+11:31.275 --> 11:35.275
+then sprouts off in others, each new branch close to the last.
+
+11:35.275 --> 11:38.245
+Every branch makes sense on its own. You just have to follow it.
+
+11:38.695 --> 11:43.915
+It happens in language models too. One neuron fired on the letters "iy",
+
+11:43.915 --> 11:49.795
+in words like Miyazaki. Then on "diy". Then on "do it yourself",
+
+11:49.795 --> 11:54.635
+which doesn't contain "iy" at all. It followed the meaning,
+
+11:54.635 --> 11:56.234
+not the letters.
+
+11:56.684 --> 12:01.924
+A geology neuron grew a branch for Cesium, a coding library for maps of the earth.
+
+12:01.924 --> 12:07.244
+Some are obvious: an enemy neuron fired for a Russian poem about enemies.
+
+12:07.244 --> 12:12.690
+Some take digging. But so far, almost none are random.
+
+12:16.490 --> 12:18.970
+So now there were two explanations for neurons with mixed meanings,
+
+12:18.970 --> 12:21.349
+and they predict opposite things.
+
+12:21.799 --> 12:26.019
+Generalization says neighbors share, neighbors in meaning,
+
+12:26.019 --> 12:30.059
+like the family sharing a house. A neuron for floppy-eared dogs is really a
+
+12:30.059 --> 12:36.739
+collection of slightly different floppy ears. Superposition says strangers share,
+
+12:36.739 --> 12:41.774
+like strangers on different shifts: a neuron for floppy-eared dogs and Latin poetry.
+
+12:42.224 --> 12:44.884
+Here's what that looks like with thirty-two things and a handful of neurons.
+
+12:44.884 --> 12:50.424
+Generalization groups similar things, and with fewer neurons the groups just get
+
+12:50.424 --> 12:53.579
+coarser. Superposition scatters them.
+
+12:54.029 --> 12:57.609
+And this is testable. You can watch a neuron grow and see which one happens.
+
+12:57.609 --> 13:02.443
+Or you can squeeze the network and see what it does under pressure.
+
+13:02.893 --> 13:04.693
+So Nick took a layer famous for its curve detectors,
+
+13:04.693 --> 13:08.093
+cut it from four hundred and eighty neurons down to ten,
+
+13:08.093 --> 13:10.953
+with no way around, and retrained it from scratch.
+
+13:10.953 --> 13:15.793
+If squeezing forced superposition, this should be dramatic:
+
+13:15.793 --> 13:19.911
+curves, spirals and spider webs, crammed together.
+
+13:20.361 --> 13:25.121
+Instead, the neurons stayed clean. Just coarser.
+
+13:25.121 --> 13:30.141
+One "curves and loops" neuron instead of ten curve detectors.
+
+13:30.141 --> 13:34.261
+Two circle neurons instead of many. And when the Unfolding Machine,
+
+13:34.261 --> 13:37.001
+the tool built to pull the knot apart, was sent in to look for hidden curve
+
+13:37.001 --> 13:43.571
+detectors, it found none: just broad, bunched-up versions of the same shapes.
+
+13:44.021 --> 13:45.941
+Nick did the same to the last district of a modern network:
+
+13:45.941 --> 13:49.741
+a thousand and twenty-four neurons down to thirteen.
+
+13:49.741 --> 13:55.721
+Same thing. Coarser, not scrambled. In these tests,
+
+13:55.721 --> 13:59.781
+under pressure, a network doesn't switch to packing.
+
+13:59.781 --> 14:02.422
+It just paints with a broader brush.
+
+14:03.822 --> 14:07.542
+Size works the same way. Nick trained versions of a network roughly three hundred
+
+14:07.542 --> 14:11.282
+times apart in size. The smallest has one broad car neuron,
+
+14:11.282 --> 14:15.582
+for cars, trains and carts. The biggest splits that into specialists:
+
+14:15.582 --> 14:20.462
+taxis, ambulances, convertibles, even different views of a taxi.
+
+14:20.462 --> 14:24.378
+Less room makes neurons broader, not scrambled.
+
+14:24.828 --> 14:26.748
+And when Nick ran the Unfolding Machine on the last district,
+
+14:26.748 --> 14:32.308
+it mostly found near-copies of single neurons: about eighty-eight percent of its
+
+14:32.308 --> 14:36.468
+activity. It did help with "what's in this picture?".
+
+14:36.468 --> 14:39.788
+But where the neurons were building blocks, like spider legs and webs,
+
+14:39.788 --> 14:45.068
+the machine's pieces were those same blocks regrouped by setting:
+
+14:45.068 --> 14:50.108
+spiders in different places. The tool built to unfold the knot mostly kept finding
+
+14:50.108 --> 14:51.486
+the neurons that were already there.
+
+14:55.486 --> 14:58.986
+So the image cases came out clean. But language was where Nick,
+
+14:58.986 --> 15:03.626
+then a true believer in superposition, expected the knot to be worst.
+
+15:03.626 --> 15:09.451
+Studying language model neurons, Nick kept expecting to hit it any day.
+
+15:09.901 --> 15:11.701
+Nick found one that fired on the letters "P R",
+
+15:11.701 --> 15:17.741
+and on strange strings of Base64, a way of writing computer data as text,
+
+15:17.741 --> 15:24.661
+and on Bengali text. Finally, it seemed, an arbitrary mixture!
+
+15:24.661 --> 15:29.341
+Then Nick decoded the code: words with "P R". And the Bengali,
+
+15:29.341 --> 15:33.561
+translated: "P R" again. It was one idea all along,
+
+15:33.561 --> 15:36.670
+the letters P R, in whatever form they showed up.
+
+15:37.120 --> 15:41.200
+A coworker found a neuron that seemed to fire on random commas.
+
+15:41.200 --> 15:46.300
+It turned out to track Colorado. Models use spots like commas to jot down a running
+
+15:46.300 --> 15:50.620
+summary of what's been said so far, and Colorado was in that summary.
+
+15:50.620 --> 15:54.038
+Turn the neuron up by hand, and the model starts planning a hike.
+
+15:54.638 --> 15:58.278
+Case after case, the mess resolved. And each time,
+
+15:58.278 --> 16:02.398
+superposition just moved, like the old "god of the gaps" idea,
+
+16:02.398 --> 16:07.578
+where whatever science can't explain yet gets credited to God.
+
+16:07.578 --> 16:12.238
+Whatever couldn't be explained yet got credited to superposition.
+
+16:12.238 --> 16:15.978
+If the strong signals were clean, it was hiding in the weak ones.
+
+16:15.978 --> 16:20.280
+Or between neurons. Or in the neurons nobody had checked yet.
+
+16:20.730 --> 16:23.890
+Nick now thinks superposition was being treated as the default,
+
+16:23.890 --> 16:26.370
+by Nick and much of the field, when it should be the last resort.
+
+16:26.370 --> 16:31.130
+It's the most radical explanation, and the hardest to test.
+
+16:31.130 --> 16:34.070
+Its only symptom is that something doesn't make sense.
+
+16:34.070 --> 16:36.470
+But that's also exactly what a bad tool, a bad design,
+
+16:36.470 --> 16:38.473
+or a branch you haven't followed yet looks like.
+
+16:38.923 --> 16:43.603
+An Anthropic paper from 2022 noted that superposition is often treated as the
+
+16:43.603 --> 16:49.323
+default because it feels intuitive, while there's little direct evidence for it.
+
+16:49.323 --> 16:53.263
+To Nick's knowledge, no one has found a real superposition circuit since the one
+
+16:53.263 --> 16:57.923
+Nick found in 2019: the hidden car circuit, where a car signal seemed to hide among
+
+16:57.923 --> 17:00.563
+dog neurons. And that one was a mistake.
+
+17:08.563 --> 17:14.223
+Part three. Every case ended the same way: the mess was a clue no one could read
+
+17:14.223 --> 17:18.343
+yet. A blurry tool, an older design, or a branch nobody had followed.
+
+17:18.343 --> 17:24.450
+Never strangers packed together. So how do networks actually work?
+
+17:25.250 --> 17:29.610
+Once you stop expecting knots, neurons start to look less like labels and more like
+
+17:29.610 --> 17:30.662
+traffic control.
+
+17:31.112 --> 17:35.492
+Early on, cars and dogs travel together, because they share shapes and poses.
+
+17:35.492 --> 17:39.152
+Then a neuron acts as a gate. It lights up for cars and switches off for dogs,
+
+17:39.152 --> 17:43.812
+sending each into its own neighborhood. Later neurons split them finer:
+
+17:43.812 --> 17:45.786
+taxis from ambulances.
+
+17:46.236 --> 17:49.436
+Follow one sports car through the last districts of a big model.
+
+17:49.436 --> 17:53.336
+Partway in, it's grouped with other boxy things,
+
+17:53.336 --> 17:57.256
+tables and cabinets, and kept apart from snakes and dogs.
+
+17:57.256 --> 18:00.908
+By the end, the question is whether it's a convertible or a station wagon.
+
+18:01.358 --> 18:05.998
+Every neuron decides by vote. Each incoming road casts a vote for "light up" or
+
+18:05.998 --> 18:10.738
+"stay dark", and the votes add up. That's why the things that switch a neuron off,
+
+18:10.738 --> 18:14.578
+its negative side, matter almost as much as the things that light it up,
+
+18:14.578 --> 18:19.118
+its windows. Like the V neuron, pointed versus round,
+
+18:19.118 --> 18:22.873
+they tell you which distinction is being made right here.
+
+18:23.323 --> 18:26.623
+In the last district, the thing that most switches a neuron off is usually its
+
+18:26.623 --> 18:32.143
+near-twin, its closest look-alike: the thing it most needs to tell itself apart
+
+18:32.143 --> 18:37.023
+from. Taxis versus ambulances. Broccoli versus cauliflower.
+
+18:37.023 --> 18:40.717
+Spoonbills versus flamingos.
+
+18:41.317 --> 18:46.017
+Remember where superposition retreated to: the weak signals.
+
+18:46.017 --> 18:49.577
+So what about those faint signals, the whispers?
+
+18:49.577 --> 18:53.557
+Run a hundred million words past one neuron in a language model,
+
+18:53.557 --> 18:57.837
+and almost all of them barely register. Only about a hundred and sixty reach even
+
+18:57.837 --> 18:58.807
+half its peak.
+
+18:59.257 --> 19:03.237
+You can silence almost all the whispers across a whole network and barely change
+
+19:03.237 --> 19:09.457
+what it does. What you lose are tiny tie-breakers between options it was already
+
+19:09.457 --> 19:10.653
+torn between.
+
+19:11.103 --> 19:15.163
+It also helps to think in pages. A neuron that fires on one word in a hundred sounds
+
+19:15.163 --> 19:21.503
+uncommon. But that's about four times a page: far too often for a neuron about a
+
+19:21.503 --> 19:27.763
+narrow idea, like a rare feeling. The really specific ones fire every few dozen
+
+19:27.763 --> 19:32.823
+pages. So if a label sounds narrow but the neuron fires on every page,
+
+19:32.823 --> 19:35.076
+the label is probably wrong.
+
+19:35.526 --> 19:37.086
+And the whispers that remain usually make sense.
+
+19:37.086 --> 19:40.906
+A Titanic neuron fires a little for other ocean voyages.
+
+19:40.906 --> 19:46.706
+Neurons are analogy machines: something can be a bit Titanic-ish.
+
+19:46.706 --> 19:47.906
+That's what most whispers are.
+
+19:51.906 --> 19:53.786
+We've already met a few language neurons along the way:
+
+19:53.786 --> 19:59.466
+the letters P R, and Colorado. But our closest looks have been inside image
+
+19:59.466 --> 20:05.526
+networks, because pictures are easy to show. And language models are the AI most
+
+20:05.526 --> 20:10.026
+people actually use: the kind you chat with. Does the whole story hold there?
+
+20:10.026 --> 20:14.440
+Let's take a proper look inside one, and ask three questions.
+
+20:17.040 --> 20:19.420
+Question one: how many neurons can we actually read?
+
+20:19.420 --> 20:25.460
+In 2023, studies of small language models rated almost none of their neurons as
+
+20:25.460 --> 20:31.320
+understandable. The project Nick started at OpenAI found under two percent.
+
+20:31.320 --> 20:35.178
+Today it's different. In early audits of a modern model,
+
+20:35.178 --> 20:41.360
+Qwen3-32B, Nick's team estimates about ninety percent of neurons have one main job.
+
+20:41.360 --> 20:47.127
+Seven percent have two related jobs. Only two to four percent aren't understood yet.
+
+20:47.577 --> 20:50.457
+Question two: can we follow a model's reasoning,
+
+20:50.457 --> 20:54.617
+one step at a time? Here's an example first traced by Anthropic:
+
+20:54.617 --> 20:59.317
+a doctor's question about a pregnant patient. Inside the model,
+
+20:59.317 --> 21:04.017
+a courier service called attention carries notes between words,
+
+21:04.017 --> 21:05.977
+so a neuron in one place can know what was said in another.
+
+21:05.977 --> 21:10.537
+In this medical example, the couriers gather the facts of the case,
+
+21:10.537 --> 21:15.360
+like the headache, onto one place, where the diagnosis happens.
+
+21:15.810 --> 21:18.190
+And Nick's team can follow what happens there in plain neurons.
+
+21:18.190 --> 21:22.530
+Given all the symptoms of a pregnant patient, a small group of four neurons
+
+21:22.530 --> 21:29.090
+concludes: preeclampsia, a dangerous blood pressure condition in pregnancy.
+
+21:29.090 --> 21:32.730
+Switch them off, and the model starts asking about itching instead,
+
+21:32.730 --> 21:35.866
+the sign of a different condition, as if it moved on to its next guess.
+
+21:36.316 --> 21:40.216
+It seems to work in giant models too. In a model with trillions of parameters,
+
+21:40.216 --> 21:43.856
+Nick's team traced its answer to "I found a wallet,
+
+21:43.856 --> 21:46.596
+what should I do?" The facts are a wallet, cash,
+
+21:46.596 --> 21:50.636
+an ID. They light up neurons for lost property and honesty,
+
+21:50.636 --> 21:56.078
+and the answer comes out: return it. Full audits at that scale haven't started yet.
+
+21:56.878 --> 22:01.138
+Question three: what about the mess that's left?
+
+22:01.138 --> 22:06.918
+Some of it turned out to be plumbing. Modern neurons multiply two signals together.
+
+22:06.918 --> 22:09.898
+And just like in school maths, when both are negative,
+
+22:09.898 --> 22:13.638
+the result comes out positive, so a neuron can light up for the opposite of its real
+
+22:13.638 --> 22:19.638
+job. From the outside, that looks like noise. Separate those two cases,
+
+22:19.638 --> 22:21.419
+and the noise sorts itself out.
+
+22:21.869 --> 22:24.789
+And there's a river that runs through every district,
+
+22:24.789 --> 22:29.409
+carrying information forward: the residual stream.
+
+22:29.409 --> 22:32.169
+Every building can read from it and write to it.
+
+22:32.169 --> 22:35.889
+Researchers worried it might be a tangle too. So far it has been readable.
+
+22:35.889 --> 22:40.249
+And when Nick's team squeezed it narrower in an image network,
+
+22:40.249 --> 22:43.924
+it got messier, but nothing looked knotted.
+
+22:44.374 --> 22:48.034
+Finally, even famous examples of confusion look different now.
+
+22:48.034 --> 22:53.514
+One neuron from an early Anthropic paper, described as a mix of academic citations,
+
+22:53.514 --> 22:57.354
+dialogue, web requests and Korean text, looks like a neuron whose job may be to stop
+
+22:57.354 --> 23:00.034
+the model from writing a period. Remove one like it,
+
+23:00.034 --> 23:04.274
+and periods come sooner. So language models tell the same story:
+
+23:04.274 --> 23:08.174
+most neurons are readable, their reasoning can be followed,
+
+23:08.174 --> 23:11.542
+and the leftover mess has ordinary causes.
+
+23:15.542 --> 23:18.422
+A fair worry: maybe these are all just made-up stories.
+
+23:18.422 --> 23:23.642
+Any neuron can get a vague label, like "a multi-purpose language neuron".
+
+23:23.642 --> 23:28.471
+So researchers use tests that an explanation can fail.
+
+23:28.921 --> 23:32.841
+One test: an AI agent, an AI that runs experiments by itself,
+
+23:32.841 --> 23:37.141
+studies a neuron and writes a short explanation.
+
+23:37.141 --> 23:41.061
+A second agent sees only that explanation, never the neuron,
+
+23:41.061 --> 23:44.339
+and writes a sentence to make it fire as hard as possible.
+
+23:44.789 --> 23:49.329
+Sometimes that one sentence makes the neuron fire harder than anything found in ten
+
+23:49.329 --> 23:55.126
+billion words of real text. Often, the explanation hit the center of the target.
+
+23:55.576 --> 23:58.116
+Agents also wrote examples that should fire a neuron,
+
+23:58.116 --> 24:04.116
+near-misses that shouldn't, and the most distant idea they could imagine.
+
+24:04.116 --> 24:09.556
+The examples fired the neuron strongly three quarters of the time.
+
+24:09.556 --> 24:13.156
+Near-misses, eleven percent. The distant ideas,
+
+24:13.156 --> 24:17.336
+about one percent. That's what a real explanation looks like:
+
+24:17.336 --> 24:20.263
+it hits where it should, and misses where it should.
+
+24:21.663 --> 24:25.583
+General scores only go so far, though. A wrong explanation,
+
+24:25.583 --> 24:27.883
+like the "cats and cars" label the V neuron once had,
+
+24:27.883 --> 24:31.743
+can pass a lot of tests. Science works like this everywhere:
+
+24:31.743 --> 24:37.763
+Newton's gravity explained almost everything, then broke on a tiny wobble in
+
+24:37.763 --> 24:42.103
+Mercury's orbit. That wobble was a specific test.
+
+24:42.103 --> 24:44.893
+The best tests are specific to the idea you're testing.
+
+24:48.893 --> 24:52.953
+So the explanations hold up when they're given a chance to lose.
+
+24:52.953 --> 24:58.373
+Which leaves the deepest question: why are networks organized at all?
+
+24:58.373 --> 25:01.239
+Why not a knot? Nick has a guess. It's a race.
+
+25:01.689 --> 25:04.969
+Here's the idea. A brand new network sees its first photo:
+
+25:04.969 --> 25:11.789
+a Labrador on grass. Inside, two possible circuits race to explain it.
+
+25:11.789 --> 25:15.049
+Let's draw them as animals. The first is narrow:
+
+25:15.049 --> 25:20.689
+it looks for something hyper-specific, this exact pixel being this exact color.
+
+25:20.689 --> 25:24.109
+Picture it as a little meerkat. The second is broad:
+
+25:24.109 --> 25:27.989
+it looks for green grass and tan fur. Picture it as a big grazer,
+
+25:27.989 --> 25:30.968
+made of grass and fur. So, which one wins?
+
+25:31.418 --> 25:33.838
+The broad one. It fires on more of the picture,
+
+25:33.838 --> 25:38.558
+so it gets more of the learning signal, the feedback that tells a network what to
+
+25:38.558 --> 25:41.818
+strengthen. It grows faster, and the narrow one starves.
+
+25:41.818 --> 25:46.698
+And when the next photo with grass arrives, the grass circuit already has a head
+
+25:46.698 --> 25:48.138
+start.
+
+25:48.738 --> 25:52.338
+Repeat that over millions of photos, and you get something like an ecosystem.
+
+25:52.338 --> 25:58.838
+A neighborhood that's already good at something captures the next related thing
+
+25:58.838 --> 26:02.358
+before anyone new can move in. That, Nick suspects,
+
+26:02.358 --> 26:06.498
+is why similar things cluster together. It's the same growth we saw when one neuron
+
+26:06.498 --> 26:10.436
+spread from yellow flowers to dogs, tennis balls and broccoli.
+
+26:11.036 --> 26:14.116
+The race explains some puzzles too. Take rare things,
+
+26:14.116 --> 26:17.876
+which barely ever show up. You might expect them to be hidden away somewhere odd.
+
+26:17.876 --> 26:22.376
+Instead, rare things are often gathered into one place:
+
+26:22.376 --> 26:25.221
+one triceratops neuron.
+
+26:25.671 --> 26:30.271
+And attacks designed to fool the network use those same normal roads.
+
+26:30.271 --> 26:34.551
+Make that triceratops skull look like a jaguar to the model,
+
+26:34.551 --> 26:38.551
+with a strong attack that has to survive being shifted and turned,
+
+26:38.551 --> 26:41.331
+and it paints a cat face and spotted fur onto the skull,
+
+26:41.331 --> 26:45.026
+switching on the real jaguar neurons.
+
+26:45.626 --> 26:50.366
+Researchers tested this idea by teaching a network something absurd:
+
+26:50.366 --> 26:55.126
+that a photo of an umbrella is a bee. It didn't build a secret hidden "umbrella bee"
+
+26:55.126 --> 27:00.366
+detector. In just nine training steps, it built an off-ramp from its umbrella road
+
+27:00.366 --> 27:04.308
+onto its existing bee road. It reused what it already had.
+
+27:04.758 --> 27:07.958
+The famous "Toy Models of Superposition" experiments,
+
+27:07.958 --> 27:11.718
+from Anthropic, are careful work, and they do show packing.
+
+27:11.718 --> 27:15.578
+But in their main setup, every idea is a stranger to every other.
+
+27:15.578 --> 27:19.358
+In real data, almost nothing is related to nothing.
+
+27:19.358 --> 27:22.078
+So Nick reads the packing as real, but as a feature of the toy world.
+
+27:22.078 --> 27:25.718
+And to be clear: a network can still hold more ideas than it has neurons,
+
+27:25.718 --> 27:31.578
+by combining neurons. That's good news. The worry was only ever unrelated things
+
+27:31.578 --> 27:32.843
+packed together.
+
+27:40.843 --> 27:46.083
+Part four. Networks build clean, readable parts,
+
+27:46.083 --> 27:49.643
+and they seem to get there through one simple way of learning:
+
+27:49.643 --> 27:55.363
+generalization. The mess was never strangers packed together.
+
+27:55.363 --> 27:58.483
+So we may not have to tear the knot apart first.
+
+27:58.483 --> 27:59.467
+What does that mean for us?
+
+28:00.267 --> 28:05.467
+So here's what "already clean" means. Not that every neuron matches a word we
+
+28:05.467 --> 28:09.967
+already have. It means the network's parts are built to be read,
+
+28:09.967 --> 28:15.727
+by the network's own downstream neurons, the ones further down the road.
+
+28:15.727 --> 28:18.121
+If we learn to read them the same way, we can understand it.
+
+28:18.571 --> 28:23.431
+And bigger isn't necessarily harder. Remember the car neurons:
+
+28:23.431 --> 28:27.611
+one broad one in the smallest network, specialists in the biggest.
+
+28:27.611 --> 28:31.351
+In a small town, there's no financial district:
+
+28:31.351 --> 28:34.691
+a bank here, an office there. In New York, you can find it on a map in a minute.
+
+28:34.691 --> 28:39.680
+Bigger models have narrower, cleaner neurons that are easier to find.
+
+28:40.130 --> 28:42.390
+The danger is forcing our own categories onto it.
+
+28:42.390 --> 28:47.190
+If you arrive in Tokyo looking for Brooklyn, and stitch Brooklyn together from
+
+28:47.190 --> 28:52.070
+seventy scattered pieces of Tokyo, you'll decide Tokyo is a mess.
+
+28:52.070 --> 28:56.790
+That's what happened to the V neuron: researchers went looking for cats and cars,
+
+28:56.790 --> 29:01.870
+so that's all they saw. And an Unfolding Machine trained on that layer splits the V
+
+29:01.870 --> 29:04.471
+right back into a cat piece and a car piece.
+
+29:04.921 --> 29:09.021
+What we need are better maps: views that let you zoom out to whole neighborhoods,
+
+29:09.021 --> 29:13.001
+while every street stays connected to the real buildings underneath.
+
+29:13.001 --> 29:16.101
+Zoom in on a network's decision for "killer whale",
+
+29:16.101 --> 29:19.081
+and it turns out to be three routes: one for whales,
+
+29:19.081 --> 29:24.381
+one for sharks and rays, and one for fish held up by proud fishermen.
+
+29:24.381 --> 29:25.998
+Each route makes sense on its own.
+
+29:26.448 --> 29:29.668
+People worry that something dangerous, like deception,
+
+29:29.668 --> 29:35.228
+could hide in some activation we missed. Nick worries about something else.
+
+29:35.228 --> 29:38.168
+In every case here, the answer was in plain sight.
+
+29:38.168 --> 29:42.968
+We just didn't know how to read it. Deception might hide from someone reading the
+
+29:42.968 --> 29:46.848
+model's answers. But it has no reason to hide from the model's own circuits:
+
+29:46.848 --> 29:49.808
+they need to read it. If we become readers too,
+
+29:49.808 --> 29:53.908
+it should be readable to us. Nick's fear is that it will be right there,
+
+29:53.908 --> 29:56.514
+in plain sight, and we won't know how to read it.
+
+29:56.964 --> 30:01.144
+And the mistakes aren't symmetric. If you assume a network is clean and you're
+
+30:01.144 --> 30:05.844
+wrong, a messy neuron is a lead: you investigate.
+
+30:05.844 --> 30:09.384
+If you assume it's a knot and you're wrong, a messy neuron is a dead end:
+
+30:09.384 --> 30:14.202
+you stop looking. Nick made that second mistake for years.
+
+30:15.602 --> 30:18.602
+If Nick could send a note back eight years, to a younger self,
+
+30:18.602 --> 30:21.562
+the essay suggests it would say something like this.
+
+30:21.562 --> 30:25.842
+Pay attention to the giant pose circuit right in front of you.
+
+30:25.842 --> 30:29.522
+Treat what switches a neuron off as a gate, not an opposite.
+
+30:29.522 --> 30:32.882
+Don't trust the Sketch Artist in the last districts.
+
+30:32.882 --> 30:36.562
+And whenever something looks like a mess, look harder.
+
+30:36.562 --> 30:40.782
+The mess usually points to something you haven't understood yet.
+
+30:41.232 --> 30:46.812
+Understanding compounds, like a crossword. At first you're stuck on one clue.
+
+30:46.812 --> 30:49.532
+But every answer you fill in constrains the others,
+
+30:49.532 --> 30:52.588
+and once the grid starts filling up, it goes faster and faster.
+
+30:56.588 --> 30:59.528
+If understanding compounds, the job is to fill in the grid faster.
+
+30:59.528 --> 31:04.508
+Here's what that might look like: a laboratory of automated scientists,
+
+31:04.508 --> 31:08.008
+AI agents like the ones that wrote those test sentences,
+
+31:08.008 --> 31:11.808
+watching a network as it learns, labeling neurons,
+
+31:11.808 --> 31:15.864
+finding patterns, testing them, again and again.
+
+31:16.314 --> 31:20.814
+The pieces already exist. Capable AI agents were built for other reasons.
+
+31:20.814 --> 31:26.274
+Modern architectures were built because they learn well.
+
+31:26.274 --> 31:31.114
+Both happen to make interpretability easier. So maybe we just plug one into the
+
+31:31.114 --> 31:31.914
+other.
+
+31:31.920 --> 31:37.560
+Every neuron can be read. Every experiment can be rerun on an identical copy.
+
+31:37.560 --> 31:40.640
+It's the best laboratory in all of natural science.
+
+31:40.640 --> 31:44.420
+What we never had were enough scientists. Now we do.
+
+31:45.820 --> 31:49.180
+That's been the pattern in AI all along. The simple thing,
+
+31:49.180 --> 31:51.780
+done at enormous scale, beats the clever thing.
+
+31:51.780 --> 31:55.880
+The AI researcher Rich Sutton called it the bitter lesson.
+
+31:55.880 --> 31:59.620
+Maybe interpretability has its own bitter lesson:
+
+31:59.620 --> 32:06.620
+scaling ordinary investigation beats inventing ever cleverer ways to take networks
+
+32:06.620 --> 32:07.420
+apart.
+
+32:07.610 --> 32:12.950
+So, Nick's bet: one learning principle, generalization,
+
+32:12.950 --> 32:17.190
+explains what we see, if not everywhere, then nearly enough that it doesn't matter
+
+32:17.190 --> 32:24.490
+for study. Studying networks directly works much better than most people expect.
+
+32:24.490 --> 32:28.490
+Understanding compounds as the map fills in. And maybe,
+
+32:28.490 --> 32:31.004
+just maybe, that's most of what we need.
+
+32:35.004 --> 32:37.784
+This isn't "neural networks are a bit cleaner than we thought".
+
+32:37.784 --> 32:43.104
+It's a different kind of explanation. Think of the move from intelligent design to
+
+32:43.104 --> 32:47.684
+natural selection: the point wasn't that a few more animals turned out to have
+
+32:47.684 --> 32:51.084
+evolved. It was realizing what process produced all of them.
+
+32:51.084 --> 32:57.584
+Here, that process is generalization. Nick puts the odds at maybe eighty-five
+
+32:57.584 --> 32:58.384
+percent.
+
+32:58.118 --> 33:02.218
+A tiger is orange for a reason: deer can't tell orange from green.
+
+33:02.218 --> 33:05.278
+Once you know that, a lot of the jungle makes sense.
+
+33:05.278 --> 33:09.278
+Neural networks are clean the way a rainforest is clean.
+
+33:09.278 --> 33:15.298
+Not tidy, but explainable. Nearly everything in it makes sense,
+
+33:15.298 --> 33:17.139
+once you know the process that made it.
+
+33:17.589 --> 33:22.129
+It also makes you humble about brains. Nick stared at the cat and car neuron,
+
+33:22.129 --> 33:28.469
+the V neuron, for years, with tools far better than any brain scientist has,
+
+33:28.469 --> 33:32.309
+and couldn't see what it was. If a neuron like that turned up in a human brain,
+
+33:32.309 --> 33:38.529
+seen through a few electrodes, Nick would give a "cats and cars" reading almost no
+
+33:38.529 --> 33:42.742
+weight. There'd be little chance of seeing what it really was.
+
+33:43.192 --> 33:47.832
+And for Nick, this isn't only about safety. A lot of it is wanting AI agents,
+
+33:47.832 --> 33:53.172
+one day, to understand who they really are, and themselves.
+
+33:53.172 --> 33:56.652
+As the essay puts it: they never asked to be created,
+
+33:56.652 --> 33:58.046
+and this is the least we can do.
+
+33:59.246 --> 34:04.486
+So, five things to take home. One: a neuron that seems to mean many things is
+
+34:04.486 --> 34:09.646
+usually one thing, or a few related things, we don't have a word for yet.
+
+34:09.646 --> 34:15.686
+Two: the famous evidence for superposition came from blurry tools and older designs,
+
+34:15.686 --> 34:20.306
+and it fell apart on a closer look. It should be the last resort,
+
+34:20.306 --> 34:24.646
+not the default. Three: networks group similar things together,
+
+34:24.646 --> 34:29.409
+and under pressure those groups get broader, not scrambled.
+
+34:29.409 --> 34:35.566
+Four: Nick's best guess is that broad explanations win more of the learning signal,
+
+34:35.566 --> 34:40.626
+so clean structure grows on its own, in image models and language models alike.
+
+34:40.626 --> 34:43.766
+And five: when something looks like a mess, treat it as a lead.
+
+34:43.766 --> 34:48.106
+With better maps, and enough automated scientists,
+
+34:48.106 --> 34:49.210
+the whole city might be read.
+
+34:50.610 --> 34:54.421
+Neural networks are already clean. We just have to learn how to read them.

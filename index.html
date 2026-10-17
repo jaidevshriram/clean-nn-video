@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Neural Networks Are Already Clean — the video</title>
+<meta name="description" content="A 35-minute animated guide to Nick Cammarata's essay “Neural Networks Are Already Clean”.">
+<meta property="og:title" content="Neural Networks Are Already Clean — the video">
+<meta property="og:description" content="A 35-minute animated guide to Nick Cammarata's essay.">
+<meta property="og:image" content="https://jaidevshriram.github.io/clean-nn-video/poster.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  html, body { margin: 0; background: #0d0c10; color: #8d8a96; }
+  body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+         font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; box-sizing: border-box;
+         padding: 24px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); }
+  main { width: min(100%, 1280px, calc((100vh - 120px) * 16 / 9)); }
+  video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; border-radius: 6px; }
+  p { margin: 14px 2px 0; display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; }
+  b { color: #e9e6ef; font-weight: 500; }
+  a { color: inherit; text-decoration: none; border-bottom: 1px solid #3a3742; }
+  a:hover { color: #e9e6ef; }
+</style>
+</head>
+<body>
+<main>
+  <video id="v" controls playsinline preload="metadata" poster="poster.jpg">
+    <track kind="subtitles" src="film/subtitles.vtt" srclang="en" label="English">
+  </video>
+  <p>
+    <span><b>Neural Networks Are Already Clean</b> · an animated guide to
+      <a href="https://already-clean.goodfire.com/">Nick Cammarata's essay</a></span>
+    <a href="https://github.com/jaidevshriram/clean-nn-video">source</a>
+  </p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script>
+  const v = document.getElementById('v'), src = 'film/film.m3u8';
+  if (v.canPlayType('application/vnd.apple.mpegurl')) v.src = src;
+  else if (window.Hls && Hls.isSupported()) { const h = new Hls(); h.loadSource(src); h.attachMedia(v); }
+</script>
+</body>
+</html>
