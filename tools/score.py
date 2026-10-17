@@ -127,7 +127,7 @@ S = {
  'ch02': dict(bpm=126, root=55, mode='maj', prog=[0, 0, 4, 4, 0, 3, 4, 0], layers=['ragtime', 'oompah', 'crackle'], lofi=True),
  'ch03': dict(bpm=78, root=50, mode='dor', prog=[0, 3, 0, 4], swing=.62, layers=['walk', 'brush', 'jazz_chords', 'sax']),
  'ch04': dict(bpm=112, root=50, mode='hmin', prog=[0, 0, 5, 4], swing=.6, layers=['spy_bass', 'vibes_comp', 'brush', 'flute']),   # cool 60s spy jazz: the minor-major 7th
- 'ch05': dict(bpm=88, root=50, mode='min', prog=[0, 5, 3, 4], layers=['harpsi_arp', 'strings', 'bass_roots'], brighten=True),
+ 'ch05': dict(bpm=72, root=50, mode='min', prog=[0, 5, 3, 4], layers=['piano_soft', 'warm', 'bass_soft'], brighten=True, gain=.6),   # foggy and calm: slow soft piano over a pad
  'ch06': dict(bpm=92, root=62, mode='maj', prog=[0, 3, 5, 4], layers=['pizz', 'flute', 'warm']),
  'ch07': dict(bpm=144, root=58, mode='maj', prog=[0, 5, 1, 4], swing=.6, layers=['brass_stabs', 'walk', 'kit_swing', 'piano_comp']),
  'ch08': dict(bpm=60, root=45, mode='min', prog=[0, 0, 5, 5], layers=['drone', 'heartbeat', 'eerie']),
@@ -232,6 +232,10 @@ def render_cue(cid, t0, t1, seed):
             elif lay == 'ep_arp':
                 pat = [0, 1, 2, 1, 3, 2, 1, 2]
                 for k in range(8): place(out, I_ep(mtof(C[pat[k]] + 12), bar / 8, .42 if k % 2 == 0 else .3, r), eighth(b, k))
+            elif lay == 'piano_soft':    # a slow broken chord in quarters, quiet, letting each note ring
+                for q, ci in enumerate([0, 2, 1, 2]): place(out, I_piano(mtof(C[ci] + 12), beat * 1.8, .26 if q else .32, r), bt + q * beat)
+            elif lay == 'bass_soft':
+                place(out, I_bass(mtof(C[0] - 24), bar * .9, .32, r), bt)
             elif lay == 'brass_hits':
                 if b % 4 == 3:
                     for m in C[:3]: place(out, I_brass(mtof(m), beat * .8, .5, r), bt + 3 * beat)
@@ -274,7 +278,7 @@ for i, c in enumerate(CH):
     if args.only and c['id'] not in args.only.split(','): continue
     a, b = BOUNDS[i], BOUNDS[i + 1]
     x = render_cue(c['id'], a - 1.0, b + 1.6, 100 + i)
-    rms = np.sqrt(np.mean(x[:int((b - a) * SR)] ** 2)) + 1e-9; x = x / rms
+    rms = np.sqrt(np.mean(x[:int((b - a) * SR)] ** 2)) + 1e-9; x = x / rms * S[c['id']].get('gain', 1.0)   # per-world level
     tt = np.arange(len(x)) / SR + a - 1.0
     fade = np.clip((tt - (a - 1.0)) / 1.2, 0, 1) * np.clip((b + 1.6 - tt) / 1.4, 0, 1)
     place(music, x * fade, a - 1.0)

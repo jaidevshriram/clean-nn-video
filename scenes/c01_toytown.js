@@ -256,12 +256,84 @@
     fxTiltShift(t < c0 ? 300 : 260, t < c0 ? 800 : 860, 9);
   }
 
+
+  // ---------- the town cinema: projector + leader ----------
+  // a film leader on the sheet: the classic circle, cross, sweeping hand and big numbers, scratched and flickering;
+  // it counts 3, 2, 1 across the last line so the next world can start on the reel
+  function leader(t, S, beam, flick, t0, t1) {
+    const X0 = Math.min(S[0][0], S[1][0]), Y0 = Math.min(S[0][1], S[2][1]), w = Math.abs(S[1][0] - S[0][0]), h = Math.abs(S[2][1] - S[0][1]), cx = X0 + w / 2, cy = Y0 + h / 2, R = Math.min(w, h) * .36;
+    ctx.save(); ctx.beginPath(); ctx.rect(X0, Y0, w, h); ctx.clip();
+    ctx.globalAlpha = beam; ctx.fillStyle = `rgba(250,246,232,${.55 + .35 * flick})`; ctx.fillRect(X0, Y0, w, h);
+    const k = clamp((t - t0) / Math.max(.6, t1 - t0)), n = 3 - Math.min(2, Math.floor(k * 3)), sweep = (k * 3) % 1;
+    ctx.strokeStyle = '#5A5650'; ctx.lineWidth = Math.max(2, w * .012);
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU * .999); ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, R * .78, 0, TAU * .999); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(X0, cy); ctx.lineTo(X0 + w, cy); ctx.moveTo(cx, Y0); ctx.lineTo(cx, Y0 + h); ctx.stroke();
+    ctx.fillStyle = 'rgba(70,66,60,.32)'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R * 1.9, -Math.PI / 2, -Math.PI / 2 + sweep * TAU); ctx.closePath(); ctx.fill();
+    if (t > t0 - .2) { ctx.globalAlpha = beam * clamp((t - t0 + .2) / .3); ctx.fillStyle = '#2E2C28'; ctx.font = `900 ${Math.round(R * 1.15)}px serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(String(n), cx, cy + R * .05); }
+    ctx.globalAlpha = beam * .5; ctx.strokeStyle = '#3A3630'; ctx.lineWidth = 1.2;   // scratches and dust on the film
+    for (let i = 0; i < 4; i++) { const sx = X0 + w * hash(Math.floor(t * 12) * 7 + i), len = h * (.3 + .6 * hash(i + Math.floor(t * 12))); ctx.beginPath(); ctx.moveTo(sx, Y0 + h * hash(i * 3 + Math.floor(t * 12))); ctx.lineTo(sx + 2, Y0 + h * hash(i * 3 + Math.floor(t * 12)) + len); ctx.stroke(); }
+    for (let i = 0; i < 6; i++) dot(X0 + w * hash(Math.floor(t * 24) + i * 11), Y0 + h * hash(Math.floor(t * 24) * 3 + i), 1.5 + 2 * hash(i), '#3A3630', .6 * beam);
+    const vg = ctx.createRadialGradient(cx, cy, R * .4, cx, cy, Math.max(w, h) * .75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(60,50,30,.35)'); ctx.globalAlpha = beam; ctx.fillStyle = vg; ctx.fillRect(X0, Y0, w, h);
+    ctx.restore();
+  }
+  // a toy film projector seen from behind on a wooden crate at world (x, 0, z); the lens points down the square at the
+  // sheet (screen quad at depth SZ). Reels spin and the light cone, with drifting dust, lands exactly on the sheet.
+  function projector(t, x, z, beam, flick, SZ) {
+    const [bx, by, k] = P(x, 0, z), u = k;   // u: pixels per world unit at the projector
+    const lens = P(x, 78, z + 40), S = [P(-160, 262, SZ), P(160, 262, SZ), P(160, 70, SZ), P(-160, 70, SZ)];
+    // the light cone first, so the projector body sits in front of its own beam
+    if (beam > 0) {
+      ctx.save(); ctx.globalCompositeOperation = 'lighter';
+      const g = ctx.createLinearGradient(lens[0], lens[1], (S[0][0] + S[1][0]) / 2, (S[0][1] + S[2][1]) / 2);
+      g.addColorStop(0, `rgba(255,244,210,${.85 * beam * flick})`); g.addColorStop(1, `rgba(255,244,210,${.34 * beam * flick})`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(lens[0], lens[1]); ctx.lineTo(S[0][0], S[0][1]); ctx.lineTo(S[1][0], S[1][1]); ctx.lineTo(S[2][0], S[2][1]); ctx.lineTo(S[3][0], S[3][1]); ctx.closePath(); ctx.fill();
+      for (let i = 0; i < 26; i++) {   // dust motes drifting through the beam
+        const f = hash(i * 1.7), q = frac(t * (.05 + .05 * hash(i)) + hash(i * 3.1)), tx = lerp(S[3][0], S[2][0], f), ty = lerp(S[3][1], S[0][1], hash(i * 5.3));
+        dot(lerp(lens[0], tx, q), lerp(lens[1], ty, q), (1 + 1.8 * hash(i * 9)) * Math.max(.6, k * .9), '#FFF6DA', .5 * beam * Math.sin(q * Math.PI));
+      }
+      ctx.restore();
+      glow(lens[0], lens[1], 40 * k, '#FFF2C8', .9 * beam * flick);
+    }
+    // crate: two visible faces with planks and a stencilled mark
+    const cw = 96 * u, ch = 44 * u, cd = 26 * u, x0 = bx - cw / 2, y0 = by - ch;
+    flat([[x0, by], [x0 + cw, by], [x0 + cw, y0], [x0, y0]], '#A0764C', { line: '#4A3020', lw: Math.max(1.5, 2.2 * u) });
+    flat([[x0, y0], [x0 + cw, y0], [x0 + cw - cd * .5, y0 - cd * .55], [x0 + cd * .5, y0 - cd * .55]], '#B98A5A', { line: '#4A3020', lw: Math.max(1.5, 2.2 * u) });
+    ctx.save(); ctx.strokeStyle = 'rgba(74,48,32,.55)'; ctx.lineWidth = Math.max(1, 1.4 * u);
+    for (let i = 1; i < 3; i++) { ctx.beginPath(); ctx.moveTo(x0, y0 + ch * i / 3); ctx.lineTo(x0 + cw, y0 + ch * i / 3); ctx.stroke(); }
+    ctx.restore();
+    // the body: a rounded steel box seen from behind, with a vent grille, the crank and the lens barrel poking forward
+    const pw = 64 * u, ph = 40 * u, px0 = bx - pw / 2, py1 = y0 - cd * .3, py0 = py1 - ph;
+    flat(rrPts(px0, py0, pw, ph, 7 * u), '#3E4A5E', { line: '#151A24', lw: Math.max(1.5, 2.4 * u) });
+    flat(rrPts(px0 + 6 * u, py0 + 6 * u, pw - 12 * u, 9 * u, 3 * u), '#56647C');
+    ctx.save(); ctx.strokeStyle = '#1E2533'; ctx.lineWidth = Math.max(1, 1.6 * u);
+    for (let i = 0; i < 5; i++) { const gy = py0 + 20 * u + i * 3.6 * u; ctx.beginPath(); ctx.moveTo(px0 + 14 * u, gy); ctx.lineTo(px0 + pw - 14 * u, gy); ctx.stroke(); }
+    ctx.restore();
+    flat(rrPts(bx - 9 * u, py0 - 6 * u, 18 * u, 8 * u, 3 * u), '#2A3242', { line: '#151A24', lw: Math.max(1, 1.8 * u) });   // the barrel, seen end-on past the top
+    // the crank on the right side, turning while the film runs
+    const ca = t * (beam > 0 ? 7 : 0), hx = px0 + pw + 4 * u, hy = py0 + ph * .55;
+    ctx.save(); ctx.strokeStyle = '#151A24'; ctx.lineCap = 'round'; ctx.lineWidth = Math.max(2, 3 * u); ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx + Math.cos(ca) * 11 * u, hy + Math.sin(ca) * 11 * u); ctx.stroke(); ctx.restore();
+    dot(hx + Math.cos(ca) * 11 * u, hy + Math.sin(ca) * 11 * u, 3.4 * u, '#C9A45A'); dot(hx, hy, 2.6 * u, '#56647C');
+    // two spoked reels on arms, the film looping down into the body; they spin while the beam is on
+    const spin = t * (beam > 0 ? 5 : 0);
+    [[-17, 1.06], [19, .92]].forEach(([rx, sc], i) => {
+      const cx = bx + rx * u, cy = py0 - 24 * u * sc, r = 17 * u * sc;
+      ctx.save(); ctx.strokeStyle = '#151A24'; ctx.lineWidth = Math.max(1.5, 2.2 * u); ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(bx + rx * .4 * u, py0); ctx.stroke(); ctx.restore();
+      flat(ellPts(cx, cy, r, r, 28), '#2A303C', { line: '#11151C', lw: Math.max(1.5, 2.2 * u) });
+      flat(ellPts(cx, cy, r * .82, r * .82, 24), '#4A3A2E');   // the wound film
+      ctx.save(); ctx.strokeStyle = '#8A93A6'; ctx.lineWidth = Math.max(1.5, 2.4 * u);
+      for (let s = 0; s < 3; s++) { const a = spin * (i ? 1.2 : 1) + s * TAU / 3; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(a) * r * .8, cy + Math.sin(a) * r * .8); ctx.stroke(); }
+      ctx.restore(); dot(cx, cy, 2.6 * u, '#C9A45A');
+    });
+    ctx.save(); ctx.strokeStyle = '#2A2018'; ctx.lineWidth = Math.max(1, 1.6 * u);   // the film loop between the reels
+    ctx.beginPath(); ctx.moveTo(bx - 17 * u - 15 * u, py0 - 24 * u); ctx.quadraticCurveTo(bx - 30 * u, py0 + 6 * u, bx - 8 * u, py0 + 4 * u); ctx.moveTo(bx + 19 * u + 13 * u, py0 - 22 * u); ctx.quadraticCurveTo(bx + 30 * u, py0 + 6 * u, bx + 8 * u, py0 + 4 * u); ctx.stroke(); ctx.restore();
+  }
+
   // ---------- shot 3 · the hope: look inside, read the parts, understand the machine; then the town cinema ----------
   function hope(t, lt, dur) {
     const a = cs('nr_hope'), tm = wt('nr_hope', 'mechanistic'), tlk = wt('nr_hope', 'Look'), trd = wt('nr_hope', 'Read'), tun = wt('nr_hope', 'Understand'), tnw = wt('nr_hope', 'network'), tcl = wt('nr_hope', 'clean'), e = ce('nr_hope'), end = chapStart('ch02');
     // projector in the square at (0, 380); bedsheet screen at (0, ROWZ(2) + 40), 300 wide, bottom at y 70
-    const SZ = ROWZ(2) + 40;
-    camKeys3(t, [[a - .5, -150, 220, 950, 1550, 1150], [tm, 150, 60, 560, 900, 900], [tlk, 280, 60, 520, 480, 560], [trd + .6, 260, 70, 520, 460, 540], [tun + .3, 100, 90, 650, 600, 560], [e + .3, 0, 150, SZ, 760, 480], [end, 0, 166, SZ, 700, 400], [end + 2.5, 0, 166, SZ, 640, 380]]);
+    const SZ = ROWZ(2) + 40, PZ = 640;
+    camKeys3(t, [[a - .5, -150, 220, 950, 1550, 1150], [tm, 150, 60, 560, 900, 900], [tlk, 280, 60, 520, 480, 560], [trd + .6, 260, 70, 520, 460, 540], [tun + .3, 60, 100, 700, 560, 420], [tun + 1.6, 0, 110, SZ, 720, 400], [end + 2.5, 0, 118, SZ, 690, 392]]);
     table(t);
     const beam = seg(t, tun + .6, e + .2), flick = .85 + .15 * hash(Math.floor(t * 24));
     town(t, q => q.feat === 'curveB' ? .3 + .7 * on(t, trd - .2, e + .4) : q.feat ? .25 + .1 * Math.sin(t * 2 + q.x) : 0, { between: r => {
@@ -270,29 +342,30 @@
       for (const sx of [-170, 170]) poly([[sx - 6, 0, SZ], [sx + 6, 0, SZ], [sx + 6, 270, SZ], [sx - 6, 270, SZ]], '#7A5233');
       const S = poly([[-160, 70, SZ], [160, 70, SZ], [160, 262, SZ], [-160, 262, SZ]], mixCol('#F4F1E8', '#FFFFFF', beam * flick), { line: '#B9AF99', lw: 2 });
       for (let i = 0; i < 5; i++) { const xx = lerp(S[0][0], S[1][0], (i + .5) / 5); ctx.save(); ctx.strokeStyle = 'rgba(160,150,130,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(xx, S[2][1]); ctx.quadraticCurveTo(xx + 6 * Math.sin(t + i), (S[0][1] + S[2][1]) / 2, xx, S[0][1]); ctx.stroke(); ctx.restore(); }
-      if (beam > 0) { // flickering projected light and a leader countdown circle, in grey
-        const cx = (S[0][0] + S[1][0]) / 2, cy = (S[0][1] + S[2][1]) / 2, R = (S[1][0] - S[0][0]) * .2;
-        ctx.save(); ctx.globalAlpha = beam * .8; ctx.strokeStyle = '#6A6A6A'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(cx, cy, R, 0, TAU); ctx.moveTo(S[0][0], cy); ctx.lineTo(S[1][0], cy); ctx.moveTo(cx, S[2][1]); ctx.lineTo(cx, S[0][1]); ctx.stroke();
-        ctx.fillStyle = 'rgba(90,90,90,.35)'; ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R * 1.6, -Math.PI / 2, -Math.PI / 2 + frac(t) * TAU); ctx.closePath(); ctx.fill(); ctx.restore();
-        if (t > e) txt(String(clamp(3 - Math.floor((t - e) * 1.6), 1, 3)), cx, cy, R * 1.3, '#4A4A4A', { font: 'serif', weight: '900' });
-      }
+      if (beam > 0) leader(t, S, beam, flick, tcl, end);
     } });
-    // the projector on its crate in the square, and its beam
-    const PZ = 620, [px, py, pk] = P(0, 60, PZ);
-    poly([[-50, 0, PZ - 20], [50, 0, PZ - 20], [50, 40, PZ - 20], [-50, 40, PZ - 20]], '#8C6A48', { line: '#3A2A1A', lw: 2 });
-    poly([[-36, 40, PZ - 10], [36, 40, PZ - 10], [36, 86, PZ - 10], [-36, 86, PZ - 10]], '#4A5268', { line: '#1A1A22', lw: 2 });
-    for (const rx of [-18, 20]) { const [rx_, ry, rk] = P(rx, 104, PZ - 5); dot(rx_, ry, 20 * rk, '#2A2A33'); ctx.save(); ctx.strokeStyle = '#9AA3B5'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(rx_, ry); ctx.lineTo(rx_ + Math.cos(t * 6 + rx) * 17 * rk, ry + Math.sin(t * 6 + rx) * 17 * rk); ctx.stroke(); ctx.restore(); }
-    if (beam > 0) { const A = P(0, 64, PZ - 5), B1 = P(-160, 262, SZ), B2 = P(160, 70, SZ), B3 = P(-160, 70, SZ), B4 = P(160, 262, SZ); ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .28 * beam * flick; ctx.fillStyle = '#FFF2C8'; ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B1[0], B1[1]); ctx.lineTo(B4[0], B4[1]); ctx.lineTo(B2[0], B2[1]); ctx.lineTo(B3[0], B3[1]); ctx.closePath(); ctx.fill(); ctx.restore(); glow(A[0], A[1], 60 * pk, '#FFFFFF', beam); }
+    // the projector: a 1930s film projector on a crate in the square, seen from behind, its lens aimed at the sheet
+    // lights down for the picture: the town dims, except the sheet, so the beam reads
+    if (beam > 0) { const S0 = [P(-160, 262, SZ), P(160, 262, SZ), P(160, 70, SZ), P(-160, 70, SZ)]; ctx.save(); resetMatrix(); ctx.fillStyle = `rgba(18,20,44,${.5 * beam})`; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.moveTo(S0[0][0], S0[0][1]); S0.slice(1).forEach(q => ctx.lineTo(q[0], q[1])); ctx.closePath(); ctx.fill('evenodd'); ctx.restore(); }
+    projector(t, -40, PZ, beam, flick, SZ);
     // Clawd with a magnifier: looks inside a house, reads its windows, then switches the projector on
-    const walk = stroll(t, a, tlk - .3, 240, 330, 1), wx = t < tun ? walk.x : lerp(330, 90, ease(seg(t, tun - .3, tun + .5)));
-    const [cx, cy, ck] = P(wx, 0, t < tun - .3 ? 470 : lerp(470, 600, seg(t, tun - .3, tun + .5)));
+    const walk = stroll(t, a, tlk - .3, 240, 330, 1), wx = t < tun ? walk.x : lerp(330, 62, ease(seg(t, tun - .3, tun + .5)));
+    const [cx, cy, ck] = P(wx, 0, t < tun - .3 ? 470 : lerp(470, 640, seg(t, tun - .3, tun + .5)));
     tourist(cx, cy, 8 * ck, 'safari', { ...emotions(t, [[a - 1, 'excited'], [tlk, 'thinking'], [trd, 'idea'], [tun + .6, 'proud'], [e, 'excited']]), view: t > tun - .3 && t < tun + .5 ? 'side' : 'q', flip: t > tun - .3, walk: (t > a && t < tlk - .3) || (t > tun - .3 && t < tun + .5) ? t * 2.4 : undefined, aR: t < tun ? 1.1 : undefined, armR: t < tun ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#7A5B3E', 'ink', 0); ctx.save(); ctx.strokeStyle = '#C99A45'; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(200,230,255,.35)'; ctx.fill(); ctx.restore(); } : undefined });
     // words
-    const words = [['look inside', tlk, 370], ['read the parts', trd, 812], ['understand the machine', tun, 1435]];
-    words.forEach(([s, ta, x], i) => { title(s, x, 170, 60, '#3A2A1A', seg(t, ta - .2, ta + .6), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tnw - .2, tnw + .3) }); if (i) title('·', i === 1 ? 578 : 1042, 170, 60, '#3A2A1A', seg(t, ta - .3, ta), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tnw - .2, tnw + .3) }); });
+    // the three words, laid out by their measured widths so they never collide, centred as one line
+    const words = [['look inside', tlk], ['read the parts', trd], ['understand the machine', tun]], FS = 54, GAP = 70;
+    ctx.save(); ctx.font = `${FS}px "Permanent Marker"`; const ws = words.map(([w]) => ctx.measureText(w).width * 1.06); ctx.restore();   // measured in the lettering's own face
+    let wx0 = 960 - (ws.reduce((p, q) => p + q, 0) + GAP * 2) / 2;
+    words.forEach(([w, ta], i) => {
+      const cxw = wx0 + ws[i] / 2, fade = 1 - seg(t, tnw - .2, tnw + .3);
+      title(w, cxw, 170, FS, '#3A2A1A', seg(t, ta - .2, ta + .6), { stroke: '#FFF6E2', strokeW: .12, alpha: fade });
+      if (i) title('·', wx0 - GAP / 2, 170, FS, '#3A2A1A', seg(t, ta - .3, ta), { stroke: '#FFF6E2', strokeW: .12, alpha: fade });
+      wx0 += ws[i] + GAP;
+    });
     // the word the whole film is about
     if (t > tcl - .4) title('clean', 960, 200, 150, '#FFF6E2', seg(t, tcl - .3, tcl + .4), { stroke: '#3A2A1A', strokeW: .1, alpha: 1 - seg(t, end - .4, end + .2) });
-    if (t > tnw - .3 && t < tcl + .5) hand('a network you can read like that…', 960, 990, 60, '#3A2A1A', seg(t, tnw - .3, tnw + 1.2) * (1 - seg(t, tcl - .4, tcl)), { stroke: '#FFF6E2', strokeW: .14 });
+    if (t > tnw - .3 && t < tcl + .5) hand('a network you can read like that…', 960, 262, 60, '#3A2A1A', seg(t, tnw - .3, tnw + 1.2) * (1 - seg(t, tcl - .4, tcl)), { stroke: '#FFF6E2', strokeW: .14 });
     if (t < tlk) title('mechanistic interpretability', 960, 170, 80, '#3A2A1A', seg(t, tm - .3, tm + 1.2), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tlk - .6, tlk - .1) });
     if (t > tun + .5 && t < tun + 2) sfx('click!', cx - 60, Math.min(cy - 90, 930), 52, PAL.berry, t - tun - .6, { life: 1.1 });
     fxTiltShift(300, 820, 9);

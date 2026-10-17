@@ -15,6 +15,26 @@
   function spy(x, y, u, hat, o = {}) { flat(ellPts(x, y - 4.6 * u, 8.2 * u, 8.2 * u, 30), CR); tourist(x, y, u, hat, o); }
   // ---------- cut-paper props ----------
   function serif(s, x, y, size, col, o = {}) { txt(s, x, y, size, col, { font: 'serif', weight: o.weight || '900', rot: o.rot, align: o.align }); }
+  // police tape strung between two stakes on the ground: it unspools from the left stake (k 0..1), sags a little,
+  // flutters, and carries DO NOT CROSS spaced along it, each word following the tape's own slope
+  function policeTape(t, k, y0) {
+    const X0 = 70, X1 = 1850, at = u => { const x = lerp(X0, X1, u); return [x, y0 + 16 * (1 - (2 * u - 1) ** 2) + 2.2 * Math.sin(t * 3.1 + u * 9) * clamp(k * 2 - 1)]; };
+    const head = k, N = 90, pts = []; for (let i = 0; i <= N; i++) { const u = head * i / N; pts.push(at(u)); }
+    for (const sx of [X0, X1]) { flat(rectPts(sx - 7, y0 - 30, 14, 92), '#F2E6CC'); flat(rectPts(sx - 10, y0 - 38, 20, 12), GD); }   // the stakes
+    ctx.save(); ctx.lineCap = 'butt'; ctx.lineJoin = 'round';
+    const line = (w, col) => { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.stroke(); };
+    line(46, '#141414'); line(38, '#F2C230'); line(26, '#F7CF3E');
+    ctx.restore();
+    // the words, spaced along the tape with a diamond between them, drawn only on the unspooled part
+    const STEP = 240;
+    for (let x = X0 + 130; x < X1 - 60; x += STEP) {
+      const u = (x - X0) / (X1 - X0); if (u > head - .02) break;
+      const [px, py] = at(u), [qx, qy] = at(u + .004), a = Math.atan2(qy - py, qx - px);
+      ctx.save(); ctx.translate(px, py); ctx.rotate(a); ctx.fillStyle = '#141414'; ctx.font = '900 21px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('DO NOT CROSS', 0, 1);
+      ctx.beginPath(); ctx.moveTo(STEP / 2, -6); ctx.lineTo(STEP / 2 + 6, 0); ctx.lineTo(STEP / 2, 6); ctx.lineTo(STEP / 2 - 6, 0); ctx.closePath(); ctx.fill(); ctx.restore();
+    }
+    if (head < 1) { const [hx, hy] = at(head); flat(ellPts(hx, hy, 16, 24, 16), '#F2C230', { line: '#141414', lw: 3 }); dot(hx, hy, 7, '#141414'); }   // the roll, still unspooling
+  }
   function sans(s, x, y, size, col, o = {}) { txt(s, x, y, size, col, { font: 'sans-serif', weight: o.weight || '900', rot: o.rot, align: o.align }); }
   // a sneaky car (orange, with a fake moustache); s scale; o.col, o.mous (moustache), o.flip
   function car(x, y, s, o = {}) {
@@ -128,8 +148,8 @@
       const kL = seg(kc, .55, .9) * (1 - seg(t, tm - .3, tm + .1));
       if (kL > 0) { ctx.globalAlpha = kL; for (const x of [Lx, Rx]) serif('car', x, Y - 150, 48, BK); serif('dog neurons', 960, Y + 190, 52, CR, { weight: '400' }); ctx.globalAlpha = 1; }
       // the police tape: it's a crime scene
-      const tk = seg(t, tc + .6, tc + 1.6);
-      if (tk > 0) { push(); translate(960, Y + 110); rotate(-.03); const w = 1700 * tk; flat(rectPts(-850, -22, w, 44), GD); for (let i = 0; i < Math.floor(w / 160); i++) sans('DO NOT CROSS', -770 + i * 160 + 70, 2, 20, BK); pop(); }
+      const tk = easeOut(seg(t, tc + .6, tc + 1.8));
+      if (tk > 0) policeTape(t, tk, Y + 104);
     }
     // 2019 slams in
     const k19 = popk(t, t19 - .25, .35) * (1 - seg(t, tm + .4, tm + .9));

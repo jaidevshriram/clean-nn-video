@@ -144,8 +144,8 @@ function hatOn(kind, x, y, s) {
   if (kind === 'helmet') { fillS('#E9E4D6', () => ctx.ellipse(x, y - s * .05, s * .42, s * .34, 0, Math.PI, TAU)); ctx.fillStyle = '#9FD8FF'; ctx.globalAlpha = .6; ctx.beginPath(); ctx.ellipse(x, y + s * .25, s * .45, s * .4, 0, 0, TAU); ctx.fill(); }
   ctx.restore();
 }
-// Clawd with a hat: head top is at y - 8u in his own units
-function tourist(x, y, u, hat, o = {}) { clawd(x, y, u, o); if (hat) hatOn(hat, x + (o.flip ? -1 : 1) * (o.view === 'q' ? u * .6 : 0), y - u * 8.05, u * 9); }
+// Clawd with a hat. The hat is part of the body drawing (see clawd() o.worldHat), so it moves with every pose
+function tourist(x, y, u, hat, o = {}) { clawd(x, y, u, { ...o, worldHat: hat || o.worldHat }); }   // the hat is drawn inside clawd()'s body transform
 function bg(col) { ctx.save(); resetMatrix(); ctx.fillStyle = col; ctx.fillRect(0, 0, W, H); ctx.restore(); }
 function vgrad(stops, y0 = 0, y1 = H) { ctx.save(); resetMatrix(); const g = ctx.createLinearGradient(0, y0, 0, y1); stops.forEach(([s, c]) => g.addColorStop(s, c)); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H); ctx.restore(); }
 function txt(s, x, y, size, col, o = {}) { ctx.save(); ctx.font = `${o.weight || '900'} ${size}px ${o.font || 'sans-serif'}`; ctx.textAlign = o.align || 'center'; ctx.textBaseline = 'middle'; if (o.stroke) { ctx.lineWidth = o.sw || size * .12; ctx.strokeStyle = o.stroke; ctx.lineJoin = 'round'; ctx.strokeText(s, x, y); } ctx.fillStyle = col; if (o.rot) { ctx.translate(x, y); ctx.rotate(o.rot); ctx.fillText(s, 0, 0); } else ctx.fillText(s, x, y); ctx.restore(); }

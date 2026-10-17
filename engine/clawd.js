@@ -139,7 +139,9 @@ function clawd(x, y, u, o = {}) {
       if (['cat', 'masq', 'bowtie'].includes(o.hat)) faceHat(u, o.hat, sw, F.sides);
       pop();
     }
-    rs('hat'); push(); translate(V.hat * u, 0); scale(V.hw, 1); hat(u, o.hat, sw); pop();
+    // the head top is y = -8u in body space: a world hat (o.worldHat, drawn by hatOn) sits there inside the body's own
+    // transform, so it rides every hop, squash, tilt, flip, turn and walk step instead of floating where Clawd used to be
+    rs('hat'); push(); translate(V.hat * u, 0); scale(V.hw, 1); hat(u, o.hat, sw); if (o.worldHat) worldHat(u, o, sq); pop();
   }
   V.arms.filter(a => a[3] === 1).forEach(arm);
   rs('draw'); if (o.draw) o.draw(u, sw);
@@ -152,6 +154,15 @@ function clawd(x, y, u, o = {}) {
     emote(o.emote, ex, ey, u * .9, o.emoteK ?? 1, o.emoteAge ?? T);
   }
   rs('after');   // so whatever is drawn next doesn't depend on this pose
+}
+
+// A world hat on the head top (body space). It takes only part of the body's squash, so it stays a hat rather than
+// a rubber sheet, and it rocks a little with each step of a walk.
+function worldHat(u, o, sq) {
+  push(); translate(0, -8.05 * u);
+  const kx = 1 / (1 + sq * .6), ky = 1 / Math.max(.2, 1 - sq); scale(lerp(1, kx, .55), lerp(1, ky, .55));
+  if (o.walk != null) rotate(.07 * Math.sin(o.walk * TAU * 2));
+  hatOn(o.worldHat, 0, 0, 9 * u); pop();
 }
 
 // The lunchbox mouth: the top 2.9u of the body hinges open at the back-left corner (front view only). The mouth is the
@@ -180,7 +191,7 @@ function lunchbox(u, o, sw, J, lid, col, dk, lt) {
   paint(rectPts(-5 * u, -8 * u, 10 * u, 2.9 * u, J), { ink: PAL.ink, sw });
   if (o.gloom > .02) gloom(u, sw, VIEWS.front, o.gloom);
   eyes(u, o, sw, [-1, 1], 0);
-  hat(u, o.hat, sw);
+  hat(u, o.hat, sw); if (o.worldHat) worldHat(u, o, o.sq || 0);   // the lid carries the hat when it opens
   pop();
 }
 
