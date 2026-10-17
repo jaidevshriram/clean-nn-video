@@ -127,7 +127,7 @@ S = {
  'ch02': dict(bpm=126, root=55, mode='maj', prog=[0, 0, 4, 4, 0, 3, 4, 0], layers=['ragtime', 'oompah', 'crackle'], lofi=True),
  'ch03': dict(bpm=78, root=50, mode='dor', prog=[0, 3, 0, 4], swing=.62, layers=['walk', 'brush', 'jazz_chords', 'sax']),
  'ch04': dict(bpm=112, root=50, mode='hmin', prog=[0, 0, 5, 4], swing=.6, layers=['spy_bass', 'vibes_comp', 'brush', 'flute']),   # cool 60s spy jazz: the minor-major 7th
- 'ch05': dict(bpm=72, root=50, mode='min', prog=[0, 5, 3, 4], layers=['piano_soft', 'warm', 'bass_soft'], brighten=True, gain=.6),   # foggy and calm: slow soft piano over a pad
+ 'ch05': dict(bpm=72, root=50, mode='min', prog=[0, 5, 3, 4], layers=['piano_soft', 'warm', 'bass_soft'], gain=.5),   # foggy and calm: slow soft piano over a pad
  'ch06': dict(bpm=92, root=62, mode='maj', prog=[0, 3, 5, 4], layers=['pizz', 'flute', 'warm']),
  'ch07': dict(bpm=144, root=58, mode='maj', prog=[0, 5, 1, 4], swing=.6, layers=['brass_stabs', 'walk', 'kit_swing', 'piano_comp']),
  'ch08': dict(bpm=60, root=45, mode='min', prog=[0, 0, 5, 5], layers=['drone', 'heartbeat', 'eerie']),
@@ -295,16 +295,16 @@ r = np.random.default_rng(3)
 sting = np.zeros(N)
 for i, c in enumerate(CH[1:], 1):
     s = c['s']; L = int(1.4 * SR); t = np.arange(L) / SR
-    wh = lp(hp(r.normal(0, 1, L), 400), 6000) * (t / 1.4) ** 2.5; place(sting, wh * .5, s - 1.2)
-    for k, m in enumerate([84, 88, 91, 96]): place(sting, I_bell(mtof(m), 2, .35, r, 3.0, 2.5), s + .15 + k * .07)
+    wh = lp(hp(r.normal(0, 1, L), 400), 3500) * (t / 1.4) ** 2.5; place(sting, wh * .3, s - 1.2)   # a gentler whoosh
+    for k, m in enumerate([72, 76, 79, 84]): place(sting, I_bell(mtof(m), 2, .3, r, 3.0, 2.5), s + .15 + k * .07)   # a soft, low chime
 sting = sting / (np.sqrt(np.mean(sting[sting != 0] ** 2)) + 1e-9) * .5 if np.any(sting) else sting
 # duck under the voice, swell in the holds
 v = np.zeros(N); v[:len(voice)] = voice
 e = np.sqrt(np.clip(lp(v ** 2, 3, 1), 0, None)); e = e / (e.max() + 1e-9)
-duck = 1 - .6 * np.clip(e * 7, 0, 1); duck = lp(duck, 1.0, 1)
+duck = 1 - .72 * np.clip(e * 7, 0, 1); duck = lp(duck, 1.0, 1)
 t = np.arange(N) / SR
 bed = music * np.clip(t / 3, 0, 1) * np.clip((DUR + .5 - t) / 3, 0, 1)
-bed = bed / (np.sqrt(np.mean(bed ** 2)) + 1e-9) * 10 ** (args.level / 20) * duck + sting * 10 ** ((args.level + 3) / 20)
+bed = bed / (np.sqrt(np.mean(bed ** 2)) + 1e-9) * 10 ** (args.level / 20) * duck + sting * 10 ** ((args.level - 4) / 20)
 bed = np.tanh(bed * 1.2) / 1.2
 st = np.stack([bed * (1 + .1 * np.sin(2 * np.pi * .07 * t)), bed * (1 - .1 * np.sin(2 * np.pi * .07 * t))], 1).astype(np.float32)
 sf.write(os.path.join(ROOT, args.out, 'music.wav'), st, SR, subtype='PCM_24')
