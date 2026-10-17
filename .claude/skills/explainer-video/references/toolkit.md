@@ -1,5 +1,8 @@
 # The toolkit
 
+The engine is built on [ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase) by John Heibel
+(MIT; license kept at `engine/LICENSE-ClaudeAnimationBase`), re-implemented for fast CPU rendering.
+
 Everything is plain JavaScript drawn with Skia (`@napi-rs/canvas`) on the CPU, plus Python for audio. A frame is a pure
 function of time `t`, so any frame can be rendered in any order, in parallel, and re-timed when the narration changes.
 

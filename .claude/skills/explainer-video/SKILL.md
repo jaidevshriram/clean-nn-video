@@ -6,7 +6,8 @@ description: Turn a pasted blog post, essay, paper or book (text or URL) into a 
 # Explainer video from a text
 
 Builds a narrated, fully animated explainer (typically 10–40 min) from a source text, using the CPU Canvas engine in
-this repo (`engine/`, `render.mjs`, `tools/`), which grew out of ClaudeAnimationBase. The reference build is "Neural
+this repo (`engine/`, `render.mjs`, `tools/`), built on
+[ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase) by John Heibel (MIT). The reference build is "Neural
 Networks Are Already Clean" (this repo, branch `claude/explainer-video`): when unsure how to do something, look at how
 `scenes/`, `script/script.md` and `tools/` do it there.
 
@@ -85,3 +86,13 @@ Use subagents generously for reviews and for building chapters in parallel. Ever
 short WHY block quoting the user's own words for this request ("the user said: '…'"), because agents otherwise decline
 work that doesn't match the latest user message. Give each agent a file scope it owns, the build brief, the review
 tools, and the rule not to touch shared engine files or commit.
+
+## Lineage and credit
+
+The engine is built on [ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase) by John Heibel (MIT):
+its painterly Canvas2D toolkit, the Clawd character and the frame-as-a-function-of-time approach. `engine/core.js` is a
+CPU (Skia) re-implementation of its `core.js` paint API, and `engine/clawd.js` and `render.mjs` grew out of its Clawd and
+renderer. His [PDoomVideo](https://github.com/JohnHeibel/PDoomVideo) was the reference for a narrated explainer on
+that base. For a new film, check those repos for anything newer worth pulling in. Always keep
+`engine/LICENSE-ClaudeAnimationBase` with the engine, and credit ClaudeAnimationBase (with link) in every film's
+README and, if the film has end credits, on screen.
