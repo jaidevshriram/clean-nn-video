@@ -87,6 +87,13 @@ images stay out of git (see `.gitignore`); `node render.mjs --video` writes the 
 - `node tools/clawd_posesheet.mjs out.jpg` (Clawd in every pose with each hat), `tools/clawd_probe.mjs` + `tools/clawd_crops.mjs`
   (record every Clawd draw in a range, then close-up crops of the hardest moments)
 
+## Reusing this for another video
+
+`.claude/skills/explainer-video/` is a Claude Code skill that packages this pipeline and the lessons from making this
+film (script rules, visual system, voice and music, review loop, delivery). In a session on this repo, paste a blog post,
+essay or book chapter and ask for an explainer video (or run `/explainer-video`). To have it in every project on your
+own machine, copy the folder to `~/.claude/skills/explainer-video/`.
+
 ## Older material
 
 `STORYBOARD.md`, `TREATMENT.md`, `WORLDS.md` and `BUILD_BRIEF.md` are planning documents from earlier passes (some written
