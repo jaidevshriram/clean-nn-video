@@ -27,6 +27,17 @@ An HTML artifact with a video player, a chapter list named by concepts (click to
 the media segments first and the playlist (named e.g. `film.txt`, served as text) and the page last. When updating an
 existing artifact, list its files first (unread files can't be overwritten). Republish to the same URL on new cuts.
 
+## Watch page on GitHub Pages (public repos)
+
+A super-minimal page where the video is the focus: dark background, the player sized to the viewport, one line of
+title and links, no other chrome. Repackage the size-limited 1080p (no re-encode; keyframes every ~10 s):
+`ffmpeg -i film_1080p.mp4 -c copy -f hls -hls_time 10 -hls_playlist_type vod -hls_segment_type fmp4 -hls_segment_filename film/s%03d.m4s film/film.m3u8`,
+convert the SRT to `film/subtitles.vtt`, add `poster.jpg`, `.nojekyll` and an `index.html` (native HLS on Safari,
+hls.js from jsDelivr elsewhere; og:image for link previews). Push it as an orphan `gh-pages` branch from a separate
+directory; Pages turns on by itself. Check the live URL with curl: if the owner has a custom domain, project pages
+redirect there (this film lives at jaidevshriram.com/clean-nn-video/). The session can't edit repo settings, so give
+the user the description/website text to paste into the repo's About box.
+
 ## README and repo
 
 - README: what the film is, a hero still, a stills gallery (one frame per stop, extracted from the master with
