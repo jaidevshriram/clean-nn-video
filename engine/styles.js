@@ -141,7 +141,15 @@ function hatOn(kind, x, y, s) {
   if (kind === 'top') { fillS('#1A1A20', () => ctx.ellipse(x, y, s * .5, s * .09, 0, 0, TAU)); fillS('#1A1A20', () => ctx.rect(x - s * .28, y - s * .6, s * .56, s * .6)); ctx.fillStyle = PAL.berry; ctx.fillRect(x - s * .28, y - s * .16, s * .56, s * .1); }
   if (kind === 'crown') fillS('#F0BE46', () => { ctx.moveTo(x - s * .3, y); ctx.lineTo(x - s * .32, y - s * .3); ctx.lineTo(x - s * .15, y - s * .14); ctx.lineTo(x, y - s * .36); ctx.lineTo(x + s * .15, y - s * .14); ctx.lineTo(x + s * .32, y - s * .3); ctx.lineTo(x + s * .3, y); ctx.closePath(); });
   if (kind === 'party') fillS(PAL.sky, () => { ctx.moveTo(x - s * .22, y); ctx.lineTo(x, y - s * .55); ctx.lineTo(x + s * .22, y); ctx.closePath(); });
-  if (kind === 'helmet') { fillS('#E9E4D6', () => ctx.ellipse(x, y - s * .05, s * .42, s * .34, 0, Math.PI, TAU)); ctx.fillStyle = '#9FD8FF'; ctx.globalAlpha = .6; ctx.beginPath(); ctx.ellipse(x, y + s * .25, s * .45, s * .4, 0, 0, TAU); ctx.fill(); }
+  if (kind === 'helmet') {   // a glass fishbowl over the top of the body: faint tint, a bright rim, a collar ring and a highlight
+    const cy = y + s * .2, R = s * .6;
+    ctx.save(); ctx.fillStyle = 'rgba(175,225,255,.16)'; ctx.beginPath(); ctx.arc(x, cy, R, 0, TAU * .999); ctx.fill();
+    ctx.strokeStyle = 'rgba(235,248,255,.95)'; ctx.lineWidth = Math.max(2, s * .028); ctx.stroke();
+    ctx.strokeStyle = 'rgba(40,60,90,.55)'; ctx.lineWidth = Math.max(1, s * .01); ctx.beginPath(); ctx.arc(x, cy, R + s * .016, 0, TAU * .999); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = Math.max(2, s * .045); ctx.lineCap = 'round'; ctx.beginPath(); ctx.arc(x, cy, R * .78, Math.PI * 1.08, Math.PI * 1.42); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.beginPath(); ctx.arc(x + R * .42, cy - R * .5, s * .03, 0, TAU); ctx.fill(); ctx.restore();
+    fillS('#C9CDD6', () => ctx.ellipse(x, cy + R * .72, R * .74, s * .07, 0, 0, TAU));   // the collar ring at the shoulders
+  }
   ctx.restore();
 }
 // Clawd with a hat. The hat is part of the body drawing (see clawd() o.worldHat), so it moves with every pose

@@ -149,8 +149,8 @@ function clawd(x, y, u, o = {}) {
 
   rs('emote');
   if (o.emote) {
-    const top = EMOTE_TOP.includes(o.emote), dir = o.flip ? -1 : 1;
-    const ex = top ? x + dir * V.hat * u : x + dir * (V.R + .4) * u, ey = y + dy + (top ? -10.4 : -8.6) * u * (1 - sq);
+    const top = EMOTE_TOP.includes(o.emote), dir = o.flip ? -1 : 1, HB = WORLD_HAT_BOX[o.worldHat] || [0, 0];   // clear the hat's height and brim
+    const ex = top ? x + dir * V.hat * u : x + dir * (V.R + .4 + Math.max(0, HB[1] * V.hw - V.R + .6)) * u, ey = y + dy + (top ? -10.4 - HB[0] : -8.6 - (HB[0] ? 2.2 : 0)) * u * (1 - sq);
     emote(o.emote, ex, ey, u * .9, o.emoteK ?? 1, o.emoteAge ?? T);
   }
   rs('after');   // so whatever is drawn next doesn't depend on this pose
@@ -440,6 +440,8 @@ function faceHat(u, h, sw, sides) {
 // music swirl stars cloud. k = 0..1 pop-in progress (with overshoot); age = seconds since it appeared (drives the
 // looping ones). Emotes in EMOTE_TOP sit over the head; the rest sit by its top corner.
 const EMOTE_TOP = ['steam', 'stars', 'cloud', 'bulb', 'scribble'];
+// each world hat's [height above the head, half-width of its brim], in u, so emotes sit clear of it
+const WORLD_HAT_BOX = { fedora: [3, 5], safari: [3, 5.4], beret: [2, 3.7], hard: [3, 4.6], top: [5.6, 4.6], crown: [3.4, 3], party: [5, 2], helmet: [3.4, 5.6] };
 function emote(kind, x, y, s, k = 1, age = T) {
   const p = backOut(k); if (p < .02) return;
   const sw = clamp(s / 15, .4, 2), P = pts => pts.map(([a, b]) => [a * s, b * s]);
