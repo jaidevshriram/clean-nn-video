@@ -28,7 +28,12 @@
         let x0 = Math.max(0, Math.floor(fy)); if (x0 >= W) continue;
         for (let x = x0, i = (y * W + x0) * 4; x < W; x++, i += 4) {
           let m = x - fy >= soft ? 1 : (x - fy) / soft; if (m <= 0) continue;
-          for (const L of Ls) { const dx = x - L[0], dy = y - L[1], q = (dx * dx + dy * dy) / (L[2] * L[2]); if (q < 1) { m *= L.length > 3 ? lerp(L[3], 1, q * q) : .3; break; } }
+          for (const L of Ls) {
+            if (L[5] === 'rect') { if (x > L[0] && x < L[2] && y > L[1] && y < L[3]) { const e = Math.min(x - L[0], L[2] - x, y - L[1], L[3] - y); m *= lerp(L[4], 1, 1 - clamp(e / 10)); break; } continue; }
+            const dx = x - L[0], dy = y - L[1];
+            if (L.length > 4) { const q = (dx * dx) / (L[2] * L[2]) + (dy * dy) / (L[4] * L[4]); if (q < 1) { m *= lerp(L[3], 1, clamp((Math.sqrt(q) - .85) / .15)); break; } continue; }   // an ellipse with a tight edge
+            const q = (dx * dx + dy * dy) / (L[2] * L[2]); if (q < 1) { m *= L.length > 3 ? lerp(L[3], 1, q * q) : .3; break; }
+          }
           const r = D[i], g = D[i + 1], bl = D[i + 2], l = Math.min(255, (r * .3 + g * .59 + bl * .11) * .86 + 44);   // lifted, so more paper shows
           const t1 = T1[row + x], t2 = T2[row + x];
           const ink = l < 52 || t1 < (255 - l) * .95 || (l < 115 && t2 < (115 - l) * 1.7);
@@ -50,11 +55,31 @@
   // a caption on an engraved paper label (a POST after the engraving, so it stays legible over the hatching)
   function cap(txt, k, o = {}) {
     if (k <= 0) return; const sz = o.size || 60, x = o.x || 960, y = o.y || 150, face = o.face || 'serif', bold = face === 'serif';
-    POST.push(() => { ctx.save(); ctx.font = `${bold ? 'bold ' : ''}${sz}px ${FONTS[face] || face}`; const W0 = ctx.measureText(txt).width + sz * 1.1, w = Math.max(30, W0 * clamp(k * 1.08)), h = sz * 1.5, x0 = x - W0 / 2; ctx.fillStyle = o.bg || PAPER; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.fillRect(x0, y - h / 2, w, h); ctx.strokeRect(x0, y - h / 2, w, h); ctx.lineWidth = 1; ctx.strokeRect(x0 + 7, y - h / 2 + 7, w - 14, h - 14); ctx.restore(); });
-    letter(txt, x, y, sz, o.col || INK, { face, bold, reveal: k, shadow: false });
+    // the whole plaque pops open from its centre first, then the words are written inside it
+    const pk = seg(k, 0, .3), tk = seg(k, .22, 1);
+    POST.push(() => { ctx.save(); ctx.font = `${bold ? 'bold ' : ''}${sz}px ${FONTS[face] || face}`; const w = ctx.measureText(txt).width + sz * 1.1, h = sz * 1.5; ctx.translate(x, y); ctx.scale(Math.max(.02, backOut(pk)), Math.max(.02, ease(clamp(pk * 1.6)))); ctx.globalAlpha = clamp(pk * 3); ctx.fillStyle = o.bg || PAPER; ctx.strokeStyle = INK; ctx.lineWidth = 2.5; ctx.fillRect(-w / 2, -h / 2, w, h); ctx.strokeRect(-w / 2, -h / 2, w, h); ctx.lineWidth = 1; ctx.strokeRect(-w / 2 + 7, -h / 2 + 7, w - 14, h - 14); ctx.restore(); });
+    if (tk > 0) letter(txt, x, y, sz, o.col || INK, { face, bold, reveal: tk, shadow: false });
   }
   // Clawd stays in colour through the engraving (a soft hole in the pass around him), so he never sinks into the hatching
-  const clawdHole = (x, y, s) => { const z = LAST_CAM ? LAST_CAM.zoom : 1, [sx, sy] = LAST_CAM ? [(x - LAST_CAM.cx) * z + 960, (y - LAST_CAM.cy) * z + 540] : [x, y]; return [sx, sy - 5 * s * z, 9 * s * z, .2]; };
+  // (a tall ellipse from his feet to the top of the tallest hat, with a tight edge, so no muddy ring is left around him)
+  const scr = (x, y) => { const z = LAST_CAM ? LAST_CAM.zoom : 1; return LAST_CAM ? [(x - LAST_CAM.cx) * z + 960, (y - LAST_CAM.cy) * z + 540, z] : [x, y, 1]; };
+  const clawdHole = (x, y, s) => { const [sx, sy, z] = scr(x, y); return [sx, sy - 6.6 * s * z, 7.6 * s * z, 0, 8.4 * s * z]; };
+  // a hole for a loose hat in flight (x, y = the brim centre in world space; s = the hat size)
+  const hatHole = (x, y, s) => { const [sx, sy, z] = scr(x, y - s * .28); return [sx, sy, s * .62 * z, 0, s * .5 * z]; };
+
+  // where a point of Clawd's body (body-local, in u) lands in the world, for the pose o given to clawd(); armTip finds his
+  // hand, so a prop he works (the focus knob) can follow it exactly
+  function bodyPt(x, y, u, o, bx, by) {
+    const sq = (o.sq || 0) + (o.take || 0), sm = clamp(o.smear || 0), fx = (o.flip ? -1 : 1) * (o.sx ?? 1) * (1 + sq * .6) * (1 + sm * .35), fy = (o.sy ?? 1) * (1 - sq);
+    const px = bx * u * fx, py = by * u * fy, r = o.rot || 0, c = Math.cos(r), s = Math.sin(r);
+    return [x + (o.dx || 0) * u + px * c - py * s, y + (o.dy || 0) * u + px * s + py * c];
+  }
+  function armTip(x, y, u, o, which = 'R') {
+    const V = VIEWS[o.view] || VIEWS.front, A = V.arms.find(q => q[2] === which), a = which === 'L' ? (o.aL ?? .2) : (o.aR ?? .2);
+    const [px, dir] = A; let rx, ry, ang, len;
+    if (dir === 0) { rx = px; ry = -4.2; ang = .7 - a; len = 2.1; } else { rx = px + dir * .55 * clamp((Math.abs(a) - .7) / .9); ry = -4.5; ang = dir < 0 ? a : -a; len = 2.2 * (dir < 0 ? -1 : 1); }
+    return bodyPt(x, y, u, o, rx + Math.cos(ang) * len, ry + Math.sin(ang) * len);
+  }
 
   // ---------- pieces ----------
   function fill(im, cx, cy, r, a = 1, blur = 0) { if (a <= 0) return; const I = blur > .5 ? blurred(im, Math.min(16, Math.round(blur / 2) * 2)) : img(im), s = Math.min(I.width, I.height); ctx.save(); ctx.globalAlpha *= a; ctx.drawImage(I, (I.width - s) / 2, (I.height - s) / 2, s, s, cx - r, cy - r, 2 * r, 2 * r); ctx.restore(); }
@@ -109,13 +134,23 @@
   }
   function hoarding(x, y, txt_, k, o = {}) {
     if (k <= 0) return; boilSeed('hoard');
-    inkLine([[x - 140, y + 120], [x - 140, y + 360]], 7, '#4A3A2E', 'ink', 0); inkLine([[x + 140, y + 120], [x + 140, y + 360]], 7, '#4A3A2E', 'ink', 0);
+    const bw = o.big ? 250 : 210, bb = o.big ? 170 : 120, gy = o.ground || 905, pk = easeOut(clamp(k * 1.6));
+    // two straight timber posts under the board's ends, braced, standing on the pavement (they rise first, then the board unfolds)
+    for (const sd of [-1, 1]) {
+      const px = x + sd * (bw - 40), top = lerp(gy, y - 60, pk);
+      paint(rectPts(px - 13, top, 26, gy - top, 0), { grad: [[0, '#6A5442'], [1, '#3E3026']], gdir: [px - 13, 0, px + 13, 0], ink: INK, sw: 1.2, tex: .4 });
+      for (let g = 0; g < 3; g++) inkLine([[px - 5 + g * 5, top + 20], [px - 5 + g * 5, gy - 14]], .5, '#2A2018', 'inkfine', 0);
+      paint(rectPts(px - 20, gy - 12, 40, 14, 0), { wash: '#3E3026', ink: INK, sw: .9 });
+    }
+    if (pk > .6) { const by = lerp(gy, y + bb + 60, pk); paint([[x - bw + 40, by + 8], [x - bw + 52, by - 6], [x + bw - 40, by + 120 - 6], [x + bw - 52, by + 120 + 8]].map(([px, py]) => [px, Math.min(gy - 20, py)]), { wash: '#4E3E32', ink: INK, sw: .9 }); }
     push(); translate(x, y + 120); scale(1, backOut(k) * (o.flip ?? 1)); translate(-x, -(y + 120));
-    const bw = o.big ? 250 : 210, bb = o.big ? 170 : 120;
-    paint(rectPts(x - bw, y - 120, bw * 2, 120 + bb, 1), { wash: o.col || '#E9DCC0', ink: INK, sw: 1.8 });
-    paint(rectPts(x - bw + 20, y - 100, bw * 2 - 40, 80 + bb, 1), { wash: null, ink: INK, sw: .7 });
+    paint(rectPts(x - bw, y - 120, bw * 2, 120 + bb, 0), { wash: o.col || '#E9DCC0', ink: INK, sw: 1.8 });
+    paint(rectPts(x - bw + 20, y - 100, bw * 2 - 40, 80 + bb, 0), { wash: null, ink: INK, sw: .7 });
     pop();
-    if (k > .6 && (o.flip ?? 1) > .3) { letter(txt_, x, y - 4, 130, o.tcol || '#8C2A1E', { face: 'serif', bold: true, shadow: false }); if (o.sub) letter(o.sub, x, o.big ? y + 100 : y + 76, o.big ? 72 : 36, INK, { face: 'serif', bold: !!o.big, shadow: false }); }
+    if (k > .6 && (o.flip ?? 1) > .3) {
+      letter(txt_, x, y - 4, 130, o.tcol || '#8C2A1E', { face: 'serif', bold: true, shadow: false });
+      if (o.sub) { const sz0 = o.big ? 72 : 36; ctx.save(); ctx.font = `${o.big ? 'bold ' : ''}${sz0}px serif`; const sw0 = ctx.measureText(o.sub).width; ctx.restore(); const sz = sz0 * Math.min(1, (bw * 2 - 60) / Math.max(1, sw0)); letter(o.sub, x, o.big ? y + 100 : y + 76, sz, INK, { face: 'serif', bold: !!o.big, shadow: false }); }
+    }
   }
   function street(t, o = {}) {
     layer('c5street' + (o.v || ''), () => {
@@ -142,9 +177,29 @@
     for (const x of [380, 1560]) gasLamp(x, 920, 1, .8 + .2 * Math.sin(t * 7 + x));
     fogBands(t, .8);
     const roll = seg(t, a + 3.4, a + 5.8);
-    const knob = kf(t, [[tu - .6, 0], [tu + .4, .8], [tT - .2, .8], [tT + .6, 3.2], [tw - .3, 3.2], [tw + .4, 5.6]]);
     const st = t < tT + .2 ? 0 : t < tw + .2 ? 1 : 2;
     const tNg = wt('fd_fv', 'nudged'), tLi = wt('fd_fv', 'little'), jg = env(t, tNg - .3, tLi + .4, .2, Math.max(.3, tc - tLi - .4)), jr = jg * .14 * Math.sin((t - tNg) * 6), jx = jg * 14 * Math.sin((t - tNg) * 4.3), jy = jg * 8 * Math.cos((t - tNg) * 3.7);
+    // Clawd walks in, hops up onto the cart and works the focus knob on the column; at the second click his top hat jumps off
+    const em = emotions(t, [[chapStart('ch05'), 'happy'], [a + 5.8, 'neutral'], [tu - .6, 'determined'], [tn, 'confused'], [tT, 'determined'], [tc - .2, 'excited'], [tw + .5, 'surprised'], [tw + 1.6, 'proud']]);
+    const up = seg(t, a + 6, a + 6.7), cx = up > 0 ? lerp(1290, 1121, ease(up)) : lerp(1700, 1290, ease(seg(t, a + 3, a + 5.8))), cy = up > 0 ? lerp(960, 810, ease(up)) - 90 * Math.sin(up * Math.PI) : 960;
+    const walking = roll > 0 && roll < 1, po = { ...em, view: walking ? 'side' : 'q', flip: true, walk: walking ? t * 2 : undefined, boilKey: 'c5c' };
+    // his near hand grips the knob's rim: each turn is two strokes (push the hand down, the knob turns with it; lift it back
+    // up, the knob stays), and the knob's angle is read off the hand's own position, so the grip never slips
+    const KX = 960 + 50, KY = 880 - 130, aTop = .55, aBot = -.3;
+    let knob = 0;
+    if (up >= 1) {
+      Object.assign(po, { rot: 0, dx: 0 });
+      const ang = aa => { const [hx, hy] = armTip(cx, cy, 11, { ...po, aR: aa }); return Math.atan2(hy - KY, hx - KX); }, dl = ang(aBot) - ang(aTop);
+      let aR = aTop, done = 0, push_ = false;
+      for (const [w0, w1] of [[tu - .6, tu + .4], [tT - .2, tT + .6], [tw - .3, tw + .4]]) {
+        if (t >= w1) { done += 2; continue; }
+        if (t > w0) { const ph = (t - w0) / (w1 - w0) * 2, n = Math.floor(ph), p = ph - n; done += n; if (p < .6) { aR = lerp(aTop, aBot, easeInOut(p / .6)); push_ = true; } else { aR = lerp(aBot, aTop, easeInOut((p - .6) / .4)); done += 1; } }
+        break;
+      }
+      const rel = seg(t, tw + .45, tw + .75); if (rel > 0) aR = lerp(aTop, em.aR ?? .2, ease(rel));
+      knob = done * dl + (push_ ? ang(aR) - ang(aTop) : 0);
+      po.aR = aR;
+    }
     scope(t, 960, 880, 1, {
       roll, knob, view: (cx, cy, r) => {
         if (t < tn - .6) {   // the city through a bad lens: a smear
@@ -165,16 +220,17 @@
       ctx.restore(); }
     // click bursts as the focus snaps
     for (const tt of [tc - .2, tw + .5]) { const k = seg(t, tt, tt + .5); if (k > 0 && k < 1) glow(960, 500, 460 * k, '#FFF3C8', .8 * (1 - k)); }
-    // Clawd works the knob; at the second click his top hat jumps off
-    const hop = env(t, tw + .5, tw + 1.4, .15, .5);
-    const em = emotions(t, [[chapStart('ch05'), 'happy'], [a + 5.8, 'neutral'], [tu - .6, 'determined'], [tn, 'confused'], [tT, 'determined'], [tc - .2, 'excited'], [tw + .5, 'surprised'], [tw + 1.6, 'proud']]);
-    // Clawd walks in, hops up onto the cart and works the focus knob on the column
-    const up = seg(t, a + 6, a + 6.7), cx = up > 0 ? lerp(1290, 1095, ease(up)) : lerp(1700, 1290, ease(seg(t, a + 3, a + 5.8))), cy = up > 0 ? lerp(960, 810, ease(up)) - 90 * Math.sin(up * Math.PI) : 960;
-    const turning = Math.max(env(t, tu - .6, tu + .4, .1, .1), env(t, tT - .2, tT + .6, .1, .1), env(t, tw - .3, tw + .4, .1, .1));
-    tourist(cx, cy, 11, hop > 0 ? null : 'top', { ...em, view: roll > 0 && roll < 1 ? 'side' : 'q', flip: true, walk: roll > 0 && roll < 1 ? t * 2 : undefined, aR: up >= 1 ? .3 + .5 * turning * Math.sin(t * 14) : undefined, boilKey: 'c5c' });
-    if (hop > 0) hatOn('top', cx - 5, cy - 11 * 8 - 160 * Math.sin(hop * Math.PI), 99);
+    // the hat: one clean parabola off his head and back onto it, with a flip, at the second click
+    const hu = seg(t, tw + .5, tw + 1.2), flying = hu > 0 && hu < 1;
+    tourist(cx, cy, 11, flying ? null : 'top', po);
+    let hh = null;
+    if (flying) {
+      const V = VIEWS[po.view], [hx, hy] = bodyPt(cx, cy, 11, po, V.hat, -8.05), yy = hy - 160 * 4 * hu * (1 - hu);
+      push(); translate(hx, yy - 30); rotate(-TAU * easeInOut(hu)); translate(-hx, -(yy - 30)); hatOn('top', hx, yy, 99); pop();
+      hh = hatHole(hx, yy, 99);
+    }
     camEnd();
-    { const z = LAST_CAM.zoom; engrave(-1e4, 160, [[(960 - LAST_CAM.cx) * z + 960, (500 - LAST_CAM.cy) * z + 540, 186 * z], clawdHole(cx, cy, 11)]); }
+    { const z = LAST_CAM.zoom; engrave(-1e4, 160, [...(hh ? [hh] : []), clawdHole(cx, cy, 11), [(960 - LAST_CAM.cx) * z + 960, (500 - LAST_CAM.cy) * z + 540, 186 * z]]); }
     // engraved plate under the lens: which stage of the story the lens is at, and the ingredient's name
     if (t > tn - .6) { const yr = ['first', 'then', 'later'][st]; letter(yr, 420, 560, 96, INK, { face: 'serif', bold: true, shadow: false, stroke: PAPER, strokeW: .12, pop: st ? seg(t, [0, tc - .2, tw + .5][st], [0, tc - .2, tw + .5][st] + .3) : null }); }
     const ks = seg(t, tn - .4, tn + .4) * (1 - seg(t, tT - .8, tT - .4));
@@ -273,7 +329,7 @@
     let cur = nums[0], ft = -10; for (const q of nums) if (t >= q[0]) { cur = q; ft = q[0]; }
     const fl = seg(t, ft, ft + .3);
     const kp = seg(t, tC - .6, tC + .4) * (1 - seg(t, tr - 1.3, tr - .8));
-    hoarding(1720, 250, cur[1], t < tW ? 1 - ease(clamp(kp * 1.5)) : t < tB - .2 ? 1 - seg(t, tW, tW + .4) : popk(t, tB - .2, .5), { big: 1, flip: Math.abs(Math.cos(fl * Math.PI)) * (fl < .5 ? 1 : 1), sub: cur[2], tcol: cur[1] === '99%' ? '#2E7A3A' : '#8C2A1E', col: mixCol('#E9DCC0', '#FFFFFF', dawn) });
+    hoarding(1600, 250, cur[1], t < tW ? 1 - ease(clamp(kp * 1.5)) : t < tB - .2 ? 1 - seg(t, tW, tW + .4) : popk(t, tB - .2, .5), { big: 1, flip: Math.abs(Math.cos(fl * Math.PI)) * (fl < .5 ? 1 : 1), sub: cur[2], tcol: cur[1] === '99%' ? '#2E7A3A' : '#8C2A1E', col: mixCol('#E9DCC0', '#FFFFFF', dawn) });
     // the architect's plan: CONVNEXT blueprint unrolled on an easel
     if (kp > 0) { boilSeed('c5plan'); push(); translate(560, 640); scale(1, ease(kp)); paint(rectPts(-300, -200, 600, 400, 1), { wash: '#2E5A8A', ink: INK, sw: 1.4 }); for (let i = 0; i < 6; i++) inkLine([[-260, -150 + i * 60], [260, -150 + i * 60]], .6, '#BFD8F0', 'inkfine', 0); pop(); }
     const lk = env(t, t50 - .7, t70 - .7, .4, .4) * old, lx = lerp(330, 1250, ease(seg(t, t50 - .5, t70 - .9))), ly = 560, lr = 300;

@@ -155,7 +155,8 @@
     }
   }
   // Clawd standing on the table at world (x, z)
-  function tClawd(t, x, z, keys, extra = {}) { const [sx, sy, k] = P(x, 0, z); if (k <= 0) return; tourist(sx, sy, 8 * k, 'safari', { ...emotions(t, keys), view: 'q', ...extra }); return [sx, sy, k]; }
+  // (extra.noHat: the safari hat is off his head, e.g. while the wind has it)
+  function tClawd(t, x, z, keys, extra = {}) { const [sx, sy, k] = P(x, 0, z); if (k <= 0) return; tourist(sx, sy, 8 * k, extra.noHat ? null : 'safari', { ...emotions(t, keys), view: 'q', ...extra }); return [sx, sy, k]; }
 
   // night over the table: everything dims, and the lit windows glow like stars (the dog house brightest)
   function nightfall(t, k, drawn) {
@@ -194,9 +195,14 @@
     if (sp > 300) { ctx.save(); ctx.globalAlpha = .9; train(t, xh, cars); ctx.restore(); const [, by] = P(0, 90, 120); for (let i = 0; i < 9; i++) { ctx.save(); ctx.globalAlpha = .5; ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 3; const yy = by - 60 + i * 18, xx = (hash(i * 3) * W + t * 3000) % W; ctx.beginPath(); ctx.moveTo(xx, yy); ctx.lineTo(xx + 180, yy); ctx.stroke(); ctx.restore(); } }
     else train(t, xh, cars);
     // Clawd on the beach by the rails, watching
-    const hatOff = seg(t, tsh + .9, tsh + 2.2);
-    tClawd(t, -280, 80, [[s0, 'happy'], [a + 1, 'thinking'], [tl - .1, 'excited'], [tsh + .9, 'surprised'], [tbr + .5, 'laugh'], [twin, 'love']], { flip: false, lookX: .7, lookY: -.3, dx: 0 });
-    if (hatOff > 0 && hatOff < 1) { const [sx, sy, k] = P(-280 + 600 * hatOff, 70 + 260 * Math.sin(hatOff * Math.PI), 80 - 40 * hatOff); ctx.save(); ctx.translate(sx, sy); ctx.rotate(hatOff * 9); hatOn('safari', 0, 0, 70 * k); ctx.restore(); }
+    // the gag: the rush of the train lifts the hat off his head; it tumbles up and away on the wind, loops back, and he
+    // catches it on his head (it lands exactly where his own hat sits, so there is only ever one hat)
+    const hatOff = seg(t, tsh + .9, tsh + 2.6), hf = hatOff > 0 && hatOff < 1, land = env(t, tsh + 2.5, tsh + 2.95, .08, .3);
+    const reach = hf ? Math.sin(Math.PI * seg(hatOff, .55, 1)) : 0;
+    const cl = tClawd(t, -280, 80, [[s0, 'happy'], [a + 1, 'thinking'], [tl - .1, 'excited'], [tsh + .9, 'surprised'], [tsh + 2.5, 'happy'], [tbr + .5, 'laugh'], [twin, 'love']], { flip: false, lookX: hf ? .5 : .7, lookY: hf ? -1 : -.3, dx: 0, noHat: hf, aL: hf ? lerp(.2, 1.5, reach) : undefined, aR: hf ? lerp(.2, 1.3, reach) : undefined, sq: .12 * Math.sin(land * Math.PI) });
+    if (hf && cl) { const [sx, sy, k] = cl, u = 8 * k, f = hatOff, hx = sx + .6 * u, hy = sy - 8.05 * u;
+      const ox = u * (44 * Math.sin(Math.PI * f) * (1 - .35 * f)), oy = -u * (30 * Math.sin(Math.PI * Math.pow(f, .8)) + 6 * Math.sin(TAU * f));
+      ctx.save(); ctx.translate(hx + ox, hy + oy); ctx.rotate(TAU * 2 * easeInOut(f)); ctx.scale(1, 1 - .5 * Math.abs(Math.sin(f * 11)) * (1 - f)); hatOn('safari', 0, 0, 9 * u); ctx.restore(); }
     // the brightest photos fly from the train up into the windows
     if (t > tkeep && t < twin + .5 && drawn.dog) DOGS.forEach((im, i) => { const k = seg(t, tkeep + .4 + i * .7, tkeep + 1.3 + i * .7); if (k <= 0 || k >= 1) return; const R = drawn.dog, tx = R.fx + R.fw * (i % 2 ? .75 : .25), ty = R.fy + R.fh * (.2 + Math.floor(i / 2) * .3), [sx, sy] = P(i * 60 - 90, 100, 120), q = arcPt([sx, sy], [tx, ty], 160, easeInOut(k)); photoFlat(im, q[0] - 50, q[1] - 40, 100, 80, { border: 5, rot: (1 - k) * .5 }); });
     if (night > 0) nightfall(t, night, drawn);
@@ -333,10 +339,22 @@
     const a = cs('nr_hope'), tm = wt('nr_hope', 'mechanistic'), tlk = wt('nr_hope', 'Look'), trd = wt('nr_hope', 'Read'), tun = wt('nr_hope', 'Understand'), tnw = wt('nr_hope', 'network'), tcl = wt('nr_hope', 'clean'), e = ce('nr_hope'), end = chapStart('ch02');
     // projector in the square at (0, 380); bedsheet screen at (0, ROWZ(2) + 40), 300 wide, bottom at y 70
     const SZ = ROWZ(2) + 40, PZ = 640;
-    camKeys3(t, [[a - .5, -150, 220, 950, 1550, 1150], [tm, 150, 60, 560, 900, 900], [tlk, 280, 60, 520, 480, 560], [trd + .6, 260, 70, 520, 460, 540], [tun + .3, 60, 100, 700, 560, 420], [tun + 1.6, 0, 110, SZ, 720, 400], [end + 2.5, 0, 118, SZ, 690, 392]]);
+    camKeys3(t, [[a - .5, -150, 220, 950, 1550, 1150], [tm, 150, 60, 560, 900, 900], [tlk, 280, 60, 520, 480, 560], [trd + .6, 260, 70, 520, 460, 540], [tun + .3, -60, 30, 620, 440, 430], [tun + 1.6, 0, 110, SZ, 720, 400], [end + 2.5, 0, 118, SZ, 690, 392]]);
     table(t);
-    const beam = seg(t, tun + .6, e + .2), flick = .85 + .15 * hash(Math.floor(t * 24));
+    const beam = seg(t, tun + 1.1, e + .2), flick = .85 + .15 * hash(Math.floor(t * 24));
+    // Clawd with a magnifier: looks inside a house, reads its windows, then walks back along the street in front of row 1
+    // and up into the square to switch the projector on. He is drawn inside the town, at his own depth, so the
+    // houses in front of him hide him like any other toy on the table.
+    // (the square is open from x -255 to 50 in row 1; the projector's crate spans x -88..8, so he ends up at its left)
+    const W0 = tun - .9, W1 = tun + .35, W2 = tun + 1;   // west along the street (z 500), then up into the square
+    const walk = stroll(t, a, tlk - .3, 240, 330, 1);
+    const wx = t < W0 ? walk.x : t < W1 ? lerp(330, -150, easeInOut(seg(t, W0, W1))) : -150, wz = t < W0 ? lerp(470, 500, seg(t, tlk - .3, W0)) : t < W1 ? 500 : lerp(500, 700, easeInOut(seg(t, W1, W2)));
+    const walking = (t > a && t < tlk - .3) || (t > W0 && t < W2), side = t > W0 && t < W1;
+    const [cx, cy, ck] = P(wx, 0, wz);
+    const drawClawd = () => tourist(cx, cy, 8 * ck, 'safari', { ...emotions(t, [[a - 1, 'excited'], [tlk, 'thinking'], [trd, 'idea'], [W2 + .1, 'proud'], [e, 'excited']]), view: side ? 'side' : t > W1 && t < W2 ? 'qback' : 'q', flip: t > W0 && t < W1, walk: walking ? t * 2.4 : undefined, aR: t < W0 ? 1.1 : t > W2 ? .5 + .5 * Math.sin(Math.PI * seg(t, W2, W2 + .5)) : undefined, armR: t < W0 ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#7A5B3E', 'ink', 0); ctx.save(); ctx.strokeStyle = '#C99A45'; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(200,230,255,.35)'; ctx.fill(); ctx.restore(); } : undefined, boilKey: 'c1hope' });
+    const inSquare = wz > 530;   // on the street he stands between rows 0 and 1; in the square nothing stands in front of him
     town(t, q => q.feat === 'curveB' ? .3 + .7 * on(t, trd - .2, e + .4) : q.feat ? .25 + .1 * Math.sin(t * 2 + q.x) : 0, { between: r => {
+      if (r === 0 && !inSquare) drawClawd();
       if (r !== 2) return;
       // the bedsheet screen on two poles, in the square
       for (const sx of [-170, 170]) poly([[sx - 6, 0, SZ], [sx + 6, 0, SZ], [sx + 6, 270, SZ], [sx - 6, 270, SZ]], '#7A5233');
@@ -348,10 +366,7 @@
     // lights down for the picture: the town dims, except the sheet, so the beam reads
     if (beam > 0) { const S0 = [P(-160, 262, SZ), P(160, 262, SZ), P(160, 70, SZ), P(-160, 70, SZ)]; ctx.save(); resetMatrix(); ctx.fillStyle = `rgba(18,20,44,${.5 * beam})`; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.moveTo(S0[0][0], S0[0][1]); S0.slice(1).forEach(q => ctx.lineTo(q[0], q[1])); ctx.closePath(); ctx.fill('evenodd'); ctx.restore(); }
     projector(t, -40, PZ, beam, flick, SZ);
-    // Clawd with a magnifier: looks inside a house, reads its windows, then switches the projector on
-    const walk = stroll(t, a, tlk - .3, 240, 330, 1), wx = t < tun ? walk.x : lerp(330, 62, ease(seg(t, tun - .3, tun + .5)));
-    const [cx, cy, ck] = P(wx, 0, t < tun - .3 ? 470 : lerp(470, 640, seg(t, tun - .3, tun + .5)));
-    tourist(cx, cy, 8 * ck, 'safari', { ...emotions(t, [[a - 1, 'excited'], [tlk, 'thinking'], [trd, 'idea'], [tun + .6, 'proud'], [e, 'excited']]), view: t > tun - .3 && t < tun + .5 ? 'side' : 'q', flip: t > tun - .3, walk: (t > a && t < tlk - .3) || (t > tun - .3 && t < tun + .5) ? t * 2.4 : undefined, aR: t < tun ? 1.1 : undefined, armR: t < tun ? (u, sw) => { inkLine([[0, 0], [u * 1.2, 0]], sw * 2, '#7A5B3E', 'ink', 0); ctx.save(); ctx.strokeStyle = '#C99A45'; ctx.lineWidth = u * .4; ctx.beginPath(); ctx.arc(u * 2.4, 0, u * 1.2, 0, TAU); ctx.stroke(); ctx.fillStyle = 'rgba(200,230,255,.35)'; ctx.fill(); ctx.restore(); } : undefined });
+    if (inSquare) drawClawd();
     // words
     // the three words, laid out by their measured widths so they never collide, centred as one line
     const words = [['look inside', tlk], ['read the parts', trd], ['understand the machine', tun]], FS = 54, GAP = 70;
@@ -367,7 +382,7 @@
     if (t > tcl - .4) title('clean', 960, 200, 150, '#FFF6E2', seg(t, tcl - .3, tcl + .4), { stroke: '#3A2A1A', strokeW: .1, alpha: 1 - seg(t, end - .4, end + .2) });
     if (t > tnw - .3 && t < tcl + .5) hand('a network you can read like that…', 960, 262, 60, '#3A2A1A', seg(t, tnw - .3, tnw + 1.2) * (1 - seg(t, tcl - .4, tcl)), { stroke: '#FFF6E2', strokeW: .14 });
     if (t < tlk) title('mechanistic interpretability', 960, 170, 80, '#3A2A1A', seg(t, tm - .3, tm + 1.2), { stroke: '#FFF6E2', strokeW: .12, alpha: 1 - seg(t, tlk - .6, tlk - .1) });
-    if (t > tun + .5 && t < tun + 2) sfx('click!', cx - 60, Math.min(cy - 90, 930), 52, PAL.berry, t - tun - .6, { life: 1.1 });
+    if (t > tun + 1 && t < tun + 2.5) sfx('click!', P(30, 150, PZ)[0], P(30, 150, PZ)[1], 52, PAL.berry, t - tun - 1.1, { life: 1.1 });
     fxTiltShift(300, 820, 9);
   }
 
