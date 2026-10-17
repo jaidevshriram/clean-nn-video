@@ -5,11 +5,12 @@ description: Turn a pasted blog post, essay, paper or book (text or URL) into a 
 
 # Explainer video from a text
 
-Builds a narrated, fully animated explainer (typically 10–40 min) from a source text, using the CPU Canvas engine in
-this repo (`engine/`, `render.mjs`, `tools/`), built on
-[ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase) by John Heibel (MIT). The reference build is "Neural
-Networks Are Already Clean" (this repo, branch `claude/explainer-video`): when unsure how to do something, look at how
-`scenes/`, `script/script.md` and `tools/` do it there.
+Builds a narrated, fully animated explainer (typically 10–40 min) from a source text. The animation craft comes from
+**[ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase) by John Heibel**: its animation guide
+(bundled here as `references/clawd-animation-guide.md`), its Clawd character and its painting/motion kit. This repo's
+engine (`engine/`, `render.mjs`, `tools/`) is a CPU port of that kit, extended for long narrated films. The reference
+build is "Neural Networks Are Already Clean" (this repo, branch `claude/explainer-video`): when unsure how to do
+something, look at how `scenes/`, `script/script.md` and `tools/` do it there.
 
 The user cares about quality above runtime and will happily allow many passes. The target is not "good" but "nothing a
 viewer would trip over". Most of the hard-won lessons below came from the user catching things the first build missed;
@@ -17,12 +18,35 @@ treat them as requirements, not suggestions.
 
 ## Read before starting
 
+- **`references/clawd-animation-guide.md` first, in full.** ClaudeAnimationBase's guide: the three goals (handmade,
+  alive, one piece), the rules, the animation principles, the storyboard-with-reads format, the review loop, and the
+  full engine and Clawd API. Everything in it applies unless "The foundation" below says how an explainer differs.
 - `references/toolkit.md`: what each file does, what is generic vs. film-specific, how to start a new film from this repo.
 - `references/script.md`: narration rules and the script format. **Read before writing a single cue.**
 - `references/visuals.md`: the visual system (worlds, metaphors, characters, text, motion, props).
 - `references/audio.md`: voice (ElevenLabs), pronunciation, pauses, QA, the music score.
 - `references/review.md`: the review loop, audits, and subagent prompt templates.
 - `references/delivery.md`: render, encode, subtitles, sharing, README, commit.
+
+## The foundation: ClaudeAnimationBase, adapted for explainers
+
+Our engine keeps the base kit's API name for name (`paint`, `inkLine`, `glow`, `boilSeed`, `feel`, `emotions`, `turn`,
+`jump`, `take`, `stroll`, `spring`, `ring`, `arcPt`, `onTwos`, `iris`, `brushWipe`, `camBegin`/`camEnd`, `toScreen`,
+`letter`, `sfx`, `move`, `dancer`, `emote`, `PAL`, `hash`, `kf`, `seg`…) and the same review commands (`--sheet`,
+`--strip`, `--crop`), so the guide's code and advice carry over directly. What changes:
+
+| Base guide | In an explainer |
+|---|---|
+| p5.brush in headless Chrome (GPU, seconds/frame) | Skia on the CPU via `@napi-rs/canvas`, plus `layer()` caching and `flat()`/vector art for graphic worlds; render with `render.mjs --video --workers=4` instead of `--clip` |
+| **No text** | Text is still the exception, but an explainer needs some: key terms, numbers and concept names, large, rare, said aloud at the same moment. The guide's warning stands: a caption that just repeats the narration, or a sign doing the story's job, is a failure |
+| One world, one palette | One world *per chapter*, each a metaphor for its idea, tied together by recurring symbols, carried objects and portals (the guide's "every shot a different world with nothing linking them" failure is exactly what the seam rules prevent) |
+| Timing locked to `bpm` | Timing locked to the narration: every read lands on its spoken word via `wt(cue, word)`; `bpm` still drives idles |
+| Clawd is the star, big on screen | Clawd is a small silent tourist and the viewer's stand-in; it reacts, never explains. Keep the guide's acting rules (emotions, takes, never snapping) |
+| Storyboard with reads | Same format, per chapter, written in the script's `>` notes and the build brief; the reads are now "what the narration says, and what the viewer must see for it" |
+| Transitions at every seam | Same: automatic portals between worlds (teleport.js), in-world dissolves/wipes within a chapter |
+
+All the guide's animation principles, the "model the viewer" timing rule, the review loop and the common-failures list
+apply unchanged; put them in every build brief you hand to subagents.
 
 ## Workflow (with user checkpoints)
 
@@ -89,10 +113,8 @@ tools, and the rule not to touch shared engine files or commit.
 
 ## Lineage and credit
 
-The engine is built on [ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase) by John Heibel (MIT):
-its painterly Canvas2D toolkit, the Clawd character and the frame-as-a-function-of-time approach. `engine/core.js` is a
-CPU (Skia) re-implementation of its `core.js` paint API, and `engine/clawd.js` and `render.mjs` grew out of its Clawd and
-renderer. His [PDoomVideo](https://github.com/JohnHeibel/PDoomVideo) was the reference for a narrated explainer on
-that base. For a new film, check those repos for anything newer worth pulling in. Always keep
-`engine/LICENSE-ClaudeAnimationBase` with the engine, and credit ClaudeAnimationBase (with link) in every film's
-README and, if the film has end credits, on screen.
+ClaudeAnimationBase by John Heibel (MIT; license at `references/LICENSE-ClaudeAnimationBase` and
+`engine/LICENSE-ClaudeAnimationBase`) is the core of this skill: the animation guide, Clawd, and the painting and motion
+kit our engine ports. His [PDoomVideo](https://github.com/JohnHeibel/PDoomVideo) was the reference for a narrated
+piece on that base. For a new film, check ClaudeAnimationBase for a newer guide or kit and refresh the bundled copy.
+Keep the license with the engine, and credit ClaudeAnimationBase (with link) in every film's README and end credits.

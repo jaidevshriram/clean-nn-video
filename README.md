@@ -107,7 +107,7 @@ are kept for reference only.
   The argument, examples, figures and photographs shown in the film are from the essay and the work it cites, including
   Chris Olah and colleagues' circuits research and the Multimodal Neurons team at OpenAI, and Anthropic's
   interpretability papers.
-- **The animation base:** this project is built on [ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase)
+- **The animation base:** this project and its `explainer-video` skill are built on [ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase)
   by John Heibel (MIT, see [`engine/LICENSE-ClaudeAnimationBase`](engine/LICENSE-ClaudeAnimationBase)). Its painterly
   Canvas2D toolkit, its Clawd character and its frame-as-a-function-of-time approach are the foundation here:
   `engine/core.js` is a CPU (Skia) re-implementation of its `core.js` paint API, and `engine/clawd.js` and the render
