@@ -51,7 +51,8 @@ def I_bell(f, d, v, r, ratio=3.5, dec=2.2):
 def I_musicbox(f, d, v, r): return I_bell(f, d, v, r, ratio=5.01, dec=3.5) + I_bell(2 * f, d, v * .3, r, 7, 5)
 def I_celesta(f, d, v, r): return I_bell(f, d, v, r, ratio=4.0, dec=2.8)
 def I_pluck(f, d, v, r, bright=.5, dec=.996):     # Karplus-Strong
-    n = int(min(d + 1.5, 3) * SR); P = max(2, int(SR / f)); buf = r.uniform(-1, 1, P); out = np.zeros(n)
+    n = int(min(d + 1.5, 3) * SR); P = max(2, int(SR / f)); out = np.zeros(n)
+    buf = np.convolve(r.uniform(-1, 1, P + 8), np.ones(5) / 5, 'same')[4:P + 4] * 1.8   # a soft, smoothed excitation: a pluck, not a hiss
     for i in range(0, n, P):
         seg = buf.copy(); out[i:i + P] = seg[:min(P, n - i)]
         buf = dec * .5 * (buf + np.roll(buf, 1))
@@ -120,22 +121,23 @@ def chord(root, mode, deg, ext=4):
 def scale_note(root, mode, i): sc = MODES[mode]; return root + sc[i % 7] + 12 * (i // 7)
 
 # ---------- the world styles ----------
-# bpm, root (MIDI), mode, progression (scale degrees, one per bar), swing, layers
+# bpm, root (MIDI), mode, progression (scale degrees, one per bar), swing, layers, gain (level after loudness matching).
+# Every cue sits under narration, so none uses noise-burst plucks, a full drum kit or a random-walk lead over the voice.
 S = {
  'ch00': dict(bpm=66, root=50, mode='lyd', prog=[0, 0, 4, 1], layers=['pad', 'bells', 'drone']),
  'ch01': dict(bpm=104, root=60, mode='maj', prog=[0, 5, 3, 4], layers=['musicbox_arp', 'warm', 'tri_bass_soft', 'tick']),
- 'ch02': dict(bpm=126, root=55, mode='maj', prog=[0, 0, 4, 4, 0, 3, 4, 0], layers=['ragtime', 'oompah', 'crackle'], lofi=True),
- 'ch03': dict(bpm=78, root=50, mode='dor', prog=[0, 3, 0, 4], swing=.62, layers=['walk', 'brush', 'jazz_chords', 'sax']),
- 'ch04': dict(bpm=112, root=50, mode='hmin', prog=[0, 0, 5, 4], swing=.6, layers=['spy_bass', 'vibes_comp', 'brush', 'flute']),   # cool 60s spy jazz: the minor-major 7th
+ 'ch02': dict(bpm=120, root=55, mode='maj', prog=[0, 0, 4, 4, 0, 3, 4, 0], layers=['ragtime', 'oompah', 'crackle'], lofi=True, gain=.8),
+ 'ch03': dict(bpm=78, root=50, mode='dor', prog=[0, 3, 0, 4], swing=.62, layers=['walk', 'brush', 'jazz_chords'], gain=.85),
+ 'ch04': dict(bpm=112, root=50, mode='hmin', prog=[0, 0, 5, 4], swing=.6, layers=['spy_bass', 'vibes_comp', 'brush', 'flute'], gain=.8),   # cool 60s spy jazz: the minor-major 7th
  'ch05': dict(bpm=72, root=50, mode='min', prog=[0, 5, 3, 4], layers=['piano_soft', 'warm', 'bass_soft'], gain=.5),   # foggy and calm: slow soft piano over a pad
- 'ch06': dict(bpm=92, root=62, mode='maj', prog=[0, 3, 5, 4], layers=['pizz', 'flute', 'warm']),
- 'ch07': dict(bpm=144, root=58, mode='maj', prog=[0, 5, 1, 4], swing=.6, layers=['brass_stabs', 'walk', 'kit_swing', 'piano_comp']),
- 'ch08': dict(bpm=60, root=45, mode='min', prog=[0, 0, 5, 5], layers=['drone', 'heartbeat', 'eerie']),
- 'ch09': dict(bpm=124, root=57, mode='min', prog=[0, 5, 2, 6], layers=['chip_arp', 'chip_lead', 'tri_bass', 'noise_kit']),
+ 'ch06': dict(bpm=92, root=62, mode='maj', prog=[0, 3, 5, 4], layers=['pizz', 'flute', 'warm'], gain=.85),
+ 'ch07': dict(bpm=120, root=58, mode='maj', prog=[0, 5, 1, 4], swing=.6, layers=['brass_stabs', 'walk', 'brush', 'piano_comp'], gain=.7),
+ 'ch08': dict(bpm=60, root=45, mode='min', prog=[0, 0, 5, 5], layers=['drone', 'heartbeat', 'eerie'], gain=.85),
+ 'ch09': dict(bpm=116, root=57, mode='min', prog=[0, 5, 2, 6], layers=['chip_arp', 'tri_bass', 'tick'], gain=.6),
  'ch10': dict(bpm=100, root=65, mode='maj', prog=[0, 3, 1, 4], layers=['celesta_arp', 'pizz', 'warm']),
- 'ch11': dict(bpm=112, root=60, mode='mix', prog=[0, 3, 4, 3], swing=.58, layers=['pub_piano', 'walk', 'kit_swing']),
- 'ch12': dict(bpm=96, root=57, mode='dor', prog=[0, 6, 3, 4], layers=['marimba', 'shaker', 'warm', 'bass_roots']),
- 'ch13': dict(bpm=84, root=53, mode='lyd', prog=[0, 4, 5, 3], layers=['pluck_arp', 'pad', 'bass_roots']),
+ 'ch11': dict(bpm=108, root=60, mode='mix', prog=[0, 3, 4, 3], swing=.58, layers=['pub_piano', 'walk', 'brush'], gain=.8),
+ 'ch12': dict(bpm=96, root=57, mode='dor', prog=[0, 6, 3, 4], layers=['marimba', 'warm', 'bass_roots'], gain=.85),
+ 'ch13': dict(bpm=84, root=53, mode='lyd', prog=[0, 4, 5, 3], layers=['ep_arp', 'pad', 'bass_roots'], gain=.8),
  'ch14': dict(bpm=100, root=60, mode='maj', prog=[0, 4, 5, 3], layers=['ep_arp', 'warm', 'bass_roots', 'tick']),   # warm retro-future: tine piano over a pad
  'ch15': dict(bpm=76, root=55, mode='maj', prog=[0, 5, 3, 4, 0, 5, 3, 0], layers=['piano_soft', 'warm', 'bass_soft'], finale=True, gain=.55),   # a calm, warm ending under the reflective lines
 }
