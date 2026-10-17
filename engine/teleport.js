@@ -151,7 +151,10 @@ function teleport(t) {
       const e = easeIn(clamp(k)), z = lerp(1.14, 9, e), n0 = noteStart(chs[i].first), nk = (n0 == null || n0 > z0 + .3 ? 0 : 1) * (1 - e);
       ctx.save(); resetMatrix(); ctx.translate(W / 2, 40); ctx.scale(1 - .16 * nk, 1 - .16 * nk); ctx.translate(-W / 2, -40);
       ctx.translate(dotXY[0], dotXY[1]); ctx.scale(z, z); ctx.translate(-dotXY[0], -dotXY[1]); ctx.drawImage(M, 0, 0); ctx.restore();
-      ctx.save(); resetMatrix(); const r = lerp(30, 1400, e); const p = new Path2D(); p.arc(dotXY[0] + (W / 2 - dotXY[0]) * e, dotXY[1] + (H / 2 - dotXY[1]) * e, r, 0, TAU); ctx.clip(p); ctx.drawImage(B, 0, 0); ctx.restore();
+      ctx.save(); resetMatrix(); const r = lerp(30, 1400, e), pcx = dotXY[0] + (W / 2 - dotXY[0]) * e, pcy = dotXY[1] + (H / 2 - dotXY[1]) * e; const p = new Path2D(); p.arc(pcx, pcy, r, 0, TAU * .999); ctx.clip(p); ctx.drawImage(B, 0, 0); ctx.restore();
+      // the opening gets the same glowing rim as every other portal, so it reads as a doorway, not a hard cut-out
+      if (k < .92) { ctx.save(); resetMatrix(); ctx.globalAlpha = 1 - clamp((k - .7) / .22); ctx.beginPath(); ctx.arc(pcx, pcy, r, 0, TAU * .999); ctx.shadowColor = 'rgba(40,20,10,.55)'; ctx.shadowBlur = 26; ctx.strokeStyle = '#3A2418'; ctx.lineWidth = 10; ctx.stroke(); ctx.shadowColor = '#FFB54A'; ctx.shadowBlur = 30; ctx.strokeStyle = '#F2C46A'; ctx.lineWidth = 4; ctx.stroke(); ctx.restore();
+        for (let q = 0; q < 24; q++) { const a = hash(q * 3.3) * TAU, f = frac(T * 1.5 + hash(q)); glow(pcx + Math.cos(a) * r * (1 + .12 * f), pcy + Math.sin(a) * r * (1 + .12 * f), 10, '#FFE6B0', .55 * (1 - f) * (1 - clamp((k - .7) / .22))); } }
       actOverlay(t, i, chs[i].first, 1 - seg(t, z0, z0 + .5));
       return true;
     }
