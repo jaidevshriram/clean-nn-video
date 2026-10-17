@@ -137,7 +137,7 @@ S = {
  'ch12': dict(bpm=96, root=57, mode='dor', prog=[0, 6, 3, 4], layers=['marimba', 'shaker', 'warm', 'bass_roots']),
  'ch13': dict(bpm=84, root=53, mode='lyd', prog=[0, 4, 5, 3], layers=['pluck_arp', 'pad', 'bass_roots']),
  'ch14': dict(bpm=100, root=60, mode='maj', prog=[0, 4, 5, 3], layers=['ep_arp', 'warm', 'bass_roots', 'tick']),   # warm retro-future: tine piano over a pad
- 'ch15': dict(bpm=88, root=55, mode='maj', prog=[0, 5, 3, 4, 0, 5, 3, 0], layers=['marimba', 'flute', 'strings', 'bass_roots', 'shaker'], finale=True),
+ 'ch15': dict(bpm=76, root=55, mode='maj', prog=[0, 5, 3, 4, 0, 5, 3, 0], layers=['piano_soft', 'warm', 'bass_soft'], finale=True, gain=.55),   # a calm, warm ending under the reflective lines
 }
 
 def place(buf, x, at, gain=1.0):
