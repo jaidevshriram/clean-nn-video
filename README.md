@@ -8,6 +8,8 @@ titles, a Victorian street, a botanical plate, a game show, a cryptid hunt, a pi
 savanna, a globe of postcards, a World's Fair poster and a jungle). A passport map marks the four parts, and the essay's
 own figures and photographs appear throughout.
 
+![Neural Networks Are Already Clean: title card](docs/hero.jpg)
+
 The narration is voiced with ElevenLabs ("Chris"); the music is procedural, one cue per world.
 
 ## Chapters
@@ -31,6 +33,20 @@ The narration is voiced with ElevenLabs ("Chris"); the music is procedural, one 
 32:32  Stop 15 why it matters     Why it matters
 ```
 
+## Stills
+
+One frame from each stop, in order:
+
+| <img src="docs/stills/00-question.jpg" width="200" alt="the question"> | <img src="docs/stills/01-neurons.jpg" width="200" alt="neurons"> | <img src="docs/stills/02-knot.jpg" width="200" alt="the knot"> | <img src="docs/stills/03-cat-car.jpg" width="200" alt="the cat & car case"> |
+|---|---|---|---|
+| 0 · the question | 1 · neurons | 2 · the knot | 3 · the cat & car case |
+| <img src="docs/stills/04-hidden-car.jpg" width="200" alt="the hidden car"> | <img src="docs/stills/05-better-tools.jpg" width="200" alt="better tools"> | <img src="docs/stills/06-grow.jpg" width="200" alt="how they grow"> | <img src="docs/stills/07-two-theories.jpg" width="200" alt="two theories"> |
+| 4 · the hidden car | 5 · better tools | 6 · how they grow | 7 · two theories |
+| <img src="docs/stills/08-moving-target.jpg" width="200" alt="a moving target"> | <img src="docs/stills/09-gates-votes.jpg" width="200" alt="gates & votes"> | <img src="docs/stills/10-language.jpg" width="200" alt="language models"> | <img src="docs/stills/11-testing-labels.jpg" width="200" alt="testing labels"> |
+| 8 · a moving target | 9 · gates & votes | 10 · language models | 11 · testing labels |
+| <img src="docs/stills/12-why-clean.jpg" width="200" alt="why it's clean"> | <img src="docs/stills/13-what-clean-means.jpg" width="200" alt="what clean means"> | <img src="docs/stills/14-ai-scientists.jpg" width="200" alt="AI scientists"> | <img src="docs/stills/15-why-it-matters.jpg" width="200" alt="why it matters"> |
+| 12 · why it's clean | 13 · what clean means | 14 · AI scientists | 15 · why it matters |
+
 ## How it works
 
 - `script/script.md`: the narration (117 cues). `[cue_id]` marks a beat the picture syncs to; `{display|spoken}` fixes
@@ -40,7 +56,7 @@ The narration is voiced with ElevenLabs ("Chris"); the music is procedural, one 
 - `tools/score.py`: the music. Each world has a small procedural cue (instruments, tempo, harmony and level in its `S`
   entry), ducked under the voice, with a soft chime at each world change; writes `audio/music.wav` and the final mix
   `audio/mix.wav` (-16 LUFS).
-- `engine/`: a CPU (Skia Canvas2D) painting engine. `clawd.js` draws Clawd (hats and held props ride his pose),
+- `engine/`: a CPU (Skia Canvas2D) painting engine. `clawd.js` draws Clawd (world hats and held props ride its pose),
   `styles.js` the per-world styling, stamps and stops, `teleport.js` the portals between worlds and the part-break map.
 - `scenes/`: one file per world (`c00_space.js` … `c15b_recap.js`). Shots and beats are keyed to cue and word times
   (`cs('cue')`, `wt('cue', 'word')`), so the picture re-times itself whenever the narration changes.
@@ -52,13 +68,16 @@ The narration is voiced with ElevenLabs ("Chris"); the music is procedural, one 
 ```bash
 npm install
 node tools/fetch_assets.mjs                      # the essay's images and figures → assets/blog (not committed)
+python tools/derive_assets.py                    # crops single photos out of the essay's composite figures
 ELEVENLABS_API_KEY=... python tools/tts.py --provider=elevenlabs --voice=iP95p4xoKVk53GoZ742B
 python tools/score.py                            # music + final mix
 node tools/check.mjs                             # every sampled frame renders; every word cue resolves
 node render.mjs --video --workers=4 --out=out/video_final.mp4
 ```
 
-Python needs `faster-whisper soundfile scipy numpy`; the video build needs `ffmpeg`.
+Python needs `faster-whisper soundfile scipy numpy`; the video build needs `ffmpeg`. Rendered video, audio and the essay's
+images stay out of git (see `.gitignore`); `node render.mjs --video` writes the film with soft subtitles, and
+`tools/tts.py` writes `out/subtitles.srt`.
 
 ## Review tools
 
@@ -67,3 +86,24 @@ Python needs `faster-whisper soundfile scipy numpy`; the video build needs `ffmp
 - `python tools/music_preview.py ch05 out.m4a` (one world's cue under the narration) and `python tools/music_tour.py out.m4a` (15 s of every world)
 - `node tools/clawd_posesheet.mjs out.jpg` (Clawd in every pose with each hat), `tools/clawd_probe.mjs` + `tools/clawd_crops.mjs`
   (record every Clawd draw in a range, then close-up crops of the hardest moments)
+
+## Older material
+
+`STORYBOARD.md`, `TREATMENT.md`, `WORLDS.md` and `BUILD_BRIEF.md` are planning documents from earlier passes (some written
+for a first-person narration and a shorter cut); `script/script.md` and `scenes/` are the source of truth. `scenes_v1/`,
+`scenes_v2/`, `engine/prof.js`, `engine/world.js`, `engine/world2.js` and `tools/music.py` belong to those earlier cuts and
+are kept for reference only.
+
+## Credits
+
+- **The essay:** [Neural Networks Are Already Clean](https://already-clean.goodfire.com/) by Nick Cammarata (Goodfire, 2026).
+  The argument, examples, figures and photographs shown in the film are from the essay and the work it cites, including
+  Chris Olah and colleagues' circuits research and the Multimodal Neurons team at OpenAI, and Anthropic's
+  interpretability papers.
+- **The animation base:** this project is built on [ClaudeAnimationBase](https://github.com/JohnHeibel/ClaudeAnimationBase)
+  by John Heibel (MIT, see [`engine/LICENSE-ClaudeAnimationBase`](engine/LICENSE-ClaudeAnimationBase)). Its painterly
+  Canvas2D toolkit, its Clawd character and its frame-as-a-function-of-time approach are the foundation here:
+  `engine/core.js` is a CPU (Skia) re-implementation of its `core.js` paint API, and `engine/clawd.js` and the render
+  pipeline grew out of its Clawd and renderer. [PDoomVideo](https://github.com/JohnHeibel/PDoomVideo), also by John Heibel,
+  was the reference for building a narrated explainer on that base.
+- **Voice:** ElevenLabs, voice "Chris". **Music:** procedural, generated by `tools/score.py`.
