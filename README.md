@@ -1,5 +1,7 @@
 # Neural Networks Are Already Clean — the explainer video
 
+**▶ Watch it: [jaidevshriram.com/clean-nn-video](https://jaidevshriram.com/clean-nn-video/)**
+
 A 35-minute animated guide to Nick Cammarata's essay
 [Neural Networks Are Already Clean](https://already-clean.goodfire.com/) (Goodfire, 2026). A narrator walks through the
 essay's argument in the third person, crediting the people and papers it draws on. Clawd, a small silent tourist,
@@ -8,7 +10,7 @@ titles, a Victorian street, a botanical plate, a game show, a cryptid hunt, a pi
 savanna, a globe of postcards, a World's Fair poster and a jungle). A passport map marks the four parts, and the essay's
 own figures and photographs appear throughout.
 
-![Neural Networks Are Already Clean: title card](docs/hero.jpg)
+[![Neural Networks Are Already Clean: title card — click to watch](docs/hero.jpg)](https://jaidevshriram.com/clean-nn-video/)
 
 The narration is voiced with ElevenLabs ("Chris"); the music is procedural, one cue per world.
 
@@ -93,6 +95,13 @@ images stay out of git (see `.gitignore`); `node render.mjs --video` writes the 
 film (script rules, visual system, voice and music, review loop, delivery). In a session on this repo, paste a blog post,
 essay or book chapter and ask for an explainer video (or run `/explainer-video`). To have it in every project on your
 own machine, copy the folder to `~/.claude/skills/explainer-video/`.
+
+## The website
+
+The [watch page](https://jaidevshriram.com/clean-nn-video/) is the `gh-pages` branch: one `index.html`, a poster, and the
+1080p film as HLS (`film/`, 10 s fMP4 segments made with `ffmpeg -c copy -f hls -hls_segment_type fmp4`) plus WebVTT
+subtitles, played natively in Safari and with hls.js elsewhere. It's an orphan branch, so `git clone --single-branch -b
+claude/explainer-video` skips the ~380 MB of video.
 
 ## Older material
 
